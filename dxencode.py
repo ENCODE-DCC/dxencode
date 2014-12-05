@@ -270,7 +270,7 @@ def get_file_link(fid, project=None):
 
     return FILES[fid]
 
-def find_file(filePath,project=None,verbose=False,multiple=False):
+def find_file(filePath,project=None,verbose=False,multiple=False, recurse=True):
     '''Using a DX style file path, find the file.'''
     proj = project
     path = filePath
@@ -293,7 +293,7 @@ def find_file(filePath,project=None,verbose=False,multiple=False):
     mode = 'exact'
     if filePath.find('*') or filePath.find('?'):
         mode = 'glob'
-    fileDicts = list(dxpy.find_data_objects(classname='file', folder=path, name=fileName, recursive=False,
+    fileDicts = list(dxpy.find_data_objects(classname='file', folder=path, name=fileName, recurse=recurse,
                                             name_mode=mode, project=projId, return_handler=False))
 
     if fileDicts == None or len(fileDicts) == 0:
@@ -347,4 +347,89 @@ def find_applet_by_name(applet_name, applets_project_id):
     logger.debug(cached + "Resolved %s to %s" % (applet_name, APPLETS[(applet_name, applets_project_id)].get_id()))
     return APPLETS[(applet_name, applets_project_id)]
 
+def filenames_in(files=None):
+    if not len(files):
+        return []
+    else:
+        return [f.get('submitted_file_name') for f in files]
 
+def files_to_map(exp_obj):
+    if not exp_obj or not exp_obj.get('files'):
+        return []
+    else:
+        files = []
+        for file_obj in exp_obj.get('files'):
+            if file_obj.get('output_type') == 'reads' and \
+               file_obj.get('file_format') == 'fastq' and \
+               file_obj.get('submitted_file_name') not in filenames_in(files):
+               files.extend([file_obj])
+            elif file_obj.get('submitted_file_name') in filenames_in(files):
+                logger.warning('%s:%s Duplicate filename, ignoring.' %(exp_obj.get('accession'),file_obj.get('accession')))
+                return []
+        return files
+
+def replicates_to_map(files):
+    if not files:
+        return []
+    else:
+        return [f.get('replicate') for f in files]
+
+def choose_mapping_for_experiment(experiment):
+    ''' for a given experiment object, fully embedded, return experimental info needed for mapping
+        returns an dict keyed by [biological_rep][technical_rep]
+        with information for mapping (sex, organism, paired/unpaired files, library id)
+    '''
+
+    exp_id = experiment['accession']
+    files = files_to_map(experiment)
+    replicates = replicates_to_map(files)
+    mapping = {}
+
+    if files:
+        for biorep_n in set([rep.get('biological_replicate_number') for rep in replicates]):
+            techrep_n = rep.get('technical_replicate_number')
+
+            try:
+                library = rep['library']['accession']
+                sex = 'male' ## including mixed
+                if rep['library']['biosample']['sex'] == 'female':
+                    sex= 'female'
+                organism = rep['library']['biosample']['donor']['organism']['name']
+            except KeyError:
+                print "Error, experiment %s replicate %s_%s missing info\n%s" % (exp_id, biorep_n, techrep_n, rep)
+
+            rep_files = [f for f in files if f.get('replicate').get('biological_replicate_number') == biorep_n and
+                                                f.get('replicate').get('technical_replicate_number') == techrep_n ]
+            paired_files = []
+            unpaired_files = []
+            while rep_files:
+                file_object = rep_files.pop()
+                if file_object.get('paired_end') == None: # group all the unpaired reads for this biorep together
+                    unpaired_files.extend([file_object])
+                elif file_object.get('paired_end') in ['1','2']:
+                    if file_object.get('paired_with'):
+                        mate = next((f for f in rep_files if f.get('@id') == file_object.get('paired_with')), None)
+                    else: #have to find the file that is paired with this one
+                        mate = next((f for f in rep_files if f.get('paired_with') == file_object.get('@id')), None)
+                    if mate:
+                        rep_files.remove(mate)
+                    else:
+                        logging.warning('%s:%s could not find mate' %(experiment.get('accession'), file_object.get('accession')))
+                        mate = {}
+                    paired_files.extend([(file_object,mate)])
+
+            mapping[biorep_n] = {
+                techrep_n: {
+                    "library": library,
+                    "sex": sex,
+                    "organism": organism,
+                    "paired": paired_files,
+                    "unpaired": unpaired_files
+                }
+            }
+            if rep_files:
+                logging.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
+    else:
+        logging.warning('%s: No files to map' % exp_id)
+
+    return mapping
