@@ -437,7 +437,7 @@ def choose_mapping_for_experiment(experiment):
         logging.warning('%s: No files to map' % exp_id)
 
     return mapping
- 
+
 def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
     '''Looks for all result files in the results folder.'''
     priors = {}
@@ -557,7 +557,7 @@ def create_workflow(steps_to_run, steps, priors, psv, proj_id, app_proj_id=None,
     '''
     This function will populate a workflow for the steps_to_run and return the worklow unlaunched.
     It relies on steps dict which contains input and output requirements,
-    pvs (pipeline specific variables) dictionary and 
+    pvs (pipeline specific variables) dictionary and
     priors, which contains input and previous results already in results dir
     '''
 
@@ -611,7 +611,7 @@ def create_workflow(steps_to_run, steps, priors, psv, proj_id, app_proj_id=None,
                 prevStepResults[ fileToken ] = 'fake-for-testing'
             else:
                 prevStepResults[ fileToken ] = dxpy.dxlink({ 'stage': stageId,'outputField': appOut })
-                
+
     if test:
         return None
     else:
