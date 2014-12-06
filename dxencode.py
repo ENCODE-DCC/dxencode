@@ -411,7 +411,7 @@ def choose_mapping_for_experiment(experiment):
             while rep_files:
                 file_object = rep_files.pop()
                 if file_object.get('paired_end') == None: # group all the unpaired reads for this biorep together
-                    unpaired_files.extend([file_object])
+                    unpaired_files.extend([ file_object ])
                 elif file_object.get('paired_end') in ['1','2']:
                     if file_object.get('paired_with'):
                         mate = next((f for f in rep_files if f.get('@id') == file_object.get('paired_with')), None)
@@ -422,7 +422,7 @@ def choose_mapping_for_experiment(experiment):
                     else:
                         logging.warning('%s:%s could not find mate' %(experiment.get('accession'), file_object.get('accession')))
                         mate = {}
-                    paired_files.extend([(file_object,mate)])
+                    paired_files.extend([ (file_object, mate) ])
 
             mapping[(biorep_n, techrep_n)] = {
                 "library": library,
@@ -435,7 +435,6 @@ def choose_mapping_for_experiment(experiment):
                 logging.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
     else:
         logging.warning('%s: No files to map' % exp_id)
-
     return mapping
 
 def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
