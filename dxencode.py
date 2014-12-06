@@ -4,12 +4,15 @@ import dxpy
 import requests
 import json
 import urlparse
+from datetime import datetime
 
 import logging
 
 REFERENCE_FILES = {} ## Dict to cache known Reference Files
 FILES = {} ## Dict to cache files
 APPLETS = {} ## Dict to cache known applets
+
+RUNS_LAUNCHED_FILE = "launchedRuns.txt"
 
 KEYFILE = 'keypairs.json'  ## see processkey() Note this file must be in gitignore!
 DEFAULT_SERVER = 'https://www.encodeproject.org'
@@ -433,3 +436,183 @@ def choose_mapping_for_experiment(experiment):
         logging.warning('%s: No files to map' % exp_id)
 
     return mapping
+ 
+def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
+    '''Looks for all result files in the results folder.'''
+    priors = {}
+    for step in pipe_path:
+        for fileToken in steps[step]['results'].keys():
+            fid = find_file(results_folder + file_globs[fileToken],proj_id)
+            if fid != None:
+                priors[fileToken] = fid
+    return priors
+
+def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=False):
+    '''Determine what steps need to be done, base upon prior results.'''
+    will_create = []
+    steps_to_run = []
+    for step in pipe_path:
+        # Force will include the first step with all its inputs
+        # This should avoid forcing concat if it isn't needed
+        #
+        if force:
+            inputs = steps[step]['inputs'].keys()
+            count = 0
+            for input in inputs:
+                if input in priors:
+                    count += 1
+            if count == len(inputs):
+                steps_to_run += [ step ]
+        if step not in steps_to_run:
+            results = steps[step]['results'].keys()
+            for result in results:
+                if result not in priors:
+                    #print "- Adding step '"+step+"' because prior '"+result+"' was not found."
+                    steps_to_run += [ step ]
+                    break
+        # If results are there but inputs are being recreated, then step must be rerun
+        if step not in steps_to_run:
+            inputs = steps[step]['inputs'].keys()
+            for inp in inputs:
+                if inp in will_create:
+                    #print "- Adding step '"+step+"' due to prior step dependency."
+                    steps_to_run += [ step ]
+                    break
+        # Any step that is rerun, will cause prior results to be deprecated
+        # NOTE: It is necessary to remove from 'priors' so succeeding steps are rerun
+        # NOTE: It is also important to move prior results out of target folder to avoid confusion!
+        if step in steps_to_run:
+            results = steps[step]['results'].keys()
+            for result in results:
+                will_create += [ result ]
+                if result in priors:
+                    deprecate += [ priors[result] ]
+                    del priors[result]
+                    # if results are in folder, then duplicate files cause a problem!
+                    # So add to 'deprecate' to move or remove before launching
+
+    # Now make sure the steps can be found, and error out if not.
+    for step in steps_to_run:
+        app = steps[step]['app']
+        dxApp = dxpy.find_data_objects(classname='file', name=app, name_mode='exact',
+                                                         project=proj_id, return_handler=False)
+        if dxApp == None:
+            print "ERROR: failure to locate app '"+app+"'!"
+            sys.exit(1)
+
+    return steps_to_run
+
+def check_run_log(results_folder,proj_id,verbose=False):
+    '''Checks for currently running jobs and will exit if found.'''
+    run_log_path = results_folder + '/' + RUNS_LAUNCHED_FILE
+    log_fids = find_file(run_log_path,proj_id,multiple=True)
+    if log_fids == None:
+        if verbose:
+            print "  No prior jobs launched."
+    else:
+        # NOTE: Appending to the one file, but just in case handle multiple files.
+        for fid in log_fids:
+            with dxpy.open_dxfile(fid) as fd:
+                for line in fd:
+                    #print "Looking for job ["+line+"]"
+                    run_id = line.split(None,1)
+                    if not run_id[0].startswith('analysis-'):
+                        continue
+                    analysis = dxpy.DXAnalysis(dxid=run_id[0])
+                    if analysis == None:
+                        continue
+                    state = analysis.describe()['state']
+                    # states I have seen: in_progress, terminated, done, failed
+                    if state not in [ "done", "failed", "terminated" ]:
+                        msg="Exiting: Can't launch because prior run ["+run_id[0]+"] "
+                        if len(run_id) > 1:
+                            msg+="("+run_id[1]+") "
+                        msg+= "has not finished (currently '"+state+"')."
+                        print msg
+                        sys.exit(1)
+                    elif verbose:
+                        msg="  Prior run ["+run_id[0]+"] "
+                        if len(run_id) > 1:
+                            msg+="("+run_id[1]+") "
+                        msg+= "is '"+state+"'."
+                        print msg
+
+def log_this_run(run_id,results_folder,proj_id):
+    '''Adds a runId to the runsLaunched file in resultsFolder.'''
+    # NOTE: DX manual lies?!  Append not possible?!  Then write new/delete old
+    run_log_path = results_folder + '/' + RUNS_LAUNCHED_FILE
+    old_fid = find_file(run_log_path,proj_id)
+    new_fh = dxpy.new_dxfile('a',project=proj_id,folder=results_folder,name=RUNS_LAUNCHED_FILE)
+    new_fh.write(run_id+' started:'+str(datetime.now())+'\n')
+    if old_fid is not None:
+        with dxpy.open_dxfile(old_fid) as old_fh:
+            for old_run_id in old_fh:
+                new_fh.write(old_run_id+'\n')
+        proj = dxpy.DXProject(proj_id)
+        proj.remove_objects([old_fid])
+    new_fh.close()
+
+def create_workflow(steps_to_run, steps, priors, psv, proj_id, app_proj_id=None,test=False):
+    '''
+    This function will populate a workflow for the steps_to_run and return the worklow unlaunched.
+    It relies on steps dict which contains input and output requirements,
+    pvs (pipeline specific variables) dictionary and 
+    priors, which contains input and previous results already in results dir
+    '''
+
+    if len(steps_to_run) < 1:
+        return None
+    if app_proj_id == None:
+        app_proj_id = proj_id
+
+    # create a workflow object
+    if not test:
+        wf = dxpy.new_dxworkflow(title=psv['name'],name=psv['name'],folder=psv['resultsFolder'],
+                                                project=proj_id,description=psv['description'])
+
+    # NOTE: prevStepResults dict contains links to result files to be generated by previous steps
+    prevStepResults = {}
+    for step in steps_to_run:
+        appName = steps[step]['app']
+        app = find_applet_by_name(appName, app_proj_id)
+        appInputs = {}
+        # file inputs
+        for fileToken in steps[step]['inputs'].keys():
+            appInp = steps[step]['inputs'][fileToken]
+            if fileToken in prevStepResults:
+                appInputs[ appInp ] = prevStepResults[fileToken]
+            elif fileToken in priors:
+                if isinstance(priors[fileToken], list):
+                    appInputs[ appInp ] = []
+                    for fid in priors[fileToken]:
+                        appInputs[ appInp ] += [ FILES[fid] ]
+                else:
+                    appInputs[ appInp ] = FILES[ priors[fileToken] ]
+            else:
+                print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
+                sys.exit(1)
+        # Non-file app inputs
+        if 'params' in steps[step]:
+            for param in steps[step]['params'].keys():
+                appParam = steps[step]['params'][param]
+                if param in psv:
+                    appInputs[ appParam ] = psv[param]
+                else:
+                    print "ERROR: unable to locate '"+param+"' in pipeline spcific variables (psv)."
+                    sys.exit(1)
+        # Add wf stage
+        if not test:
+            stageId = wf.add_stage(app, stage_input=appInputs, folder=psv['resultsFolder'])
+        # outputs, which we will need to link to
+        for fileToken in steps[step]['results'].keys():
+            appOut = steps[step]['results'][fileToken]
+            if test:
+                prevStepResults[ fileToken ] = 'fake-for-testing'
+            else:
+                prevStepResults[ fileToken ] = dxpy.dxlink({ 'stage': stageId,'outputField': appOut })
+                
+    if test:
+        return None
+    else:
+        return wf
+
