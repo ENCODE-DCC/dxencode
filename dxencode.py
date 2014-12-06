@@ -368,11 +368,12 @@ def files_to_map(exp_obj):
                 return []
         return files
 
-def replicates_to_map(files):
+def replicates_to_map(experiment, files):
     if not files:
         return []
     else:
-        return [f.get('replicate') for f in files]
+        reps_with_files = set([ f['replicate']['uuid'] for f in files if f.get('replicate') ])
+        return [ r for r in experiment['replicates'] if r['uuid'] in reps_with_files ]
 
 def choose_mapping_for_experiment(experiment):
     ''' for a given experiment object, fully embedded, return experimental info needed for mapping
@@ -382,12 +383,14 @@ def choose_mapping_for_experiment(experiment):
 
     exp_id = experiment['accession']
     files = files_to_map(experiment)
-    replicates = replicates_to_map(files)
+    replicates = replicates_to_map(experiment, files)
     mapping = {}
 
     if files:
-        for biorep_n in set([rep.get('biological_replicate_number') for rep in replicates]):
+        for rep in replicates:
+            biorep_n = rep.get('biological_replicate_number')
             techrep_n = rep.get('technical_replicate_number')
+
 
             try:
                 library = rep['library']['accession']
@@ -418,14 +421,12 @@ def choose_mapping_for_experiment(experiment):
                         mate = {}
                     paired_files.extend([(file_object,mate)])
 
-            mapping[biorep_n] = {
-                techrep_n: {
-                    "library": library,
-                    "sex": sex,
-                    "organism": organism,
-                    "paired": paired_files,
-                    "unpaired": unpaired_files
-                }
+            mapping[(biorep_n, techrep_n)] = {
+                "library": library,
+                "sex": sex,
+                "organism": organism,
+                "paired": paired_files,
+                "unpaired": unpaired_files
             }
             if rep_files:
                 logging.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
