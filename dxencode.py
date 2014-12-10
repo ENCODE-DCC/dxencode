@@ -442,12 +442,12 @@ def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
     priors = {}
     for step in pipe_path:
         for fileToken in steps[step]['results'].keys():
-            fid = find_file(results_folder + file_globs[fileToken],proj_id)
+            fid = find_file(results_folder + file_globs[fileToken],proj_id,recurse=False)
             if fid != None:
                 priors[fileToken] = fid
     return priors
 
-def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=False):
+def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=False, verbose=False):
     '''Determine what steps need to be done, base upon prior results.'''
     will_create = []
     steps_to_run = []
@@ -463,20 +463,24 @@ def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=F
                     count += 1
             if count == len(inputs):
                 steps_to_run += [ step ]
+                if verbose:
+                    print "- Adding step '"+step+"' because of force flag."
         if step not in steps_to_run:
             results = steps[step]['results'].keys()
             for result in results:
                 if result not in priors:
-                    #print "- Adding step '"+step+"' because prior '"+result+"' was not found."
                     steps_to_run += [ step ]
+                    if verbose:
+                        print "- Adding step '"+step+"' because prior '"+result+"' was not found."
                     break
         # If results are there but inputs are being recreated, then step must be rerun
         if step not in steps_to_run:
             inputs = steps[step]['inputs'].keys()
             for inp in inputs:
                 if inp in will_create:
-                    #print "- Adding step '"+step+"' due to prior step dependency."
                     steps_to_run += [ step ]
+                    if verbose:
+                        print "- Adding step '"+step+"' due to prior step dependency."
                     break
         # Any step that is rerun, will cause prior results to be deprecated
         # NOTE: It is necessary to remove from 'priors' so succeeding steps are rerun
@@ -598,7 +602,8 @@ def create_workflow(steps_to_run, steps, priors, psv, proj_id, app_proj_id=None,
                 if param in psv:
                     appInputs[ appParam ] = psv[param]
                 else:
-                    print "ERROR: unable to locate '"+param+"' in pipeline spcific variables (psv)."
+                    print "ERROR: step '"+step+"' unable to locate '"+param+ \
+                                                        "' in pipeline specific variables (psv)."
                     sys.exit(1)
         # Add wf stage
         if not test:
@@ -615,4 +620,129 @@ def create_workflow(steps_to_run, steps, priors, psv, proj_id, app_proj_id=None,
         return None
     else:
         return wf
+
+
+def build_a_step(applet, file_globs, proj_id):
+    ''' create input object for a step and extends the file_globs dict as appropriate.'''
+    try:
+        dxapp = dxpy.find_one_data_object(classname="applet", name=applet, project=proj_id,
+                                          zero_ok=False, more_ok=False,describe=True)
+    except IOError:
+        print "Cannot find applet '"+applet+"' in "+proj_id
+        sys.exit(1)
+
+    params = {}
+    inputs = {}
+    results = {}
+    inps = dxapp['describe'].get('inputSpec') or []
+    for inp in inps:
+        in_name = inp['name'].encode('ascii','ignore')
+        if inp['class'] == 'file' or inp['class'] == 'array:file':
+            inputs[in_name] = in_name
+        else:
+            params[in_name] = in_name
+
+    outs = dxapp['describe'].get('outputSpec') or []
+    for out in outs:
+        if out['class'] == 'file' or out['class'] == 'array:file':
+            out_name = out['name'].encode('ascii','ignore')
+            results[out_name] = out_name
+            if out_name not in file_globs and 'patterns' in out:
+                file_globs[out_name] = '/'+out['patterns'][0].encode('ascii','ignore')
+        else:
+            pass
+            # TODO not sure what to do with these
+
+    return {
+        'app': applet,
+        'params': params,
+        'inputs': inputs,
+        'results': results
+    }
+    
+def build_simple_steps(pipe_path, proj_id, verbose=False):
+    '''
+    Builds dict of steps for the apps in the pipeline and a dict of file_globs for look up.
+    Only works for pipelines where every step in pipe_path is a distinct app,
+    and each result glob is uniq for all pipeline results.
+    '''
+    steps = {}
+    file_globs = {}
+    for step in pipe_path:
+        steps[step] = build_a_step(step, file_globs, proj_id)
+    if verbose:
+        print ">>> steps:"
+        print json.dumps(steps,indent=4)
+        print ">>> file_globs:"
+        print json.dumps(file_globs,indent=4)
+
+    return [ steps, file_globs ]
+
+
+def report_plans(psv, reads1, reads2, reference_files, deprecate_files, priors, 
+                 pipe_path, steps_to_do, steps):
+    '''Report the plans before executing them.'''
+    
+    print "Running: "+psv['title']
+    if 'subTitle' in psv:
+        print "         "+psv['subTitle']
+    two_read_sets = True
+    if reads2 == None or len(reads2) == 0:
+        two_read_sets = False
+    if two_read_sets:
+        print "- Reads1: "
+    else:
+        print "- Reads: "
+    for fid in reads1:
+        print "  " + file_path_from_fid(fid)
+    if two_read_sets:
+        print "- Reads2: "
+        for fid in reads2:
+            print "  " + file_path_from_fid(fid)
+    print "- Reference files:"
+    for token in reference_files:
+        print "  " + file_path_from_fid(priors[token],True)
+    print "- Results written to: " + psv['project'] + ":" +psv['resultsFolder'] +'/'
+    if len(steps_to_do) == 0:
+        print "* All expected results are in the results folder, so there is nothing to do."
+        print "  If this experiment/replicate needs to be rerun, then use the --force flag to "
+        print "  rerun all steps; or remove suspect results from the folder before relaunching."
+        sys.exit(0)
+    else:
+        print "- Steps to run:"
+        for step in pipe_path:
+            if step in steps_to_do:
+                print "  * "+steps[step]['app']+" will be run"
+            else:
+                if not step.find('concat') == 0:
+                    print "    "+steps[step]['app']+" has already been run"
+                    
+    if len(deprecate_files) > 0:
+        oldFolder = psv['resultsFolder']+"/deprecated"
+        print "Will move "+str(len(deprecate_files))+" prior result file(s) to '" + \
+                                                        psv['resultsFolder']+"/deprecated/'."
+        for fid in deprecate_files:
+            print "  " + file_path_from_fid(fid)
+
+
+def launchPad(wf,proj_id,psv,run=False):
+    '''Launches or just advertises preassembled workflow.'''
+    if wf == None:
+        print "ERROR: failure to assemble workflow!"
+        sys.exit(1)
+
+    if run:
+        print "Launch sequence initiating..."
+        wf_run = wf.run({})
+        if wf_run == None:
+            print "ERROR: failure to lift off!"
+            sys.exit(1)
+        else:
+            print "  We have liftoff!"
+            wf_dict = wf_run.describe()
+            log_this_run(wf_dict['id'],psv['resultsFolder'],proj_id)
+            print "  Launched " + wf_dict['id']+" as '"+wf.name+"'"
+    else:
+        print "Workflow '" + wf.name + "' has been assembled in "+psv['resultsFolder'] + \
+                                                                    ". Manual launch required."
 
