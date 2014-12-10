@@ -70,7 +70,6 @@ def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
         'Accept': 'application/json',
     }
 
-    print file_meta
     r = requests.post(
         SERVER + '/file',
         auth=(AUTHID, AUTHPW),
@@ -101,7 +100,7 @@ def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
     subprocess.check_call(['aws', 's3', 'cp', file_meta['submitted_file_name'], creds['upload_url']], env=env)
     end = datetime.now()
     duration = end - start
-    logger.info("Uploaded in %.2f seconds" % duration.seconds)
+    logger.debug("Uploaded in %.2f seconds" % duration.seconds)
     return item
 
 
