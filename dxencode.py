@@ -4,7 +4,9 @@ import dxpy
 import requests
 import json
 import urlparse
+import hashlib
 from datetime import datetime
+import subprocess
 
 import logging
 
@@ -19,6 +21,15 @@ DEFAULT_SERVER = 'https://www.encodeproject.org'
 S3_SERVER='s3://encode-files/'
 
 logger = logging.getLogger("DXENCODE")  # not sure this goes here.
+
+def calc_md5(path):
+    ''' Calculate md5 sum from file as specified by valid path name'''
+    md5sum = hashlib.md5()
+    with open(path, 'rb') as f:
+        for chunk in iter(lambda: f.read(1024*1024), ''):
+            md5sum.update(chunk)
+    return md5sum
+
 
 def processkey(key):
     ''' check encodedD access keys; assuming the format:
@@ -51,6 +62,47 @@ def processkey(key):
 
     return (AUTHID,AUTHPW,SERVER)
     ## TODO possibly this should return a dict
+
+def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
+    ''' take a file object on local file system, post meta data and cp to AWS '''
+    HEADERS = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+    }
+
+    r = requests.post(
+        SERVER + '/file',
+        auth=(AUTHID, AUTHPW),
+        data=json.dumps(file_meta),
+        headers=HEADERS,
+    )
+    try:
+        r.raise_for_status()
+    except:
+        logger.error('Submission failed: %s %s' % (r.status_code, r.reason))
+        logger.error(r.text)
+        raise
+    item = r.json()['@graph'][0]
+
+    ####################
+    # POST file to S3
+
+    creds = item['upload_credentials']
+    env = os.environ.copy()
+    env.update({
+        'AWS_ACCESS_KEY_ID': creds['access_key'],
+        'AWS_SECRET_ACCESS_KEY': creds['secret_key'],
+        'AWS_SECURITY_TOKEN': creds['session_token'],
+    })
+
+    logger.debug("Uploading file.")
+    start = datetime.now()
+    subprocess.check_call(['aws', 's3', 'cp', file_meta['path'], creds['upload_url']], env=env)
+    end = datetime.now()
+    duration = end - start
+    logger.info("Uploaded in %.2f seconds" % duration.seconds)
+    return item
+
 
 def encoded_get(url, AUTHID=None, AUTHPW=None):
     ''' executes GET on Encoded server without without authz '''
