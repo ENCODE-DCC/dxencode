@@ -70,6 +70,7 @@ def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
         'Accept': 'application/json',
     }
 
+    print file_meta
     r = requests.post(
         SERVER + '/file',
         auth=(AUTHID, AUTHPW),
