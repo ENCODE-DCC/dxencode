@@ -97,10 +97,14 @@ def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
 
     logger.debug("Uploading file.")
     start = datetime.now()
-    subprocess.check_call(['aws', 's3', 'cp', file_meta['submitted_file_name'], creds['upload_url']], env=env)
-    end = datetime.now()
-    duration = end - start
-    logger.debug("Uploaded in %.2f seconds" % duration.seconds)
+    try:
+        subprocess.check_call(['aws', 's3', 'cp', file_meta['submitted_file_name'], creds['upload_url']], env=env)
+        end = datetime.now()
+        duration = end - start
+        logger.debug("Uploaded in %.2f seconds" % duration.seconds)
+    except:
+        logger.debug("Upload failed")
+
     return item
 
 
