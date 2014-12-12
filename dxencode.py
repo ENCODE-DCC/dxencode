@@ -80,7 +80,10 @@ def file_path_from_fid(fid,projectToo=False):
         dxlink = fid
 
     fileDict = dxpy.describe(dxlink) # FILES contain dxLinks
-    path = fileDict['folder'] + '/' + fileDict['name']
+    if fileDict['folder'] == '/':
+        path = '/' + fileDict['name']
+    else:
+        path = fileDict['folder'] + '/' + fileDict['name']
     if projectToo:
         projDict = dxpy.describe(fileDict['project'])
         path = projDict['name'] + ':' + path
@@ -672,33 +675,24 @@ def build_simple_steps(pipe_path, proj_id, verbose=False):
     for step in pipe_path:
         steps[step] = build_a_step(step, file_globs, proj_id)
     if verbose:
-        print ">>> steps:"
+        print "STEPS = "
         print json.dumps(steps,indent=4)
-        print ">>> file_globs:"
+        print "FILE_GLOBS = "
         print json.dumps(file_globs,indent=4)
 
     return [ steps, file_globs ]
 
 
-def report_plans(psv, reads1, reads2, reference_files, deprecate_files, priors, 
+def report_plans(psv, input_files, reference_files, deprecate_files, priors, 
                  pipe_path, steps_to_do, steps):
     '''Report the plans before executing them.'''
     
     print "Running: "+psv['title']
     if 'subTitle' in psv:
         print "         "+psv['subTitle']
-    two_read_sets = True
-    if reads2 == None or len(reads2) == 0:
-        two_read_sets = False
-    if two_read_sets:
-        print "- Reads1: "
-    else:
-        print "- Reads: "
-    for fid in reads1:
-        print "  " + file_path_from_fid(fid)
-    if two_read_sets:
-        print "- Reads2: "
-        for fid in reads2:
+    for input_type in sorted( input_files.keys() ):
+        print "- " + input_type + ":"
+        for fid in input_files[input_type]:
             print "  " + file_path_from_fid(fid)
     print "- Reference files:"
     for token in reference_files:
