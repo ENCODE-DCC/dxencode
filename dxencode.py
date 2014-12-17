@@ -3,6 +3,7 @@ import sys
 import dxpy
 import requests
 import json
+import re
 import urlparse
 import hashlib
 from datetime import datetime
@@ -718,7 +719,7 @@ def build_a_step(applet, file_globs, proj_id):
         'inputs': inputs,
         'results': results
     }
-    
+
 def build_simple_steps(pipe_path, proj_id, verbose=False):
     '''
     Builds dict of steps for the apps in the pipeline and a dict of file_globs for look up.
@@ -738,10 +739,10 @@ def build_simple_steps(pipe_path, proj_id, verbose=False):
     return [ steps, file_globs ]
 
 
-def report_plans(psv, input_files, reference_files, deprecate_files, priors, 
+def report_plans(psv, input_files, reference_files, deprecate_files, priors,
                  pipe_path, steps_to_do, steps):
     '''Report the plans before executing them.'''
-    
+
     print "Running: "+psv['title']
     if 'subTitle' in psv:
         print "         "+psv['subTitle']
@@ -766,7 +767,7 @@ def report_plans(psv, input_files, reference_files, deprecate_files, priors,
             else:
                 if not step.find('concat') == 0:
                     print "    "+steps[step]['app']+" has already been run"
-                    
+
     if len(deprecate_files) > 0:
         oldFolder = psv['resultsFolder']+"/deprecated"
         print "Will move "+str(len(deprecate_files))+" prior result file(s) to '" + \
@@ -795,4 +796,40 @@ def launchPad(wf,proj_id,psv,run=False):
     else:
         print "Workflow '" + wf.name + "' has been assembled in "+psv['resultsFolder'] + \
                                                                     ". Manual launch required."
+
+SW_CACHE = {}
+def get_sw_from_log(dxfile, regex):
+    ''' given a regex and a dx file, look for the software version in the dnanexus log '''
+    try:
+        job_id = dxfile.describe()['createdBy']['job']
+    except:
+        print "Could not get job id"
+
+    if not SW_CACHE.get(job_id, {}):
+        cmd = ["dx", "watch", job_id]
+        log = subprocess.check_output(cmd)
+        swre = re.compile(regex)
+        sw = swre.findall(log)
+
+        if not sw:
+            return {}
+        SW_CACHE[job_id] =  {
+            "software_versions":
+                    [ { "software": i,
+                        "version":  j }  for (i,j) in sw ]
+        }
+    return SW_CACHE[job_id]
+
+def create_notes(dxfile, addons={}):
+    ''' creates temporary notes storage for file metadat from dxfile object '''
+
+    description = dxfile.describe()
+    notes = {
+            'dx-id': description.get('id'),
+            'dx-createdBy': description.get('createdBy')
+    }
+
+    notes.update(addons)
+    return notes
+
 
