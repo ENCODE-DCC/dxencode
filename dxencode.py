@@ -457,12 +457,14 @@ def choose_mapping_for_experiment(experiment):
 
             try:
                 library = rep['library']['accession']
-                sex = 'male' ## including mixed
-                if rep['library']['biosample']['sex'] == 'female':
-                    sex= 'female'
+                sex = rep['library']['biosample'].get('sex', "male")
+                if sex != "male" and sex != "female":
+                    print "WARN: using male replacement for %s" % sex
+                    sex = "male"
                 organism = rep['library']['biosample']['donor']['organism']['name']
             except KeyError:
                 print "Error, experiment %s replicate %s_%s missing info\n%s" % (exp_id, biorep_n, techrep_n, rep)
+                sys.exit(0)
 
             rep_files = [f for f in files if f.get('replicate').get('biological_replicate_number') == biorep_n and
                                                 f.get('replicate').get('technical_replicate_number') == techrep_n ]
