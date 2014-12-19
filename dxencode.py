@@ -491,7 +491,8 @@ def choose_mapping_for_experiment(experiment):
                 "sex": sex,
                 "organism": organism,
                 "paired": paired_files,
-                "unpaired": unpaired_files
+                "unpaired": unpaired_files,
+                "replicate_id": rep['@id']
             }
             if rep_files:
                 logging.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
