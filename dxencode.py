@@ -422,7 +422,7 @@ def files_to_map(exp_obj):
     else:
         files = []
         for file_obj in exp_obj.get('files'):
-            if file_obj.get('output_type') == 'reads' and \
+            if (file_obj.get('output_type') == 'reads' or file_obj.get('output_type') == 'raw data') and \
                file_obj.get('file_format') == 'fastq' and \
                file_obj.get('submitted_file_name') not in filenames_in(files):
                files.extend([file_obj])
