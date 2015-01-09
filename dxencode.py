@@ -98,7 +98,7 @@ def encoded_post_file(local_file, file_meta, SERVER, AUTHID, AUTHPW):
     ####################
     # POST file to S3
 
-def encoded_upload_existing(local_file, file_acc, SERVER, AUTHID, AUTHPW):
+def encoded_upload_existing(local_file, file_acc, SERVER, AUTHID, AUTHPW, dryrun=False):
     ''' if a ENCFF object exists, get upload credentials and upload '''
 
 
@@ -129,7 +129,10 @@ def encoded_upload_existing(local_file, file_acc, SERVER, AUTHID, AUTHPW):
         raise
     item = upr.json()['@graph'][0]
 
-    return aws_cp(local_file, item)
+    if dryrun:
+        return item
+    else:
+        return aws_cp(local_file, item)
     ####################
     # POST file to S3
 
