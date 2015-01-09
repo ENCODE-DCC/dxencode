@@ -102,6 +102,10 @@ def encoded_upload_existing(local_file, file_acc, SERVER, AUTHID, AUTHPW, dryrun
     ''' if a ENCFF object exists, get upload credentials and upload '''
 
 
+    HEADERS = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+    }
     ## doublecheck file
     ffr = encoded_get(SERVER+file_acc, AUTHID=AUTHID, AUTHPW=AUTHPW)
     try:
@@ -120,7 +124,12 @@ def encoded_upload_existing(local_file, file_acc, SERVER, AUTHID, AUTHPW, dryrun
         logger.error("File size for %s not equal to metadata value: %s" % (localsize, file_meta['file_size']))
         sys.exit(1)
 
-    upr = encoded_get(SERVER+file_acc+'/upload/', AUTHID=AUTHID, AUTHPW=AUTHPW)
+    upr = requests.post(
+        SERVER + file_meta['@id'] + '/upload',
+        data=json.dumps({}),
+        auth=(AUTHID, AUTHPW),
+        headers=HEADERS,
+    )
     try:
         upr.raise_for_status()
     except:
