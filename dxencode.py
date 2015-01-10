@@ -122,11 +122,64 @@ def encoded_get(url, AUTHID=None, AUTHPW=None):
 
 def project_has_folder(project, folder):
     ''' Checks for a folder in a given DX project '''
-    ##TODO Deprecate for find_or_create?
-    folders = project.list_folder()['folders']
+    try:
+        found = project.list_folder(folder)
+    except:
+        return False
+    return True
 
-    return folder in folders
 
+def find_folder(target_folder,project,root_folders='/'):
+    '''
+    Recursively attempts to find the first folder in a project and root that matches target_folder.
+    The target_folder may be a nested as one/two/three but with no intervening wildcards.
+    The root_folders can start with '/' but can/will grow to be nested during recursion.
+    Returns full path to folder or None. 
+    '''
+    assert len(target_folder) > 0
+    
+    # full path is easy.
+    if target_folder.startswith('/') \
+    and project != None \
+    and project_has_folder(project, target_folder):
+        return target_folder
+    
+    # Normalize target and root
+    if target_folder.endswith('/'):
+        target_folder = target_folder[:-1]
+    if root_folders[0] != '/':
+       root_folders = '/' + root_folders
+
+    # Because list_folder is only one level at a time, find_folder must recurse
+    return rfind_folder(target_folder,project,root_folders)  
+
+def rfind_folder(target_folder,project=None,root_folders='/'):
+    '''Recursive call for find_folder - DO NOT call directly.'''
+    try:
+        query_folders = project.list_folder(root_folders)['folders']
+    except:
+        return None
+                
+    targets = target_folder.split('/')
+    target = '/' + targets[0] # whole directory string is matched
+
+    for query_folder in query_folders:
+        found = None
+        #print "Query [%s] target [%s]" % (query_folder,target)
+        if query_folder.endswith(target):
+            if len(targets) == 1:
+                #print "- Found: " + query_folder
+                return query_folder
+            else:
+                # Nested target_folders cannot have intervening gaps, so append all but last
+                new_root = query_folder + '/' + '/'.join(targets[1:-1])
+                #print "- new root [%s] target [%s]" % (new_root,targets[-1])
+                found = rfind_folder(targets[-1], project, new_root )
+        else:
+            found = rfind_folder(target_folder, project, query_folder)
+        if found != None:
+            return found
+    return None      
 
 def file_path_from_fid(fid,projectToo=False):
     '''Returns full dx path to file from a file id.'''
@@ -162,7 +215,7 @@ def find_or_create_folder(project, sub_folder, root_folder='/'):
     ''' Finds or creates a sub_folder in the specified parent (root) folder'''
     folder = root_folder+sub_folder
     logger.debug("Creating %s (%s)" % (folder, root_folder))
-    if folder in project.list_folder(root_folder)['folders']:
+    if project_has_folder(project, folder):
         return folder
     else:
         return project.new_folder(folder)
@@ -500,6 +553,75 @@ def choose_mapping_for_experiment(experiment):
         logging.warning('%s: No files to map' % exp_id)
     return mapping
 
+def get_mapping(experiment,biorep=None,techrep=None,must_find=True):
+    '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
+    
+    (AUTHID,AUTHPW,SERVER) = processkey('default')
+    url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
+    response = encoded_get(url, AUTHID, AUTHPW)
+    exp = response.json()
+
+    if not exp.get('replicates') or len(exp['replicates']) < 1:
+        if must_find:
+            print "No replicates found in %s\n%s" % ( experiment, exp )
+            sys.exit(1)
+        return None
+
+    reps_mapping = choose_mapping_for_experiment(exp)
+    if biorep != None and techrep != None:
+        try:
+            return reps_mapping[(biorep,techrep)]
+        except KeyError:
+            if must_find:
+                print "Specified replicate: rep%s_%s could not be found in mapping of %s." % \
+                    ( biorep, techrep, experiment )
+                print json.dumps(reps_mapping,indent=4)
+                sys.exit(1)
+        return None
+    else:
+        return reps_mapping
+
+def load_fastqs_from_mapping(load_to, mapping, controls=False):
+    '''
+    Resolves fastq file names from mapping and puts them into load_to dict (hint psv).
+    Note: load_to['fastqs'] will always be { "1":[],"2":[]} though '2' is an empty set for unpaired
+    Returns True or False for paired end.  Failures exit.
+    '''
+
+    # Paired ends?  Read files?
+    if mapping['unpaired'] and not mapping['paired']:
+        paired_end = False
+    elif mapping['paired'] and not mapping['unpaired']:
+        paired_end = True
+    elif not mapping['unpaired'] and not mapping['paired']:
+        print "Replicate has no reads either paired or unpaired"
+        print json.dumps(mapping,indent=4)
+        sys.exit(1)
+    else:
+        print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
+            (len(mapping['paired'], len(mapping['unpaired'])))
+        print json.dumps(mapping,indent=4)
+        sys.exit(1)
+    if controls:
+        load_to['controls'] = []
+    load_to['fastqs'] = { "1": [], "2": [] }
+    if paired_end:
+        for (p1, p2) in mapping['paired']:
+            load_to['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
+            load_to['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
+            if controls:
+                if 'controlled_by' in p1:
+                    load_to['controls'] += p1['controlled_by']
+                if 'controlled_by' in p2:
+                    load_to['controls'] += p2['controlled_by']
+    else:
+        load_to['fastqs']['1'] = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
+        if controls:
+            if 'controlled_by' in mapping['unpaired']:
+                load_to['controls'] += mapping['unpaired']['controlled_by']
+
+    return paired_end
+
 def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
     '''Looks for all result files in the results folder.'''
     priors = {}
@@ -756,7 +878,7 @@ def report_plans(psv, input_files, reference_files, deprecate_files, priors,
     print "- Reference files:"
     for token in reference_files:
         print "  " + file_path_from_fid(priors[token],True)
-    print "- Results written to: " + psv['project'] + ":" +psv['resultsFolder'] +'/'
+    print "- Results written to: " + psv['project'] + ":" +psv['resultsFolder']
     if len(steps_to_do) == 0:
         print "* All expected results are in the results folder, so there is nothing to do."
         print "  If this experiment/replicate needs to be rerun, then use the --force flag to "
@@ -774,7 +896,7 @@ def report_plans(psv, input_files, reference_files, deprecate_files, priors,
     if len(deprecate_files) > 0:
         oldFolder = psv['resultsFolder']+"/deprecated"
         print "Will move "+str(len(deprecate_files))+" prior result file(s) to '" + \
-                                                        psv['resultsFolder']+"/deprecated/'."
+                                                        psv['resultsFolder']+"deprecated/'."
         for fid in deprecate_files:
             print "  " + file_path_from_fid(fid)
 
@@ -787,7 +909,7 @@ def launchPad(wf,proj_id,psv,run=False):
 
     if run:
         print "Launch sequence initiating..."
-        wf_run = wf.run({})
+        wf_run = wf.run({}, project=proj_id)
         if wf_run == None:
             print "ERROR: failure to lift off!"
             sys.exit(1)
