@@ -892,7 +892,7 @@ def report_plans(psv, input_files, reference_files, deprecate_files, priors,
 
     if len(deprecate_files) > 0:
         deprecated = psv['resultsFolder']+"/deprecated/"
-        if psv['resultsFolder'].endswith('/')
+        if psv['resultsFolder'].endswith('/'):
             deprecated = psv['resultsFolder']+"deprecated/"
         print "Will move "+str(len(deprecate_files))+" prior result file(s) to '" + deprecated+"'."
         for fid in deprecate_files:
