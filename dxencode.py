@@ -139,9 +139,7 @@ def find_folder(target_folder,project,root_folders='/'):
     assert len(target_folder) > 0
     
     # full path is easy.
-    if target_folder.startswith('/') \
-    and project != None \
-    and project_has_folder(project, target_folder):
+    if target_folder.startswith('/') and project_has_folder(project, target_folder):
         return target_folder
     
     # Normalize target and root
@@ -159,24 +157,23 @@ def rfind_folder(target_folder,project=None,root_folders='/'):
         query_folders = project.list_folder(root_folders)['folders']
     except:
         return None
-                
+        
     targets = target_folder.split('/')
-    target = '/' + targets[0] # whole directory string is matched
 
-    for query_folder in query_folders:
-        found = None
-        #print "Query [%s] target [%s]" % (query_folder,target)
-        if query_folder.endswith(target):
-            if len(targets) == 1:
-                #print "- Found: " + query_folder
-                return query_folder
-            else:
-                # Nested target_folders cannot have intervening gaps, so append all but last
-                new_root = query_folder + '/' + '/'.join(targets[1:-1])
-                #print "- new root [%s] target [%s]" % (new_root,targets[-1])
-                found = rfind_folder(targets[-1], project, new_root )
+    if root_folders.endswith('/'):
+        root_folders = root_folders[-1]
+    full_query = root_folders + '/' + targets[0] # whole path is matched
+    #print "Full query [%s]" % full_query
+    if full_query in query_folders:  # hash shortcut
+        if len(targets) == 1:
+            return full_query
         else:
-            found = rfind_folder(target_folder, project, query_folder)
+            full_query = root_folders + '/' + target_folder # shoot for it all
+            #print "- shooting [%s]" % full_query
+            if project_has_folder(project, full_query):
+                return full_query
+    for query_folder in query_folders:
+        found = rfind_folder(target_folder, project, query_folder)
         if found != None:
             return found
     return None      
