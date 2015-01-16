@@ -573,7 +573,7 @@ def choose_mapping_for_experiment(experiment,warn=True):
         logging.warning('%s: No files to map' % exp_id)
     return mapping
 
-def get_full_mapping(experiment,must_find=True,warn=False):
+def get_exp(experiment,must_find=True,warn=False):
     '''Returns all replicate mappings for an experiment from encoded.'''
     
     (AUTHID,AUTHPW,SERVER) = processkey('default')
@@ -587,18 +587,28 @@ def get_full_mapping(experiment,must_find=True,warn=False):
             sys.exit(1)
         return None
 
+    return exp
+
+def get_full_mapping(experiment,exp=None,must_find=True,warn=False):
+    '''Returns all replicate mappings for an experiment from encoded.'''
+    
+    if exp == None:
+        exp = get_exp(experiment,must_find=must_find,warn=warn)
+
     return choose_mapping_for_experiment(exp,warn=warn)
 
-def get_replicate_mapping(rep_mapping,experiment,biorep=None,techrep=None,must_find=True):
+def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,must_find=True):
     '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
-    
+    if full_mapping == None:
+        full_mapping = get_full_mapping(experiment,must_find=True,warn=False)
+        
     try:
-        return rep_mapping[(biorep,techrep)]
+        return full_mapping[(biorep,techrep)]
     except KeyError:
         if must_find:
             print "Specified replicate: rep%s_%s could not be found in mapping of %s." % \
                 ( biorep, techrep, experiment )
-            print json.dumps(reps_mapping,indent=4)
+            print json.dumps(full_mapping,indent=4)
             sys.exit(1)
     return None
 
@@ -693,10 +703,11 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False):
     for cv_rep in cv['reps'].keys():
         rep = cv['reps'][cv_rep]
         # TODO get rep_mapping once and then subset "mapping" multiple times
-        mapping = get_replicate_mapping(full_mapping,cv['experiment'],rep['br'],rep['tr'])
+        mapping = get_replicate_mapping(cv['experiment'],rep['br'],rep['tr'], full_mapping)
 
         # Not a common var but convenient and cheap
         rep['library_id'] = mapping['library']
+        rep['replicate_id'] = mapping['replicate_id']
         
         # TODO add enough info that individual pipelines can varify the experiment matches pipeline
         
