@@ -11,6 +11,16 @@ import subprocess
 
 import logging
 
+GENOME_DEFAULTS = { 'human': 'hg19', 'mouse': 'mm10' }
+''' This the default genomes for each supported organism.'''
+
+REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
+''' This the default DNA Nexus project to find reference files in.'''
+
+REF_FOLDER_DEFAULT = '/'
+''' This the default folder that reference files are found in.'''
+
+
 REFERENCE_FILES = {} ## Dict to cache known Reference Files
 FILES = {} ## Dict to cache files
 APPLETS = {} ## Dict to cache known applets
@@ -500,7 +510,7 @@ def replicates_to_map(experiment, files):
         reps_with_files = set([ f['replicate']['uuid'] for f in files if f.get('replicate') ])
         return [ r for r in experiment['replicates'] if r['uuid'] in reps_with_files ]
 
-def choose_mapping_for_experiment(experiment):
+def choose_mapping_for_experiment(experiment,warn=True):
     ''' for a given experiment object, fully embedded, return experimental info needed for mapping
         returns an dict keyed by [biological_rep][technical_rep]
         with information for mapping (sex, organism, paired/unpaired files, library id)
@@ -521,7 +531,8 @@ def choose_mapping_for_experiment(experiment):
                 library = rep['library']['accession']
                 sex = rep['library']['biosample'].get('sex', "male")
                 if sex != "male" and sex != "female":
-                    print "WARN: using male replacement for %s" % sex
+                    if warn:
+                        print "WARN: using male replacement for %s" % sex
                     sex = "male"
                 organism = rep['library']['biosample']['donor']['organism']['name']
             except KeyError:
@@ -543,7 +554,7 @@ def choose_mapping_for_experiment(experiment):
                         mate = next((f for f in rep_files if f.get('paired_with') == file_object.get('@id')), None)
                     if mate:
                         rep_files.remove(mate)
-                    else:
+                    elif warn:
                         logging.warning('%s:%s could not find mate' %(experiment.get('accession'), file_object.get('accession')))
                         mate = {}
                     paired_files.extend([ (file_object, mate) ])
@@ -556,14 +567,14 @@ def choose_mapping_for_experiment(experiment):
                 "unpaired": unpaired_files,
                 "replicate_id": rep['@id']
             }
-            if rep_files:
+            if rep_files and warn:
                 logging.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
-    else:
+    elif warn:
         logging.warning('%s: No files to map' % exp_id)
     return mapping
 
-def get_mapping(experiment,biorep=None,techrep=None,must_find=True):
-    '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
+def get_full_mapping(experiment,must_find=True,warn=False):
+    '''Returns all replicate mappings for an experiment from encoded.'''
     
     (AUTHID,AUTHPW,SERVER) = processkey('default')
     url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
@@ -576,19 +587,20 @@ def get_mapping(experiment,biorep=None,techrep=None,must_find=True):
             sys.exit(1)
         return None
 
-    reps_mapping = choose_mapping_for_experiment(exp)
-    if biorep != None and techrep != None:
-        try:
-            return reps_mapping[(biorep,techrep)]
-        except KeyError:
-            if must_find:
-                print "Specified replicate: rep%s_%s could not be found in mapping of %s." % \
-                    ( biorep, techrep, experiment )
-                print json.dumps(reps_mapping,indent=4)
-                sys.exit(1)
-        return None
-    else:
-        return reps_mapping
+    return choose_mapping_for_experiment(exp,warn=warn)
+
+def get_replicate_mapping(rep_mapping,experiment,biorep=None,techrep=None,must_find=True):
+    '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
+    
+    try:
+        return rep_mapping[(biorep,techrep)]
+    except KeyError:
+        if must_find:
+            print "Specified replicate: rep%s_%s could not be found in mapping of %s." % \
+                ( biorep, techrep, experiment )
+            print json.dumps(reps_mapping,indent=4)
+            sys.exit(1)
+    return None
 
 def load_fastqs_from_mapping(load_to, mapping, controls=False):
     '''
@@ -617,11 +629,12 @@ def load_fastqs_from_mapping(load_to, mapping, controls=False):
     if paired_end:
         for (p1, p2) in mapping['paired']:
             load_to['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
-            load_to['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
+            if p2 != None and 'paired_end' in p2:
+                load_to['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
             if controls:
                 if 'controlled_by' in p1:
                     load_to['controls'] += p1['controlled_by']
-                if 'controlled_by' in p2:
+                if p2 != None and 'controlled_by' in p2:
                     load_to['controls'] += p2['controlled_by']
     else:
         load_to['fastqs']['1'] = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
@@ -630,6 +643,108 @@ def load_fastqs_from_mapping(load_to, mapping, controls=False):
                 load_to['controls'] += mapping['unpaired']['controlled_by']
 
     return paired_end
+
+def common_variables(args,results_folder_default,fastqs=True,controls=False):
+    '''Initializes dict with common variables from args and encoded.'''
+    
+    cv = {}
+    cv['project']    = args.project
+    cv['experiment'] = args.experiment
+
+    # expecting either commbined-replicates or biological and technical replicate
+    if 'cr' in args and args.cr != None:
+        if len(args.cr) != 2:
+            print "Specify which two replicates to compare (e.g. '1_2 2')."
+            sys.exit(1)
+        cv['combined'] = True
+        cv['reps'] = {}
+        for rep_tech in args.cr:
+            # Normalize rep_tech string
+            if '_' not in rep_tech:
+                rep_tech = rep_tech + '_1' # default to tech_rep 1
+            if not rep_tech.startswith('rep'):
+                rep_tech = 'rep' + rep_tech
+            # parse out biological and technical replicates
+            br_tr = rep_tech[3:]
+            (br,tr) = br_tr.split('_')
+            if 'a' in cv['reps']:
+                cv['reps']['b'] = { 'br': int(br), 'tr': int(tr) }
+                cv['reps']['b']['rep_tech'] = rep_tech
+            else:
+                cv['reps']['a'] = { 'br': int(br), 'tr': int(tr) }
+                cv['reps']['a']['rep_tech'] = rep_tech
+                
+        if cv['reps']['a']['rep_tech'] == cv['reps']['b']['rep_tech']:
+            print "Specify different replicates to compare (e.g. 'rep1_1 rep2_1')."
+            sys.exit(1)
+        args.br = cv['reps']['a']['br']
+        args.tr = cv['reps']['a']['tr']
+        cv['rep_tech'] = 'reps' + cv['reps']['a']['rep_tech'][3:] + \
+                            '-' + cv['reps']['b']['rep_tech'][3:]
+    else:
+        cv['combined'] = False
+        if args.br == 0:
+            print "Must specify either --biological-replicate or --compare-replicates." 
+            sys.exit(1)
+        cv['reps'] = {'a': { 'br': args.br, 'tr': args.tr} }
+        cv['reps']['a']['rep_tech'] = 'rep' + str(args.br) + '_' + str(args.tr)
+
+    full_mapping = get_full_mapping(cv['experiment'])
+    for cv_rep in cv['reps'].keys():
+        rep = cv['reps'][cv_rep]
+        # TODO get rep_mapping once and then subset "mapping" multiple times
+        mapping = get_replicate_mapping(full_mapping,cv['experiment'],rep['br'],rep['tr'])
+
+        # Not a common var but convenient and cheap
+        rep['library_id'] = mapping['library']
+        
+        # TODO add enough info that individual pipelines can varify the experiment matches pipeline
+        
+        if fastqs:
+            rep['paired_end'] = load_fastqs_from_mapping(rep,mapping,controls)
+            # Non-file app inputs
+            rep['rootR1'] = cv['experiment'] + rep['rep_tech'] + '_concatR1'
+            if rep['paired_end']: 
+                rep['rootR2'] = cv['experiment'] + rep['rep_tech'] + '_concatR2'
+
+        if cv_rep == 'a':
+            # Only supported genomes
+            if mapping['organism'] in GENOME_DEFAULTS:
+                cv['genome'] = GENOME_DEFAULTS[mapping['organism']]
+            else:
+                print "Organism %s not currently supported" % mapping['organism']
+                sys.exit(1)
+
+            cv['gender'] = mapping['sex']
+
+    # Paired ends?
+    if cv['combined'] and cv['reps']['a']['paired_end'] != cv['reps']['a']['paired_end']:
+        print "Replicates are expected to be both paired-end or single-end!  Check encoded."
+        sys.exit(1)
+    cv['paired_end'] = cv['reps']['a']['paired_end']
+
+    # Default locations (with adjustments)
+    cv['refLoc'] = args.refLoc
+    if cv['refLoc'] == REF_FOLDER_DEFAULT:
+        cv['refLoc'] = REF_FOLDER_DEFAULT + cv['genome'] + '/'
+    if not cv['refLoc'].endswith('/'):
+        cv['refLoc'] += '/' 
+    cv['resultsLoc'] = args.resultsLoc
+    if cv['resultsLoc'] == results_folder_default:
+        if cv['genome'] == 'mm10':
+            cv['resultsLoc'] = results_folder_default + cv['genome'] + '/' + cv['annotation'] + '/'
+        else:
+            cv['resultsLoc'] = results_folder_default + cv['genome'] + '/'
+    if not cv['resultsLoc'].endswith('/'):
+        cv['resultsLoc'] += '/' 
+    cv['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/'
+    cv['reps']['a']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
+                                                          cv['reps']['a']['rep_tech'] + '/'
+    if cv['combined']:
+        cv['reps']['b']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
+                                                              cv['reps']['b']['rep_tech'] + '/'
+
+    return cv
 
 def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
     '''Looks for all result files in the results folder.'''
@@ -640,6 +755,46 @@ def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
             if fid != None:
                 priors[fileToken] = fid
     return priors
+
+def finding_rep_inputs_and_priors(psv,steps,globs,project,test):
+    '''Finds the inputs and priors for a run.'''
+    
+    print "Checking for prior results..."
+    proj_id = project.get_id()
+
+    # NOTE: priors is a dictionary of fileIds that will be used to determine stepsToDo
+    #       and fill in inputs to workflow steps
+    for rep in psv['reps'].values():
+        if not test:
+            if not project_has_folder(project, rep['resultsFolder']):
+                project.new_folder(rep['resultsFolder'],parents=True)
+        rep['priors'] = find_prior_results(rep['path'],steps,rep['resultsFolder'],globs,proj_id)
+
+    print "Checking for input files..."
+    # Find all reads files and move into place
+    # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
+    #       or possibly local, Currently only DX locations are supported.
+    for rep in psv['reps'].values():
+        rep['inputs'] = {}
+        reads_token = 'reads'
+        if psv['paired_end']:
+            reads_token += '1'
+        rep['inputs']['Reads1'] = find_and_copy_read_files(rep['priors'], rep['fastqs']['1'], \
+                                           test, reads_token, rep['resultsFolder'], False, proj_id)
+        # Note: rep['fastqs']['2'] and rep['inputs']['Reads2'] will be empty on single-end
+        rep['inputs']['Reads2'] = find_and_copy_read_files(rep['priors'], rep['fastqs']['2'], \
+                                            test, 'reads2', rep['resultsFolder'], False, proj_id)
+
+def find_all_ref_files(psv,find_references_function):
+    '''Locates all reference files based upon organism and gender.'''
+    
+    print "Looking for reference files..."
+    for rep in psv['reps'].values():
+        # Need multiple copies of control files because they are put into priors!
+        find_references_function(rep['priors'],psv) # pipeline specific
+    if psv['combined']:
+        find_references_function(psv['priors'],psv)
+
 
 def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=False, verbose=False):
     '''Determine what steps need to be done, base upon prior results.'''
@@ -700,6 +855,22 @@ def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=F
 
     return steps_to_run
 
+
+def determine_steps_needed(psv, replicate_steps, combined_steps, proj_id, force=False):
+    '''Determine steps needed for replicate(s) and combined, base upon prior results.'''
+    
+    print "Determining steps to run..."
+    # NOTE: stepsToDo is an ordered list of steps that need to be run
+    for rep in psv['reps'].values():
+        rep['deprecate'] = [] # old results will need to be moved/removed if step is rerun
+        rep['stepsToDo'] = determine_steps_to_run(rep['path'], replicate_steps, \
+                                     rep['priors'], rep['deprecate'], proj_id, force=force)
+    if psv['combined']:
+        psv['deprecate'] = [] # old results will need to be moved/removed if step is rerun
+        psv['stepsToDo'] = determine_steps_to_run(psv['path'], combined_steps, \
+                                     psv['priors'], psv['deprecate'], proj_id, force=force)
+
+
 def check_run_log(results_folder,proj_id,verbose=False):
     '''Checks for currently running jobs and will exit if found.'''
     run_log_path = results_folder + '/' + RUNS_LAUNCHED_FILE
@@ -739,84 +910,19 @@ def log_this_run(run_id,results_folder,proj_id):
     '''Adds a runId to the runsLaunched file in resultsFolder.'''
     # NOTE: DX manual lies?!  Append not possible?!  Then write new/delete old
     run_log_path = results_folder + '/' + RUNS_LAUNCHED_FILE
-    old_fid = find_file(run_log_path,proj_id)
+    old_fids = find_file(run_log_path,proj_id,multiple=True,recurse=False)
     new_fh = dxpy.new_dxfile('a',project=proj_id,folder=results_folder,name=RUNS_LAUNCHED_FILE)
     new_fh.write(run_id+' started:'+str(datetime.now())+'\n')
-    if old_fid is not None:
-        with dxpy.open_dxfile(old_fid) as old_fh:
-            for old_run_id in old_fh:
-                new_fh.write(old_run_id+'\n')
+    if old_fids is not None:
+        for old_fid in old_fids:
+            with dxpy.open_dxfile(old_fid) as old_fh:
+                for old_run_id in old_fh:
+                    new_fh.write(old_run_id+'\n')
         proj = dxpy.DXProject(proj_id)
-        proj.remove_objects([old_fid])
+        proj.remove_objects(old_fids)
     new_fh.close()
 
-def create_workflow(steps_to_run, steps, priors, psv, proj_id, app_proj_id=None,test=False):
-    '''
-    This function will populate a workflow for the steps_to_run and return the worklow unlaunched.
-    It relies on steps dict which contains input and output requirements,
-    pvs (pipeline specific variables) dictionary and
-    priors, which contains input and previous results already in results dir
-    '''
-
-    if len(steps_to_run) < 1:
-        return None
-    if app_proj_id == None:
-        app_proj_id = proj_id
-
-    # create a workflow object
-    if not test:
-        wf = dxpy.new_dxworkflow(title=psv['name'],name=psv['name'],folder=psv['resultsFolder'],
-                                                project=proj_id,description=psv['description'])
-
-    # NOTE: prevStepResults dict contains links to result files to be generated by previous steps
-    prevStepResults = {}
-    for step in steps_to_run:
-        appName = steps[step]['app']
-        app = find_applet_by_name(appName, app_proj_id)
-        appInputs = {}
-        # file inputs
-        for fileToken in steps[step]['inputs'].keys():
-            appInp = steps[step]['inputs'][fileToken]
-            if fileToken in prevStepResults:
-                appInputs[ appInp ] = prevStepResults[fileToken]
-            elif fileToken in priors:
-                if isinstance(priors[fileToken], list):
-                    appInputs[ appInp ] = []
-                    for fid in priors[fileToken]:
-                        appInputs[ appInp ] += [ FILES[fid] ]
-                else:
-                    appInputs[ appInp ] = FILES[ priors[fileToken] ]
-            else:
-                print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
-                sys.exit(1)
-        # Non-file app inputs
-        if 'params' in steps[step]:
-            for param in steps[step]['params'].keys():
-                appParam = steps[step]['params'][param]
-                if param in psv:
-                    appInputs[ appParam ] = psv[param]
-                else:
-                    print "ERROR: step '"+step+"' unable to locate '"+param+ \
-                                                        "' in pipeline specific variables (psv)."
-                    sys.exit(1)
-        # Add wf stage
-        if not test:
-            stageId = wf.add_stage(app, stage_input=appInputs, folder=psv['resultsFolder'])
-        # outputs, which we will need to link to
-        for fileToken in steps[step]['results'].keys():
-            appOut = steps[step]['results'][fileToken]
-            if test:
-                prevStepResults[ fileToken ] = 'fake-for-testing'
-            else:
-                prevStepResults[ fileToken ] = dxpy.dxlink({ 'stage': stageId,'outputField': appOut })
-
-    if test:
-        return None
-    else:
-        return wf
-
-
-def create_runable_workflow(steps, psv, run, proj_id, app_proj_id=None,test=False,template=False):
+def create_workflow(psv, run, proj_id, app_proj_id=None,test=False,template=False):
     '''
     This function will populate a workflow for the steps in run['stepsToDo'] and return 
     the worklow unlaunched.   It relies on steps dict which contains input and output requirements,
@@ -836,6 +942,7 @@ def create_runable_workflow(steps, psv, run, proj_id, app_proj_id=None,test=Fals
 
     # NOTE: prevStepResults dict contains links to result files to be generated by previous steps
     prevStepResults = {}
+    steps = run['steps']
     for step in run['stepsToDo']:
         appName = steps[step]['app']
         app = find_applet_by_name(appName, app_proj_id)
@@ -941,57 +1048,19 @@ def build_simple_steps(pipe_path, proj_id, verbose=False):
     return [ steps, file_globs ]
 
 
-def report_plans(psv, input_files, reference_files, deprecate_files, priors,
-                 pipe_path, steps_to_do, steps):
-    '''Report the plans before executing them.'''
-
-    print "Running: "+psv['title']
-    if 'subTitle' in psv:
-        print "         "+psv['subTitle']
-    for input_type in sorted( input_files.keys() ):
-        print "- " + input_type + ":"
-        for fid in input_files[input_type]:
-            print "  " + file_path_from_fid(fid)
-    print "- Reference files:"
-    for token in reference_files:
-        print "  " + file_path_from_fid(priors[token],True)
-    print "- Results written to: " + psv['project'] + ":" +psv['resultsFolder']
-    if len(steps_to_do) == 0:
-        print "* All expected results are in the results folder, so there is nothing to do."
-        print "  If this experiment/replicate needs to be rerun, then use the --force flag to "
-        print "  rerun all steps; or remove suspect results from the folder before relaunching."
-        sys.exit(0)
-    else:
-        print "- Steps to run:"
-        for step in pipe_path:
-            if step in steps_to_do:
-                print "  * "+steps[step]['app']+" will be run"
-            else:
-                if not step.find('concat') == 0:
-                    print "    "+steps[step]['app']+" has already been run"
-
-    if len(deprecate_files) > 0:
-        deprecated = psv['resultsFolder']+"/deprecated/"
-        if psv['resultsFolder'].endswith('/'):
-            deprecated = psv['resultsFolder']+"deprecated/"
-        print "Will move "+str(len(deprecate_files))+" prior result file(s) to '" + deprecated+"'."
-        for fid in deprecate_files:
-            print "  " + file_path_from_fid(fid)
-
-
-def report_run_plans(psv, run, reference_files,
-                 pipe_path, steps):
+def report_run_plans(psv, run):
     '''Report the plans before executing them.'''
 
     print "Running: "+run['title']
     if 'subTitle' in run:
         print "         "+run['subTitle']
     for input_type in sorted( run['inputs'].keys() ):
-        print "- " + input_type + ":"
-        for fid in run['inputs'][input_type]:
-            print "  " + file_path_from_fid(fid)
+        if len(run['inputs'][input_type]) > 0: 
+            print "- " + input_type + ":"
+            for fid in run['inputs'][input_type]:
+                print "  " + file_path_from_fid(fid)
     print "- Reference files:"
-    for token in reference_files:
+    for token in psv['ref_files']:
         print "  " + file_path_from_fid(run['priors'][token],True)
     print "- Results written to: " + psv['project'] + ":" +run['resultsFolder']
     if len(run['stepsToDo']) == 0:
@@ -1001,12 +1070,12 @@ def report_run_plans(psv, run, reference_files,
         sys.exit(0)
     else:
         print "- Steps to run:"
-        for step in pipe_path:
+        for step in run['path']:
             if step in run['stepsToDo']:
-                print "  * "+steps[step]['app']+" will be run"
+                print "  * "+run['steps'][step]['app']+" will be run"
             else:
                 if not step.find('concat') == 0:
-                    print "    "+steps[step]['app']+" has already been run"
+                    print "    "+run['steps'][step]['app']+" has already been run"
 
     if len(run['deprecate']) > 0:
         deprecated = run['resultsFolder']+"/deprecated/"
@@ -1037,6 +1106,38 @@ def launchPad(wf,proj_id,psv,run=False):
     else:
         print "Workflow '" + wf.name + "' has been assembled in "+psv['resultsFolder'] + \
                                                                     ". Manual launch required."
+
+
+def report_build_launch(psv, run, proj_id, test=True, launch=False):
+    '''
+    Handles everything from reporting to building workflow to running, using standardized 
+    methods.  This function should finish a launcher using the psv and run dict already created.
+    '''
+    # Report the plans
+    report_run_plans(psv, run)
+
+    print "Checking for currently running analyses..."
+    check_run_log(run['resultsFolder'], proj_id, verbose=True)
+
+    if len(run['deprecate']) > 0 and not test:
+        deprecated = run['resultsFolder']+"deprecated/"
+        print "Moving "+str(len(run['deprecate']))+" prior result file(s) to '"+deprecated+"'..."
+        move_files(run['deprecate'],deprecated,proj_id)
+
+    if test:
+        print "Testing workflow assembly..."
+    else:
+        print "Assembling workflow..."
+    wf = create_workflow(psv, run, proj_id, test=test,template=(not launch))
+
+    # Exit if test only
+    if test:
+        print "TEST ONLY - exiting."
+        sys.exit(0)
+
+    # Roll out to pad and possibly launch
+    launchPad(wf,proj_id,run,launch)
+
 
 SW_CACHE = {}
 def get_sw_from_log(dxfile, regex):
