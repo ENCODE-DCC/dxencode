@@ -94,17 +94,16 @@ def encoded_post_file(local_file, file_meta, SERVER, AUTHID, AUTHPW):
         if r.status_code == 409:
             ### we asssume this is a md5sum issue
             cr = requests.get(
-                    SERVER + "/search/?type=file&md5sum=" % file_meta['md5sum'],
+                    SERVER + "md5:"+file_meta['md5sum'],
                     auth=(AUTHID,AUTHPW),
                     headers=HEADERS
             )
             try:
                 cr.raise_for_status()
             except:
-                raise
-            if len(cr.json().get('@graph', [])) != 1:
                 logger.error("Failed attempting to find existing file")
-            return cr.json()['@graph'][0]
+                raise
+            return cr.json()
         else:
             raise
     item = r.json()['@graph'][0]
