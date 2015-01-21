@@ -82,7 +82,10 @@ def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
     except:
         logger.error('Submission failed: %s %s' % (r.status_code, r.reason))
         logger.error(r.text)
-        raise
+        if r.status_code == 409:
+            return {}
+        else:
+            raise
     item = r.json()['@graph'][0]
 
     ####################
