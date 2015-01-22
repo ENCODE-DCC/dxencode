@@ -139,7 +139,7 @@ def project_has_folder(project, folder):
     return True
 
 
-def find_folder(target_folder,project,root_folders='/',exclude_deprecated=True):
+def find_folder(target_folder,project,root_folders='/',exclude_folders=["deprecated","data"]):
     '''
     Recursively attempts to find the first folder in a project and root that matches target_folder.
     The target_folder may be a nested as one/two/three but with no intervening wildcards.
@@ -158,18 +158,22 @@ def find_folder(target_folder,project,root_folders='/',exclude_deprecated=True):
     if root_folders[0] != '/':
        root_folders = '/' + root_folders
        
-    # If explicitly requesting deprecated, don't exclude it
-    if exclude_deprecated:
-        if root_folders.find('/deprecated') != -1 or target_folder.find('/deprecated') != -1:
-            exclude_deprecated=False
+    # If explicitly requesting one of the exluded folders then don't exclude it
+    if exclude_folders == None:
+        exclude_folders = []
+    for exclude_folder in exclude_folders:
+        exclude = '/' + exclude_folder
+        if root_folders.find(exclude) != -1 or target_folder.find(exclude) != -1:
+            exclude_folders.remove(exclude_folder)
 
     # Because list_folder is only one level at a time, find_folder must recurse
-    return rfind_folder(target_folder,project,root_folders,exclude_deprecated)  
+    return rfind_folder(target_folder,project,root_folders,exclude_folders)  
 
-def rfind_folder(target_folder,project=None,root_folders='/',exclude_deprecated=True):
+def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[]):
     '''Recursive call for find_folder - DO NOT call directly.'''
-    if exclude_deprecated and root_folders.find('/deprecated') != -1:
-        return None
+    for exclude_folder in exclude_folders:
+        if root_folders.find('/' + exclude_folder) != -1:
+            return None
     try:
         query_folders = project.list_folder(root_folders)['folders']
     except:
@@ -195,20 +199,44 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_deprecated=
 
     # nothing to do but recurse
     for query_folder in query_folders:
-        found = rfind_folder(target_folder, project, query_folder,exclude_deprecated)
+        found = rfind_folder(target_folder, project, query_folder,exclude_folders)
         if found != None:
             return found
     return None      
 
-def file_path_from_fid(fid,projectToo=False):
-    '''Returns full dx path to file from a file id.'''
+def description_from_fid(fid):
+    '''Returns file description object from fid.'''
     try:
         dxlink = FILES[fid]
     except:
-        logger.error("File %s not cached, trying id" % fid)
+        #logger.error("File %s not cached, trying id" % fid)
         dxlink = fid
 
-    fileDict = dxpy.describe(dxlink) # FILES contain dxLinks
+    return dxpy.describe(dxlink)
+
+
+def file_handler_from_fid(fid):
+    '''Returns dx file handler from fid.'''
+    try:
+        dxlink = FILES[fid]
+    except:
+        dxlink = fid
+    return dxpy.get_handler(dxlink)
+
+
+def job_from_fid(fid):
+    '''Returns job decription from fid.'''
+    try:
+        file_dict = description_from_fid(fid)
+        job_id = file_dict["createdBy"]["job"]
+        return dxpy.api.job_describe(job_id)
+    except:
+        return None
+
+
+def file_path_from_fid(fid,projectToo=False):
+    '''Returns full dx path to file from a file id.'''
+    fileDict = description_from_fid(fid)
     if fileDict['folder'] == '/':
         path = '/' + fileDict['name']
     else:
@@ -573,34 +601,62 @@ def choose_mapping_for_experiment(experiment,warn=True):
         logging.warning('%s: No files to map' % exp_id)
     return mapping
 
-def get_exp(experiment,must_find=True,warn=False):
+def get_exp(experiment,must_find=True,warn=False,key='default'):
     '''Returns all replicate mappings for an experiment from encoded.'''
     
     (AUTHID,AUTHPW,SERVER) = processkey('default')
     url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
-    response = encoded_get(url, AUTHID, AUTHPW)
-    exp = response.json()
-
-    if not exp.get('replicates') or len(exp['replicates']) < 1:
+    try:
+        response = encoded_get(url, AUTHID, AUTHPW)
+        exp = response.json()
+    except:
         if must_find:
-            print "No replicates found in %s\n%s" % ( experiment, exp )
+            print "Experiment %s not found." % experiment
             sys.exit(1)
         return None
 
     return exp
 
-def get_full_mapping(experiment,exp=None,must_find=True,warn=False):
+def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
+    '''Looks up encoded experiment's assay_type, normalized to lower case.'''
+    if exp == None:
+        exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
+
+    if exp["assay_term_name"] == "RNA-seq":
+        if exp["replicates"][0]["library"]["size_range"] == ">200":
+            return "long-rna-seq"
+        else:
+            return "small-rna-seq"
+    elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
+        return "dna-me"
+    #elif exp["assay_term_name"] == "RAMPAGE":
+    #    return "rampage"
+    #elif exp["assay_term_name"] == "ChIP-seq":
+    #    return "chip-seq"
+    #elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
+    #    return "dna-me"
+        
+    return exp["assay_term_name"].lower()
+        
+def get_full_mapping(experiment,exp=None,key='default',must_find=True,warn=False):
     '''Returns all replicate mappings for an experiment from encoded.'''
     
     if exp == None:
-        exp = get_exp(experiment,must_find=must_find,warn=warn)
+        exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
+
+    if not exp.get('replicates') or len(exp['replicates']) < 1:
+        if must_find:
+            print "No replicates found in %s" % experiment
+            sys.exit(1)
+        return None
 
     return choose_mapping_for_experiment(exp,warn=warn)
 
-def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,must_find=True):
+def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,key='default', \
+                                                                                    must_find=True):
     '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
     if full_mapping == None:
-        full_mapping = get_full_mapping(experiment,must_find=True,warn=False)
+        full_mapping = get_full_mapping(experiment,key=key,must_find=must_find,warn=False)
         
     try:
         return full_mapping[(biorep,techrep)]
@@ -654,7 +710,7 @@ def load_fastqs_from_mapping(load_to, mapping, controls=False):
 
     return paired_end
 
-def common_variables(args,results_folder_default,fastqs=True,controls=False):
+def common_variables(args,results_folder_default,fastqs=True,controls=False,key='default'):
     '''Initializes dict with common variables from args and encoded.'''
     
     cv = {}
@@ -699,7 +755,9 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False):
         cv['reps'] = {'a': { 'br': args.br, 'tr': args.tr} }
         cv['reps']['a']['rep_tech'] = 'rep' + str(args.br) + '_' + str(args.tr)
 
-    full_mapping = get_full_mapping(cv['experiment'])
+    exp = get_exp(cv['experiment'],key=key)
+    full_mapping = get_full_mapping(cv['experiment'],exp)
+    cv['exp_type'] = get_assay_type(cv['experiment'],exp)
     for cv_rep in cv['reps'].keys():
         rep = cv['reps'][cv_rep]
         # TODO get rep_mapping once and then subset "mapping" multiple times
@@ -1160,7 +1218,7 @@ def get_sw_from_log(dxfile, regex):
 
     if not SW_CACHE.get(job_id, {}):
         cmd = ["dx", "watch", job_id]
-        log = subprocess.check_output(cmd)
+        log = subprocess.check_output(cmd, stderr=subprocess.STDOUT) # DEVNULL ?
         swre = re.compile(regex)
         sw = swre.findall(log)
 
