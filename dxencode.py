@@ -103,10 +103,12 @@ def encoded_post_file(local_file, file_meta, SERVER, AUTHID, AUTHPW):
             except:
                 logger.error("Failed attempting to find existing file")
                 raise
+            logger.debug("Using exsting object: %s" % cr.json())
             return cr.json()
         else:
             raise
     item = r.json()['@graph'][0]
+    logger.debug("New object posted: %s" % item)
 
     return aws_cp(local_file, item)
     ####################
