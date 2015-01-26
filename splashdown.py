@@ -21,13 +21,12 @@
 # 7) Either exit or advance to the next experiment folder
 
 import argparse,os, sys
-import json, urlparse, subprocess, itertools
-#import requests, logging, re, shlex, time
+import json, urlparse, subprocess, itertools, logging
+#import requests, re, shlex, time
 #from datetime import datetime
 
 import dxpy
 import dxencode
-
 
 class Splashdown(object):
     PROJECT_DEFAULT = 'scratchPad'
@@ -39,12 +38,6 @@ class Splashdown(object):
     RESULT_FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
-    ASSEMBLIES_SUPPORTED = { "hg19": "GRCh37", "hg38": "GRCh37", "mm10": "GRCm38" }
-    '''This module supports only these assemblies.'''
-
-    ANNOTATIONS_SUPPORTED = [ 'v19', 'M2', 'M3', 'M4' ]
-    '''This module supports only these annotations.'''
-    
     EXPERIMENT_TYPES_SUPPORTED = [ "long-rna-seq", "small-rna-seq", "rampage" ] #,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
@@ -56,53 +49,71 @@ class Splashdown(object):
                             "align-star","signals-star-se","signals-star-pe","quant-rsem"],
             "combined":   {},
             "replicate":  {
-                "align-tophat":    { "tophat_bam":           "*_tophat.bam"                 },
-                "signals-top-se":  { "tophat_all_bw":        "*_tophat_all.bw",
-                                     "tophat_uniq_bw":       "*_tophat_uniq.bw"             },
-                "signals-top-pe":  { "tophat_minus_all_bw":  "*_tophat_minusAll.bw",
-                                     "tophat_minus_uniq_bw": "*_tophat_minusUniq.bw",
-                                     "tophat_plus_all_bw":   "*_tophat_plusAll.bw",
-                                     "tophat_plus_uniq_bw":  "*_tophat_plusUniq.bw"         },
-                "align-star":      { "star_genome_bam":      "*_star_genome.bam",
-                                     "star_anno_bam":        "*_star_anno.bam"              },
-                "signals-star-se": { "star_all_bw":          "*_star_genome_all.bw",
-                                     "star_uniq_bw":         "*_star_genome_uniq.bw"        },
-                "signals-star-pe": { "star_minus_all_bw":    "*_star_genome_minusAll.bw",
-                                     "star_minus_uniq_bw":   "*_star_genome_minusUniq.bw",
-                                     "star_plus_all_bw":     "*_star_genome_plusAll.bw",
-                                     "star_plus_uniq_bw":    "*_star_genome_plusUniq.bw"    },
-                "quant-rsem":      { "rsem_iso_results":     "*_rsem.isoforms.results",
-                                     "rsem_gene_results":    "*_rsem.genes.results"         }
+                "align-tophat":    { "alignments":                "*_tophat.bam"                 },
+                "signals-top-se":  { "multi-read signal":         "*_tophat_all.bw",
+                                     "unique signal":             "*_tophat_uniq.bw"             },
+                "signals-top-pe":  { "multi-read minus signal":   "*_tophat_minusAll.bw",
+                                     "multi-read plus signal":    "*_tophat_plusAll.bw",
+                                     "unique minus signal":       "*_tophat_minusUniq.bw",
+                                     "unique plus signal":        "*_tophat_plusUniq.bw"         },
+                "align-star":      { "alignments":                "*_star_genome.bam",
+                                     "transcriptome alignments":  "*_star_anno.bam"              },
+                "signals-star-se": { "multi-read signal":         "*_star_genome_all.bw",
+                                     "unique signal":             "*_star_genome_uniq.bw"        },
+                "signals-star-pe": { "multi-read minus signal":   "*_star_genome_minusAll.bw",
+                                     "multi-read plus signal":    "*_star_genome_plusAll.bw",
+                                     "unique minus signal":       "*_star_genome_minusUniq.bw",
+                                     "unique plus signal":        "*_star_genome_plusUniq.bw"    },
+                "quant-rsem":      { "transcript quantifications":"*_rsem.isoforms.results",
+                                     "genome quantifications":    "*_rsem.genes.results"         }
             }
         },
         "small-rna-seq": {
             "step-order": [ "align","signals"],
             "combined":   {},
             "replicate":  {
-                "align":           { "genome_bam":           "*_star_genome.bam"            },
-                "signals":         { "all_plus_bw":          "*_small_plusAll.bw",
-                                     "all_minus_bw":         "*_small_minusAll.bw",
-                                     "unique_plus_bw":       "*_small_plusUniq.bw",
-                                     "unique_minus_bw":      "*_small_minusUniq.bw"         }
+                "align":           { "alignments":                "*_star_genome.bam"            },
+                "signals":         { "multi-read plus signal":    "*_small_plusAll.bw",
+                                     "multi-read minus signal":   "*_small_minusAll.bw",
+                                     "unique plus signal":        "*_small_plusUniq.bw",
+                                     "unique minus signal":       "*_small_minusUniq.bw"         }
             }
         },
         "rampage": {
             "step-order": [ "align","signals","peaks","idr"],
             "combined":   {
-                "idr":             { "rampage_idr_gff":      "*_rampage_idr.gff",
-                                     "rampage_idr_bb":       "*_rampage_idr.bb" }
+                "idr":             { "sites":                     "*_rampage_idr.gff",
+                                     "peaks":                     "*_rampage_idr.bb" }
             },
             "replicate":  {
-                "align":           { "rampage_marked_bam":   "*_rampage_star_marked.bam" },
-                "signals":         { "all_plus_bw":          "*_rampage_5p_plusAll.bw",    
-                                     "all_minus_bw":         "*_rampage_5p_minusAll.bw",
-                                     "unique_plus_bw":       "*_rampage_5p_plusUniq.bw", 
-                                     "unique_minus_bw":      "*_rampage_5p_minusUniq.bw" },
-                "peaks":           { "rampage_peaks_bb":     "*_rampage_peaks.bb",
-                                     "rampage_peaks_gff":    "*_rampage_peaks.gff" }
+                "align":           { "alignments":                "*_rampage_star_marked.bam" },
+                "signals":         { "multi-read plus signal":    "*_rampage_5p_plusAll.bw",    
+                                     "multi-read minus signal":   "*_rampage_5p_minusAll.bw",
+                                     "unique plus signal":        "*_rampage_5p_plusUniq.bw", 
+                                     "unique minus signal":       "*_rampage_5p_minusUniq.bw" },
+                "peaks":           { "peaks":                     "*_rampage_peaks.bb",
+                                     "sites":                     "*_rampage_peaks.gff" }
             }
         }
     }
+
+    ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "hg38": "GRCh37", "mm10": "mm10" }
+    '''This module supports only these assemblies.'''
+
+    ANNOTATIONS_SUPPORTED = [ 'v19', 'M2', 'M3', 'M4' ]
+    '''This module supports only these annotations.'''
+    
+    FORMATS_SUPPORTED = ["bam", "bed", "bedLogR", "bed_bedLogR", "bedMethyl", "bed_bedMethyl",
+                         "bigBed", "bigWig", "broadPeak", "bed_broadPeak", "fasta", "fastq",
+                         "gtf", "idat", "narrowPeak", "bed_narrowPeak", "rcc", "CEL", "tsv", "csv" ]
+    EXTENSION_TO_FORMAT = { "bb":"bigBed", "bw":"bigWig",
+                            "fa":"fasta","fq":"fastq","results":"tsv" 
+                            "gff": "gtf" }
+    '''List of supported formats, and means of recognizing with file extensions.'''
+
+    PRIMARY_INPUT_EXTENSION = [ "fastq","fq"]
+    '''List of file extensions used to recognize primary inputs to parse accessions.'''
+
 
     def __init__(self):
         '''
@@ -111,6 +122,7 @@ class Splashdown(object):
         '''
         self.args = {} # run time arguments
         self.server_key = 'test'
+        self.acc_prefix = "TSTFF"
         self.proj_name = self.PROJECT_DEFAULT
         self.project = None
         self.proj_id = None
@@ -122,6 +134,9 @@ class Splashdown(object):
         self.pipeline = None # pipeline definitions (filled in when experiment type is known)
         self.replicates = None # lost replicate folders currently found beneath experiment folder
         self.test = True # assume Test until told otherwise
+        dxencode.logger = logging.getLogger(__name__) # I need this to avoid some errors
+        dxencode.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
+
     
     def get_args(self):
         '''Parse the input arguments.'''
@@ -257,27 +272,31 @@ class Splashdown(object):
         ext = file_name.split(".")[-1]
         if ext == "gz" or ext == "tgz":
             ext = file_name.split(".")[-2]
-        if ext in ["bam","bw","bb","gff"]:
+        if ext in self.EXTENSION_TO_FORMAT.keys():
+            ext = self.EXTENSION_TO_FORMAT[ext]
+        if ext in self.FORMATS_SUPPORTED:
             return ext
-        if ext == "results":
-            return "csv"
-        elif ext == "bw":
-            return "bigwig"
-        elif ext == "bb":
-            return "bigbed"
         return None
 
 
-    def find_genome(self,path):
-        '''Try to determine genome from file path.'''
-        # TODO: There should be a better way of determining genome and annotation!!!
-        if self.genome == None:
-            for part in path.split('/'):
-                if part in self.ASSEMBLIES_SUPPORTED.keys():
-                    self.genome = self.ASSEMBLIES_SUPPORTED[part]
-                elif self.annotation == None and part in self.ANNOTATIONS_SUPPORTED:
-                    self.annotation = part
-        print "- Genome: %s, annotation: %s" % (self.genome,self.annotation)
+    def find_genome_annotation(self,file_dict):
+        '''Try to determine genome from input file properties.'''
+        # TODO: currently done in derived_from which is only run on needed files
+        #       much change to do this on expected files.
+        properties = file_dict["properties"]
+        msg = ""
+        if self.genome == None and "genome" in properties:
+            genome = properties["genome"]
+            if genome in self.ASSEMBLIES_SUPPORTED.keys(): 
+                self.genome = self.ASSEMBLIES_SUPPORTED[genome]
+                msg += " genome[%s]" % self.genome
+        if self.annotation == None and "annotation" in properties:
+            annotation = properties["annotation"]
+            if annotation in self.ANNOTATIONS_SUPPORTED: 
+                self.annotation = annotation
+                msg += " annotation[%s]" % self.annotation
+        if len(msg) > 0:
+            print "  - Found " + msg
         return self.genome
 
 
@@ -294,8 +313,6 @@ class Splashdown(object):
             fid = dxencode.find_file(result_folder + file_globs[token],self.proj_id, recurse=False)
             if fid != None:
                 step_files.append( (token,rep_tech,fid) )
-                if self.genome == None:
-                    self.genome = self.find_genome(dxencode.file_path_from_fid(fid))
             else:
                 return []      # Only include files from completed steps!
         return step_files
@@ -365,9 +382,15 @@ class Splashdown(object):
         '''Returns the tuple list of files that NEED to be uploaded to ENCODE.'''
         needed = []
         for (out_type, rep_tech, fid) in files_expected:
-            # Don't bother searching for tag: tag means upload requested, NOT upload succeeded!
+            # Current strategy is to complete an upload before updating the accession field.
+            # so existence of accession should mean it is already in encoded.
             #for tag in dxencode.description_from_fid(fid)['tags']:
             #    m = re.search(r'(ENCFF\d{3}\D{3})|(TSTFF\D{6})', tag)
+            fileDict = dxencode.description_from_fid(fid,properties=True)
+            if "properties" in fileDict and "accession" in fileDict["properties"]:
+                accession = fileDict["properties"]["accession"]
+                if accession.startswith(self.acc_prefix) and len(accession) == 11:
+                    needed.append( (out_type,rep_tech,fid) )
 
             if self.find_in_encode(fid,verbose) == None:
                 needed.append( (out_type,rep_tech,fid) )
@@ -390,21 +413,20 @@ class Splashdown(object):
                 inp_fid = dxlink
             else:
                 inp_fid = dxlink.get("id")
-            inp_obj = dxencode.description_from_fid(inp_fid)
+            inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
             if inp_obj != None:
-                if self.genome == None:
-                    self.genome = self.find_genome(inp_obj["folder"])
+                self.genome = self.find_genome_annotation(inp_obj)
                 if "properties" in inp_obj and "accession" in inp_obj["properties"]:
                     derived_from.append(inp_obj["properties"]["accession"])
                 else: # if file name is primary input (fastq) and is named as an accession
-                    if inp_obj["name"].startswith("ENCFF"):
-                        if inp_obj["name"].endswith(".fastq.gz") \
-                        or inp_obj["name"].endswith(".fq.gz") \
-                        or inp_obj["name"].endswith(".fastq") \
-                        or inp_obj["name"].endswith(".fq"):
-                            root = inp_obj["name"].split('.')[0]
-                            for acc in root.split('-'): #usually only one
-                                # TODO: make sure concat files do what they are supposed to!!!
+                    if inp_obj["name"].startswith(self.acc_prefix):
+                        parts = inp_obj["name"].split('.')
+                        ext = parts[-1] 
+                        if ext in ["gz","tgz"]:
+                            ext = parts[-2]
+                        if ext in self.PRIMARY_INPUT_EXTENSION:
+                            root = parts[0]
+                            for acc in root.split('_'): #usually only one
                                 if acc.startswith("ENCFF") and len(acc) == 11:
                                     derived_from.append(acc)
         if verbose:
@@ -447,12 +469,14 @@ class Splashdown(object):
         #    print json.dumps(job,indent=4)
         #applet = dxencode.applet_from_fid(fid)
         upload_obj["file_format"] = self.file_format(dx_obj["name"])
+        if upload_obj["file_format"] == None:
+            print "Warning: file %s has unknown file format!" % dxencode.file_path_from_fid(fid)
         upload_obj["derived_from"] = self.find_derived_from(job)
         upload_obj['submitted_file_name'] = dxencode.file_path_from_fid(fid,projectToo=True)
         upload_obj['file_size'] = dx_obj["size"]
         #upload_obj['md5sum'] = calculated_md5 # TODO: Find from file properties???
         if self.genome == None:
-            print "Error: could not determine genome assembly!"
+            print "Error: could not determine genome assembly! Add properties to reference files."
             sys.exit(1)
         upload_obj['assembly'] = self.genome
         if self.annotation != None:
@@ -476,20 +500,43 @@ class Splashdown(object):
         return upload_obj
 
 
-    def file_upload(self,upload_obj,test=True):
+    def file_upload(self,fid,upload_obj,test=True):
         '''Uploads a file to encoded.'''
         path = upload_obj['submitted_file_name'].split(':')[1]
         if test:
             print "  - Test upload %s to '%s' server" % (path,self.server_key)
+            if self.server_key == "test":
+                return "TSTFF00FAKE"
             return "ENCFF00FAKE"
         else:
-            (AUTHID,AUTHPW,SERVER) = processkey(self.server_key)
-            try:
-                result = dxencode.encoded_post_file(upload_obj,SERVER,AUTHID,AUTHPW)
-                print "  - Real upload %s to '%s' server" % (path,self.server_key)
-                return result.get('accession')
-            except:
-                print "  * FAILED upload of %s to '%s' server" % (path,self.server_key)
+            out_folder = self.exp_folder + "/uploads"
+            dxencode.find_or_create_folder(self.project, out_folder)
+            applet = dxencode.find_applet_by_name('validate-post', self.proj_id )
+            job = applet.run({
+                "pipe_file": dxpy.dxlink(fid),
+                "file_meta": upload_obj,
+                "key": self.server_key,
+                "skipvalidate": True,
+                "debug": True
+                },
+                folder=out_folder)
+            print "  Submitting %s to %s" % (job.id, out_folder)
+            job.wait_on_done(interval=1)
+            job_dict = job.describe()
+            #error = job_dict['output'].get('error', None)
+            if job_dict["state"] == "done":
+                accession = job_dict['output'].get('accession', None)
+                return accession
+            else:
+                return None
+
+            #(AUTHID,AUTHPW,SERVER) = dxencode.processkey(self.server_key)
+            #try:
+            #    result = dxencode.encoded_post_file(upload_obj,SERVER,AUTHID,AUTHPW)
+            #    print "  - Real upload %s to '%s' server" % (path,self.server_key)
+            #    return result.get('accession')
+            #except:
+            #    print "  * FAILED upload of %s to '%s' server" % (path,self.server_key)
         return None
 
 
@@ -514,13 +561,17 @@ class Splashdown(object):
         '''Runs splasdown from start to finish using command line arguments.'''
         args = self.get_args()
         self.server_key = args.server
+        if self.server_key != "test":
+            self.acc_prefix = "ENCFF"
         self.proj_name = args.project
         self.project = dxencode.get_project(self.proj_name)
         self.proj_id = self.project.get_id()
         print "== Running in project [%s] and will post to the [%s] server ==" % \
                                                         (self.proj_name,self.server_key)
-        
+        exp_count = 0
+        total_uploaded = 0
         for exp_id in args.experiments:
+            sys.stdout.flush()
             # 1) Lookup experiment type from encoded, based on accession
             print "Working on %s..." % exp_id
             self.exp = dxencode.get_exp(exp_id,must_find=False,key=self.server_key)
@@ -551,26 +602,46 @@ class Splashdown(object):
             if len(files_expected) == 0:
                 continue
 
-            # 5) For each file that should be uploaded, determine if the file needs to be uploaded (not already uploaded).
+            # 5) For each file that should be uploaded, determine if the file needs to be uploaded.
             files_to_upload = self.find_needed_files(files_expected)
             print "- Found %d files that need to be uploaded" % len(files_to_upload) 
             if len(files_to_upload) == 0:
                 continue
+            sys.stdout.flush()
 
             # 6) For each file that needs to be uploaded:
+            exp_count += 1
+            file_count = 0
+            upload_count = 0
             for (out_type,rep_tech,fid) in files_to_upload:
                 # a) discover all necessary dx information needed for upload.
-                # b) gather any other information necessary from dx and encoded. (notice hand-waving)
+                # b) gather any other information necessary from dx and encoded.
                 print "  Document file %s" % dxencode.file_path_from_fid(fid) 
                 upload_obj = self.make_upload_obj(out_type,rep_tech,fid)
 
+                file_count += 1
                 # c) Upload file and update encoded database. 
-                accession = self.file_upload(upload_obj,args.test)
+                accession = self.file_upload(fid,upload_obj,args.test)
 
                 # d) Update dnanexus file with file accession tag.
                 if accession != None:
                     self.file_mark_accession(fid,accession,args.test)
-
+                    if not args.test:
+                        upload_count += 1
+                else:
+                    print "- Abandoning %s - upload failure could compromise 'derived_from'" % \
+                                                                                    (self.exp_id)
+                    break
+                    
+                if file_count >= 2 and not args.test:
+                    break # Just try two files at first
+                    
+            print "- For %s Processed %d file(s), uploaded %s" % \
+                                                        (self.exp_id, file_count, upload_count)
+            total_uploaded += upload_count
+            
+        print "Processed %d experiment(s), uploaded %d file(s)" % (exp_count, total_uploaded)
+            
         print "(finished)"
                 
 

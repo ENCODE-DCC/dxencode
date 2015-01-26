@@ -204,7 +204,7 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
             return found
     return None      
 
-def description_from_fid(fid):
+def description_from_fid(fid,properties=False):
     '''Returns file description object from fid.'''
     try:
         dxlink = FILES[fid]
@@ -212,7 +212,7 @@ def description_from_fid(fid):
         #logger.error("File %s not cached, trying id" % fid)
         dxlink = fid
 
-    return dxpy.describe(dxlink)
+    return dxpy.describe(dxlink,incl_properties=properties)
 
 
 def file_handler_from_fid(fid):
@@ -772,9 +772,9 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False,key=
         if fastqs:
             rep['paired_end'] = load_fastqs_from_mapping(rep,mapping,controls)
             # Non-file app inputs
-            rep['rootR1'] = cv['experiment'] + rep['rep_tech'] + '_concatR1'
+            rep['concat_id'] = 'reads'
             if rep['paired_end']: 
-                rep['rootR2'] = cv['experiment'] + rep['rep_tech'] + '_concatR2'
+                rep['concat_id2'] = 'reads2'
 
         if cv_rep == 'a':
             # Only supported genomes
