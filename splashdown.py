@@ -112,7 +112,7 @@ class Splashdown(object):
                          "bigBed", "bigWig", "broadPeak", "bed_broadPeak", "fasta", "fastq",
                          "gtf", "idat", "narrowPeak", "bed_narrowPeak", "rcc", "CEL", "tsv", "csv" ]
     EXTENSION_TO_FORMAT = { "bb":"bigBed", "bw":"bigWig",
-                            "fa":"fasta","fq":"fastq","results":"tsv" 
+                            "fa":"fasta","fq":"fastq","results":"tsv", 
                             "gff": "gtf" }
     '''List of supported formats, and means of recognizing with file extensions.'''
 
@@ -188,8 +188,8 @@ class Splashdown(object):
         #                required=False)
 
         ap.add_argument('--results_folder',
-                        help="The location to to place results folders (default: '<project>:" + \
-                                                                self.RESULT_FOLDER_DEFAULT + "')",
+                        help="The location to search for experiment folders (default: " + \
+                                                "'<project>:" + self.RESULT_FOLDER_DEFAULT + "')",
                         default=self.RESULT_FOLDER_DEFAULT,
                         required=False)
 
@@ -227,9 +227,7 @@ class Splashdown(object):
             results_folder += '/'
         target_folder = dxencode.find_folder(exp_id,self.project,results_folder)
         if target_folder == None or target_folder == "":
-            print "Unable to locate target folder for %s in project %s" % (exp_id, self.proj_name)
             return None
-        #return self.proj_name + ':' + target_folder + '/'
         return target_folder + '/'
         
 

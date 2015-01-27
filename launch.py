@@ -8,18 +8,27 @@ import argparse,os, sys, json
 import dxpy
 import dxencode
 
-# NOTES: This command-line utility will run the short RNA-seq pipeline for a single replicate
-#      - All results will be written to a folder /srna/<expId>/rep<#>.
+# NOTES: This command-line utility will run the a pipeline for a single replicate or combined reps.
+#      - All results will be written to a folder /<results_folder>/<exp_id>/rep<#>_<#>.
 #      - If any results are already in that directory, then the steps that created those results
 #        will not be rerun.
 #      - If any jobs for the experiment and replicate are already running, nothing new will be
 #        launched.
-#      - Most of the code is generic and found in dxencode.  It relies upon hard-coded JSON below.
+#      - Almost all the code is generic and derived classes will only need to entend or override a 
+#        a few things.  It relies upon JSON pipeline descriptions which in simple cases can be 
+#        directly read from dx (e.g. srnaLaunch.py).  More compex examples (e.g. lrnaLaunch.py)
+#        must hard-code the pipeline json to handle repeated apps and dx name conflicts.
 #        Tokens are used to abstract dx.app input/outout file names to avoid collisions.
 #        - STEP_ORDER is the list of steps in the pipeline
 #        - STEPS contains step definitions and enforces dependencies by input file tokens matching
 #          to result file tokens of earlier steps.
 #        - FILE_GLOBS is needed for locating result files from prior runs.
+#      - Combined replicate processing is optional and depends upon COMBINED_STEP, etc.
+#        (e.g. rampageLaunch.py).
+#      - Control files are supported but most likely will require function overrides in derived
+#        classes (e.g. rampageLaunch.py)
+#
+# Example derived classes: long-rna-seq-pipeline: lrnaLaunch.py, srnaLaunch.py rampageLaunch.py
 
 class Launch(object):
     '''
@@ -38,6 +47,9 @@ class Launch(object):
     PROJECT_DEFAULT = 'scratchPad'
     ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
 
+    SERVER_DEFAULT = 'default'
+    '''At this time there is no need to use the any but the default server for launching.'''
+    
     RESULT_FOLDER_DEFAULT = '/runs/'
     ''' This the default location to place results folders for each experiment.'''
     
@@ -85,7 +97,7 @@ class Launch(object):
         an experiment.
         '''
         self.args = {} # run time arguments
-        self.server_key = 'default'   #At this point no need to point to anything but default 
+        self.server_key = self.SERVER_DEFAULT
         self.proj_name = self.PROJECT_DEFAULT
         self.project = None
         self.proj_id = None
@@ -108,13 +120,13 @@ class Launch(object):
                         help='ENCODED experiment accession',
                         required=True)
 
-        ap.add_argument('--br', '--biological-replicate',
-                        help="Biological replicate number (default: 1)",
+        ap.add_argument('-br','--br', '--biological-replicate',
+                        help="Biological replicate number",
                         type=int,
-                        default='1',
-                        required=True)
+                        #default='1',
+                        required=False)
 
-        ap.add_argument('--tr', '--technical-replicate',
+        ap.add_argument('-tr','--tr', '--technical-replicate',
                         help="Technical replicate number (default: 1)",
                         type=int,
                         default='1',
@@ -128,7 +140,7 @@ class Launch(object):
 
         if self.COMBINED_STEPS != None:
             # Include this argument for pipelines with combined replicate steps
-            ap.add_argument('--cr','--combine-replicates',
+            ap.add_argument('-cr','--cr','--combine-replicates',
                             help="Combine or compare two replicates (e.g.'1 2_2').'",
                             nargs='+',
                             required=False)
@@ -155,11 +167,10 @@ class Launch(object):
                         action='store_true',
                         required=False)
 
-        #At this point no need to point to anything but default 
-        #ap.add_argument('--server',
-        #                help="Server to post files to (default: '" + self.SERVER_DEFAULT + "')",
-        #                default=self.SERVER_DEFAULT,
-        #                required=False)
+        ap.add_argument('--server',
+                        help="Server to post files to (default: '" + self.SERVER_DEFAULT + "')",
+                        default=self.SERVER_DEFAULT,
+                        required=False)
 
         ap.add_argument('--test',
                         help='Test run only, do not launch anything.',
@@ -195,7 +206,8 @@ class Launch(object):
 
         # Start with dict containing common variables
         print "Retrieving experiment specifics..."
-        psv = self.common_variables(args)
+        self.server_key = args.server
+        psv = self.common_variables(args,key=self.server_key)
         if psv['exp_type'] != self.PIPELINE_NAME:
             print "Experiment %s is not for %s but for '%s'" \
                                            % (psv['experiment'],self.PIPELINE_NAME,psv['exp_type'])
@@ -293,7 +305,7 @@ class Launch(object):
         cv['project']    = args.project
         cv['experiment'] = args.experiment
 
-        # expecting either commbined-replicates or biological and technical replicate
+        # expecting either combined-replicates or biological and technical replicate
         if 'cr' in args and args.cr != None:
             if len(args.cr) != 2:
                 print "Specify which two replicates to compare (e.g. '1_2 2')."
@@ -324,6 +336,13 @@ class Launch(object):
             cv['rep_tech'] = 'reps' + cv['reps']['a']['rep_tech'][3:] + \
                                 '-' + cv['reps']['b']['rep_tech'][3:]
         else:
+            if args.br == None:
+                if self.COMBINED_STEPS == None:
+                    print "Specify which '--biolgical-replicate'."
+                else:
+                    print "Specify '--biolgical-replicate' or '--combined-replicates'."
+                sys.exit(1)
+
             cv['combined'] = False
             if args.br == 0:
                 print "Must specify either --biological-replicate or --compare-replicates." 
@@ -819,7 +838,7 @@ class Launch(object):
             proj.remove_objects(old_fids)
         new_fh.close()
 
-    def launchPad(self,wf,run,ignition=False):
+    def launch_pad(self,wf,run,ignition=False):
         '''Launches or just advertises preassembled workflow.'''
         # NOT EXPECTED TO OVERRIDE
         if wf == None:
@@ -907,7 +926,7 @@ class Launch(object):
             sys.exit(0)
 
         # Roll out to pad and possibly launch
-        self.launchPad(wf,run,ignition=args.run)
+        self.launch_pad(wf,run,ignition=args.run)
                 
         print "(success)"
 
