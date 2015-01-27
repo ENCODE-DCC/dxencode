@@ -1,22 +1,22 @@
 #!/usr/bin/env python
 # splashdown.py 0.0.1
 #
-# Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py 
+# Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py
 #
-# Splashdown is meant to run outside of dnanexus and to examine experiment directories to 
+# Splashdown is meant to run outside of dnanexus and to examine experiment directories to
 # find results up upload to encoded.
 #
 # 1) Lookup experiment type from encoded, based on accession
 # 2) Locate the experiment accession named folder
 # 3) Given the experiment type, determine the expected results
-# 4) Given expected results locate any files (by glob) that should be uploaded for 
+# 4) Given expected results locate any files (by glob) that should be uploaded for
 #    a) each single replicate (in replicate sub-folders named as reN_N/
 #    b) combined replicates in the experiment folder itself
 # 5) For each file that should be uploaded, determine if the file needs to be uploaded (not already uploaded).
 # 6) For each file that needs to be uploaded:
 #    a) discover all necessary dx information needed for upload.
 #    b) gather any other information necessary from dx and encoded. (notice hand-waving)
-#    c) Upload file and update encoded database. 
+#    c) Upload file and update encoded database.
 #    d) Update dnanexus file with file accession tag.
 # 7) Either exit or advance to the next experiment folder
 
@@ -36,17 +36,17 @@ class Splashdown(object):
 
     PROJECT_DEFAULT = 'scratchPad'
     '''This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
-    
+
     SERVER_DEFAULT = 'test'
     '''This the default server to post files to.'''
-    
+
     RESULT_FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
     EXPERIMENT_TYPES_SUPPORTED = [ "long-rna-seq", "small-rna-seq", "rampage" ] #,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
-    #Pipeline specifications include order of steps, steps per replicate, combined steps and 
+    #Pipeline specifications include order of steps, steps per replicate, combined steps and
     #within steps, the output_type: file_glob that define expected results.
     PIPELINE_SPECS = {
         "long-rna-seq": {
@@ -92,9 +92,9 @@ class Splashdown(object):
             },
             "replicate":  {
                 "align":           { "alignments":                "*_rampage_star_marked.bam" },
-                "signals":         { "multi-read plus signal":    "*_rampage_5p_plusAll.bw",    
+                "signals":         { "multi-read plus signal":    "*_rampage_5p_plusAll.bw",
                                      "multi-read minus signal":   "*_rampage_5p_minusAll.bw",
-                                     "unique plus signal":        "*_rampage_5p_plusUniq.bw", 
+                                     "unique plus signal":        "*_rampage_5p_plusUniq.bw",
                                      "unique minus signal":       "*_rampage_5p_minusUniq.bw" },
                 "peaks":           { "peaks":                     "*_rampage_peaks.bb",
                                      "sites":                     "*_rampage_peaks.gff" }
@@ -107,12 +107,12 @@ class Splashdown(object):
 
     ANNOTATIONS_SUPPORTED = [ 'v19', 'M2', 'M3', 'M4' ]
     '''This module supports only these annotations.'''
-    
+
     FORMATS_SUPPORTED = ["bam", "bed", "bedLogR", "bed_bedLogR", "bedMethyl", "bed_bedMethyl",
                          "bigBed", "bigWig", "broadPeak", "bed_broadPeak", "fasta", "fastq",
                          "gtf", "idat", "narrowPeak", "bed_narrowPeak", "rcc", "CEL", "tsv", "csv" ]
     EXTENSION_TO_FORMAT = { "bb":"bigBed", "bw":"bigWig",
-                            "fa":"fasta","fq":"fastq","results":"tsv" 
+                            "fa":"fasta","fq":"fastq","results":"tsv",
                             "gff": "gtf" }
     '''List of supported formats, and means of recognizing with file extensions.'''
 
@@ -123,7 +123,7 @@ class Splashdown(object):
     def __init__(self):
         '''
         Splashdown expects one or more experiment ids as arguments and will find, document
-        and upload files in the associated directory. 
+        and upload files in the associated directory.
         '''
         self.args = {} # run time arguments
         self.server_key = 'test'
@@ -142,7 +142,7 @@ class Splashdown(object):
         dxencode.logger = logging.getLogger(__name__) # I need this to avoid some errors
         dxencode.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
 
-    
+
     def get_args(self):
         '''Parse the input arguments.'''
         ### PIPELINE SPECIFIC
@@ -203,21 +203,21 @@ class Splashdown(object):
                         action='store_true',
                         required=False)
         return ap.parse_args()
-        
+
     def get_exp_type(self,exp_id,exp=None):
         '''Looks up encoded experiment's assay_type, normalized to known supported tokens.'''
         self.exp_id = exp_id
         if exp == None and self.exp == None:
             self.exp = get_exp(exp_id)
         self.exp_type = dxencode.get_assay_type(self.exp_id,self.exp)
-            
-        if self.exp_type not in self.EXPERIMENT_TYPES_SUPPORTED: 
+
+        if self.exp_type not in self.EXPERIMENT_TYPES_SUPPORTED:
             print "Experiment %s has unsupported assay type of '%s'" % \
                                                             (exp_id,self.exp["assay_term_name"])
             return None
         return self.exp_type
 
-    
+
     def find_exp_folder(self,exp_id,results_folder='/'):
         '''Finds the experiment folder, given an accession.'''
         # normalize
@@ -231,7 +231,7 @@ class Splashdown(object):
             return None
         #return self.proj_name + ':' + target_folder + '/'
         return target_folder + '/'
-        
+
 
     def find_replicate_folders(self,exp_folder,verbose=False):
         '''Returns a sorted list of replicate folders which are sub-folders of an exp folder.'''
@@ -253,25 +253,25 @@ class Splashdown(object):
             print "Replicate folders:"
             print json.dumps(replicates,indent=4)
         return replicates
-        
+
 
     def pipeline_specification(self,args,exp_type,exp_folder,verbose=False):
         '''Sets the pipeline specification object for this experiment type.'''
 
         # Start with dict containing common variables
         #self.expected = copy.deepcopy(self.PIPELINE_SPECS[exp_type])
-        
+
         pipeline_specs = self.PIPELINE_SPECS.get(exp_type)
         self.genome = None  # TODO: need way to determine genome before any uploads occur!
         self.annotation = None  # TODO: if appropriate, need way to determine annotation
-        
+
 
         if verbose:
             print "Pipeline specification:"
             print json.dumps(pipeline_specs,indent=4)
         return pipeline_specs
-        
-        
+
+
     def file_format(self,file_name):
         '''Try to determine file format from file name extension.'''
         ext = file_name.split(".")[-1]
@@ -292,12 +292,12 @@ class Splashdown(object):
         msg = ""
         if self.genome == None and "genome" in properties:
             genome = properties["genome"]
-            if genome in self.ASSEMBLIES_SUPPORTED.keys(): 
+            if genome in self.ASSEMBLIES_SUPPORTED.keys():
                 self.genome = self.ASSEMBLIES_SUPPORTED[genome]
                 msg += " genome[%s]" % self.genome
         if self.annotation == None and "annotation" in properties:
             annotation = properties["annotation"]
-            if annotation in self.ANNOTATIONS_SUPPORTED: 
+            if annotation in self.ANNOTATIONS_SUPPORTED:
                 self.annotation = annotation
                 msg += " annotation[%s]" % self.annotation
         if len(msg) > 0:
@@ -308,7 +308,7 @@ class Splashdown(object):
     def find_step_files(self,file_globs,result_folder,rep_tech,verbose=False):
         '''Returns tuple list of (type,rep_tech,fid) of ALL files expected for a single step.'''
         step_files = []
-        
+
         for token in file_globs.keys():
             if self.file_format(file_globs[token]) == None:
                 print "Error: file glob %s has unknown file format! Please fix" % file_globs[token]
@@ -334,7 +334,7 @@ class Splashdown(object):
                                                     exp_folder + rep_tech + '/',rep_tech,verbose)
                 if len(step_files) > 0:
                      expected.extend(step_files) # keep them in order!
-        
+
         # Now add combined step files
         for step in self.pipeline["step-order"]:
             if step not in self.pipeline["combined"]:
@@ -343,7 +343,7 @@ class Splashdown(object):
                                                                     exp_folder,"combined",verbose)
             if len(step_files) > 0:
                  expected.extend(step_files) # keep them in order!
-            
+
         if verbose:
             print "Expected files:"
             print json.dumps(expected,indent=4)
@@ -426,7 +426,7 @@ class Splashdown(object):
                 else: # if file name is primary input (fastq) and is named as an accession
                     if inp_obj["name"].startswith(self.acc_prefix):
                         parts = inp_obj["name"].split('.')
-                        ext = parts[-1] 
+                        ext = parts[-1]
                         if ext in ["gz","tgz"]:
                             ext = parts[-2]
                         if ext in self.PRIMARY_INPUT_EXTENSION:
@@ -444,7 +444,7 @@ class Splashdown(object):
         '''Updates an object with information from encoded database.'''
         obj['lab'] = self.exp['lab']['@id']
         obj['award'] = self.exp['award']['@id']
-        
+
         # Find replicate info
         if rep_tech.startswith("rep"):
             br_tr = rep_tech[3:]
@@ -452,7 +452,7 @@ class Splashdown(object):
             full_mapping = dxencode.get_full_mapping(self.exp_id,self.exp)
             mapping = dxencode.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
             obj['replicate'] = mapping['replicate_id']
-            
+
         if verbose:
             print "After adding encoded info:"
             print json.dumps(obj,indent=4)
@@ -497,7 +497,7 @@ class Splashdown(object):
         upload_obj['notes'] = json.dumps(notes)
 
         #print "  - Adding encoded information."
-        upload_obj = self.add_encoded_info(upload_obj,rep_tech,fid) 
+        upload_obj = self.add_encoded_info(upload_obj,rep_tech,fid)
 
         if verbose:
             print "Upload_obj from dx info:"
@@ -599,17 +599,17 @@ class Splashdown(object):
             self.pipeline   = self.pipeline_specification(args,self.exp_type,self.exp_folder)
             self.replicates = self.find_replicate_folders(self.exp_folder)
 
-            # 4) Given expected results locate any files (by glob) that should be uploaded for 
+            # 4) Given expected results locate any files (by glob) that should be uploaded for
             #    a) each single replicate (in replicate sub-folders named as reN_N/
             #    b) combined replicates in the experiment folder itself
             files_expected = self.find_expected_files(self.exp_folder,self.replicates)
-            print "- Found %d files that are available to upload." % len(files_expected) 
+            print "- Found %d files that are available to upload." % len(files_expected)
             if len(files_expected) == 0:
                 continue
 
             # 5) For each file that should be uploaded, determine if the file needs to be uploaded.
             files_to_upload = self.find_needed_files(files_expected)
-            print "- Found %d files that need to be uploaded" % len(files_to_upload) 
+            print "- Found %d files that need to be uploaded" % len(files_to_upload)
             if len(files_to_upload) == 0:
                 continue
             sys.stdout.flush()
@@ -621,11 +621,11 @@ class Splashdown(object):
             for (out_type,rep_tech,fid) in files_to_upload:
                 # a) discover all necessary dx information needed for upload.
                 # b) gather any other information necessary from dx and encoded.
-                print "  Document file %s" % dxencode.file_path_from_fid(fid) 
+                print "  Document file %s" % dxencode.file_path_from_fid(fid)
                 upload_obj = self.make_upload_obj(out_type,rep_tech,fid)
 
                 file_count += 1
-                # c) Upload file and update encoded database. 
+                # c) Upload file and update encoded database.
                 accession = self.file_upload(fid,upload_obj,args.test)
 
                 # d) Update dnanexus file with file accession tag.
@@ -637,18 +637,18 @@ class Splashdown(object):
                     print "- Abandoning %s - upload failure could compromise 'derived_from'" % \
                                                                                     (self.exp_id)
                     break
-                    
+
                 if file_count >= 2 and not args.test:
                     break # Just try two files at first
-                    
+
             print "- For %s Processed %d file(s), uploaded %s" % \
                                                         (self.exp_id, file_count, upload_count)
             total_uploaded += upload_count
-            
+
         print "Processed %d experiment(s), uploaded %d file(s)" % (exp_count, total_uploaded)
-            
+
         print "(finished)"
-                
+
 
 if __name__ == '__main__':
     '''Run from the command line.'''
