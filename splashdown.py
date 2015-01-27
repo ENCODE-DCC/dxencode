@@ -3,7 +3,7 @@
 #
 # Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py 
 #
-# Splasdown is meant to run outside of dnanexus and to examine experiment directories to 
+# Splashdown is meant to run outside of dnanexus and to examine experiment directories to 
 # find results up upload to encoded.
 #
 # 1) Lookup experiment type from encoded, based on accession
@@ -29,6 +29,11 @@ import dxpy
 import dxencode
 
 class Splashdown(object):
+    '''
+    Splashdown module uploads from dnanexus to ENCODEd,  all files available and necessry for
+    a given experiment .
+    '''
+
     PROJECT_DEFAULT = 'scratchPad'
     '''This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
     
@@ -646,7 +651,7 @@ class Splashdown(object):
                 
 
 if __name__ == '__main__':
-    '''Run from the coomad line.'''
+    '''Run from the command line.'''
     recovery = Splashdown()
     recovery.run()
 
