@@ -103,7 +103,7 @@ def encoded_post_file(local_file, file_meta, SERVER, AUTHID, AUTHPW):
             except:
                 logger.error("Failed attempting to find existing file")
                 raise
-            logger.debug("Using exsting object: %s" % cr.json())
+            logger.debug("Using existing object: %s" % cr.json())
             return cr.json()
         else:
             raise
