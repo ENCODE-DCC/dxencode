@@ -144,20 +144,20 @@ def find_folder(target_folder,project,root_folders='/',exclude_folders=["depreca
     Recursively attempts to find the first folder in a project and root that matches target_folder.
     The target_folder may be a nested as one/two/three but with no intervening wildcards.
     The root_folders can start with '/' but can/will grow to be nested during recursion.
-    Returns full path to folder or None. 
+    Returns full path to folder or None.
     '''
     assert len(target_folder) > 0
-    
+
     # full path is easy.
     if target_folder.startswith('/') and project_has_folder(project, target_folder):
         return target_folder
-    
+
     # Normalize target and root
     if target_folder.endswith('/'):
         target_folder = target_folder[:-1]
     if root_folders[0] != '/':
        root_folders = '/' + root_folders
-       
+
     # If explicitly requesting one of the exluded folders then don't exclude it
     if exclude_folders == None:
         exclude_folders = []
@@ -167,7 +167,7 @@ def find_folder(target_folder,project,root_folders='/',exclude_folders=["depreca
             exclude_folders.remove(exclude_folder)
 
     # Because list_folder is only one level at a time, find_folder must recurse
-    return rfind_folder(target_folder,project,root_folders,exclude_folders)  
+    return rfind_folder(target_folder,project,root_folders,exclude_folders)
 
 def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[]):
     '''Recursive call for find_folder - DO NOT call directly.'''
@@ -178,14 +178,14 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
         query_folders = project.list_folder(root_folders)['folders']
     except:
         return None
-    
-    # Normalize    
+
+    # Normalize
     if root_folders.endswith('/'):
         root_folders = root_folders[-1]
-        
+
     # match whole path to first target
     targets = target_folder.split('/')
-    full_query = root_folders + '/' + targets[0] 
+    full_query = root_folders + '/' + targets[0]
     #print "Full query [%s]" % full_query
 
     if full_query in query_folders:  # hash shortcut
@@ -202,7 +202,7 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
         found = rfind_folder(target_folder, project, query_folder,exclude_folders)
         if found != None:
             return found
-    return None      
+    return None
 
 def description_from_fid(fid,properties=False):
     '''Returns file description object from fid.'''
@@ -603,7 +603,7 @@ def choose_mapping_for_experiment(experiment,warn=True):
 
 def get_exp(experiment,must_find=True,warn=False,key='default'):
     '''Returns all replicate mappings for an experiment from encoded.'''
-    
+
     (AUTHID,AUTHPW,SERVER) = processkey('default')
     url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
     try:
@@ -622,12 +622,12 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     if exp == None:
         exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
 
-    if exp["assay_term_name"] == "RNA-seq":
+    if exp["assay_term_name"] == "RNA-seq" or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq":
         if exp["replicates"][0]["library"]["size_range"] == ">200":
             return "long-rna-seq"
         else:
             return "small-rna-seq"
-    elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
+    elif exp["assay_term_name"] == "whole genome bisulfite sequencing":
         return "dna-me"
     #elif exp["assay_term_name"] == "RAMPAGE":
     #    return "rampage"
@@ -635,12 +635,12 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     #    return "chip-seq"
     #elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
     #    return "dna-me"
-        
+
     return exp["assay_term_name"].lower()
-        
+
 def get_full_mapping(experiment,exp=None,key='default',must_find=True,warn=False):
     '''Returns all replicate mappings for an experiment from encoded.'''
-    
+
     if exp == None:
         exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
 
@@ -657,7 +657,7 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
     '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
     if full_mapping == None:
         full_mapping = get_full_mapping(experiment,key=key,must_find=must_find,warn=False)
-        
+
     try:
         return full_mapping[(biorep,techrep)]
     except KeyError:
@@ -712,7 +712,7 @@ def load_fastqs_from_mapping(load_to, mapping, controls=False):
 
 def common_variables(args,results_folder_default,fastqs=True,controls=False,key='default'):
     '''Initializes dict with common variables from args and encoded.'''
-    
+
     cv = {}
     cv['project']    = args.project
     cv['experiment'] = args.experiment
@@ -739,7 +739,7 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False,key=
             else:
                 cv['reps']['a'] = { 'br': int(br), 'tr': int(tr) }
                 cv['reps']['a']['rep_tech'] = rep_tech
-                
+
         if cv['reps']['a']['rep_tech'] == cv['reps']['b']['rep_tech']:
             print "Specify different replicates to compare (e.g. 'rep1_1 rep2_1')."
             sys.exit(1)
@@ -750,7 +750,7 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False,key=
     else:
         cv['combined'] = False
         if args.br == 0:
-            print "Must specify either --biological-replicate or --compare-replicates." 
+            print "Must specify either --biological-replicate or --compare-replicates."
             sys.exit(1)
         cv['reps'] = {'a': { 'br': args.br, 'tr': args.tr} }
         cv['reps']['a']['rep_tech'] = 'rep' + str(args.br) + '_' + str(args.tr)
@@ -766,14 +766,14 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False,key=
         # Not a common var but convenient and cheap
         rep['library_id'] = mapping['library']
         rep['replicate_id'] = mapping['replicate_id']
-        
+
         # TODO add enough info that individual pipelines can varify the experiment matches pipeline
-        
+
         if fastqs:
             rep['paired_end'] = load_fastqs_from_mapping(rep,mapping,controls)
             # Non-file app inputs
             rep['concat_id'] = 'reads'
-            if rep['paired_end']: 
+            if rep['paired_end']:
                 rep['concat_id2'] = 'reads2'
 
         if cv_rep == 'a':
@@ -797,7 +797,7 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False,key=
     if cv['refLoc'] == REF_FOLDER_DEFAULT:
         cv['refLoc'] = REF_FOLDER_DEFAULT + cv['genome'] + '/'
     if not cv['refLoc'].endswith('/'):
-        cv['refLoc'] += '/' 
+        cv['refLoc'] += '/'
     cv['resultsLoc'] = args.resultsLoc
     if cv['resultsLoc'] == results_folder_default:
         if cv['genome'] == 'mm10':
@@ -805,7 +805,7 @@ def common_variables(args,results_folder_default,fastqs=True,controls=False,key=
         else:
             cv['resultsLoc'] = results_folder_default + cv['genome'] + '/'
     if not cv['resultsLoc'].endswith('/'):
-        cv['resultsLoc'] += '/' 
+        cv['resultsLoc'] += '/'
     cv['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/'
     cv['reps']['a']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
                                                           cv['reps']['a']['rep_tech'] + '/'
@@ -827,7 +827,7 @@ def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
 
 def finding_rep_inputs_and_priors(psv,steps,globs,project,test):
     '''Finds the inputs and priors for a run.'''
-    
+
     print "Checking for prior results..."
     proj_id = project.get_id()
 
@@ -856,7 +856,7 @@ def finding_rep_inputs_and_priors(psv,steps,globs,project,test):
 
 def find_all_ref_files(psv,find_references_function):
     '''Locates all reference files based upon organism and gender.'''
-    
+
     print "Looking for reference files..."
     for rep in psv['reps'].values():
         # Need multiple copies of control files because they are put into priors!
@@ -927,7 +927,7 @@ def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=F
 
 def determine_steps_needed(psv, replicate_steps, combined_steps, proj_id, force=False):
     '''Determine steps needed for replicate(s) and combined, base upon prior results.'''
-    
+
     print "Determining steps to run..."
     # NOTE: stepsToDo is an ordered list of steps that need to be run
     for rep in psv['reps'].values():
@@ -993,7 +993,7 @@ def log_this_run(run_id,results_folder,proj_id):
 
 def create_workflow(psv, run, proj_id, app_proj_id=None,test=False,template=False):
     '''
-    This function will populate a workflow for the steps in run['stepsToDo'] and return 
+    This function will populate a workflow for the steps in run['stepsToDo'] and return
     the worklow unlaunched.   It relies on steps dict which contains input and output requirements,
     pvs (pipeline specific variables) dictionary and run (run specific dictionary),
     which contains input and previous results already in results dir
@@ -1124,7 +1124,7 @@ def report_run_plans(psv, run):
     if 'subTitle' in run:
         print "         "+run['subTitle']
     for input_type in sorted( run['inputs'].keys() ):
-        if len(run['inputs'][input_type]) > 0: 
+        if len(run['inputs'][input_type]) > 0:
             print "- " + input_type + ":"
             for fid in run['inputs'][input_type]:
                 print "  " + file_path_from_fid(fid)
@@ -1179,7 +1179,7 @@ def launchPad(wf,proj_id,psv,run=False):
 
 def report_build_launch(psv, run, proj_id, test=True, launch=False):
     '''
-    Handles everything from reporting to building workflow to running, using standardized 
+    Handles everything from reporting to building workflow to running, using standardized
     methods.  This function should finish a launcher using the psv and run dict already created.
     '''
     # Report the plans

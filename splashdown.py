@@ -43,13 +43,13 @@ class Splashdown(object):
     RESULT_FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
-    EXPERIMENT_TYPES_SUPPORTED = [ "long-rna-seq", "small-rna-seq", "rampage" ] #,"dna-me","chip-seq" ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
     #Pipeline specifications include order of steps, steps per replicate, combined steps and
     #within steps, the output_type: file_glob that define expected results.
     PIPELINE_SPECS = {
-        "long-rna-seq": {
+         "long-rna-seq": {
             "step-order": [ "align-tophat","signals-top-se","signals-top-pe",
                             "align-star","signals-star-se","signals-star-pe","quant-rsem"],
             "combined":   {},
@@ -227,7 +227,7 @@ class Splashdown(object):
             results_folder += '/'
         target_folder = dxencode.find_folder(exp_id,self.project,results_folder)
         if target_folder == None or target_folder == "":
-            print "Unable to locate target folder for %s in project %s" % (exp_id, self.proj_name)
+            print "Unable to locate target folder (%s) for %s in project %s" % (results_folder, exp_id, self.proj_name)
             return None
         #return self.proj_name + ':' + target_folder + '/'
         return target_folder + '/'
