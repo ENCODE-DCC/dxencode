@@ -34,16 +34,13 @@ class Splashdown(object):
     a given experiment .
     '''
 
-    PROJECT_DEFAULT = 'scratchPad'
-    '''This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
-    
     SERVER_DEFAULT = 'test'
     '''This the default server to post files to.'''
     
     RESULT_FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
-    EXPERIMENT_TYPES_SUPPORTED = [ "long-rna-seq", "small-rna-seq", "rampage" ] #,"dna-me","chip-seq" ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
     #Pipeline specifications include order of steps, steps per replicate, combined steps and 
@@ -128,7 +125,7 @@ class Splashdown(object):
         self.args = {} # run time arguments
         self.server_key = 'test'
         self.acc_prefix = "TSTFF"
-        self.proj_name = self.PROJECT_DEFAULT
+        self.proj_name = None
         self.project = None
         self.proj_id = None
         self.exp = {}  # Will hold the encoded exp json
@@ -177,8 +174,8 @@ class Splashdown(object):
         #                required=False)
 
         ap.add_argument('--project',
-                        help="Project to run analysis in (default: '" + self.PROJECT_DEFAULT + "')",
-                        default=self.PROJECT_DEFAULT,
+                        help="Project to run analysis in (default: '" + \
+                                                         dxencode.env_get_current_project() + "')",
                         required=False)
 
         #ap.add_argument('--refLoc',
@@ -227,6 +224,8 @@ class Splashdown(object):
             results_folder += '/'
         target_folder = dxencode.find_folder(exp_id,self.project,results_folder)
         if target_folder == None or target_folder == "":
+            print "Unable to locate target folder (%s) for %s in project %s" % \
+                                                        (results_folder, exp_id, self.proj_name)
             return None
         return target_folder + '/'
         
@@ -440,8 +439,8 @@ class Splashdown(object):
 
     def add_encoded_info(self,obj,rep_tech,fid,verbose=False):
         '''Updates an object with information from encoded database.'''
-        obj['lab'] = self.exp['lab']['@id']
-        obj['award'] = self.exp['award']['@id']
+        obj['lab'] = '/labs/j-michael-cherry/' # self.exp['lab']['@id'] Now hard-coded
+        obj['award'] = '/awards/U41HG006992/'  # self.exp['award']['@id']
         
         # Find replicate info
         if rep_tech.startswith("rep"):
@@ -566,11 +565,19 @@ class Splashdown(object):
         self.server_key = args.server
         if self.server_key != "test":
             self.acc_prefix = "ENCFF"
-        self.proj_name = args.project
+        self.proj_name = dxencode.env_get_current_project()
+        if self.proj_name == None:
+            if  args.project != None:
+                self.proj_name = args.project
+            else:
+                print "Please enter a '--project' to run in."
+                sys.exit(1)
+
         self.project = dxencode.get_project(self.proj_name)
         self.proj_id = self.project.get_id()
         print "== Running in project [%s] and will post to the [%s] server ==" % \
                                                         (self.proj_name,self.server_key)
+        
         exp_count = 0
         total_uploaded = 0
         for exp_id in args.experiments:
@@ -588,7 +595,6 @@ class Splashdown(object):
             # 2) Locate the experiment accession named folder
             self.exp_folder = self.find_exp_folder(exp_id,args.results_folder)
             if self.exp_folder == None:
-                print "Unable to locate experiment folder %s in dnanexus" % exp_id
                 continue
             print "- Examining %s:%s for '%s' results..." % \
                                             (self.proj_name, self.exp_folder, self.exp_type)

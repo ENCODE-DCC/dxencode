@@ -8,6 +8,7 @@ import urlparse
 import hashlib
 from datetime import datetime
 import subprocess
+import commands
 
 import logging
 
@@ -128,6 +129,14 @@ def encoded_get(url, AUTHID=None, AUTHPW=None):
     else:
         response = requests.get(url, headers=HEADERS)
     return response
+
+
+def env_get_current_project():
+    ''' Returns the current project name for the command-line environment '''
+    err, proj_name = commands.getstatusoutput('cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME')
+    if err != 0:
+        return None 
+    return proj_name
 
 
 def project_has_folder(project, folder):
@@ -621,12 +630,13 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     if exp == None:
         exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
 
-    if exp["assay_term_name"] == "RNA-seq":
+    if exp["assay_term_name"] == "RNA-seq" \
+    or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq":
         if exp["replicates"][0]["library"]["size_range"] == ">200":
             return "long-rna-seq"
         else:
             return "small-rna-seq"
-    elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
+    elif exp["assay_term_name"] == "whole genome bisulfite sequencing":
         return "dna-me"
     #elif exp["assay_term_name"] == "RAMPAGE":
     #    return "rampage"

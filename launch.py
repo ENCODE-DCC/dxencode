@@ -44,9 +44,6 @@ class Launch(object):
                     "analysis for one replicate or combined replicates. "
     ''' This help title should name pipline and whether combined replicates are supported.'''
                     
-    PROJECT_DEFAULT = 'scratchPad'
-    ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
-
     SERVER_DEFAULT = 'default'
     '''At this time there is no need to use the any but the default server for launching.'''
     
@@ -98,7 +95,7 @@ class Launch(object):
         '''
         self.args = {} # run time arguments
         self.server_key = self.SERVER_DEFAULT
-        self.proj_name = self.PROJECT_DEFAULT
+        self.proj_name = None
         self.project = None
         self.proj_id = None
         self.exp = {}  # Will hold the encoded exp json
@@ -146,8 +143,8 @@ class Launch(object):
                             required=False)
 
         ap.add_argument('--project',
-                        help="Project to run analysis in (default: '" + self.PROJECT_DEFAULT + "')",
-                        default=self.PROJECT_DEFAULT,
+                        help="Project to run analysis in (default: '" + \
+                                                        dxencode.env_get_current_project() + "')",
                         required=False)
 
         ap.add_argument('--refLoc',
@@ -302,7 +299,17 @@ class Launch(object):
         # NOT EXPECTED TO OVERRIDE
         
         cv = {}
-        cv['project']    = args.project
+        self.proj_name = dxencode.env_get_current_project()
+        if self.proj_name == None:
+            if  args.project != None:
+                self.proj_name = args.project
+            else:
+                print "Please enter a '--project' to run in."
+                sys.exit(1)
+        self.project = dxencode.get_project(args.project)
+        self.proj_id = self.project.get_id()        
+
+        cv['project']    = self.proj_name
         cv['experiment'] = args.experiment
 
         # expecting either combined-replicates or biological and technical replicate
@@ -869,10 +876,6 @@ class Launch(object):
         print "Retrieving pipeline specifics..."
         self.psv = self.pipeline_specific_vars(args)
         
-        self.proj_name = args.project
-        self.project = dxencode.get_project(args.project)
-        self.proj_id = self.project.get_id()
-
         print "Building apps dictionary..."
         rep_steps, file_globs = self.assemble_steps_and_globs(self.REP_STEP_ORDER)
         combined_steps = None
