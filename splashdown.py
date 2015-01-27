@@ -442,8 +442,8 @@ class Splashdown(object):
 
     def add_encoded_info(self,obj,rep_tech,fid,verbose=False):
         '''Updates an object with information from encoded database.'''
-        obj['lab'] = self.exp['lab']['@id']
-        obj['award'] = self.exp['award']['@id']
+        obj['lab'] = '/labs/j-michael-cherry/'
+        obj['award'] = '/awards/U41HG006992/'
 
         # Find replicate info
         if rep_tech.startswith("rep"):
