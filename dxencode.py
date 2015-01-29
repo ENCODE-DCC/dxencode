@@ -144,20 +144,20 @@ def find_folder(target_folder,project,root_folders='/',exclude_folders=["depreca
     Recursively attempts to find the first folder in a project and root that matches target_folder.
     The target_folder may be a nested as one/two/three but with no intervening wildcards.
     The root_folders can start with '/' but can/will grow to be nested during recursion.
-    Returns full path to folder or None. 
+    Returns full path to folder or None.
     '''
     assert len(target_folder) > 0
-    
+
     # full path is easy.
     if target_folder.startswith('/') and project_has_folder(project, target_folder):
         return target_folder
-    
+
     # Normalize target and root
     if target_folder.endswith('/'):
         target_folder = target_folder[:-1]
     if root_folders[0] != '/':
        root_folders = '/' + root_folders
-       
+
     # If explicitly requesting one of the exluded folders then don't exclude it
     if exclude_folders == None:
         exclude_folders = []
@@ -167,7 +167,7 @@ def find_folder(target_folder,project,root_folders='/',exclude_folders=["depreca
             exclude_folders.remove(exclude_folder)
 
     # Because list_folder is only one level at a time, find_folder must recurse
-    return rfind_folder(target_folder,project,root_folders,exclude_folders)  
+    return rfind_folder(target_folder,project,root_folders,exclude_folders)
 
 def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[]):
     '''Recursive call for find_folder - DO NOT call directly.'''
@@ -178,8 +178,8 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
         query_folders = project.list_folder(root_folders)['folders']
     except:
         return None
-    
-    # Normalize    
+
+    # Normalize
     if root_folders.endswith('/'):
         root_folders = root_folders[:-1]
         
@@ -201,7 +201,7 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
         found = rfind_folder(target_folder, project, query_folder,exclude_folders)
         if found != None:
             return found
-    return None      
+    return None
 
 def description_from_fid(fid,properties=False):
     '''Returns file description object from fid.'''
@@ -602,7 +602,7 @@ def choose_mapping_for_experiment(experiment,warn=True):
 
 def get_exp(experiment,must_find=True,warn=False,key='default'):
     '''Returns all replicate mappings for an experiment from encoded.'''
-    
+
     (AUTHID,AUTHPW,SERVER) = processkey('default')
     url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
     try:
@@ -621,12 +621,12 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     if exp == None:
         exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
 
-    if exp["assay_term_name"] == "RNA-seq":
+    if exp["assay_term_name"] == "RNA-seq" or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq":
         if exp["replicates"][0]["library"]["size_range"] == ">200":
             return "long-rna-seq"
         else:
             return "small-rna-seq"
-    elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
+    elif exp["assay_term_name"] == "whole genome bisulfite sequencing":
         return "dna-me"
     #elif exp["assay_term_name"] == "RAMPAGE":
     #    return "rampage"
@@ -634,12 +634,12 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     #    return "chip-seq"
     #elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
     #    return "dna-me"
-        
+
     return exp["assay_term_name"].lower()
-        
+
 def get_full_mapping(experiment,exp=None,key='default',must_find=True,warn=False):
     '''Returns all replicate mappings for an experiment from encoded.'''
-    
+
     if exp == None:
         exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
 
@@ -656,7 +656,7 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
     '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
     if full_mapping == None:
         full_mapping = get_full_mapping(experiment,key=key,must_find=must_find,warn=False)
-        
+
     try:
         return full_mapping[(biorep,techrep)]
     except KeyError:
@@ -667,65 +667,203 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
             sys.exit(1)
     return None
 
-def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=False, verbose=False):
-    '''Determine what steps need to be done, base upon prior results.'''
-    # OBSOLETE: now in launch.py
-    will_create = []
-    steps_to_run = []
-    for step in pipe_path:
-        # Force will include the first step with all its inputs
-        # This should avoid forcing concat if it isn't needed
-        #
-        if force:
-            inputs = steps[step]['inputs'].keys()
-            count = 0
-            for input in inputs:
-                if input in priors:
-                    count += 1
-            if count == len(inputs):
-                steps_to_run += [ step ]
-                if verbose:
-                    print "- Adding step '"+step+"' because of force flag."
-        if step not in steps_to_run:
-            results = steps[step]['results'].keys()
-            for result in results:
-                if result not in priors:
-                    steps_to_run += [ step ]
-                    if verbose:
-                        print "- Adding step '"+step+"' because prior '"+result+"' was not found."
-                    break
-        # If results are there but inputs are being recreated, then step must be rerun
-        if step not in steps_to_run:
-            inputs = steps[step]['inputs'].keys()
-            for inp in inputs:
-                if inp in will_create:
-                    steps_to_run += [ step ]
-                    if verbose:
-                        print "- Adding step '"+step+"' due to prior step dependency."
-                    break
-        # Any step that is rerun, will cause prior results to be deprecated
-        # NOTE: It is necessary to remove from 'priors' so succeeding steps are rerun
-        # NOTE: It is also important to move prior results out of target folder to avoid confusion!
-        if step in steps_to_run:
-            results = steps[step]['results'].keys()
-            for result in results:
-                will_create += [ result ]
-                if result in priors:
-                    deprecate += [ priors[result] ]
-                    del priors[result]
-                    # if results are in folder, then duplicate files cause a problem!
-                    # So add to 'deprecate' to move or remove before launching
+<<<<<<< HEAD
+=======
+def load_fastqs_from_mapping(load_to, mapping, controls=False):
+    '''
+    Resolves fastq file names from mapping and puts them into load_to dict (hint psv).
+    Note: load_to['fastqs'] will always be { "1":[],"2":[]} though '2' is an empty set for unpaired
+    Returns True or False for paired end.  Failures exit.
+    '''
 
-    # Now make sure the steps can be found, and error out if not.
-    for step in steps_to_run:
-        app = steps[step]['app']
-        dxApp = dxpy.find_data_objects(classname='file', name=app, name_mode='exact',
-                                                         project=proj_id, return_handler=False)
-        if dxApp == None:
-            print "ERROR: failure to locate app '"+app+"'!"
+    # Paired ends?  Read files?
+    if mapping['unpaired'] and not mapping['paired']:
+        paired_end = False
+    elif mapping['paired'] and not mapping['unpaired']:
+        paired_end = True
+    elif not mapping['unpaired'] and not mapping['paired']:
+        print "Replicate has no reads either paired or unpaired"
+        print json.dumps(mapping,indent=4)
+        sys.exit(1)
+    else:
+        print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
+            (len(mapping['paired'], len(mapping['unpaired'])))
+        print json.dumps(mapping,indent=4)
+        sys.exit(1)
+    if controls:
+        load_to['controls'] = []
+    load_to['fastqs'] = { "1": [], "2": [] }
+    if paired_end:
+        for (p1, p2) in mapping['paired']:
+            load_to['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
+            if p2 != None and 'paired_end' in p2:
+                load_to['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
+            if controls:
+                if 'controlled_by' in p1:
+                    load_to['controls'] += p1['controlled_by']
+                if p2 != None and 'controlled_by' in p2:
+                    load_to['controls'] += p2['controlled_by']
+    else:
+        load_to['fastqs']['1'] = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
+        if controls:
+            if 'controlled_by' in mapping['unpaired']:
+                load_to['controls'] += mapping['unpaired']['controlled_by']
+
+    return paired_end
+
+def common_variables(args,results_folder_default,fastqs=True,controls=False,key='default'):
+    '''Initializes dict with common variables from args and encoded.'''
+
+    cv = {}
+    cv['project']    = args.project
+    cv['experiment'] = args.experiment
+
+    # expecting either commbined-replicates or biological and technical replicate
+    if 'cr' in args and args.cr != None:
+        if len(args.cr) != 2:
+            print "Specify which two replicates to compare (e.g. '1_2 2')."
             sys.exit(1)
+        cv['combined'] = True
+        cv['reps'] = {}
+        for rep_tech in args.cr:
+            # Normalize rep_tech string
+            if '_' not in rep_tech:
+                rep_tech = rep_tech + '_1' # default to tech_rep 1
+            if not rep_tech.startswith('rep'):
+                rep_tech = 'rep' + rep_tech
+            # parse out biological and technical replicates
+            br_tr = rep_tech[3:]
+            (br,tr) = br_tr.split('_')
+            if 'a' in cv['reps']:
+                cv['reps']['b'] = { 'br': int(br), 'tr': int(tr) }
+                cv['reps']['b']['rep_tech'] = rep_tech
+            else:
+                cv['reps']['a'] = { 'br': int(br), 'tr': int(tr) }
+                cv['reps']['a']['rep_tech'] = rep_tech
 
-    return steps_to_run
+        if cv['reps']['a']['rep_tech'] == cv['reps']['b']['rep_tech']:
+            print "Specify different replicates to compare (e.g. 'rep1_1 rep2_1')."
+            sys.exit(1)
+        args.br = cv['reps']['a']['br']
+        args.tr = cv['reps']['a']['tr']
+        cv['rep_tech'] = 'reps' + cv['reps']['a']['rep_tech'][3:] + \
+                            '-' + cv['reps']['b']['rep_tech'][3:]
+    else:
+        cv['combined'] = False
+        if args.br == 0:
+            print "Must specify either --biological-replicate or --compare-replicates."
+            sys.exit(1)
+        cv['reps'] = {'a': { 'br': args.br, 'tr': args.tr} }
+        cv['reps']['a']['rep_tech'] = 'rep' + str(args.br) + '_' + str(args.tr)
+
+    exp = get_exp(cv['experiment'],key=key)
+    full_mapping = get_full_mapping(cv['experiment'],exp)
+    cv['exp_type'] = get_assay_type(cv['experiment'],exp)
+    for cv_rep in cv['reps'].keys():
+        rep = cv['reps'][cv_rep]
+        # TODO get rep_mapping once and then subset "mapping" multiple times
+        mapping = get_replicate_mapping(cv['experiment'],rep['br'],rep['tr'], full_mapping)
+
+        # Not a common var but convenient and cheap
+        rep['library_id'] = mapping['library']
+        rep['replicate_id'] = mapping['replicate_id']
+
+        # TODO add enough info that individual pipelines can varify the experiment matches pipeline
+
+        if fastqs:
+            rep['paired_end'] = load_fastqs_from_mapping(rep,mapping,controls)
+            # Non-file app inputs
+            rep['concat_id'] = 'reads'
+            if rep['paired_end']:
+                rep['concat_id2'] = 'reads2'
+
+        if cv_rep == 'a':
+            # Only supported genomes
+            if mapping['organism'] in GENOME_DEFAULTS:
+                cv['genome'] = GENOME_DEFAULTS[mapping['organism']]
+            else:
+                print "Organism %s not currently supported" % mapping['organism']
+                sys.exit(1)
+
+            cv['gender'] = mapping['sex']
+
+    # Paired ends?
+    if cv['combined'] and cv['reps']['a']['paired_end'] != cv['reps']['a']['paired_end']:
+        print "Replicates are expected to be both paired-end or single-end!  Check encoded."
+        sys.exit(1)
+    cv['paired_end'] = cv['reps']['a']['paired_end']
+
+    # Default locations (with adjustments)
+    cv['refLoc'] = args.refLoc
+    if cv['refLoc'] == REF_FOLDER_DEFAULT:
+        cv['refLoc'] = REF_FOLDER_DEFAULT + cv['genome'] + '/'
+    if not cv['refLoc'].endswith('/'):
+        cv['refLoc'] += '/'
+    cv['resultsLoc'] = args.resultsLoc
+    if cv['resultsLoc'] == results_folder_default:
+        if cv['genome'] == 'mm10':
+            cv['resultsLoc'] = results_folder_default + cv['genome'] + '/' + cv['annotation'] + '/'
+        else:
+            cv['resultsLoc'] = results_folder_default + cv['genome'] + '/'
+    if not cv['resultsLoc'].endswith('/'):
+        cv['resultsLoc'] += '/'
+    cv['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/'
+    cv['reps']['a']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
+                                                          cv['reps']['a']['rep_tech'] + '/'
+    if cv['combined']:
+        cv['reps']['b']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
+                                                              cv['reps']['b']['rep_tech'] + '/'
+
+    return cv
+
+def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
+    '''Looks for all result files in the results folder.'''
+    priors = {}
+    for step in pipe_path:
+        for fileToken in steps[step]['results'].keys():
+            fid = find_file(results_folder + file_globs[fileToken],proj_id,recurse=False)
+            if fid != None:
+                priors[fileToken] = fid
+    return priors
+
+def finding_rep_inputs_and_priors(psv,steps,globs,project,test):
+    '''Finds the inputs and priors for a run.'''
+
+    print "Checking for prior results..."
+    proj_id = project.get_id()
+
+    # NOTE: priors is a dictionary of fileIds that will be used to determine stepsToDo
+    #       and fill in inputs to workflow steps
+    for rep in psv['reps'].values():
+        if not test:
+            if not project_has_folder(project, rep['resultsFolder']):
+                project.new_folder(rep['resultsFolder'],parents=True)
+        rep['priors'] = find_prior_results(rep['path'],steps,rep['resultsFolder'],globs,proj_id)
+
+    print "Checking for input files..."
+    # Find all reads files and move into place
+    # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
+    #       or possibly local, Currently only DX locations are supported.
+    for rep in psv['reps'].values():
+        rep['inputs'] = {}
+        reads_token = 'reads'
+        if psv['paired_end']:
+            reads_token += '1'
+        rep['inputs']['Reads1'] = find_and_copy_read_files(rep['priors'], rep['fastqs']['1'], \
+                                           test, reads_token, rep['resultsFolder'], False, proj_id)
+        # Note: rep['fastqs']['2'] and rep['inputs']['Reads2'] will be empty on single-end
+        rep['inputs']['Reads2'] = find_and_copy_read_files(rep['priors'], rep['fastqs']['2'], \
+                                            test, 'reads2', rep['resultsFolder'], False, proj_id)
+
+def find_all_ref_files(psv,find_references_function):
+    '''Locates all reference files based upon organism and gender.'''
+
+    print "Looking for reference files..."
+    for rep in psv['reps'].values():
+        # Need multiple copies of control files because they are put into priors!
+        find_references_function(rep['priors'],psv) # pipeline specific
+    if psv['combined']:
+        find_references_function(psv['priors'],psv)
 
 
 SW_CACHE = {}
