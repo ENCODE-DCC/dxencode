@@ -44,8 +44,8 @@ class Launch(object):
                     "analysis for one replicate or combined replicates. "
     ''' This help title should name pipline and whether combined replicates are supported.'''
                     
-    SERVER_DEFAULT = 'default'
-    '''At this time there is no need to use the any but the default server for launching.'''
+    SERVER_DEFAULT = 'www'
+    '''At this time there is no need to use the any but the one true server for launching.'''
     
     RESULT_FOLDER_DEFAULT = '/runs/'
     ''' This the default location to place results folders for each experiment.'''
@@ -206,7 +206,7 @@ class Launch(object):
         self.server_key = args.server
         psv = self.common_variables(args,key=self.server_key)
         if psv['exp_type'] != self.PIPELINE_NAME:
-            print "Experiment %s is not for %s but for '%s'" \
+            print "Experiment %s is not for '%s' but for '%s'" \
                                            % (psv['experiment'],self.PIPELINE_NAME,psv['exp_type'])
             sys.exit(1)
         
@@ -222,10 +222,21 @@ class Launch(object):
     def find_ref_files(self,priors):
         '''Locates all reference files based upon organism and gender.'''
         # PLEASE REPLACE in derived class
+        assert "must replace!" and False
         
         # Add your pipeline specific referernce file detection here
         
-        # Common example
+        # Examples:
+        # If all the ref files are in json keyed by ['genome']['gender'] then try:
+        for ref in self.REFERENCES_FILES.keys():
+            dxfile = self.psv['refLoc']+self.REFERENCES_FILES[ref][self.psv['genome']][self.psv['gender']]
+            fid = dxencode.find_file(dxfile,dxencode.REF_PROJECT_DEFAULT)
+            if fid == None:
+                sys.exit("ERROR: Unable to locate ref file: '" + dxfile + "'")
+            else:
+                priors[ref] = fid
+        
+        # Or explicitly by key
         chrom_sizes = self.psv['refLoc']+self.REFERENCE_FILES['chrom_sizes'][self.psv['genome']][self.psv['gender']]
         chrom_sizes_fid = dxencode.find_file(chrom_sizes,dxencode.REF_PROJECT_DEFAULT)
         if chrom_sizes_fid == None:
@@ -300,12 +311,11 @@ class Launch(object):
         
         cv = {}
         self.proj_name = dxencode.env_get_current_project()
+        if self.proj_name == None or args.project != None:
+            self.proj_name = args.project
         if self.proj_name == None:
-            if  args.project != None:
-                self.proj_name = args.project
-            else:
-                print "Please enter a '--project' to run in."
-                sys.exit(1)
+            print "Please enter a '--project' to run in."
+            sys.exit(1)
         self.project = dxencode.get_project(args.project)
         self.proj_id = self.project.get_id()        
 
