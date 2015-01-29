@@ -3,7 +3,7 @@
 
 import argparse,os, sys, json
 #import urlparse, subprocess, itertools, logging
-#from datetime import datetime
+from datetime import datetime
 
 import dxpy
 import dxencode
@@ -842,7 +842,7 @@ class Launch(object):
         # NOT EXPECTED TO OVERRIDE
         # NOTE: DX manual lies?!  Append not possible?!  Then write new/delete old
         run_log_path = results_folder + '/' + dxencode.RUNS_LAUNCHED_FILE
-        old_fids = find_file(run_log_path,self.proj_id,multiple=True,recurse=False)
+        old_fids = dxencode.find_file(run_log_path,self.proj_id,multiple=True,recurse=False)
         new_fh = dxpy.new_dxfile('a',project=self.proj_id,folder=results_folder, \
                                                                   name=dxencode.RUNS_LAUNCHED_FILE)
         new_fh.write(run_id+' started:'+str(datetime.now())+'\n')
@@ -871,7 +871,7 @@ class Launch(object):
             else:
                 print "  We have liftoff!"
                 wf_dict = wf_run.describe()
-                self.log_this_run(wf_dict['id'],run['resultsFolder'],self.proj_id)
+                self.log_this_run(wf_dict['id'],run['resultsFolder'])
                 print "  Launched " + wf_dict['id']+" as '"+wf.name+"'"
         else:
             print "Workflow '" + wf.name + "' has been assembled in "+run['resultsFolder'] + \
