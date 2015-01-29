@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # splashdown.py 0.0.1
 #
-# Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py 
+# Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py
 #
 # Splashdown is meant to run outside of dnanexus and to examine experiment directories to 
 # find results tp post to encoded.
@@ -36,7 +36,7 @@ class Splashdown(object):
 
     SERVER_DEFAULT = 'test'
     '''This the default server to post files to.'''
-    
+
     RESULT_FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
@@ -49,7 +49,7 @@ class Splashdown(object):
     #Pipeline specifications include order of steps, steps per replicate, combined steps and 
     #within steps, the output_type: file_glob that define expected results.
     PIPELINE_SPECS = {
-        "long-rna-seq": {
+         "long-rna-seq": {
             "step-order": [ "align-tophat","signals-top-se","signals-top-pe",
                             "align-star","signals-star-se","signals-star-pe","quant-rsem"],
             "combined":   {},
@@ -92,9 +92,9 @@ class Splashdown(object):
             },
             "replicate":  {
                 "align":           { "alignments":                "*_rampage_star_marked.bam" },
-                "signals":         { "multi-read plus signal":    "*_rampage_5p_plusAll.bw",    
+                "signals":         { "multi-read plus signal":    "*_rampage_5p_plusAll.bw",
                                      "multi-read minus signal":   "*_rampage_5p_minusAll.bw",
-                                     "unique plus signal":        "*_rampage_5p_plusUniq.bw", 
+                                     "unique plus signal":        "*_rampage_5p_plusUniq.bw",
                                      "unique minus signal":       "*_rampage_5p_minusUniq.bw" },
                 "peaks":           { "peaks":                     "*_rampage_peaks.bb",
                                      "sites":                     "*_rampage_peaks.gff" }
@@ -107,7 +107,7 @@ class Splashdown(object):
 
     ANNOTATIONS_SUPPORTED = [ 'V19', 'M2', 'M3', 'M4' ]
     '''This module supports only these annotations.'''
-    
+
     FORMATS_SUPPORTED = ["bam", "bed", "bedLogR", "bed_bedLogR", "bedMethyl", "bed_bedMethyl",
                          "bigBed", "bigWig", "broadPeak", "bed_broadPeak", "fasta", "fastq",
                          "gtf", "idat", "narrowPeak", "bed_narrowPeak", "rcc", "CEL", "tsv", "csv" ]
@@ -142,7 +142,7 @@ class Splashdown(object):
         dxencode.logger = logging.getLogger(__name__) # I need this to avoid some errors
         dxencode.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
 
-    
+
     def get_args(self):
         '''Parse the input arguments.'''
         ### PIPELINE SPECIFIC
@@ -203,21 +203,21 @@ class Splashdown(object):
                         action='store_true',
                         required=False)
         return ap.parse_args()
-        
+
     def get_exp_type(self,exp_id,exp=None):
         '''Looks up encoded experiment's assay_type, normalized to known supported tokens.'''
         self.exp_id = exp_id
         if exp == None and self.exp == None:
             self.exp = get_exp(exp_id)
         self.exp_type = dxencode.get_assay_type(self.exp_id,self.exp)
-            
-        if self.exp_type not in self.EXPERIMENT_TYPES_SUPPORTED: 
+
+        if self.exp_type not in self.EXPERIMENT_TYPES_SUPPORTED:
             print "Experiment %s has unsupported assay type of '%s'" % \
                                                             (exp_id,self.exp["assay_term_name"])
             return None
         return self.exp_type
 
-    
+
     def find_exp_folder(self,exp_id,results_folder='/'):
         '''Finds the experiment folder, given an accession.'''
         # normalize
@@ -231,7 +231,7 @@ class Splashdown(object):
                                                         (results_folder, exp_id, self.proj_name)
             return None
         return target_folder + '/'
-        
+
 
     def find_replicate_folders(self,exp_folder,verbose=False):
         '''Returns a sorted list of replicate folders which are sub-folders of an exp folder.'''
@@ -253,25 +253,25 @@ class Splashdown(object):
             print "Replicate folders:"
             print json.dumps(replicates,indent=4)
         return replicates
-        
+
 
     def pipeline_specification(self,args,exp_type,exp_folder,verbose=False):
         '''Sets the pipeline specification object for this experiment type.'''
 
         # Start with dict containing common variables
         #self.expected = copy.deepcopy(self.PIPELINE_SPECS[exp_type])
-        
+
         pipeline_specs = self.PIPELINE_SPECS.get(exp_type)
         self.genome = None  # TODO: need way to determine genome before any posts occur!
         self.annotation = None  # TODO: if appropriate, need way to determine annotation
-        
+
 
         if verbose:
             print "Pipeline specification:"
             print json.dumps(pipeline_specs,indent=4)
         return pipeline_specs
-        
-        
+
+
     def file_format(self,file_name):
         '''Try to determine file format from file name extension.'''
         ext = file_name.split(".")[-1]
@@ -292,7 +292,7 @@ class Splashdown(object):
         msg = ""
         if self.genome == None and "genome" in properties:
             genome = properties["genome"]
-            if genome in self.ASSEMBLIES_SUPPORTED.keys(): 
+            if genome in self.ASSEMBLIES_SUPPORTED.keys():
                 self.genome = self.ASSEMBLIES_SUPPORTED[genome]
                 msg += " genome[%s]" % self.genome
         if self.annotation == None and "annotation" in properties:
@@ -308,7 +308,7 @@ class Splashdown(object):
     def find_step_files(self,file_globs,result_folder,rep_tech,verbose=False):
         '''Returns tuple list of (type,rep_tech,fid) of ALL files expected for a single step.'''
         step_files = []
-        
+
         for token in file_globs.keys():
             if self.file_format(file_globs[token]) == None:
                 print "Error: file glob %s has unknown file format! Please fix" % file_globs[token]
@@ -334,7 +334,7 @@ class Splashdown(object):
                                                     exp_folder + rep_tech + '/',rep_tech,verbose)
                 if len(step_files) > 0:
                      expected.extend(step_files) # keep them in order!
-        
+
         # Now add combined step files
         for step in self.pipeline["step-order"]:
             if step not in self.pipeline["combined"]:
@@ -343,7 +343,7 @@ class Splashdown(object):
                                                                     exp_folder,"combined",verbose)
             if len(step_files) > 0:
                  expected.extend(step_files) # keep them in order!
-            
+
         if verbose:
             print "Expected files:"
             print json.dumps(expected,indent=4)
@@ -433,7 +433,7 @@ class Splashdown(object):
                 else: # if file name is primary input (fastq) and is named as an accession
                     if inp_obj["name"].startswith("ENCFF"): # Not test version 'TSTFF'!
                         parts = inp_obj["name"].split('.')
-                        ext = parts[-1] 
+                        ext = parts[-1]
                         if ext in ["gz","tgz"]:
                             ext = parts[-2]
                         if ext in self.PRIMARY_INPUT_EXTENSION:
@@ -459,7 +459,7 @@ class Splashdown(object):
             full_mapping = dxencode.get_full_mapping(self.exp_id,self.exp)
             mapping = dxencode.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
             obj['replicate'] = mapping['replicate_id']
-            
+
         if verbose:
             print "After adding encoded info:"
             print json.dumps(obj,indent=4)
@@ -674,7 +674,7 @@ class Splashdown(object):
         if halted == exp_count:
             sys.exit(1)    
         print "(finished)"
-                
+
 
 if __name__ == '__main__':
     '''Run from the command line.'''
