@@ -3,20 +3,20 @@
 #
 # Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py
 #
-# Splashdown is meant to run outside of dnanexus and to examine experiment directories to 
+# Splashdown is meant to run outside of dnanexus and to examine experiment directories to
 # find results tp post to encoded.
 #
 # 1) Lookup experiment type from encoded, based on accession
 # 2) Locate the experiment accession named folder
 # 3) Given the experiment type, determine the expected results
-# 4) Given expected results locate any files (by glob) that should be posted for 
+# 4) Given expected results locate any files (by glob) that should be posted for
 #    a) each single replicate (in replicate sub-folders named as reN_N/
 #    b) combined replicates in the experiment folder itself
 # 5) For each file that should be posted, determine if the file needs to be posted (not already).
 # 6) For each file that needs to be posted:
 #    a) discover all necessary dx information needed for posting.
 #    b) gather any other information necessary from dx and encoded. (notice hand-waving)
-#    c) Post file and update encoded database. 
+#    c) Post file and update encoded database.
 #    d) Update dnanexus file with file accession tag.
 # 7) Either exit or advance to the next experiment folder
 
@@ -43,10 +43,10 @@ class Splashdown(object):
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
-    SKIP_VALIDATE = ["transcriptome alignments"]
-    '''Some output_types cannot currently be validated.'''
+    SKIP_VALIDATE = []
+    '''Some output_types cannot currently be validated, theoretically'''
 
-    #Pipeline specifications include order of steps, steps per replicate, combined steps and 
+    #Pipeline specifications include order of steps, steps per replicate, combined steps and
     #within steps, the output_type: file_glob that define expected results.
     PIPELINE_SPECS = {
          "long-rna-seq": {
@@ -101,7 +101,7 @@ class Splashdown(object):
             }
         }
     }
-    
+
     ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "hg38": "GRCh37", "mm10": "mm10" }
     '''This module supports only these assemblies.'''
 
@@ -112,7 +112,7 @@ class Splashdown(object):
                          "bigBed", "bigWig", "broadPeak", "bed_broadPeak", "fasta", "fastq",
                          "gtf", "idat", "narrowPeak", "bed_narrowPeak", "rcc", "CEL", "tsv", "csv" ]
     EXTENSION_TO_FORMAT = { "bb":"bigBed", "bw":"bigWig",
-                            "fa":"fasta","fq":"fastq","results":"tsv", 
+                            "fa":"fasta","fq":"fastq","results":"tsv",
                             "gff": "gtf" }
     '''List of supported formats, and means of recognizing with file extensions.'''
 
@@ -123,7 +123,7 @@ class Splashdown(object):
     def __init__(self):
         '''
         Splashdown expects one or more experiment ids as arguments and will find, document
-        and post files in the associated directory. 
+        and post files in the associated directory.
         '''
         self.args = {} # run time arguments
         self.server_key = 'test'
@@ -297,7 +297,7 @@ class Splashdown(object):
                 msg += " genome[%s]" % self.genome
         if self.annotation == None and "annotation" in properties:
             annotation = properties["annotation"].upper() # BRITTLE: v19 in dx but V19 in encoded
-            if annotation in self.ANNOTATIONS_SUPPORTED: 
+            if annotation in self.ANNOTATIONS_SUPPORTED:
                 self.annotation = annotation
                 msg += " annotation[%s]" % self.annotation
         if len(msg) > 0:
@@ -391,7 +391,7 @@ class Splashdown(object):
             # so existence of accession should mean it is already in encoded.
             fileDict = dxencode.description_from_fid(fid,properties=True)
             acc_key = "accession"
-            if self.server_key == 'test': 
+            if self.server_key == 'test':
                 acc_key = "test_accession"
             if "properties" in fileDict and acc_key in fileDict["properties"]:
                 accession = fileDict["properties"][acc_key]
@@ -424,7 +424,7 @@ class Splashdown(object):
             if inp_obj != None:
                 self.genome = self.find_genome_annotation(inp_obj)
                 acc_key = "accession"
-                if self.server_key == 'test': 
+                if self.server_key == 'test':
                     acc_key = "test_accession"
                 if "properties" in inp_obj and acc_key in inp_obj["properties"]:
                     accession = inp_obj["properties"][acc_key]
@@ -451,7 +451,7 @@ class Splashdown(object):
         '''Updates an object with information from encoded database.'''
         obj['lab'] = '/labs/j-michael-cherry/' # self.exp['lab']['@id'] Now hard-coded
         obj['award'] = '/awards/U41HG006992/'  # self.exp['award']['@id']
-        
+
         # Find replicate info
         if rep_tech.startswith("rep"):
             br_tr = rep_tech[3:]
@@ -504,7 +504,7 @@ class Splashdown(object):
         payload['notes'] = json.dumps(notes)
 
         #print "  - Adding encoded information."
-        payload = self.add_encoded_info(payload,rep_tech,fid) 
+        payload = self.add_encoded_info(payload,rep_tech,fid)
 
         if verbose:
             print "payload from dx info:"
@@ -518,7 +518,7 @@ class Splashdown(object):
         properties = file_handler.get_properties()
         path = dxencode.file_path_from_fid(fid)
         acc_key = "accession"
-        if self.server_key == 'test': 
+        if self.server_key == 'test':
             acc_key = "test_accession"
         if acc_key in properties and properties[acc_key] != accession:
             if properties[acc_key] != accession:
@@ -566,7 +566,7 @@ class Splashdown(object):
             except Exception as e:
                 print "  " + e.message
                 return None
-                
+
             job_dict = job.describe()
             #error = job_dict['output'].get('error', None)
             if job_dict["state"] == "done":
@@ -596,7 +596,7 @@ class Splashdown(object):
         self.proj_id = self.project.get_id()
         print "== Running in project [%s] and will post to the [%s] server ==" % \
                                                         (self.proj_name,self.server_key)
-        
+
         exp_count = 0
         halted = 0
         total_posted = 0
@@ -623,17 +623,17 @@ class Splashdown(object):
             self.pipeline   = self.pipeline_specification(args,self.exp_type,self.exp_folder)
             self.replicates = self.find_replicate_folders(self.exp_folder)
 
-            # 4) Given expected results locate any files (by glob) that should be posted for 
+            # 4) Given expected results locate any files (by glob) that should be posted for
             #    a) each single replicate (in replicate sub-folders named as reN_N/
             #    b) combined replicates in the experiment folder itself
             files_expected = self.find_expected_files(self.exp_folder,self.replicates)
-            print "- Found %d files that are available to post." % len(files_expected) 
+            print "- Found %d files that are available to post." % len(files_expected)
             if len(files_expected) == 0:
                 continue
 
             # 5) For each file that should be posted, determine if the file needs to be posted.
             files_to_post = self.find_needed_files(files_expected)
-            print "- Found %d files that need to be posted" % len(files_to_post) 
+            print "- Found %d files that need to be posted" % len(files_to_post)
             if len(files_to_post) == 0:
                 continue
 
@@ -645,34 +645,34 @@ class Splashdown(object):
                 sys.stdout.flush() # Slow running job should flush to piped log
                 # a) discover all necessary dx information needed for post.
                 # b) gather any other information necessary from dx and encoded.
-                print "  Handle file %s" % dxencode.file_path_from_fid(fid) 
+                print "  Handle file %s" % dxencode.file_path_from_fid(fid)
                 payload = self.make_payload_obj(out_type,rep_tech,fid)
 
                 file_count += 1
-                # c) Post file and update encoded database. 
+                # c) Post file and update encoded database.
                 accession = self.file_post(fid,payload,args.test)
                 if accession == None:
                     print "* HALTING %s - post failure could compromise 'derived_from'" % \
                                                                                     (self.exp_id)
                     halted += 1
                     break
-                
+
                 # d) Update dnanexus file with file accession tag.
                 if not args.test:
                     post_count += 1
                 self.file_mark_accession(fid,accession,args.test)
-                
+
                 #if file_count >= 5:  # Short circuit for test
                 #    break
-                    
+
             print "- For %s Processed %d file(s), posted %s" % \
                                                         (self.exp_id, file_count, post_count)
             total_posted += post_count
-            
+
         print "Processed %d experiment(s), halted %d, posted %d file(s)" % \
                                                             (exp_count, halted, total_posted)
         if halted == exp_count:
-            sys.exit(1)    
+            sys.exit(1)
         print "(finished)"
 
 
