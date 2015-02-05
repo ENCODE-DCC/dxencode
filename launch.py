@@ -33,7 +33,7 @@ import dxencode
 class Launch(object):
     '''
     Launch module is the common code for pipeline specific launcher classes.  
-    Launchers dynamically create an launch a workflow covering any needed steps of a pipeline.
+    Launchers dynamically create and launch a workflow covering any needed steps of a pipeline.
     Steps needed are thos that have available inputs but not already generatedresults.
     '''
 

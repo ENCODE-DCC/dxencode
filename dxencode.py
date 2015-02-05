@@ -9,6 +9,7 @@ import hashlib
 from datetime import datetime
 import subprocess
 import commands
+import shlex
 
 import logging
 
@@ -42,6 +43,7 @@ def calc_md5(path):
             md5sum.update(chunk)
     return md5sum
 
+SAVED_KEYS = {}
 
 def processkey(key):
     ''' check encodedD access keys; assuming the format:
@@ -54,6 +56,9 @@ def processkey(key):
                 {"server":"https://www.encodeproject.org", "key":"rand_user_name", "secret":"rand_password"}
     }
     '''
+    if key in SAVED_KEYS:
+        return SAVED_KEYS[key]
+    
     if key:
         keysf = open(KEYFILE,'r')
         keys_json_string = keysf.read()
@@ -72,6 +77,7 @@ def processkey(key):
     if not SERVER.endswith("/"):
         SERVER += "/"
 
+    SAVED_KEYS[key] = (AUTHID,AUTHPW,SERVER)
     return (AUTHID,AUTHPW,SERVER)
     ## TODO possibly this should return a dict
 
@@ -212,6 +218,23 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
             return found
     return None
 
+
+def find_exp_folder(project,exp_id,results_folder='/',warn=False):
+    '''Returns the full path to the experiment folder if found, else None.'''
+    # normalize
+    if not results_folder.startswith('/'):
+        results_folder = '/' + results_folder
+    if not results_folder.endswith('/'):
+        results_folder += '/'
+    target_folder = find_folder(exp_id,project,results_folder)
+    if target_folder == None or target_folder == "":
+        if warn:
+            print "Unable to locate target folder (%s) for %s in project %s" % \
+                                                                        (results_folder, exp_id, project.describe()['name'])
+        return None
+    return target_folder + '/'
+
+
 def description_from_fid(fid,properties=False):
     '''Returns file description object from fid.'''
     try:
@@ -306,6 +329,47 @@ def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
 
     #hack together the s3 cp url (with the s3 method instead of https)
     return filename, S3_SERVER.rstrip('/') + o.path
+    
+def copy_enc_file_to_dx(accession,proj_id,dx_folder,dx_name=None,f_obj=None,key=None):
+    '''
+    Finds encoded file by accession, creates s3 url and copies file to named folder,
+    and adds the accession to the dx file properties, returning the dx file id or None for failure.
+    If dx file name is None, the file ill have the accession based encoded name.
+    MUST BE run on dx, not command-line.
+    '''
+    (AUTHID,AUTHPW,SERVER) = processkey(key)
+    if accession != None and f_obj == None:
+        url = SERVER + '/search/?type=file&accession=%s&format=json&frame=embedded&limit=all' % (accession)
+        response = encoded_get(url, AUTHID, AUTHPW)
+        if response == None:
+            return None
+        f_obj = response.json()['@graph'][0]
+        if f_obj == None:
+            return None
+    elif accession == None and f_obj != None:
+        accession = f_obj['accession']
+    # If both are None or if accessions don't match then developer will hear about it!
+    assert accession == f_obj['accession']
+    
+    (enc_file_name,s3_url) = get_bucket(SERVER, AUTHID, AUTHPW, f_obj)
+    if enc_file_name == None or s3_url == None:
+        return None
+    #cp the file from the bucket
+    print '> aws s3 cp %s . --quiet' %(s3_url)
+    subprocess.check_call(shlex.split('aws s3 cp %s . --quiet' %(s3_url)), stderr=subprocess.STDOUT)
+    subprocess.check_call(shlex.split('ls -l %s' %(enc_file_name)))
+    if dx_name == None:
+        dx_name = enc_file_name
+        #if 'submitted_file_name' in f_obj:
+        #    dx_file_name = os.path.basename(f_obj['submitted_file_name'])
+
+    dxfile = dxpy.upload_local_file(enc_file_name,project=proj_id,folder=dx_folder, name=dx_name, \
+                                    properties={ "accession": accession }, wait_on_close=True) # TODO test: wait_on_close=False
+    if dxfile == None:
+        return None
+
+    return dxfile.get_id()
+
 
 def move_files(fids, folder, projectId):
     '''Moves files to supplied folder.  Expected to be in the same project.'''
@@ -612,7 +676,7 @@ def choose_mapping_for_experiment(experiment,warn=True):
 def get_exp(experiment,must_find=True,warn=False,key='default'):
     '''Returns all replicate mappings for an experiment from encoded.'''
 
-    (AUTHID,AUTHPW,SERVER) = processkey('default')
+    (AUTHID,AUTHPW,SERVER) = processkey(key)
     url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
     try:
         response = encoded_get(url, AUTHID, AUTHPW)
@@ -676,6 +740,56 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
             print json.dumps(full_mapping,indent=4)
             sys.exit(1)
     return None
+
+def get_enc_file(file_acc,must_find=False,key='default'):
+    '''Returns all replicate mappings for an experiment from encoded.'''
+
+    (AUTHID,AUTHPW,SERVER) = processkey(key)
+
+    if file_acc.startswith("/files/") and file_acc.endswith('/'):
+        url = SERVER + '%s?format=json&frame=embedded' % file_acc
+    else:
+        url = SERVER + '/files/%s/?format=json&frame=embedded' % file_acc
+    try:
+        response = encoded_get(url, AUTHID, AUTHPW)
+        file_obj = response.json()
+    except:
+        if must_find:
+            print "File %s not found." % file_acc
+            sys.exit(1)
+        return None
+
+    return file_obj
+
+def get_enc_exp_files(exp_obj,output_types=[],key='default'):
+    '''Returns list of file objs associated with an experiment, filtered by zero or more output_types.'''
+    if not exp_obj or not exp_obj.get('files'):
+        return []
+    files = []
+    accessions = []
+    for file_acc in exp_obj['original_files']:
+        file_obj = None
+        acc = file_acc[7:18]
+        if acc in accessions:
+            continue
+        accessions.append(acc)
+        for f_obj in exp_obj['files']:
+            if acc == f_obj['accession']:
+                file_obj = f_obj
+                break
+        if file_obj == None:
+            file_obj = get_enc_file(file_acc,key=key)
+        if file_obj == None:
+            continue
+        #print " * Found: %s [%s] status:%s %s" % \
+        #                  (file_obj['accession'],file_obj['output_type'],file_obj['status'],file_obj['submitted_file_name'])
+        if len(output_types) > 0 and file_obj.get('output_type') not in output_types:
+            continue
+        if file_obj.get('status') not in ["released","uploaded","in progress"]:
+            continue
+        if file_obj.get('submitted_file_name') not in filenames_in(files):
+           files.extend([file_obj])
+    return files
 
 SW_CACHE = {}
 def get_sw_from_log(dxfile, regex):
