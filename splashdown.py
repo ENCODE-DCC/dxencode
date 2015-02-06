@@ -156,33 +156,10 @@ class Splashdown(object):
                         nargs='+',
                         required=True)
 
-        #ap.add_argument('--br', '--biorep',
-        #                help="Biological Replicate number (default: 1)",
-        #                type=int,
-        #                default='1',
-        #                required=False)
-
-        #ap.add_argument('--tr', '--techrep',
-        #                help="Technical replicate number (default: 1)",
-        #                type=int,
-        #                default='1',
-        #                required=False)
-
-        #ap.add_argument('--cr','--combine-replicates',
-        #                help="Combine or compare two replicates (e.g.'1 2_2').'",
-        #                nargs='+',
-        #                required=False)
-
         ap.add_argument('--project',
                         help="Project to run analysis in (default: '" + \
                                                          dxencode.env_get_current_project() + "')",
                         required=False)
-
-        #ap.add_argument('--refLoc',
-        #                help="The location to find reference files (default: '" + \
-        #                                    REF_PROJECT_DEFAULT + ":" + REF_FOLDER_DEFAULT + "')",
-        #                default=REF_FOLDER_DEFAULT,
-        #                required=False)
 
         ap.add_argument('--results_folder',
                         help="The location to search for experiment folders (default: " + \
@@ -199,6 +176,12 @@ class Splashdown(object):
                         help='Test run only, do not launch anything.',
                         action='store_true',
                         required=False)
+
+        ap.add_argument('--verbose',
+                        help='More debugging output.',
+                        action='store_true',
+                        required=False)
+
         return ap.parse_args()
 
     def get_exp_type(self,exp_id,exp=None):
@@ -334,13 +317,13 @@ class Splashdown(object):
 
     def find_in_encode(self,fid,verbose=False):
         '''Looks for file in encode with the same submitted file name as the fid has.'''
-        file_name = dxencode.file_path_from_fid(fid,projectToo=True)
+        file_name = dxencode.file_path_from_fid(fid,projectToo=True).split(':')[-1]
         file_size = dxencode.description_from_fid(fid).get('size')
 
         # TODO: encoded should allow searching on fid !!!
         authid, authpw, server = dxencode.processkey(self.server_key)
         url = urlparse.urljoin(server,
-                'search/?type=file&submitted_file_name=%s&format=json&frame=object' % file_name)
+                'search/?type=file&frame=object&submitted_file_name=%s' % file_name)
         response = dxencode.encoded_get(url,authid,authpw)
         try:
             if verbose:
@@ -350,19 +333,25 @@ class Splashdown(object):
                 encode_file = response.json()['@graph'][0]
                 #logger.info("Found potential duplicate: %s" %(duplicate_item.get('accession')))
                 if file_size ==  encode_file.get('file_size'):
-                    #logger.info("%s %s: File sizes match, assuming duplicate." % \
-                    #                               (str(file_size), encode_file.get('file_size')))
+                    if verbose:
+                        print("%s %s: File sizes match, assuming duplicate." % \
+                                                   (str(file_size), encode_file.get('file_size')))
                     return encode_file
                 else:
-                    #logger.info("%s %s: File sizes differ, assuming new file." % \
-                    #                                (str(file_size), encode_file.get('file_size')))
+                    if verbose:
+                        print("%s %s: File sizes differ, assuming new file." % \
+                                                   (str(file_size), encode_file.get('file_size')))
                     return None
             else:
-                #logger.info("No duplicate ... proceeding")
+                if verbose:
+                    print("No duplicate ... proceeding")
+                    print(response.text)
+                    print(response.json())
                 return None
         except:
-            #logger.warning('Duplicate accession check failed: %s %s' % (response.status_code, response.reason))
-            #logger.debug(response.text)
+            if verbose:
+                print('Duplicate accession check failed: %s %s' % (response.status_code, response.reason))
+                print(response.text)
             return None
 
     def find_needed_files(self,files_expected,verbose=False):
@@ -465,7 +454,7 @@ class Splashdown(object):
         payload["file_format"] = self.file_format(dx_obj["name"])
         if payload["file_format"] == None:
             print "Warning: file %s has unknown file format!" % dxencode.file_path_from_fid(fid)
-        payload["derived_from"] = self.find_derived_from(fid,job)
+        payload["derived_from"] = self.find_derived_from(fid,job, verbose)
         payload['submitted_file_name'] = dxencode.file_path_from_fid(fid,projectToo=True)
         payload['file_size'] = dx_obj["size"]
         #payload['md5sum'] = calculated_md5 # TODO: Find from file properties???
@@ -603,18 +592,18 @@ class Splashdown(object):
 
             # 3) Given the experiment type, determine the expected results
             self.pipeline   = self.pipeline_specification(args,self.exp_type,self.exp_folder)
-            self.replicates = self.find_replicate_folders(self.exp_folder)
+            self.replicates = self.find_replicate_folders(self.exp_folder, verbose=args.verbose)
 
             # 4) Given expected results locate any files (by glob) that should be posted for
             #    a) each single replicate (in replicate sub-folders named as reN_N/
             #    b) combined replicates in the experiment folder itself
-            files_expected = self.find_expected_files(self.exp_folder,self.replicates)
+            files_expected = self.find_expected_files(self.exp_folder,self.replicates, verbose=args.verbose)
             print "- Found %d files that are available to post." % len(files_expected)
             if len(files_expected) == 0:
                 continue
 
             # 5) For each file that should be posted, determine if the file needs to be posted.
-            files_to_post = self.find_needed_files(files_expected)
+            files_to_post = self.find_needed_files(files_expected, verbose=args.verbose)
             print "- Found %d files that need to be posted" % len(files_to_post)
             if len(files_to_post) == 0:
                 continue
@@ -628,7 +617,7 @@ class Splashdown(object):
                 # a) discover all necessary dx information needed for post.
                 # b) gather any other information necessary from dx and encoded.
                 print "  Handle file %s" % dxencode.file_path_from_fid(fid)
-                payload = self.make_payload_obj(out_type,rep_tech,fid)
+                payload = self.make_payload_obj(out_type,rep_tech,fid, verbose=args.verbose)
 
                 file_count += 1
                 # c) Post file and update encoded database.
