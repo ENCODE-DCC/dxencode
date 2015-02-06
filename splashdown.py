@@ -19,6 +19,7 @@
 #    c) Post file and update encoded database.
 #    d) Update dnanexus file with file accession tag.
 # 7) Either exit or advance to the next experiment folder
+ # NOTE: any job output name='metadata' class=string (in json format!) will be added to each postable file of that job
 
 import argparse,os, sys
 import json, urlparse, subprocess, itertools, logging
@@ -52,7 +53,6 @@ class Splashdown(object):
          "long-rna-seq": {
             "step-order": [ "align-tophat","signals-top-se","signals-top-pe",
                             "align-star","signals-star-se","signals-star-pe","quant-rsem"],
-            "combined":   {},
             "replicate":  {
                 "align-tophat":    { "alignments":                "*_tophat.bam"                 },
                 "signals-top-se":  { "multi-read signal":         "*_tophat_all.bw",
@@ -70,26 +70,21 @@ class Splashdown(object):
                                      "unique minus signal":       "*_star_genome_minusUniq.bw",
                                      "unique plus signal":        "*_star_genome_plusUniq.bw"    },
                 "quant-rsem":      { "transcript quantifications":"*_rsem.isoforms.results",
-                                     "genome quantifications":    "*_rsem.genes.results"         }
-            }
+                                     "genome quantifications":    "*_rsem.genes.results"         }  },
+            "combined":   {}
         },
         "small-rna-seq": {
             "step-order": [ "align","signals"],
-            "combined":   {},
             "replicate":  {
                 "align":           { "alignments":                "*_star_genome.bam"            },
                 "signals":         { "multi-read plus signal":    "*_small_plusAll.bw",
                                      "multi-read minus signal":   "*_small_minusAll.bw",
                                      "unique plus signal":        "*_small_plusUniq.bw",
-                                     "unique minus signal":       "*_small_minusUniq.bw"         }
-            }
+                                     "unique minus signal":       "*_small_minusUniq.bw"         }  },
+            "combined":   {}
         },
         "rampage": {
             "step-order": [ "align","signals","peaks","idr"],
-            "combined":   {
-                "idr":             { "sites":                     "*_rampage_idr.gff",
-                                     "peaks":                     "*_rampage_idr.bb" }
-            },
             "replicate":  {
                 "align":           { "alignments":                "*_rampage_star_marked.bam" },
                 "signals":         { "multi-read plus signal":    "*_rampage_5p_plusAll.bw",
@@ -97,8 +92,10 @@ class Splashdown(object):
                                      "unique plus signal":        "*_rampage_5p_plusUniq.bw",
                                      "unique minus signal":       "*_rampage_5p_minusUniq.bw" },
                 "peaks":           { "peaks":                     "*_rampage_peaks.bb",
-                                     "sites":                     "*_rampage_peaks.gff" }
-            }
+                                     "sites":                     "*_rampage_peaks.gff"       } },
+            "combined":   {
+                "idr":             { "sites":                     "*_rampage_idr.gff",    # TODO: not really "sites"
+                                     "peaks":                     "*_rampage_idr.bb" }  } # TODO: not really "peaks" ?
         }
     }
 
@@ -216,21 +213,6 @@ class Splashdown(object):
                                                             (exp_id,self.exp["assay_term_name"])
             return None
         return self.exp_type
-
-
-    def find_exp_folder(self,exp_id,results_folder='/'):
-        '''Finds the experiment folder, given an accession.'''
-        # normalize
-        if not results_folder.startswith('/'):
-            results_folder = '/' + results_folder
-        if not results_folder.endswith('/'):
-            results_folder += '/'
-        target_folder = dxencode.find_folder(exp_id,self.project,results_folder)
-        if target_folder == None or target_folder == "":
-            print "Unable to locate target folder (%s) for %s in project %s" % \
-                                                        (results_folder, exp_id, self.proj_name)
-            return None
-        return target_folder + '/'
 
 
     def find_replicate_folders(self,exp_folder,verbose=False):
@@ -499,8 +481,8 @@ class Splashdown(object):
         notes = dxencode.create_notes(dxFile, versions)
         #notes['qc'] = flagstat_parse(bamqc) ????
         # TODO: find json added to job as a result of returns? ??
-        if "notes" in job["output"]:
-           notes.update(json.load(job["output"]["json"]))
+        if "metadata" in job["output"]:
+           notes.update(json.load(job["output"]["metadata"])) # NOTE: output class=string name='metadata' in json format
         payload['notes'] = json.dumps(notes)
 
         #print "  - Adding encoded information."
@@ -613,7 +595,7 @@ class Splashdown(object):
                 continue
 
             # 2) Locate the experiment accession named folder
-            self.exp_folder = self.find_exp_folder(exp_id,args.results_folder)
+            self.exp_folder = dxencode.find_exp_folder(self.project,exp_id,args.results_folder,warn=True)
             if self.exp_folder == None:
                 continue
             print "- Examining %s:%s for '%s' results..." % \
