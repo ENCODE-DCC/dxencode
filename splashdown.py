@@ -357,6 +357,7 @@ class Splashdown(object):
     def find_needed_files(self,files_expected,verbose=False):
         '''Returns the tuple list of files that NEED to be posted to ENCODE.'''
         needed = []
+        self.found = {}
         for (out_type, rep_tech, fid) in files_expected:
             # Current strategy is to complete an post before updating the accession field.
             # so existence of accession should mean it is already in encoded.
@@ -369,8 +370,11 @@ class Splashdown(object):
                 if accession.startswith(self.acc_prefix) and len(accession) == 11:
                     continue
             # No accession so try to match in encoded by submit_file_name and size
-            if self.find_in_encode(fid,verbose) == None:
+            f_obj =  self.find_in_encode(fid,verbose)
+            if f_obj == None:
                 needed.append( (out_type,rep_tech,fid) )
+            else:
+                self.found[fid] = f_obj
 
         if verbose:
             print "Needed files:"
