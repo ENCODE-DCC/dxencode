@@ -5,9 +5,120 @@ import sys
 
 class Patchdown(splashdown.Splashdown):
 
+    post_templates = {
+        # For looking up previous result files, use wild-cards
+        # used with old lrnaLaunch script
+        "tophat_bam":   {
+            "file_format": "bam",
+            "output_type": "alignments",
+            "derived_from": ["reads1", "reads2"]
+        },
+        "tophat_minus_all_bw":  {
+            "file_format": "bigWig",
+            "output_type": "multi-read minus signal",
+            "derived_from": ["tophat_bam"]
+        },
+        "tophat_minus_uniq_bw":{
+            "file_format": "bigWig",
+            "output_type": "unique minus signal",
+            "derived_from": ["tophat_bam"]
+        },
+        "tophat_plus_all_bw":   {
+            "file_format": "bigWig",
+            "output_type": "multi-read plus signal",
+            "derived_from": ["tophat_bam"]
+        },
+        "tophat_plus_uniq_bw":  {
+            "file_format": "bigWig",
+            "output_type": "unique minus signal",
+            "derived_from": ["tophat_bam"]
+        },
+        "tophat_all_bw":        {
+            "file_format": "bigWig",
+            "output_type": "multi-read signal",
+            "derived_from": ["tophat_bam"]
+        },
+        "tophat_uniq_bw":       {
+            "file_format": "bigWig",
+            "output_type": "unique signal",
+            "derived_from": ["tophat_bam"]
+        },
+        "star_genome_bam":      {
+            "file_format": "bam",
+            "output_type": "alignments",
+            "derived_from": ["reads1", "reads2"]
+        },
+        "star_minus_all_bw":    {
+            "file_format": "bigWig",
+            "output_type": "multi-read minus signal",
+            "derived_from": ["star_genome_bam"]
+        },
+        "star_minus_uniq_bw":   {
+            "file_format": "bigWig",
+            "output_type": "unique minus signal",
+            "derived_from": ["star_genome_bam"]
+        },
+        "star_plus_all_bw":     {
+            "file_format": "bigWig",
+            "output_type": "multi-read plus signal",
+            "derived_from": ["star_genome_bam"]
+        },
+        "star_plus_uniq_bw":    {
+            "file_format": "bigWig",
+            "output_type": "unique plus signal",
+            "derived_from": ["star_genome_bam"]
+        },
+        "star_all_bw":          {
+            "file_format": "bigWig",
+            "output_type": "multi-read signal",
+            "derived_from": ["star_genome_bam"]
+        },
+        "star_uniq_bw":         {
+            "file_format": "bigWig",
+            "output_type": "unique signal",
+            "derived_from": ["star_genome_bam"]
+        },
+        "rsem_gene_results":    {
+            "file_format": "tsv",
+            "output_type": "genome quantifications",
+            "derived_from": ["star_anno_bam"]
+            # note should be derived from star_anno_bam
+        },
+        "star_anno_bam":        {
+            "file_format": "bam",
+            "output_type": "transcriptome alignments",
+            "derived_from": ["reads1", "reads2"]
+        },
+        "rsem_iso_results":     {
+            "file_format": "tsv",
+            "output_type": "transcript quantifications",
+            "derived_from": ["star_anno_bam"]
+        },
+        "reads1":     {
+            "file_format": "fastq",
+            "output_type": "reads1",
+            "derived_from": []
+        },
+        "reads2":     {
+            "file_format": "fastq",
+            "output_type": "reads2",
+            "derived_from": []
+        }
+    }
+
+    def __init__(self):
+        super(Patchdown, self).__init__()
+        self.derived_map = { x['output_type']:
+            [ self.post_templates[y]['output_type'] for y in x['derived_from'] ] for x in self.post_templates.values() }
+
+
     def find_derived_from(self,fid,job,verbose=False):
-        import pdb;pdb.set_trace()
-        super(Patchdown, self).find_derived_from(fid,job,verbose)
+        derived_from = super(Patchdown, self).find_derived_from(fid,job,verbose)
+        if not derived_from:
+            #import pdb;pdb.set_trace()
+            # try to guess
+            pass
+        return derived_from
 
     def run(self):
         '''Override super.run()'''
@@ -80,12 +191,15 @@ class Patchdown(splashdown.Splashdown):
 
                 derived_from = self.find_derived_from(fid,job, args.verbose)
                 if not files_to_post.get(fid,()):
-                    f_obj = self.found[fid]
-                    current_derived_from = f_obj['derived_from']
-                    if derived_from != current_derived_from:
-                        print "Need to patch derived_from for %s/%s to %s (currently: %s)" % (f_obj['accession'], fid, derived_from, current_derived_from)
+                    f_obj = self.found.get(fid,None)
+                    if f_obj:
+                        current_derived_from = f_obj['derived_from']
+                        if derived_from and not current_derived_from:
+                            print "Need to patch derived_from for %s/%s to %s (currently: %s)" % (f_obj['accession'], fid, derived_from, current_derived_from)
+                        else:
+                            print "Derived from for %s good" % f_obj['accession']
                     else:
-                        print "Derived from for %s good" % f_obj['accession']
+                        print "File %s (%s) from %s/%s not found @ DNANexus" % (fid,out_type,exp_id,rep_tech)
 
                 #POSTING
                 else:
@@ -93,7 +207,6 @@ class Patchdown(splashdown.Splashdown):
 
                     file_count += 1
                     # c) Post file and update encoded database.
-                    '''
                     accession = self.file_post(fid,payload,args.test)
                     if accession == None:
                         print "* HALTING %s - post failure could compromise 'derived_from'" % \
@@ -105,7 +218,6 @@ class Patchdown(splashdown.Splashdown):
                     if not args.test:
                         post_count += 1
                     self.file_mark_accession(fid,accession,args.test)
-                    '''
 
                 print "- For %s Processed %d file(s), posted %s" % \
                                                             (self.exp_id, file_count, post_count)

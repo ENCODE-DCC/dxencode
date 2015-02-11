@@ -402,6 +402,7 @@ class Splashdown(object):
                 if self.server_key == 'test':
                     acc_key = "test_accession"
                 if "properties" in inp_obj and acc_key in inp_obj["properties"]:
+                    # older runs don't have
                     accession = inp_obj["properties"][acc_key]
                     if accession.startswith(self.acc_prefix) and len(accession) == 11:
                         derived_from.append(accession)
@@ -463,9 +464,10 @@ class Splashdown(object):
         payload['file_size'] = dx_obj["size"]
         #payload['md5sum'] = calculated_md5 # TODO: Find from file properties???
         if self.genome == None:
-            print "Error: could not determine genome assembly! Add properties to reference files."
-            sys.exit(1)
-        payload['assembly'] = self.genome
+            print "Warning: could not determine genome assembly! Add properties to reference files."
+            #sys.exit(1)
+        else:
+            payload['assembly'] = self.genome
         if self.annotation != None:
             payload['genome_annotation'] = self.annotation
 
