@@ -58,7 +58,7 @@ def processkey(key):
     '''
     if key in SAVED_KEYS:
         return SAVED_KEYS[key]
-    
+
     if key:
         keysf = open(KEYFILE,'r')
         keys_json_string = keysf.read()
@@ -141,7 +141,7 @@ def env_get_current_project():
     ''' Returns the current project name for the command-line environment '''
     err, proj_name = commands.getstatusoutput('cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME')
     if err != 0:
-        return None 
+        return None
     return proj_name
 
 
@@ -197,10 +197,10 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
     # Normalize
     if root_folders.endswith('/'):
         root_folders = root_folders[:-1]
-        
+
     # match whole path to first target
     targets = target_folder.split('/')
-    full_query = root_folders + '/' + targets[0] 
+    full_query = root_folders + '/' + targets[0]
 
     if full_query in query_folders:  # hash shortcut
         if len(targets) == 1:
@@ -329,7 +329,7 @@ def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
 
     #hack together the s3 cp url (with the s3 method instead of https)
     return filename, S3_SERVER.rstrip('/') + o.path
-    
+
 def copy_enc_file_to_dx(accession,proj_id,dx_folder,dx_name=None,f_obj=None,key=None):
     '''
     Finds encoded file by accession, creates s3 url and copies file to named folder,
@@ -350,7 +350,7 @@ def copy_enc_file_to_dx(accession,proj_id,dx_folder,dx_name=None,f_obj=None,key=
         accession = f_obj['accession']
     # If both are None or if accessions don't match then developer will hear about it!
     assert accession == f_obj['accession']
-    
+
     (enc_file_name,s3_url) = get_bucket(SERVER, AUTHID, AUTHPW, f_obj)
     if enc_file_name == None or s3_url == None:
         return None
@@ -609,6 +609,39 @@ def replicates_to_map(experiment, files):
     else:
         reps_with_files = set([ f['replicate']['uuid'] for f in files if f.get('replicate') ])
         return [ r for r in experiment['replicates'] if r['uuid'] in reps_with_files ]
+
+def is_paired_ended(experiment):
+    ''' this is likely not the most efficient way to do this'''
+
+    mapping = choose_mapping_for_experiment(experiment, warn=True)
+    reps_paired = {}
+    for rep in mapping.keys():
+        p = mapping[rep].get('paired', [])
+        up = mapping[rep].get('unpaired', [])
+        # I should be a CS guy and do some XOR thing here.
+        if p and not up:
+            reps_paired[rep] = True
+        elif up and not p:
+            reps_paired[rep] = False
+        else:
+            print("Mixed mapping for replicate %s/%s" %(experiment['accession'], rep))
+            print("Paired: %s" % ([ f['accession'] for f in p ]))
+            print("Unaired: %s" % ([ f['accession'] for f in up ]))
+            sys.exit(1)
+
+    trues = len([ v for v in reps_paired if v ])
+    falses = len([v for v in reps_paired if not v])
+    if trues and falses:
+        print("Mixed mapping for replicates in experiment %s" % (experiment['accession']))
+        print reps_paired
+    else:
+        if trues:
+            return True
+        elif falses:
+            return False
+
+    print "Never get here"
+    sys.exit(1)
 
 def choose_mapping_for_experiment(experiment,warn=True):
     ''' for a given experiment object, fully embedded, return experimental info needed for mapping
