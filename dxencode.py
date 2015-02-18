@@ -629,8 +629,8 @@ def is_paired_ended(experiment):
             print("Unaired: %s" % ([ f['accession'] for f in up ]))
             sys.exit(1)
 
-    trues = len([ v for v in reps_paired if v ])
-    falses = len([v for v in reps_paired if not v])
+    trues = len([ v for v in reps_paired.values() if v ])
+    falses = len([ v for v in reps_paired.values() if not v])
     if trues and falses:
         print("Mixed mapping for replicates in experiment %s" % (experiment['accession']))
         print reps_paired

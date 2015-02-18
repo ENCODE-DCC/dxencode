@@ -53,7 +53,7 @@ class Checker(object):
 
         ap.add_argument('-a', '--all',
                         help='All experiments for assay type (as specified in self.do_query())',
-                        nargs='+',
+                        action='store_true',
                         required=False)
 
         ap.add_argument('--verbose',
