@@ -130,7 +130,7 @@ class lRNAChecker(Checker):
                     # do I need to hash by output_type here?
                 except (ValueError, KeyError), e:
                     # should also trap JSON loads exception.
-                    print("WARN: Other file: %s %s %s %s" % (f['accession'], f['file_format'], f['output_type'], f['submitted_by']))
+                    print("WARN %s: Other file: %s %s %s %s" % (exp['accession'], f['accession'], f['file_format'], f['output_type'], f['submitted_by']))
                     #print("Error: %s" % (e))
                     continue
 
@@ -139,16 +139,16 @@ class lRNAChecker(Checker):
             return
 
         for rep in reads.keys():
-            print("%s: Found %s fastqs in replicate %s" % (exp['accession'], len(reads[rep]), rep))
+            print("WARN %s: Found %s fastqs in replicate %s" % (exp['accession'], len(reads[rep]), rep))
 
 
         if not derived.keys():
-            print("WARN: No derived files found in %s" % (exp['accession']))
+            print("WARN %s: No derived files found." % (exp['accession']))
             return
 
         for gen in derived.keys():
             for ann in derived[gen].keys():
-                print("%s: Found %s derived files for %s/%s" %(exp['accession'], len(derived[gen][ann]), gen,ann))
+                print("WARN %s: Found %s derived files for %s/%s" %(exp['accession'], len(derived[gen][ann]), gen,ann))
 
         paired = 'unpaired'
         if dxencode.is_paired_ended(exp):
@@ -218,11 +218,11 @@ class lRNAChecker(Checker):
                     print("Could not find %s in encodeD" % (acc))
                     continue
         elif self.args.all:
-            q = 'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&files.file_format=fastq&frame=embedded' % self.ASSAY_TERM_ID
+            q = 'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&files.file_format=fastq&frame=embedded&replicates.library.size_range=>200' % self.ASSAY_TERM_ID
             res = dxencode.encoded_get(self.server+q,  AUTHID=self.authid,AUTHPW=self.authpw)
             try:
                 res.raise_for_status()
-                self.experiments = [ e for e in res.json()['@graph'] if e['replicates'][0]['library'].get('size_range', "") != '>200' ]
+                self.experiments = res.json()['@graph']
             except Exception, ex:
                 print("Some error: %s trying to find experiments" % (ex))
                 raise
