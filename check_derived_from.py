@@ -82,11 +82,8 @@ class lRNAChecker(Checker):
 
         reads = {}
         derived = {}
-        paired = 'unpaired'
-        if dxencode.is_paired_ended(exp):
-            paired = 'paired'
 
-        for facc in exp['original_files']:  ## this could throw a key error but shouldn't
+        for facc in exp.get('original_files',[]): ## could have no files
             res = dxencode.encoded_get(self.server+facc, AUTHID=self.authid, AUTHPW=self.authpw)
             try:
                 res.raise_for_status()
@@ -100,7 +97,6 @@ class lRNAChecker(Checker):
                     rstr = "rep_%s_%s" % (f['replicate']['biological_replicate_number'], f['replicate']['technical_replicate_number'])
                 except:
                     print("missing replicate numbers for fastq: %s" % (json.dumps(f,indent=4)))
-                    import pdb;pdb.set_trace()
                     continue
                 rr = reads.get(rstr,{})
                 rr.update({f['accession']: f})
@@ -131,32 +127,32 @@ class lRNAChecker(Checker):
                         derived[gen][ann] = rfa
                     else:
                         derived[gen].update({ ann: rfa})
-
-
-
-                    '''
-                    Cant' get this to do what I want
-                    rfg = derived.get(gen,{})
-                    rfa = rfg.get(ann, {})
-
-                    if derived.get(gen):
-                        rfg.update(rfa)
-                        derived[gen] = rfg
-                    else:
-                        derived.setdefault(gen,{})[ann] = rfg
-                    '''
                     # do I need to hash by output_type here?
-                except KeyError, e:
+                except (ValueError, KeyError), e:
                     # should also trap JSON loads exception.
                     print("WARN: Other file: %s %s %s %s" % (f['accession'], f['file_format'], f['output_type'], f['submitted_by']))
                     #print("Error: %s" % (e))
                     continue
 
+        if not reads.keys():
+            print("WARN: No read files found in %s" % (exp['accession']))
+            return
+
         for rep in reads.keys():
             print("%s: Found %s fastqs in replicate %s" % (exp['accession'], len(reads[rep]), rep))
+
+
+        if not derived.keys():
+            print("WARN: No derived files found in %s" % (exp['accession']))
+            return
+
         for gen in derived.keys():
             for ann in derived[gen].keys():
                 print("%s: Found %s derived files for %s/%s" %(exp['accession'], len(derived[gen][ann]), gen,ann))
+
+        paired = 'unpaired'
+        if dxencode.is_paired_ended(exp):
+            paired = 'paired'
 
         for assembly in derived.keys():
             for annotation in derived[assembly].keys():
@@ -222,7 +218,7 @@ class lRNAChecker(Checker):
                     print("Could not find %s in encodeD" % (acc))
                     continue
         elif self.args.all:
-            q = self.server+'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&files.file_format=fastq' % self.ASSAY_TERM_ID
+            q = 'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&files.file_format=fastq&frame=embedded' % self.ASSAY_TERM_ID
             res = dxencode.encoded_get(self.server+q,  AUTHID=self.authid,AUTHPW=self.authpw)
             try:
                 res.raise_for_status()
