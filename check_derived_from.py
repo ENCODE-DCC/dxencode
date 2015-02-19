@@ -98,7 +98,10 @@ class lRNAChecker(Checker):
                 print("File: %s not found" % (facc))
                 continue
 
-            if f['file_format'] == 'fastq' and f['output_type'] == 'reads':
+            if f['file_format'] == 'fastq':
+                if f['output_type'] != 'reads':
+                    # sometimes this is "raw data" but I guess we just cross fingers here.
+                    f['output_type'] = 'reads'
                 try:
                     rstr = "rep_%s_%s" % (f['replicate']['biological_replicate_number'], f['replicate']['technical_replicate_number'])
                 except:
