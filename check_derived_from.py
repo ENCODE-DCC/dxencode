@@ -69,13 +69,19 @@ class Checker(object):
         return ap.parse_args()
 
 class lRNAChecker(Checker):
-    ASSAY_TYPE = 'RNA-seq'
-    ASSAY_TERM_ID = "OBI:0001271"
+    ASSAY_TYPES = ['RNA-seq', 'shRNA knockdown followed by RNA-seq']
+    ASSAY_QUERY = "assay_term_id=OBI:0001271&assay_term_id=NTR:0000762"
 
     def guess_parents(self, f, derived_files, reads, current_graph):
         parent_type = current_graph[f['output_type']]
-        possibles = [ (d['accession'], d['file_format'], d['output_type'], d['submitted_file_name']) for d in derived_files.values()
+
+        options = derived_files
+        if parent_type == 'reads':
+            options = reads
+
+        possibles = [ (d['accession'], d['file_format'], d['output_type'], d['submitted_file_name']) for d in options.values()
             if d['output_type'] == parent_type ]
+
         return possibles
 
     def reconcile(self, exp):
@@ -160,16 +166,17 @@ class lRNAChecker(Checker):
 
                 for acc, f in derived[assembly][annotation].items():
                     dfs = f['derived_from']
+                    try:
+                        f_rstr = "rep_%s_%s" % (f['replicate']['biological_replicate_number'], f['replicate']['technical_replicate_number'])
+                    except:
+                        print("WARN %s: missing replicate numbers for %s" % (exp['accession'], json.dumps(f,indent=4)))
+                        continue
                     if not dfs:
                         print("File not in graph: %s %s %s %s %s" % (f['accession'], f['file_format'], f['output_type'], f['submitted_by']['title'], notes))
-                        print("Possible parents: %s" %(self.guess_parents(f, derived[assembly][annotation], reads, current_graph)))
+                        possibilities = self.guess_parents(f, derived[assembly][annotation], reads[f_rstr], current_graph)
+                        print("Possible parents (%s): %s" % (len(possibilities), possibilities))
                     else:
                         notes = json.loads(f['notes'])
-                        try:
-                            f_rstr = "rep_%s_%s" % (f['replicate']['biological_replicate_number'], f['replicate']['technical_replicate_number'])
-                        except:
-                            print("missing replicate numbers for %s" % (json.dumps(f,indent=4)))
-                            continue
                         aligns = [ sv['software'] for sv in notes['software_versions'] if sv['software'] in self.aligners ]
 
                         if f['output_type'] == 'alignments':
@@ -218,7 +225,7 @@ class lRNAChecker(Checker):
                     print("Could not find %s in encodeD" % (acc))
                     continue
         elif self.args.all:
-            q = 'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&files.file_format=fastq&frame=embedded&replicates.library.size_range=>200' % self.ASSAY_TERM_ID
+            q = 'search/?type=experiment&%s&award.rfa=ENCODE3&limit=all&files.file_format=fastq&frame=embedded&replicates.library.size_range=>200' % self.ASSAY_QUERY
             res = dxencode.encoded_get(self.server+q,  AUTHID=self.authid,AUTHPW=self.authpw)
             try:
                 res.raise_for_status()
