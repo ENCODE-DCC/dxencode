@@ -182,6 +182,10 @@ class Splashdown(object):
                         action='store_true',
                         required=False)
 
+        ap.add_argument('--force_annotation',
+                        help='If annotation cannot be found, use this string',
+                        required=False)
+
         return ap.parse_args()
 
     def get_exp_type(self,exp_id,exp=None):

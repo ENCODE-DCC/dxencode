@@ -2,6 +2,7 @@
 import splashdown
 import dxencode
 import sys
+import dxpy.exceptions
 
 class Patchdown(splashdown.Splashdown):
 
@@ -113,7 +114,14 @@ class Patchdown(splashdown.Splashdown):
 
 
     def find_derived_from(self,fid,job,verbose=False):
-        derived_from = super(Patchdown, self).find_derived_from(fid,job,verbose)
+        ''' wrap in exception because sometimes dx-files go missing '''
+        try:
+            derived_from = super(Patchdown, self).find_derived_from(fid,job,verbose)
+
+        except dxpy.exceptions.ResourceNotFound, e:
+            print "WARN: derived_from failed %s" % e
+            derived_from = []
+
         if not derived_from:
             #import pdb;pdb.set_trace()
             # try to guess
@@ -189,7 +197,12 @@ class Patchdown(splashdown.Splashdown):
                 print "  Handle file %s" % dxencode.file_path_from_fid(fid)
                 job = dxencode.job_from_fid(fid)
 
-                derived_from = self.find_derived_from(fid,job, args.verbose)
+                try:
+                    derived_from = self.find_derived_from(fid,job, args.verbose)
+
+                except dxpy.exceptions.ResourceNotFound, e:
+                    print "WARN: derived_from failed %s" % e
+                    derived_from = []
                 if not files_to_post.get(fid,()):
                     f_obj = self.found.get(fid,None)
                     if f_obj:
@@ -204,6 +217,9 @@ class Patchdown(splashdown.Splashdown):
                 #POSTING
                 else:
                     payload = self.make_payload_obj(out_type,rep_tech,fid, verbose=args.verbose)
+                    if args.force_annotation:
+                        print "WARN: forcing genome_annotation to be %s" % args.force_annotation
+                        payload['genome_annotation'] = args.force_annotation
 
                     file_count += 1
                     # c) Post file and update encoded database.
