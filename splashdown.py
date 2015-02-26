@@ -186,6 +186,11 @@ class Splashdown(object):
                         help='If annotation cannot be found, use this string',
                         required=False)
 
+        ap.add_argument('--ignore_properties',
+                        help='Ignore DNANexus file properties and try to post, --server == test',
+                        action='store_true',
+                        required=False)
+
         return ap.parse_args()
 
     def get_exp_type(self,exp_id,exp=None):
@@ -367,12 +372,14 @@ class Splashdown(object):
             # so existence of accession should mean it is already in encoded.
             fileDict = dxencode.description_from_fid(fid,properties=True)
             acc_key = "accession"
-            if self.server_key == 'test':
-                acc_key = "test_accession"
-            if "properties" in fileDict and acc_key in fileDict["properties"]:
-                accession = fileDict["properties"][acc_key]
-                if accession.startswith(self.acc_prefix) and len(accession) == 11:
-                    continue
+            if not self.ignore:
+                # check file properties
+                if self.server_key == 'test':
+                    acc_key = "test_accession"
+                if "properties" in fileDict and acc_key in fileDict["properties"]:
+                    accession = fileDict["properties"][acc_key]
+                    if accession.startswith(self.acc_prefix) and len(accession) == 11:
+                        continue
             # No accession so try to match in encoded by submit_file_name and size
             f_obj =  self.find_in_encode(fid,verbose)
             if f_obj == None:
@@ -563,6 +570,11 @@ class Splashdown(object):
         '''Runs splasdown from start to finish using command line arguments.'''
         args = self.get_args()
         self.test = args.test
+        if args.ignore_properties:
+            print "Ignoring DXFile properties (will post to test server)"
+            self.ignore = args.ignore_properties
+            self.server_key = 'test' # mandated because option is dangerous
+
         self.server_key = args.server
         if self.server_key != "test":
             self.acc_prefix = "ENCFF"
