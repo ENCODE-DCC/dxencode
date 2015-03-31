@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# assemble.py 0.0.1
+# assemble.py 0.0.2
 
 import argparse,os, sys, json
 #import urlparse, subprocess, itertools, logging
@@ -16,12 +16,12 @@ class Assemble(object):
     '''
 
     SERVER_DEFAULT = 'www'
-    '''This the default server to post files to.'''
+    '''At this time there is no need to use the any but the one true server for assembling.'''
 
     RESULT_FOLDER_DEFAULT = '/runs/'
-    '''At this time there is no need to use the any but the one true server for assembling.'''
+    '''This the default location for creating experiment folders on dnanexus.'''
     
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dna-me","chip-seq" ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dnase" ,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
     # Pipeline files includes inputs and results.  To assemble the files, there is no need to understand step order
@@ -70,9 +70,7 @@ class Assemble(object):
 
     def __init__(self):
         '''
-        Launch expects to be the base class for derived pipeline specific launch classes.
-        As such it will not run stand alone.
-        an experiment.
+        Assemble expects to be the only class for assembling experiments on for pipeline types.
         '''
         self.args = {} # run time arguments
         self.server_key = self.SERVER_DEFAULT
@@ -85,10 +83,7 @@ class Assemble(object):
     
     def get_args(self,parse=True):
         '''Parse the input arguments.'''
-        # MAY NEED TO EXTEND OR REPLACE in derived class
-        # see long-rna-seq: lrnaLaunch.py for and example of extending
-        
-        # Change this description to PIPELINE SPECIFIC version
+        # Change this description if there is a derived version of Assemble
         ap = argparse.ArgumentParser(description="Handles assembly of files needed to launched pipeline runs " +
                     "for supported experiment types. Can be run repeatedly and will only try to " +
                     "copy the files from ENCODEd that are not already on dnanexus in the expected loaction, All files " +
@@ -110,6 +105,11 @@ class Assemble(object):
                         help="Technical replicate number (default: 1)",
                         type=int,
                         default='1',
+                        required=False)
+
+        ap.add_argument('-i','--inputs_only',
+                        help='Only copy input files (e.g. fastqs) to dnanexus',
+                        action='store_true',
                         required=False)
 
         # Easier to make it whole experiment or experiment/replicate
@@ -143,7 +143,7 @@ class Assemble(object):
         #                required=False)
 
         ap.add_argument('--server',
-                        help="Server to post files to (default: '" + self.SERVER_DEFAULT + "')",
+                        help="Server to download files from (default: '" + self.SERVER_DEFAULT + "')",
                         default=self.SERVER_DEFAULT,
                         required=False)
 
@@ -160,6 +160,7 @@ class Assemble(object):
     def load_variables(self,args,key='default'):
         '''Loads common variables to self.'''
         self.test = args.test
+        self.inputs_only = args.inputs_only
         self.server_key = args.server
         if self.server_key != "test":
             self.acc_prefix = "ENCFF"
@@ -240,17 +241,19 @@ class Assemble(object):
                 enc_file_names.append(file_path) 
 
         # Result file must match their glob!
-        result_files = dxencode.get_enc_exp_files(exp,key=self.server_key)
-        for obj_type in exp_files['results'].keys():
-            for f_obj in result_files:
-                if obj_type == f_obj['output_type']:
-                    file_path = f_obj['submitted_file_name']
-                    if file_path in enc_file_names:
-                        continue
-                    for glob in exp_files['results'][obj_type]:
-                        if fnmatch.fnmatch(file_path, glob):
-                            enc_files.append( f_obj )
-                            enc_file_names.append(file_path) 
+        if not self.inputs_only:
+            result_files = dxencode.get_enc_exp_files(exp,key=self.server_key)
+            for obj_type in exp_files['results'].keys():
+                for f_obj in result_files:
+                    if obj_type == f_obj['output_type']:
+                        file_path = f_obj['submitted_file_name']
+                        if file_path in enc_file_names:
+                            continue
+                        for glob in exp_files['results'][obj_type]:
+                            if fnmatch.fnmatch(file_path, glob):
+                                enc_files.append( f_obj )
+                                enc_file_names.append(file_path) 
+
         if verbose:
             print "Encoded files:"
             #print json.dumps(enc_files,indent=4)
@@ -395,7 +398,7 @@ class Assemble(object):
                     print "NEED TO WRITE dx applet to copy a file from encoded to dx."
                     sys.exit(1)
                     #fid = dxencode.copy_enc_file_to_dx(f_obj['accession'],self.proj_id,f_obj['dx_folder'],f_obj['dx_file_name'], \
-                                                                                                f_obj=f_obj,key=self.server_key)
+                    #                                                                            f_obj=f_obj,key=self.server_key)
                     if fid == None:
                         print "  * Failure to copy %s to dx %s%s%s" % \
                                 (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
