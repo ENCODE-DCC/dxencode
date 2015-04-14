@@ -528,7 +528,7 @@ class Splashdown(object):
                     (br,tr) = br_tr.split('_')
                     full_mapping = dxencode.get_full_mapping(self.exp_id,self.exp)
                     mapping = dxencode.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
-                    if mapping["paired_ended"]:
+                    if "paired_ended" in mapping:
                         pipe_qualifiers["qualifier"] = '-pe'
                     else:
                         pipe_qualifiers["qualifier"] = '-se'
@@ -1029,8 +1029,8 @@ class Splashdown(object):
                     post_count += 1
                 self.file_mark_accession(fid,accession,args.test)
 
-                if post_count >= 1:  # Short circuit for test
-                    break
+                #if post_count >= 1:  # Short circuit for test
+                #    break
 
             print "- For %s Processed %d file(s), posted %s" % \
                                                         (self.exp_id, file_count, post_count)

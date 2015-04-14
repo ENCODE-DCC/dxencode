@@ -918,7 +918,7 @@ def dx_file_get_property(fid,key,return_json=False,fail_on_parse_error=True):
 def dx_property_accesion_key(server_key):
     '''Returns the dx file propery key to use for the accession property.  Depends on the server being posted to.'''
     acc_key = "beta_accession"
-    if server_key == "test"
+    if server_key == "test":
         acc_key = "test_accesion"
     elif server_key == "www":
         acc_key = "accesion"
