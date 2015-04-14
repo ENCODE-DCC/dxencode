@@ -13,6 +13,8 @@ import shlex
 
 import logging
 
+DXENCODE_VERSION = "1"
+
 GENOME_DEFAULTS = { 'human': 'hg19', 'mouse': 'mm10' }
 ''' This the default genomes for each supported organism.'''
 
@@ -919,9 +921,9 @@ def dx_property_accesion_key(server_key):
     '''Returns the dx file propery key to use for the accession property.  Depends on the server being posted to.'''
     acc_key = "beta_accession"
     if server_key == "test":
-        acc_key = "test_accesion"
+        acc_key = "test_accession"
     elif server_key == "www":
-        acc_key = "accesion"
+        acc_key = "accession"
     return acc_key
     
 def dx_file_set_property(fid,key,value,add_only=False,test=False,verbose=False):
