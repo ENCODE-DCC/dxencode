@@ -63,7 +63,7 @@ class Assemble(object):
             # TODO: "references" Probably not.  Assume that they are in place.
         }
     }
-
+    
     GENOMES_SUPPORTED = ['hg19', 'mm10']
     GENOME_DEFAULT = 'hg19'
     ''' This the default Genome that long RNA-seq experiments are mapped to.'''
@@ -79,7 +79,7 @@ class Assemble(object):
         self.proj_id = None
         self.exp = {}  # Will hold the encoded exp json
         self.psv = {} # will hold pipeline specific variables.
-
+        print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
     def get_args(self,parse=True):
         '''Parse the input arguments.'''
@@ -310,13 +310,73 @@ class Assemble(object):
         return needed_files
 
 
+    def prepare_files_to_fetch_json(self, needed_files,verbose=False):
+        '''Prepares a json string for requesting files to fetch from encoded to dnanexus.'''
+        f2f_files = []
+        AUTHID, AUTHPW, SERVER = dxencode.processkey(self.server_key)
+        for f_obj in needed_files:
+            f2f_obj = {}     # { "accession": ,"dx_folder": ,"dx_file_name": }
+            f2f_obj['accession'] = f_obj['accession']
+            f2f_obj['dx_folder'] = f_obj['dx_folder']
+            f2f_obj['dx_file_name'] = f_obj['dx_file_name']
+            (enc_file_name, bucket_url) = dxencode.get_bucket(SERVER, AUTHID, AUTHPW, f_obj)
+            f2f_obj['enc_file_name'] = enc_file_name
+            f2f_obj['bucket_url'] = bucket_url
+            f2f_files.append(f2f_obj)
+        f2f_json = json.dumps(f2f_files)
+        if verbose:
+            print "Files to fetch from encoded to dnanexus files json:"
+            print f2f_json
+        return f2f_json
+
+
+    def fetch_to_dx(self,exp_id,dx_folder,needed_files,test=True):
+        '''Runs fetch-to-dx app to fetch of all files for a given experiment from encoded to dnanexus.'''
+        needed_count = len(needed_files)        
+        files_to_fetch = self.prepare_files_to_fetch_json(needed_files,verbose=False)
+        assert (files_to_fetch != None)
+
+        if test:
+            print "  - Test fetch %d files from encoded:%s to dnanexus:%s" % (needed_count,exp_id,dx_folder)
+            return 0 # Returns the number of files NOT successfully fetched
+        else:
+            applet = dxencode.find_applet_by_name('fetch-to-dx', self.proj_id )
+            job = applet.run({
+                "exp_acc": exp_id,
+                "files_to_fetch": files_to_fetch,
+                "key": self.server_key,
+                "skipvalidate": True,
+                "debug": True
+                },
+                folder=dx_folder,name="Fetch files for "+exp_id)
+            print "  - Fetching %d files from encoded:%s to dnanexus:%s  (job:%s)" % \
+                    (needed_count,exp_id,dx_folder,job.id)
+            sys.stdout.flush() # Slow running job should flush to piped log
+            try:
+                job.wait_on_done(interval=3)
+            except Exception as e:
+                print "  " + e.message
+                return needed_count
+
+            job_dict = job.describe()
+            #error = job_dict['output'].get('error', None)
+            if job_dict["state"] == "done":
+                fetched_count = job_dict['output'].get('fetched_count', 0)
+                return needed_count - fetched_count
+
+        return needed_count # Returns the number of files NOT successfully fetched
+
 
     def run(self):
-        '''Called from amin to run as command line utility'''
+        '''Runs launch from start to finish using command line arguments.'''
         # NOT EXPECTED TO OVERRIDE
-
+        
+        #try:
         args = self.get_args()
         self.load_variables(args)
+        #except Exception as e:
+        #    print 'Caught: %s %s' % (e.status_code, e.reason)
+        #    #raise
         
         print "== Running in project [%s] and will copy from the [%s] server ==" % \
                                                         (self.proj_name,self.server_key)
@@ -389,36 +449,49 @@ class Assemble(object):
                 continue
             print "- Need to copy %d files to dx for %s" % (len(needed_files),self.exp_id)
             
-            # Now for each needed file copy it to dx
-            copied = 0
-            failed = 0
+            # Now for each needed report it
             for f_obj in needed_files:
                 sys.stdout.flush() # Slow running job should flush to piped log
                 if not self.test: 
-                    print "NEED TO WRITE dx applet to copy a file from encoded to dx."
-                    sys.exit(1)
-                    #fid = dxencode.copy_enc_file_to_dx(f_obj['accession'],self.proj_id,f_obj['dx_folder'],f_obj['dx_file_name'], \
-                    #                                                                            f_obj=f_obj,key=self.server_key)
-                    if fid == None:
-                        print "  * Failure to copy %s to dx %s%s%s" % \
-                                (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
-                        failed += 1
-                        contine
-                    else:
-                        print "  - Copied %s to dx %s:%s%s" % \
-                                (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
-                        copied += 1
+            #        print "NEED TO WRITE dx applet to copy a file from encoded to dx."
+            #        sys.exit(1)
+            #        #fid = dxencode.copy_enc_file_to_dx(f_obj['accession'],self.proj_id,f_obj['dx_folder'],f_obj['dx_file_name'], \
+            #        #                                                                            f_obj=f_obj,key=self.server_key)
+            #        if fid == None:
+            #            print "  * Failure to copy %s to dx %s%s%s" % \
+            #                    (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
+            #            failed += 1
+            #            contine
+            #        else:
+            #            print "  - Copied %s to dx %s:%s%s" % \
+            #                    (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
+            #            copied += 1
+                    print "  - Will try to copy %s to dx %s:%s%s" % \
+                            (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
                 else:
                     print "  - Would try to copy %s to dx %s:%s%s" % \
                             (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
 
-            print "- For %s Processed %d file(s), copied %d, failed %d" % \
-                                                        (self.exp_id, len(needed_files), copied, failed)
+            failed = 0
+            failed = self.fetch_to_dx(self.exp_id,self.exp_folder,needed_files,test=self.test)
+            copied = len(needed_files) - failed
+            
+            if self.test:
+                print "- For %s Processed %d file(s), would try to copy %d file(s)" % \
+                                                            (self.exp_id, len(needed_files), copied)
+            else:
+                print "- For %s Processed %d file(s), copied %d, failed %d" % \
+                                                            (self.exp_id, len(needed_files), copied, failed)
             total_copied += copied
             total_failed += failed
-            
-        print "Processed %d experiment(s), skipped %d, copied %d file(s) failures %d" % \
-                                                            (exp_count, skipped, total_copied, total_failed)
+        
+        if exp_count > 1:
+            if self.test:
+                print "Processed %d experiment(s), skipped %d, would try to copy %d file(s)" % \
+                                                                (exp_count, skipped, total_copied)
+            else:    
+                print "Processed %d experiment(s), skipped %d, copied %d file(s) failures %d" % \
+                                                                (exp_count, skipped, total_copied, total_failed)
         if total_failed != 0:
             print "(finished with failures)"
             sys.exit(1)    

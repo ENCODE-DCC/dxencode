@@ -80,6 +80,28 @@ def processkey(key):
     SAVED_KEYS[key] = (AUTHID,AUTHPW,SERVER)
     return (AUTHID,AUTHPW,SERVER)
     ## TODO possibly this should return a dict
+    
+def encoded_post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
+    ''' Posts a json object of a given type to the encoded database. '''
+    HEADERS = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+    }
+
+    r = requests.post(
+        SERVER + '/'+obj_type,
+        auth=(AUTHID, AUTHPW),
+        data=json.dumps(obj_meta),
+        headers=HEADERS,
+    )
+    try:
+        r.raise_for_status()
+    except:
+        logger.error('Submission failed: %s %s' % (r.status_code, r.reason))
+        logger.error(r.text)
+        raise
+    item = r.json()['@graph'][0]
+    return item
 
 def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
     ''' take a file object on local file system, post meta data and cp to AWS '''
@@ -291,11 +313,20 @@ def get_project(projectName, level=None):
 
 def find_or_create_folder(project, sub_folder, root_folder='/'):
     ''' Finds or creates a sub_folder in the specified parent (root) folder'''
-    folder = root_folder+sub_folder
-    logger.debug("Creating %s (%s)" % (folder, root_folder))
+    if root_folder.endswith('/'):
+        if sub_folder.startswith('/'):
+            folder = root_folder+sub_folder[1:]
+        else:
+            folder = root_folder+sub_folder
+    else: 
+        if sub_folder.startswith('/'):
+            folder = root_folder+sub_folder
+        else:
+            folder = root_folder+'/'+sub_folder
     if project_has_folder(project, folder):
         return folder
     else:
+        logger.debug("Creating %s" % (folder))
         return project.new_folder(folder)
 
 def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
@@ -832,7 +863,7 @@ def get_sw_from_log(dxfile, regex):
     except:
         print "Could not get job id"
 
-    if not SW_CACHE.get(job_id, {}):
+    if not SW_CACHE.get(job_id+regex, {}):
         cmd = ["dx", "watch", job_id]
         log = subprocess.check_output(cmd, stderr=subprocess.STDOUT) # DEVNULL ?
         swre = re.compile(regex)
@@ -840,12 +871,12 @@ def get_sw_from_log(dxfile, regex):
 
         if not sw:
             return {}
-        SW_CACHE[job_id] =  {
+        SW_CACHE[job_id+regex] =  {
             "software_versions":
                     [ { "software": i,
                         "version":  j }  for (i,j) in sw ]
         }
-    return SW_CACHE[job_id]
+    return SW_CACHE[job_id+regex]
 
 def create_notes(dxfile, addons={}):
     ''' creates temporary notes storage for file metadat from dxfile object '''
@@ -858,5 +889,68 @@ def create_notes(dxfile, addons={}):
 
     notes.update(addons)
     return notes
+
+def dx_file_get_properties(fid):
+    '''Returns dx file's properties.'''
+    file_handler = file_handler_from_fid(fid)
+    return file_handler.get_properties()
+
+def dx_file_get_property(fid,key,return_json=False,fail_on_parse_error=True):
+    '''Returns dx file's property matching 'key'.'''
+    properties = dx_file_get_properties(fid)
+    if not properties or key not in properties:
+        return None
+    if return_json:
+        try:
+            return json.loads(properties[key])
+        except:
+            try:
+                return json.loads("{"+properties[key]+"}")
+            except:
+                print "JSON parsing failed:"
+                print properties[key]
+                if fail_on_parse_error:
+                    sys.exit(1)
+                return None
+    
+    return properties[key]
+
+def dx_property_accesion_key(server_key):
+    '''Returns the dx file propery key to use for the accession property.  Depends on the server being posted to.'''
+    acc_key = "beta_accession"
+    if server_key == "test"
+        acc_key = "test_accesion"
+    elif server_key == "www":
+        acc_key = "accesion"
+    return acc_key
+    
+def dx_file_set_property(fid,key,value,add_only=False,test=False,verbose=False):
+    '''Adds/replaces key=value in a dx file's properties.
+       Returns the value of the property after this operation.'''
+    file_handler = file_handler_from_fid(fid)
+    properties = file_handler.get_properties()
+    if verbose:
+        path = file_path_from_fid(fid)
+    if key in properties:
+        if properties[key] == value:
+            if verbose:
+                print "Note: file %s already has property '%s' set to '%s'" % (path,key,properties[key])
+            return properties[key]
+        elif add_only:
+            if verbose:
+                print "Error: file %s already has property '%s' and is not being updated from '%s'" % (path,key,properties[key])
+            return properties[key]
+        elif verbose:
+                print "Warning: file %s has property '%s' but is being updated to '%s'" % (path,key,value)
+    properties[key] = value
+    if test:
+        if verbose:
+            print "  - Test set %s with %s='%s'" % (path,key,value)
+    else:
+        file_handler.set_properties(properties)
+        if verbose:
+            print "  - set %s with %s='%s'" % (path,key,value)
+    return properties[key]
+
 
 

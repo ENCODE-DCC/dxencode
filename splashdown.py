@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # splashdown.py 0.0.1
 #
 # Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py
@@ -22,9 +22,9 @@
  # NOTE: any job output name='metadata' class=string (in json format!) will be added to each postable file of that job
 
 import argparse,os, sys
-import json, urlparse, subprocess, itertools, logging
+import json, urlparse, subprocess, itertools, logging, time
 #import requests, re, shlex, time
-#from datetime import datetime
+from datetime import datetime
 
 import dxpy
 import dxencode
@@ -61,14 +61,14 @@ class Splashdown(object):
                                      "multi-read plus signal":    "*_tophat_plusAll.bw",
                                      "unique minus signal":       "*_tophat_minusUniq.bw",
                                      "unique plus signal":        "*_tophat_plusUniq.bw"         },
-                "align-star":      { "alignments":                "*_star_genome.bam",
-                                     "transcriptome alignments":  "*_star_anno.bam"              },
                 "signals-star-se": { "multi-read signal":         "*_star_genome_all.bw",
                                      "unique signal":             "*_star_genome_uniq.bw"        },
                 "signals-star-pe": { "multi-read minus signal":   "*_star_genome_minusAll.bw",
                                      "multi-read plus signal":    "*_star_genome_plusAll.bw",
                                      "unique minus signal":       "*_star_genome_minusUniq.bw",
                                      "unique plus signal":        "*_star_genome_plusUniq.bw"    },
+                "align-star":      { "alignments":                "*_star_genome.bam",
+                                     "transcriptome alignments":  "*_star_anno.bam"              },
                 "quant-rsem":      { "transcript quantifications":"*_rsem.isoforms.results",
                                      "genome quantifications":    "*_rsem.genes.results"         }  },
             "combined":   {}
@@ -136,8 +136,10 @@ class Splashdown(object):
         self.pipeline = None # pipeline definitions (filled in when experiment type is known)
         self.replicates = None # lost replicate folders currently found beneath experiment folder
         self.test = True # assume Test until told otherwise
+        self.obj_cache = {} # certain things take time to find or create and are needed multiple times
         dxencode.logger = logging.getLogger(__name__) # I need this to avoid some errors
         dxencode.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
+        print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
 
 
     def get_args(self):
@@ -239,7 +241,6 @@ class Splashdown(object):
         self.genome = None  # TODO: need way to determine genome before any posts occur!
         self.annotation = None  # TODO: if appropriate, need way to determine annotation
 
-
         if verbose:
             print "Pipeline specification:"
             print json.dumps(pipeline_specs,indent=4)
@@ -268,12 +269,12 @@ class Splashdown(object):
             genome = properties["genome"]
             if genome in self.ASSEMBLIES_SUPPORTED.keys():
                 self.genome = self.ASSEMBLIES_SUPPORTED[genome]
-                msg += " genome[%s]" % self.genome
+                msg += "genome[%s]" % self.genome
         if self.annotation == None and "annotation" in properties:
             annotation = properties["annotation"].upper() # BRITTLE: v19 in dx but V19 in encoded
             if annotation in self.ANNOTATIONS_SUPPORTED:
                 self.annotation = annotation
-                msg += " annotation[%s]" % self.annotation
+                msg += "annotation[%s]" % self.annotation
         if len(msg) > 0:
             print "  - Found " + msg
         return self.genome
@@ -330,15 +331,23 @@ class Splashdown(object):
         file_size = dxencode.description_from_fid(fid).get('size')
 
         # TODO: encoded should allow searching on fid !!!
-        authid, authpw, server = dxencode.processkey(self.server_key)
-        url = urlparse.urljoin(server,
+        #authid, authpw, server = dxencode.processkey(self.server_key)
+        url = urlparse.urljoin(self.server,
                 'search/?type=file&frame=object&submitted_file_name=%s' % file_name)
-        response = dxencode.encoded_get(url,authid,authpw)
+        response = dxencode.encoded_get(url,self.authid, self.authpw)
         try:
             if verbose:
                 print "-- Looking for %s (size:%d) in %s" % (file_name, file_size, server)
             response.raise_for_status()
             if response.json()['@graph']:
+                #for encode_file in response.json()['@graph']:
+                #    for ext_id in encode_file.get('dbxrefs'):
+                #        if ext_id == 'dxid:' + fid:
+                #            if verbose:
+                #                print("%s %s: File sizes match in dxid,." % \
+                #                                           (fid, encode_file.get('file_size')))
+                #            return encode_file
+                            
                 encode_file = response.json()['@graph'][0]
                 #logger.info("Found potential duplicate: %s" %(duplicate_item.get('accession')))
                 if file_size ==  encode_file.get('file_size'):
@@ -371,11 +380,9 @@ class Splashdown(object):
             # Current strategy is to complete an post before updating the accession field.
             # so existence of accession should mean it is already in encoded.
             fileDict = dxencode.description_from_fid(fid,properties=True)
-            acc_key = "accession"
+            acc_key = dxencode.dx_property_accesion_key(self.server_key)
             if not self.ignore:
                 # check file properties
-                if self.server_key == 'test':
-                    acc_key = "test_accession"
                 if "properties" in fileDict and acc_key in fileDict["properties"]:
                     accession = fileDict["properties"][acc_key]
                     if accession.startswith(self.acc_prefix) and len(accession) == 11:
@@ -409,9 +416,7 @@ class Splashdown(object):
             inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
             if inp_obj != None:
                 self.genome = self.find_genome_annotation(inp_obj)
-                acc_key = "accession"
-                if self.server_key == 'test':
-                    acc_key = "test_accession"
+                acc_key = dxencode.dx_property_accesion_key(self.server_key)
                 if "properties" in inp_obj and acc_key in inp_obj["properties"]:
                     # older runs don't have
                     accession = inp_obj["properties"][acc_key]
@@ -453,20 +458,345 @@ class Splashdown(object):
         return obj
 
 
+    def get_qc_metrics(self,fid,job,verbose=False):
+        '''Returns an object containing 'QC_metrics' info found in the file and or job.'''
+        qc_metrics = None
+        if "metadata" in job["output"]:
+            try:
+                qc_metrics = json.loads(job["output"]["metadata"]) # NOTE: output class=string name='metadata' in json format
+            except:
+                try:
+                    qc_metrics = json.loads("{"+job["output"]["metadata"]+"}")
+                except:
+                    print job["output"]["metadata"]
+                    sys.exit(1)
+                    
+        qc_for_file = dxencode.dx_file_get_property(fid,"QC",return_json=True)
+        if qc_for_file and qc_metrics:
+            qc_metrics.update(qc_for_file)  # Note that qc_for_file take priority over qc for the job
+        else:
+            qc_metrics = qc_for_file
+                 
+        if qc_metrics and verbose:
+            print "qc_metrics:"
+            print json.dumps(qc_metrics,indent=4)
+            
+        return qc_metrics
+        
+
+    def enc_lookup_json(self,path,must_find=False):
+        '''Attempts to retrieve an ENCODEd json object.'''
+        url = self.server + path + '/?format=json&frame=embedded'
+        #print url
+        response = dxencode.encoded_get(url, self.authid, self.authpw)
+        try:
+            response.raise_for_status()
+            json_obj = response.json()
+        except:
+            if must_find:
+                print "Path to json object '%s' not found." % path
+                print 'Lookup failed: %s %s' % (response.status_code, response.reason)
+                sys.exit(1)
+            return None
+        return json_obj
+
+
+    def pipeline_qualifiers(self,rep_tech,app_name=None):
+        '''Determines and pipeline_qualifiers in ugly special-case code.'''
+        if "exp" in self.obj_cache and rep_tech in self.obj_cache["exp"] \
+        and "pipe_qualifiers" in self.obj_cache["exp"][rep_tech]:
+            return self.obj_cache["exp"][rep_tech]["pipe_qualifiers"]
+        #if "exp" in self.obj_cache and pipe_qualifiers in self.obj_cache["exp"]:
+        #    return self.obj_cache["exp"]["pipe_qualifiers"]
+            
+        pipe_qualifiers = {}
+        pipe_qualifiers["version"] = "1"
+        if self.exp_type.startswith('long-rna-seq'): # FIXME: ugly special case
+            pipe_qualifiers["version"] = "2"
+
+        pipe_qualifiers["qualifier"] = ''
+        if self.exp_type.startswith('long-rna-seq'): # FIXME: ugly special case
+            #pipe_qualifiers["qualifier"] = '-unknown'
+            if app_name and len(app_name):
+                if app_name.endswith('-pe'):
+                    pipe_qualifiers["qualifier"] = '-pe'
+                elif app_name.endswith('-se'):
+                    pipe_qualifiers["qualifier"] = '-se'
+            if len(pipe_qualifiers["qualifier"]) == 0 and rep_tech and len(rep_tech):
+                if rep_tech.startswith("rep"):
+                    br_tr = rep_tech[3:]
+                    (br,tr) = br_tr.split('_')
+                    full_mapping = dxencode.get_full_mapping(self.exp_id,self.exp)
+                    mapping = dxencode.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
+                    if mapping["paired_ended"]:
+                        pipe_qualifiers["qualifier"] = '-pe'
+                    else:
+                        pipe_qualifiers["qualifier"] = '-se'
+                else: #if rep_tech == "combined":
+                    # FIXME: What about combined replicate only files???  No problem SO FAR since lrna has no combined steps
+                    # Desperate attempt, but if the replicate level files are uploaded first then could try to look them up
+                    if "exp" in self.obj_cache:
+                        for try_rep in  ["rep1_1","rep2_1","rep1_2","rep2_2"]:
+                            if try_rep in self.obj_cache["exp"] and "pipe_qualifiers" in self.obj_cache["exp"][try_rep]:
+                                pipe_qualifiers["qualifier"] = self.obj_cache["exp"][try_rep]["pipe_qualifiers"]["qualifier"]
+            if len(pipe_qualifiers["qualifier"]) == 0:
+                print "Error: Can't determine pipeline qualifiers for '%s' replicate of '%' experiment" % \
+                                                                                    (replicate,self.exp_type)
+                sys.exit(1) 
+                            
+        if "exp" not in self.obj_cache:
+             self.obj_cache["exp"] = {}
+        if rep_tech not in self.obj_cache["exp"]:
+            self.obj_cache["exp"][rep_tech] = {}
+        self.obj_cache["exp"][rep_tech]["pipe_qualifiers"] = pipe_qualifiers
+        #self.obj_cache["exp"]["pipe_qualifiers"] = pipe_qualifiers
+        return pipe_qualifiers
+
+
+    def enc_pipeline_find(self,dx_pipe_name,rep_tech):
+        '''Finds a 'pipeline' encoded object.'''
+        pipe = None
+        # First lookup pipe_qualifiers:
+        pipe_qualifiers = self.pipeline_qualifiers(rep_tech) 
+        
+        # Lookup pipeline as: /pipelines/encode:long-rna-seq-se-pipeline-2
+        pipe_name = dx_pipe_name + pipe_qualifiers["qualifier"] + '-pipeline-' + pipe_qualifiers["version"].replace('.','-')
+        pipe_alias = 'encode:' + pipe_name
+        if pipe_alias in self.obj_cache:
+            return self.obj_cache[pipe_alias]
+        pipe = self.enc_lookup_json( 'pipelines/' + pipe_alias,must_find=True)
+        if pipe:
+            self.obj_cache[pipe_alias] = pipe
+            print "  - Found pipeline: '%s'" % pipe_alias
+        return pipe
+       
+
+    def enc_analysis_step_find(self,dx_app_name,dx_app_ver,dx_app_id,pipe_name):
+        '''Finds the 'analysis_step' encoded object used in creating the file.'''
+        ana_step = None
+        ana_step_name = dx_app_name + '-v-' + dx_app_ver.replace('.','-')
+        # NOTE: the special dnanexus: alias.  Because dx_ids will differ between projects, and the identical app can be
+        #       rebuilt, the dnanexus: alias will instead be the app_name and app_version!
+        #       The ana_step_name, on the otherhand, may be sanitized ('prep_star' => 'index_star')
+        # /analysis-steps/unstranded-signal-star-v-1-0-1/ or /analysis-steps/dnanexus:bam-to-bigwig-unstranded-v-1-0-1/
+        ana_step_alias = 'dnanexus:' + ana_step_name
+        if ana_step_alias in self.obj_cache:
+            return self.obj_cache[ana_step_alias]
+        ana_step = self.enc_lookup_json( 'analysis-steps/' + ana_step_name,must_find=False)
+        if not ana_step:
+            ana_step = self.enc_lookup_json( 'analysis-steps/' + ana_step_alias,must_find=True)
+        if ana_step:
+            self.obj_cache[ana_step_alias] = ana_step
+            print "  - Found ananlsys_step: '%s'" % ana_step_alias
+        # Could attempt to create analysis-step
+        #if not ana_step:  
+        #    ana_step = {}
+        #    ana_step['aliases'] = [ ana_step_alias  ]
+        #    ana_step['name'] = ana_step_name  
+        #    ana_step['pipeline'] = "/pipelines/encode:" + pipe_name
+        #    #ana_step["pipeline"] = pipe
+        #
+        #    # Shoe-horn in:
+        #    notes = {}
+        #    notes['dx_app_name'] = dx_app_name
+        #    notes['dx_app_ver'] = dx_app_ver
+        #    ana_step["notes"] = json.dumps(notes)
+        #    #    ana_step = dxencode.encoded_post_obj('analysis-step-run',ana_step, self.server, self.authid, self.authpw)
+        return ana_step
+
+
+    def enc_workflow_run_find_or_create(self,dx_wf_id,rep_tech,test=False,verbose=False):
+        '''Finds or creates the 'workflow_run' encoded object that actually created the file.'''
+        wf_run = None
+        wf_alias = 'dnanexus:' + dx_wf_id
+        # Find if you can:  /workflow-runs/dnanexus:analysis-BZKpZBQ0F1GJ7Z4ky8vBZpBx
+        if "exp" in self.obj_cache and wf_alias in self.obj_cache["exp"]:
+            wf_run = self.obj_cache["exp"][wf_alias]
+        else:
+            wf_run = self.enc_lookup_json( '/workflow-runs/' + wf_alias,must_find=False)
+            if wf_run:
+                self.obj_cache["exp"][wf_alias] = wf_run
+                print "  - Found workflow_run: '%s'" % wf_alias
+        
+        if wf_run == None:
+            wf_run = {}
+            
+            # Lookup pipeline as: /pipelines/encode:long-rna-seq-se-pipeline-2
+            pipe = self.enc_pipeline_find(self.exp_type,rep_tech)
+            
+            wf_run['aliases'] = [ wf_alias ]
+            wf_run['status'] = "finished"
+            wf_run['pipeline'] = "/pipelines/encode:" + pipe["name"]
+            wf_run["dx_workflow_id"] = dx_wf_id
+            # wf_run["software_version"] NO
+            # wf_run["input_files"] NO
+            # wf_run["dx_analysis_id"] NO
+            # wf_run["dx_workflow_json"] NO
+
+            # Look up the actual analysis
+            dx_wf = dxpy.api.analysis_describe(dx_wf_id)
+            if dx_wf:  # Note that wf is created immediately before running, then last modified by dx to set status 'done'
+                if "created" in dx_wf:
+                    then = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(dx_wf.get("created")/1000.0))
+                    wf_run["started_running"] = then
+                if "modified" in dx_wf:
+                    then = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(dx_wf.get("modified")/1000.0))
+                    wf_run["stopped_running"] = then
+            
+            # shoe-horn into notes:
+            notes = {}
+            notes["notes_version"] = "1"
+            notes['pipeline_name'] = pipe["name"]
+            notes["dx_project_id"] = self.proj_id
+            notes["dx_project_name"] = self.proj_name
+            if dx_wf:
+                notes["dx_cost"] = "$" + str(round(dx_wf.get("totalPrice"),2)) 
+            wf_run["notes"] = json.dumps(notes)
+            
+            # Now post this new object
+            self.obj_cache["exp"][wf_alias] = wf_run
+            if test:
+                print "  - Would post workflow_run: '%s'" % wf_alias
+            else:
+                try:
+                    posted_wf_run = dxencode.encoded_post_obj('workflow_run',wf_run, self.server, self.authid, self.authpw)
+                except:
+                    print "Failed to post workflow_run: '%s'" % wf_alias
+                    sys.exit(1)
+                print "  - Posted workflow_run: '%s'" % wf_alias
+                #sys.exit(1)  # TEST one case!
+            
+        if verbose:
+            print "ENCODEd 'workflow_run':"
+            print json.dumps(wf_run,indent=4)
+            if "notes" in wf_run:
+                wf_run_notes = json.loads(wf_run.get("notes"))
+                print "ENCODEd 'workflow_run[notes]':"
+                print json.dumps(wf_run_notes,indent=4)
+        return wf_run
+        
+        
+    def enc_step_run_find_or_create(self,job,dxFile,rep_tech,test=False,verbose=False):
+        '''Finds or creates the 'analysis_step_run' encoded object that actually created the file.'''
+        step_run = None
+        job_id = job.get('id')
+        step_alias = 'dnanexus:' + job_id
+        if "exp" in self.obj_cache and step_alias in self.obj_cache["exp"]:
+            step_run = self.obj_cache["exp"][step_alias]
+        else:
+            step_run = self.enc_lookup_json( '/analysis-step-runs/' + step_alias,must_find=False)
+            if step_run:
+                if "exp" not in self.obj_cache:
+                     self.obj_cache["exp"] = {}
+                self.obj_cache["exp"][step_alias] = step_run
+                print "  - Found step_run: '%s'" % step_alias
+
+        if step_run == None:  
+            step_run = {}
+            step_run['aliases'] = [ step_alias ]
+            step_run['status'] = "finished"
+            dx_app_name = job.get('executableName')
+            
+            # MUST determine special case pipeline qualifiers before proceeding!
+            pipe_qualifiers = self.pipeline_qualifiers(rep_tech,dx_app_name) 
+            # Note that qualifiers are not used here, but will be in workflow_run creation
+
+            # Find or create the workflow
+            dx_wf_id = job.get('analysis')
+            #wf_run = self.enc_workflow_run_find_or_create(dx_wf_id,rep_tech,test=False,verbose=verbose)
+            wf_run = self.enc_workflow_run_find_or_create(dx_wf_id,rep_tech,test=self.test,verbose=verbose)
+            wf_run_notes = json.loads(wf_run["notes"])
+            step_run["workflow_run"] = "/workflow-runs/dnanexus:" + dx_wf_id
+            
+            # Find analysis_step
+            dx_app_id = job.get('applet')
+            dx_app_ver = dxencode.get_sw_from_log(dxFile, '\* Running:\s(\S+)\s+\S*\[(\S+)\]') # * Running: align-star-pe.sh [v2.0.0]
+            if dx_app_ver and 'software_versions' in dx_app_ver:
+                dx_app_ver = dx_app_ver.get('software_versions')[0]
+                if dx_app_ver and 'version' in dx_app_ver:
+                    dx_app_ver = str( dx_app_ver.get('version') )
+                    if dx_app_ver[0] == 'v':
+                        dx_app_ver = dx_app_ver[1:]
+            if not dx_app_ver or not isinstance(dx_app_ver, str) or len(dx_app_ver) == 0:
+                print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
+                sys.exit(0)
+            ana_step = self.enc_analysis_step_find(dx_app_name,dx_app_ver,dx_app_id,wf_run_notes["pipeline_name"])
+            step_run['analysis_step'] = "/analysis-steps/" + ana_step['name']
+            
+            # applet details:
+            applet_details = {}
+            #step_run["dx_applet_details"] = {}
+            applet_details["dx_job_id"] = job_id
+            then = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(job.get('startedRunning')/1000.0))
+            applet_details["started_running"] = then
+            then = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(job.get('stoppedRunning')/1000.0))
+            applet_details["stopped_running"] = then
+            applet_details["dx_status"] = "finished"
+
+            # Parameters:
+            params = {}
+            inputs = job.get("originalInput")
+            for name in inputs.keys():
+                #if isinstance(inputs[name],str) or isinstance(inputs[name],int) or isinstance(inputs[name],unicode):
+                if not isinstance(inputs[name],dict):
+                    params[name] = inputs[name]
+            if len(params) > 0:
+                applet_details["parameters"] = params
+                
+            # applet json?
+            #dx_app = dxpy.api.applet_describe(dx_app_id)
+            #if dx_app:  # Note that wf is created immediately before runiing, then last modified by dx to set status
+            #    applet_details["dx_app_json"] = dx_app
+            step_run["dx_applet_details"] = [ applet_details ]
+            
+            # shoe-horn into notes:
+            notes = {}
+            notes["notes_version"] = "1"
+            notes["dx_app_name"] = dx_app_name
+            notes['dx_app_version'] = dx_app_ver
+            notes["dx_app_id"] = dx_app_id
+            notes["step_name"] = ana_step['name']
+            notes['pipeline_name'] = wf_run_notes["pipeline_name"]
+            notes["dx_workflow_id"] = dx_wf_id
+            notes["dx_project_id"] = self.proj_id
+            notes["dx_project_name"] = self.proj_name
+            notes["dx_cost"] = "$" + str(round(job['totalPrice'],2))
+            step_run["notes"] = json.dumps(notes)
+            
+            # Now post this new object
+            self.obj_cache["exp"][step_alias] = step_run
+            if test:
+                print "  - Would post step_run: '%s'" % step_alias
+            else:
+                try:
+                    posted_step_run = dxencode.encoded_post_obj('analysis_step_run',step_run, self.server, self.authid, self.authpw)
+                except:
+                    print "Failed to post step_run: '%s'" % step_alias
+                    sys.exit(1)
+                print "  - Posted step_run: '%s'" % step_alias
+                #sys.exit(1)  # TEST one case!
+
+        if step_run and verbose:
+            print "ENCODEd 'analysis_step_run':"
+            print json.dumps(step_run,indent=4)
+            if "notes" in step_run:
+                step_run_notes = json.loads(step_run.get("notes"))
+                print "ENCODEd 'analysis_step_run[notes]':"
+                print json.dumps(step_run_notes,indent=4)
+        return step_run
+        
+        
     def make_payload_obj(self,out_type,rep_tech,fid,verbose=False):
         '''Returns an object for submitting a file to encode, with all dx info filled in.'''
         payload = {}
         payload['dataset'] = self.exp_id
         payload["output_type"] = out_type
+
         dx_obj = dxencode.description_from_fid(fid)
-        #if verbose:
-        #    print "dx_obj:"
-        #    print json.dumps(dx_obj,indent=4)
+
+        # get job for this file
         job = dxencode.job_from_fid(fid)
-        #if verbose:
-        #    print "job:"
-        #    print json.dumps(job,indent=4)
-        #applet = dxencode.applet_from_fid(fid)
+
         payload["file_format"] = self.file_format(dx_obj["name"])
         if payload["file_format"] == None:
             print "Warning: file %s has unknown file format!" % dxencode.file_path_from_fid(fid)
@@ -483,42 +813,82 @@ class Splashdown(object):
             payload['genome_annotation'] = self.annotation
 
         dxFile = dxencode.file_handler_from_fid(fid)
-        versions = dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)')
+        versions = dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)') # * STAR version: 2.4.0k
         notes = dxencode.create_notes(dxFile, versions)
-        #notes['qc'] = flagstat_parse(bamqc) ????
-        # TODO: find json added to job as a result of returns? ??
-        if "metadata" in job["output"]:
-           notes.update(json.load(job["output"]["metadata"])) # NOTE: output class=string name='metadata' in json format
-        payload['notes'] = json.dumps(notes)
+        notes["notes_version"] = "5" # Cricket requests starting at "5", since earlier files uploads were distingusihed by user
+        if 'totalPrice' in job:
+            notes['dx_cost'] = "$" + str(round(job['totalPrice'],2))
 
+        # Put QC metrics in notes
+        qc_metrics = self.get_qc_metrics(fid,job)
+        if qc_metrics:
+            notes['QC_metrics'] = qc_metrics
+        
         #print "  - Adding encoded information."
         payload = self.add_encoded_info(payload,rep_tech,fid)
 
+        # Find or create step_run object
+        step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=self.test,verbose=verbose)
+        #step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=False,verbose=verbose)
+        if step_run:
+            if "dx_applet_details" in step_run:
+                payload["step_run"] = "/analysis-step-runs/dnanexus:" + step_run["dx_applet_details"][0].get("dx_job_id")
+            if "notes" in step_run:
+                step_run_notes = json.loads(step_run.get("notes"))
+                payload["analysis_step"] = "/analysis-steps/" + step_run_notes.get("step_name")
+                payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
+                notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_workflow_id")
+
+        notes["dx_project_id"] = self.proj_id
+        notes["dx_project_name"] = self.proj_name
+        payload['notes'] = json.dumps(notes)
+        
+        # FIXME: temporary testing
+        #if qc_metrics:
+        #    print "payload:"
+        #    print json.dumps(payload,indent=4)
+        #    print "payload[notes]:"
+        #    print json.dumps(notes,indent=4)
+        #    sys.exit(1)
+
         if verbose:
-            print "payload from dx info:"
+            print "payload:"
             print json.dumps(payload,indent=4)
+            print "payload[notes]:"
+            print json.dumps(notes,indent=4)
         return payload
 
 
     def file_mark_accession(self,fid,accession,test=True):
         '''Adds/replaces accession to a file's properties.'''
-        file_handler = dxencode.file_handler_from_fid(fid)
-        properties = file_handler.get_properties()
+        acc_key = dxencode.dx_property_accesion_key(self.server_key)
         path = dxencode.file_path_from_fid(fid)
-        acc_key = "accession"
-        if self.server_key == 'test':
-            acc_key = "test_accession"
-        if acc_key in properties and properties[acc_key] != accession:
-            if properties[acc_key] != accession:
-                print "Warning: file %s has accession %s but has been posted as accession %s" % \
-                    (path,properties[acc_key],accession)
-                #sys.exit(1)
-        properties[acc_key] = accession
-        if test:
+        acc = dxencode.dx_file_set_property(fid,acc_key,accession,add_only=True,test=test,verbose=True) # verbose for now
+        #if acc:
+        #    print "Warning: file %s has accession %s but has been posted as accession %s" % \
+        #        (path,props[acc_key],accession)
+        #    props = dxencode.dx_file_set_property(fid,acc_key,accession,add_only=False,test=test)
+        if acc == None or acc != accession:
+            print "Error: failed to update accession for file %s to '%s'" % (path,accession)
+        elif test:
             print "  - Test flag %s with accession='%s'" % (path,accession)
         else:
-            file_handler.set_properties(properties)
             print "  - Flagged   %s with accession='%s'" % (path,accession)
+
+        #file_handler = dxencode.file_handler_from_fid(fid)
+        #properties = file_handler.get_properties()
+        #path = dxencode.file_path_from_fid(fid)
+        #if acc_key in properties and properties[acc_key] != accession:
+        #    if properties[acc_key] != accession:
+        #        print "Warning: file %s has accession %s but has been posted as accession %s" % \
+        #            (path,properties[acc_key],accession)
+        #        #sys.exit(1)
+        #properties[acc_key] = accession
+        #if test:
+        #    print "  - Test flag %s with accession='%s'" % (path,accession)
+        #else:
+        #    file_handler.set_properties(properties)
+        #    print "  - Flagged   %s with accession='%s'" % (path,accession)
 
 
     def file_post(self,fid,payload,test=True):
@@ -570,12 +940,15 @@ class Splashdown(object):
         '''Runs splasdown from start to finish using command line arguments.'''
         args = self.get_args()
         self.test = args.test
+        self.ignore = False
         if args.ignore_properties:
             print "Ignoring DXFile properties (will post to test server)"
             self.ignore = args.ignore_properties
             self.server_key = 'test' # mandated because option is dangerous
 
         self.server_key = args.server
+        self.authid, self.authpw, self.server = dxencode.processkey(self.server_key)
+        
         if self.server_key != "test":
             self.acc_prefix = "ENCFF"
         self.proj_name = dxencode.env_get_current_project()
@@ -595,6 +968,7 @@ class Splashdown(object):
         total_posted = 0
         for exp_id in args.experiments:
             sys.stdout.flush() # Slow running job should flush to piped log
+            self.obj_cache["exp"] = {}  # clear exp cache, which will hold exp specific wf_run and step_run objects
             # 1) Lookup experiment type from encoded, based on accession
             print "Working on %s..." % exp_id
             self.exp = dxencode.get_exp(exp_id,must_find=False,key=self.server_key)
@@ -619,7 +993,7 @@ class Splashdown(object):
             # 4) Given expected results locate any files (by glob) that should be posted for
             #    a) each single replicate (in replicate sub-folders named as reN_N/
             #    b) combined replicates in the experiment folder itself
-            files_expected = self.find_expected_files(self.exp_folder,self.replicates, verbose=args.verbose)
+            files_expected = self.find_expected_files(self.exp_folder, self.replicates, verbose=args.verbose)
             print "- Found %d files that are available to post." % len(files_expected)
             if len(files_expected) == 0:
                 continue
@@ -655,8 +1029,8 @@ class Splashdown(object):
                     post_count += 1
                 self.file_mark_accession(fid,accession,args.test)
 
-                #if file_count >= 5:  # Short circuit for test
-                #    break
+                if post_count >= 1:  # Short circuit for test
+                    break
 
             print "- For %s Processed %d file(s), posted %s" % \
                                                         (self.exp_id, file_count, post_count)

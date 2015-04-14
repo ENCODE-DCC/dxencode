@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # launch.py 0.0.1
 
 import argparse,os, sys, json
@@ -100,7 +100,7 @@ class Launch(object):
         self.proj_id = None
         self.exp = {}  # Will hold the encoded exp json
         self.psv = {} # will hold pipeline specific variables.
-
+        print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
     def get_args(self,parse=True):
         '''Parse the input arguments.'''
@@ -316,7 +316,7 @@ class Launch(object):
         if self.proj_name == None:
             print "Please enter a '--project' to run in."
             sys.exit(1)
-        self.project = dxencode.get_project(args.project)
+        self.project = dxencode.get_project(self.proj_name)
         self.proj_id = self.project.get_id()        
 
         cv['project']    = self.proj_name
@@ -843,7 +843,7 @@ class Launch(object):
         # NOTE: DX manual lies?!  Append not possible?!  Then write new/delete old
         run_log_path = results_folder + '/' + dxencode.RUNS_LAUNCHED_FILE
         old_fids = dxencode.find_file(run_log_path,self.proj_id,multiple=True,recurse=False)
-        new_fh = dxpy.new_dxfile('a',project=self.proj_id,folder=results_folder, \
+        new_fh = dxpy.new_dxfile('w',project=self.proj_id,folder=results_folder, \
                                                                   name=dxencode.RUNS_LAUNCHED_FILE)
         new_fh.write(run_id+' started:'+str(datetime.now())+'\n')
         if old_fids is not None:
@@ -853,6 +853,7 @@ class Launch(object):
                         new_fh.write(old_run_id+'\n')
             proj = dxpy.DXProject(self.proj_id)
             proj.remove_objects(old_fids)
+            
         new_fh.close()
 
     def launch_pad(self,wf,run,ignition=False):
@@ -878,13 +879,14 @@ class Launch(object):
                                                                         ". Manual launch required."
 
     def run(self):
-        '''Called from amin to run as command line utility'''
+        '''Runs launch from start to finish using command line arguments.'''
         # NOT EXPECTED TO OVERRIDE
 
         args = self.get_args()
 
         print "Retrieving pipeline specifics..."
         self.psv = self.pipeline_specific_vars(args)
+        print "Running in project ["+self.proj_name+"]..."
         
         print "Building apps dictionary..."
         rep_steps, file_globs = self.assemble_steps_and_globs(self.REP_STEP_ORDER)
