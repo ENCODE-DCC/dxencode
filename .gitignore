@@ -1,3 +1,4 @@
+keypairs.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -52,3 +53,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+keypairs.json
+*~

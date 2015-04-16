@@ -8,8 +8,22 @@ import urlparse
 import hashlib
 from datetime import datetime
 import subprocess
+import commands
+import shlex
 
 import logging
+
+DXENCODE_VERSION = "1"
+
+GENOME_DEFAULTS = { 'human': 'hg19', 'mouse': 'mm10' }
+''' This the default genomes for each supported organism.'''
+
+REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
+''' This the default DNA Nexus project to find reference files in.'''
+
+REF_FOLDER_DEFAULT = '/'
+''' This the default folder that reference files are found in.'''
+
 
 REFERENCE_FILES = {} ## Dict to cache known Reference Files
 FILES = {} ## Dict to cache files
@@ -21,7 +35,7 @@ KEYFILE = 'keypairs.json'  ## see processkey() Note this file must be in gitigno
 DEFAULT_SERVER = 'https://www.encodeproject.org'
 S3_SERVER='s3://encode-files/'
 
-logger = logging.getLogger("DXENCODE")  # not sure this goes here.
+logger = logging.getLogger('dxencode') # Callers should either use dxencode.logger or set dxencode.logger = local.logger()
 
 def calc_md5(path):
     ''' Calculate md5 sum from file as specified by valid path name'''
@@ -31,6 +45,7 @@ def calc_md5(path):
             md5sum.update(chunk)
     return md5sum
 
+SAVED_KEYS = {}
 
 def processkey(key):
     ''' check encodedD access keys; assuming the format:
@@ -43,6 +58,9 @@ def processkey(key):
                 {"server":"https://www.encodeproject.org", "key":"rand_user_name", "secret":"rand_password"}
     }
     '''
+    if key in SAVED_KEYS:
+        return SAVED_KEYS[key]
+
     if key:
         keysf = open(KEYFILE,'r')
         keys_json_string = keysf.read()
@@ -61,10 +79,18 @@ def processkey(key):
     if not SERVER.endswith("/"):
         SERVER += "/"
 
+    SAVED_KEYS[key] = (AUTHID,AUTHPW,SERVER)
     return (AUTHID,AUTHPW,SERVER)
     ## TODO possibly this should return a dict
+    
+def encoded_post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
+    ''' Posts a json object of a given type to the encoded database. '''
+    HEADERS = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+    }
 
-def encoded_post_file(local_file, file_meta, SERVER, AUTHID, AUTHPW):
+def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
     ''' take a file object on local file system, post meta data and cp to AWS '''
     HEADERS = {
         'Content-type': 'application/json',
@@ -173,7 +199,7 @@ def aws_cp(local_file, item):
     logger.debug("Uploading file.")
     start = datetime.now()
     try:
-        subprocess.check_call(['aws', 's3', 'cp', local_file, creds['upload_url']], env=env)
+        subprocess.check_call(['aws', 's3', 'cp', filename, creds['upload_url']], env=env)
         end = datetime.now()
         duration = end - start
         logger.debug("Uploaded in %.2f seconds" % duration.seconds)
@@ -194,23 +220,137 @@ def encoded_get(url, AUTHID=None, AUTHPW=None):
     return response
 
 
+def env_get_current_project():
+    ''' Returns the current project name for the command-line environment '''
+    err, proj_name = commands.getstatusoutput('cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME')
+    if err != 0:
+        return None
+    return proj_name
+
+
 def project_has_folder(project, folder):
     ''' Checks for a folder in a given DX project '''
-    ##TODO Deprecate for find_or_create?
-    folders = project.list_folder()['folders']
+    try:
+        found = project.list_folder(folder)
+    except:
+        return False
+    return True
 
-    return folder in folders
+
+def find_folder(target_folder,project,root_folders='/',exclude_folders=["deprecated","data"]):
+    '''
+    Recursively attempts to find the first folder in a project and root that matches target_folder.
+    The target_folder may be a nested as one/two/three but with no intervening wildcards.
+    The root_folders can start with '/' but can/will grow to be nested during recursion.
+    Returns full path to folder or None.
+    '''
+    assert len(target_folder) > 0
+
+    # full path is easy.
+    if target_folder.startswith('/') and project_has_folder(project, target_folder):
+        return target_folder
+
+    # Normalize target and root
+    if target_folder.endswith('/'):
+        target_folder = target_folder[:-1]
+    if root_folders[0] != '/':
+       root_folders = '/' + root_folders
+
+    # If explicitly requesting one of the exluded folders then don't exclude it
+    if exclude_folders == None:
+        exclude_folders = []
+    for exclude_folder in exclude_folders:
+        exclude = '/' + exclude_folder
+        if root_folders.find(exclude) != -1 or target_folder.find(exclude) != -1:
+            exclude_folders.remove(exclude_folder)
+
+    # Because list_folder is only one level at a time, find_folder must recurse
+    return rfind_folder(target_folder,project,root_folders,exclude_folders)
+
+def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[]):
+    '''Recursive call for find_folder - DO NOT call directly.'''
+    for exclude_folder in exclude_folders:
+        if root_folders.find('/' + exclude_folder) != -1:
+            return None
+    try:
+        query_folders = project.list_folder(root_folders)['folders']
+    except:
+        return None
+
+    # Normalize
+    if root_folders.endswith('/'):
+        root_folders = root_folders[:-1]
+
+    # match whole path to first target
+    targets = target_folder.split('/')
+    full_query = root_folders + '/' + targets[0]
+
+    if full_query in query_folders:  # hash shortcut
+        if len(targets) == 1:
+            return full_query
+        else:
+            full_query = root_folders + '/' + target_folder # shoot for it all
+            #print "- shooting [%s]" % full_query
+            if project_has_folder(project, full_query):
+                return full_query
+
+    # nothing to do but recurse
+    for query_folder in query_folders:
+        found = rfind_folder(target_folder, project, query_folder,exclude_folders)
+        if found != None:
+            return found
+    return None
+
+
+def find_exp_folder(project,exp_id,results_folder='/',warn=False):
+    '''Returns the full path to the experiment folder if found, else None.'''
+    # normalize
+    if not results_folder.startswith('/'):
+        results_folder = '/' + results_folder
+    if not results_folder.endswith('/'):
+        results_folder += '/'
+    target_folder = find_folder(exp_id,project,results_folder)
+    if target_folder == None or target_folder == "":
+        if warn:
+            print "Unable to locate target folder (%s) for %s in project %s" % \
+                                                                        (results_folder, exp_id, project.describe()['name'])
+        return None
+    return target_folder + '/'
+
+
+def description_from_fid(fid,properties=False):
+    '''Returns file description object from fid.'''
+    try:
+        dxlink = FILES[fid]
+    except:
+        #logger.error("File %s not cached, trying id" % fid)
+        dxlink = fid
+
+    return dxpy.describe(dxlink,incl_properties=properties)
+
+
+def file_handler_from_fid(fid):
+    '''Returns dx file handler from fid.'''
+    try:
+        dxlink = FILES[fid]
+    except:
+        dxlink = dxpy.dxlink(fid)
+    return dxpy.get_handler(dxlink)
+
+
+def job_from_fid(fid):
+    '''Returns job decription from fid.'''
+    try:
+        file_dict = description_from_fid(fid)
+        job_id = file_dict["createdBy"]["job"]
+        return dxpy.api.job_describe(job_id)
+    except:
+        return None
 
 
 def file_path_from_fid(fid,projectToo=False):
     '''Returns full dx path to file from a file id.'''
-    try:
-        dxlink = FILES[fid]
-    except:
-        logger.error("File %s not cached, trying id" % fid)
-        dxlink = fid
-
-    fileDict = dxpy.describe(dxlink) # FILES contain dxLinks
+    fileDict = description_from_fid(fid)
     if fileDict['folder'] == '/':
         path = '/' + fileDict['name']
     else:
@@ -234,16 +374,24 @@ def get_project(projectName, level=None):
 
 def find_or_create_folder(project, sub_folder, root_folder='/'):
     ''' Finds or creates a sub_folder in the specified parent (root) folder'''
-    folder = root_folder+sub_folder
-    logger.debug("Creating %s (%s)" % (folder, root_folder))
-    if folder in project.list_folder(root_folder)['folders']:
+    if root_folder.endswith('/'):
+        if sub_folder.startswith('/'):
+            folder = root_folder+sub_folder[1:]
+        else:
+            folder = root_folder+sub_folder
+    else: 
+        if sub_folder.startswith('/'):
+            folder = root_folder+sub_folder
+        else:
+            folder = root_folder+'/'+sub_folder
+    if project_has_folder(project, folder):
         return folder
     else:
+        logger.debug("Creating %s" % (folder))
         return project.new_folder(folder)
 
 def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
     ''' returns aws s3 bucket and file name from encodeD file object (f_obj)'''
-
     #make the URL that will get redirected - get it from the file object's href property
     encode_url = urlparse.urljoin(SERVER,f_obj.get('href'))
     logger.debug(encode_url)
@@ -272,6 +420,47 @@ def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
 
     #hack together the s3 cp url (with the s3 method instead of https)
     return filename, S3_SERVER.rstrip('/') + o.path
+
+def copy_enc_file_to_dx(accession,proj_id,dx_folder,dx_name=None,f_obj=None,key=None):
+    '''
+    Finds encoded file by accession, creates s3 url and copies file to named folder,
+    and adds the accession to the dx file properties, returning the dx file id or None for failure.
+    If dx file name is None, the file ill have the accession based encoded name.
+    MUST BE run on dx, not command-line.
+    '''
+    (AUTHID,AUTHPW,SERVER) = processkey(key)
+    if accession != None and f_obj == None:
+        url = SERVER + '/search/?type=file&accession=%s&format=json&frame=embedded&limit=all' % (accession)
+        response = encoded_get(url, AUTHID, AUTHPW)
+        if response == None:
+            return None
+        f_obj = response.json()['@graph'][0]
+        if f_obj == None:
+            return None
+    elif accession == None and f_obj != None:
+        accession = f_obj['accession']
+    # If both are None or if accessions don't match then developer will hear about it!
+    assert accession == f_obj['accession']
+
+    (enc_file_name,s3_url) = get_bucket(SERVER, AUTHID, AUTHPW, f_obj)
+    if enc_file_name == None or s3_url == None:
+        return None
+    #cp the file from the bucket
+    print '> aws s3 cp %s . --quiet' %(s3_url)
+    subprocess.check_call(shlex.split('aws s3 cp %s . --quiet' %(s3_url)), stderr=subprocess.STDOUT)
+    subprocess.check_call(shlex.split('ls -l %s' %(enc_file_name)))
+    if dx_name == None:
+        dx_name = enc_file_name
+        #if 'submitted_file_name' in f_obj:
+        #    dx_file_name = os.path.basename(f_obj['submitted_file_name'])
+
+    dxfile = dxpy.upload_local_file(enc_file_name,project=proj_id,folder=dx_folder, name=dx_name, \
+                                    properties={ "accession": accession }, wait_on_close=True) # TODO test: wait_on_close=False
+    if dxfile == None:
+        return None
+
+    return dxfile.get_id()
+
 
 def move_files(fids, folder, projectId):
     '''Moves files to supplied folder.  Expected to be in the same project.'''
@@ -512,7 +701,40 @@ def replicates_to_map(experiment, files):
         reps_with_files = set([ f['replicate']['uuid'] for f in files if f.get('replicate') ])
         return [ r for r in experiment['replicates'] if r['uuid'] in reps_with_files ]
 
-def choose_mapping_for_experiment(experiment):
+def is_paired_ended(experiment):
+    ''' this is likely not the most efficient way to do this'''
+
+    mapping = choose_mapping_for_experiment(experiment, warn=True)
+    reps_paired = {}
+    for rep in mapping.keys():
+        p = mapping[rep].get('paired', [])
+        up = mapping[rep].get('unpaired', [])
+        # I should be a CS guy and do some XOR thing here.
+        if p and not up:
+            reps_paired[rep] = True
+        elif up and not p:
+            reps_paired[rep] = False
+        else:
+            print("Mixed mapping for replicate %s/%s" %(experiment['accession'], rep))
+            print("Paired: %s" % ([ f['accession'] for f in p ]))
+            print("Unaired: %s" % ([ f['accession'] for f in up ]))
+            sys.exit(1)
+
+    trues = len([ v for v in reps_paired.values() if v ])
+    falses = len([ v for v in reps_paired.values() if not v])
+    if trues and falses:
+        print("Mixed mapping for replicates in experiment %s" % (experiment['accession']))
+        print reps_paired
+    else:
+        if trues:
+            return True
+        elif falses:
+            return False
+
+    print "Never get here"
+    sys.exit(1)
+
+def choose_mapping_for_experiment(experiment,warn=True):
     ''' for a given experiment object, fully embedded, return experimental info needed for mapping
         returns an dict keyed by [biological_rep][technical_rep]
         with information for mapping (sex, organism, paired/unpaired files, library id)
@@ -533,7 +755,8 @@ def choose_mapping_for_experiment(experiment):
                 library = rep['library']['accession']
                 sex = rep['library']['biosample'].get('sex', "male")
                 if sex != "male" and sex != "female":
-                    print "WARN: using male replacement for %s" % sex
+                    if warn:
+                        print "WARN: using male replacement for %s" % sex
                     sex = "male"
                 organism = rep['library']['biosample']['donor']['organism']['name']
             except KeyError:
@@ -555,8 +778,8 @@ def choose_mapping_for_experiment(experiment):
                         mate = next((f for f in rep_files if f.get('paired_with') == file_object.get('@id')), None)
                     if mate:
                         rep_files.remove(mate)
-                    else:
-                        logging.warning('%s:%s could not find mate' %(experiment.get('accession'), file_object.get('accession')))
+                    elif warn:
+                        logger.warning('%s:%s could not find mate' %(experiment.get('accession'), file_object.get('accession')))
                         mate = {}
                     paired_files.extend([ (file_object, mate) ])
 
@@ -568,311 +791,129 @@ def choose_mapping_for_experiment(experiment):
                 "unpaired": unpaired_files,
                 "replicate_id": rep['@id']
             }
-            if rep_files:
-                logging.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
-    else:
-        logging.warning('%s: No files to map' % exp_id)
+            if rep_files and warn:
+                logger.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
+    elif warn:
+        logger.warning('%s: No files to map' % exp_id)
     return mapping
 
-def find_prior_results(pipe_path,steps,results_folder,file_globs,proj_id):
-    '''Looks for all result files in the results folder.'''
-    priors = {}
-    for step in pipe_path:
-        for fileToken in steps[step]['results'].keys():
-            fid = find_file(results_folder + file_globs[fileToken],proj_id,recurse=False)
-            if fid != None:
-                priors[fileToken] = fid
-    return priors
+def get_exp(experiment,must_find=True,warn=False,key='default'):
+    '''Returns all replicate mappings for an experiment from encoded.'''
 
-def determine_steps_to_run(pipe_path, steps, priors, deprecate, proj_id, force=False, verbose=False):
-    '''Determine what steps need to be done, base upon prior results.'''
-    will_create = []
-    steps_to_run = []
-    for step in pipe_path:
-        # Force will include the first step with all its inputs
-        # This should avoid forcing concat if it isn't needed
-        #
-        if force:
-            inputs = steps[step]['inputs'].keys()
-            count = 0
-            for input in inputs:
-                if input in priors:
-                    count += 1
-            if count == len(inputs):
-                steps_to_run += [ step ]
-                if verbose:
-                    print "- Adding step '"+step+"' because of force flag."
-        if step not in steps_to_run:
-            results = steps[step]['results'].keys()
-            for result in results:
-                if result not in priors:
-                    steps_to_run += [ step ]
-                    if verbose:
-                        print "- Adding step '"+step+"' because prior '"+result+"' was not found."
-                    break
-        # If results are there but inputs are being recreated, then step must be rerun
-        if step not in steps_to_run:
-            inputs = steps[step]['inputs'].keys()
-            for inp in inputs:
-                if inp in will_create:
-                    steps_to_run += [ step ]
-                    if verbose:
-                        print "- Adding step '"+step+"' due to prior step dependency."
-                    break
-        # Any step that is rerun, will cause prior results to be deprecated
-        # NOTE: It is necessary to remove from 'priors' so succeeding steps are rerun
-        # NOTE: It is also important to move prior results out of target folder to avoid confusion!
-        if step in steps_to_run:
-            results = steps[step]['results'].keys()
-            for result in results:
-                will_create += [ result ]
-                if result in priors:
-                    deprecate += [ priors[result] ]
-                    del priors[result]
-                    # if results are in folder, then duplicate files cause a problem!
-                    # So add to 'deprecate' to move or remove before launching
-
-    # Now make sure the steps can be found, and error out if not.
-    for step in steps_to_run:
-        app = steps[step]['app']
-        dxApp = dxpy.find_data_objects(classname='file', name=app, name_mode='exact',
-                                                         project=proj_id, return_handler=False)
-        if dxApp == None:
-            print "ERROR: failure to locate app '"+app+"'!"
-            sys.exit(1)
-
-    return steps_to_run
-
-def check_run_log(results_folder,proj_id,verbose=False):
-    '''Checks for currently running jobs and will exit if found.'''
-    run_log_path = results_folder + '/' + RUNS_LAUNCHED_FILE
-    log_fids = find_file(run_log_path,proj_id,multiple=True)
-    if log_fids == None:
-        if verbose:
-            print "  No prior jobs launched."
-    else:
-        # NOTE: Appending to the one file, but just in case handle multiple files.
-        for fid in log_fids:
-            with dxpy.open_dxfile(fid) as fd:
-                for line in fd:
-                    #print "Looking for job ["+line+"]"
-                    run_id = line.split(None,1)
-                    if not run_id[0].startswith('analysis-'):
-                        continue
-                    analysis = dxpy.DXAnalysis(dxid=run_id[0])
-                    if analysis == None:
-                        continue
-                    state = analysis.describe()['state']
-                    # states I have seen: in_progress, terminated, done, failed
-                    if state not in [ "done", "failed", "terminated" ]:
-                        msg="Exiting: Can't launch because prior run ["+run_id[0]+"] "
-                        if len(run_id) > 1:
-                            msg+="("+run_id[1]+") "
-                        msg+= "has not finished (currently '"+state+"')."
-                        print msg
-                        sys.exit(1)
-                    elif verbose:
-                        msg="  Prior run ["+run_id[0]+"] "
-                        if len(run_id) > 1:
-                            msg+="("+run_id[1]+") "
-                        msg+= "is '"+state+"'."
-                        print msg
-
-def log_this_run(run_id,results_folder,proj_id):
-    '''Adds a runId to the runsLaunched file in resultsFolder.'''
-    # NOTE: DX manual lies?!  Append not possible?!  Then write new/delete old
-    run_log_path = results_folder + '/' + RUNS_LAUNCHED_FILE
-    old_fid = find_file(run_log_path,proj_id)
-    new_fh = dxpy.new_dxfile('a',project=proj_id,folder=results_folder,name=RUNS_LAUNCHED_FILE)
-    new_fh.write(run_id+' started:'+str(datetime.now())+'\n')
-    if old_fid is not None:
-        with dxpy.open_dxfile(old_fid) as old_fh:
-            for old_run_id in old_fh:
-                new_fh.write(old_run_id+'\n')
-        proj = dxpy.DXProject(proj_id)
-        proj.remove_objects([old_fid])
-    new_fh.close()
-
-def create_workflow(steps_to_run, steps, priors, psv, proj_id, app_proj_id=None,test=False):
-    '''
-    This function will populate a workflow for the steps_to_run and return the worklow unlaunched.
-    It relies on steps dict which contains input and output requirements,
-    pvs (pipeline specific variables) dictionary and
-    priors, which contains input and previous results already in results dir
-    '''
-
-    if len(steps_to_run) < 1:
-        return None
-    if app_proj_id == None:
-        app_proj_id = proj_id
-
-    # create a workflow object
-    if not test:
-        wf = dxpy.new_dxworkflow(title=psv['name'],name=psv['name'],folder=psv['resultsFolder'],
-                                                project=proj_id,description=psv['description'])
-
-    # NOTE: prevStepResults dict contains links to result files to be generated by previous steps
-    prevStepResults = {}
-    for step in steps_to_run:
-        appName = steps[step]['app']
-        app = find_applet_by_name(appName, app_proj_id)
-        appInputs = {}
-        # file inputs
-        for fileToken in steps[step]['inputs'].keys():
-            appInp = steps[step]['inputs'][fileToken]
-            if fileToken in prevStepResults:
-                appInputs[ appInp ] = prevStepResults[fileToken]
-            elif fileToken in priors:
-                if isinstance(priors[fileToken], list):
-                    appInputs[ appInp ] = []
-                    for fid in priors[fileToken]:
-                        appInputs[ appInp ] += [ FILES[fid] ]
-                else:
-                    appInputs[ appInp ] = FILES[ priors[fileToken] ]
-            else:
-                print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
-                sys.exit(1)
-        # Non-file app inputs
-        if 'params' in steps[step]:
-            for param in steps[step]['params'].keys():
-                appParam = steps[step]['params'][param]
-                if param in psv:
-                    appInputs[ appParam ] = psv[param]
-                else:
-                    print "ERROR: step '"+step+"' unable to locate '"+param+ \
-                                                        "' in pipeline specific variables (psv)."
-                    sys.exit(1)
-        # Add wf stage
-        if not test:
-            stageId = wf.add_stage(app, stage_input=appInputs, folder=psv['resultsFolder'])
-        # outputs, which we will need to link to
-        for fileToken in steps[step]['results'].keys():
-            appOut = steps[step]['results'][fileToken]
-            if test:
-                prevStepResults[ fileToken ] = 'fake-for-testing'
-            else:
-                prevStepResults[ fileToken ] = dxpy.dxlink({ 'stage': stageId,'outputField': appOut })
-
-    if test:
-        return None
-    else:
-        return wf
-
-
-def build_a_step(applet, file_globs, proj_id):
-    ''' create input object for a step and extends the file_globs dict as appropriate.'''
+    (AUTHID,AUTHPW,SERVER) = processkey(key)
+    url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
     try:
-        dxapp = dxpy.find_one_data_object(classname="applet", name=applet, project=proj_id,
-                                          zero_ok=False, more_ok=False,describe=True)
-    except IOError:
-        print "Cannot find applet '"+applet+"' in "+proj_id
-        sys.exit(1)
-
-    params = {}
-    inputs = {}
-    results = {}
-    inps = dxapp['describe'].get('inputSpec') or []
-    for inp in inps:
-        in_name = inp['name'].encode('ascii','ignore')
-        if inp['class'] == 'file' or inp['class'] == 'array:file':
-            inputs[in_name] = in_name
-        else:
-            params[in_name] = in_name
-
-    outs = dxapp['describe'].get('outputSpec') or []
-    for out in outs:
-        if out['class'] == 'file' or out['class'] == 'array:file':
-            out_name = out['name'].encode('ascii','ignore')
-            results[out_name] = out_name
-            if out_name not in file_globs and 'patterns' in out:
-                file_globs[out_name] = '/'+out['patterns'][0].encode('ascii','ignore')
-        else:
-            pass
-            # TODO not sure what to do with these
-
-    return {
-        'app': applet,
-        'params': params,
-        'inputs': inputs,
-        'results': results
-    }
-
-def build_simple_steps(pipe_path, proj_id, verbose=False):
-    '''
-    Builds dict of steps for the apps in the pipeline and a dict of file_globs for look up.
-    Only works for pipelines where every step in pipe_path is a distinct app,
-    and each result glob is uniq for all pipeline results.
-    '''
-    steps = {}
-    file_globs = {}
-    for step in pipe_path:
-        steps[step] = build_a_step(step, file_globs, proj_id)
-    if verbose:
-        print "STEPS = "
-        print json.dumps(steps,indent=4)
-        print "FILE_GLOBS = "
-        print json.dumps(file_globs,indent=4)
-
-    return [ steps, file_globs ]
-
-
-def report_plans(psv, input_files, reference_files, deprecate_files, priors,
-                 pipe_path, steps_to_do, steps):
-    '''Report the plans before executing them.'''
-
-    print "Running: "+psv['title']
-    if 'subTitle' in psv:
-        print "         "+psv['subTitle']
-    for input_type in sorted( input_files.keys() ):
-        print "- " + input_type + ":"
-        for fid in input_files[input_type]:
-            print "  " + file_path_from_fid(fid)
-    print "- Reference files:"
-    for token in reference_files:
-        print "  " + file_path_from_fid(priors[token],True)
-    print "- Results written to: " + psv['project'] + ":" +psv['resultsFolder'] +'/'
-    if len(steps_to_do) == 0:
-        print "* All expected results are in the results folder, so there is nothing to do."
-        print "  If this experiment/replicate needs to be rerun, then use the --force flag to "
-        print "  rerun all steps; or remove suspect results from the folder before relaunching."
-        sys.exit(0)
-    else:
-        print "- Steps to run:"
-        for step in pipe_path:
-            if step in steps_to_do:
-                print "  * "+steps[step]['app']+" will be run"
-            else:
-                if not step.find('concat') == 0:
-                    print "    "+steps[step]['app']+" has already been run"
-
-    if len(deprecate_files) > 0:
-        oldFolder = psv['resultsFolder']+"/deprecated"
-        print "Will move "+str(len(deprecate_files))+" prior result file(s) to '" + \
-                                                        psv['resultsFolder']+"/deprecated/'."
-        for fid in deprecate_files:
-            print "  " + file_path_from_fid(fid)
-
-
-def launchPad(wf,proj_id,psv,run=False):
-    '''Launches or just advertises preassembled workflow.'''
-    if wf == None:
-        print "ERROR: failure to assemble workflow!"
-        sys.exit(1)
-
-    if run:
-        print "Launch sequence initiating..."
-        wf_run = wf.run({})
-        if wf_run == None:
-            print "ERROR: failure to lift off!"
+        response = encoded_get(url, AUTHID, AUTHPW)
+        exp = response.json()
+    except:
+        if must_find:
+            print "Experiment %s not found." % experiment
             sys.exit(1)
+        return None
+
+    return exp
+
+def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
+    '''Looks up encoded experiment's assay_type, normalized to lower case.'''
+    if exp == None:
+        exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
+
+    if exp["assay_term_name"] == "RNA-seq" \
+    or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq":
+        if exp["replicates"][0]["library"]["size_range"] == ">200":
+            return "long-rna-seq"
         else:
-            print "  We have liftoff!"
-            wf_dict = wf_run.describe()
-            log_this_run(wf_dict['id'],psv['resultsFolder'],proj_id)
-            print "  Launched " + wf_dict['id']+" as '"+wf.name+"'"
+            return "small-rna-seq"
+    elif exp["assay_term_name"] == "whole genome bisulfite sequencing":
+        return "dna-me"
+    #elif exp["assay_term_name"] == "RAMPAGE":
+    #    return "rampage"
+    #elif exp["assay_term_name"] == "ChIP-seq":
+    #    return "chip-seq"
+    #elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
+    #    return "dna-me"
+
+    return exp["assay_term_name"].lower()
+
+def get_full_mapping(experiment,exp=None,key='default',must_find=True,warn=False):
+    '''Returns all replicate mappings for an experiment from encoded.'''
+
+    if exp == None:
+        exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
+
+    if not exp.get('replicates') or len(exp['replicates']) < 1:
+        if must_find:
+            print "No replicates found in %s" % experiment
+            sys.exit(1)
+        return None
+
+    return choose_mapping_for_experiment(exp,warn=warn)
+
+def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,key='default', \
+                                                                                    must_find=True):
+    '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
+    if full_mapping == None:
+        full_mapping = get_full_mapping(experiment,key=key,must_find=must_find,warn=False)
+
+    try:
+        return full_mapping[(biorep,techrep)]
+    except KeyError:
+        if must_find:
+            print "Specified replicate: rep%s_%s could not be found in mapping of %s." % \
+                ( biorep, techrep, experiment )
+            print json.dumps(full_mapping,indent=4)
+            sys.exit(1)
+    return None
+
+def get_enc_file(file_acc,must_find=False,key='default'):
+    '''Returns all replicate mappings for an experiment from encoded.'''
+
+    (AUTHID,AUTHPW,SERVER) = processkey(key)
+
+    if file_acc.startswith("/files/") and file_acc.endswith('/'):
+        url = SERVER + '%s?format=json&frame=embedded' % file_acc
     else:
-        print "Workflow '" + wf.name + "' has been assembled in "+psv['resultsFolder'] + \
-                                                                    ". Manual launch required."
+        url = SERVER + '/files/%s/?format=json&frame=embedded' % file_acc
+    try:
+        response = encoded_get(url, AUTHID, AUTHPW)
+        file_obj = response.json()
+    except:
+        if must_find:
+            print "File %s not found." % file_acc
+            sys.exit(1)
+        return None
+
+    return file_obj
+
+def get_enc_exp_files(exp_obj,output_types=[],key='default'):
+    '''Returns list of file objs associated with an experiment, filtered by zero or more output_types.'''
+    if not exp_obj or not exp_obj.get('files'):
+        return []
+    files = []
+    accessions = []
+    for file_acc in exp_obj['original_files']:
+        file_obj = None
+        acc = file_acc[7:18]
+        if acc in accessions:
+            continue
+        accessions.append(acc)
+        for f_obj in exp_obj['files']:
+            if acc == f_obj['accession']:
+                file_obj = f_obj
+                break
+        if file_obj == None:
+            file_obj = get_enc_file(file_acc,key=key)
+        if file_obj == None:
+            continue
+        #print " * Found: %s [%s] status:%s %s" % \
+        #                  (file_obj['accession'],file_obj['output_type'],file_obj['status'],file_obj['submitted_file_name'])
+        if len(output_types) > 0 and file_obj.get('output_type') not in output_types:
+            continue
+        if file_obj.get('status') not in ["released","uploaded","in progress"]:
+            continue
+        if file_obj.get('submitted_file_name') not in filenames_in(files):
+           files.extend([file_obj])
+    return files
 
 SW_CACHE = {}
 def get_sw_from_log(dxfile, regex):
@@ -882,20 +923,20 @@ def get_sw_from_log(dxfile, regex):
     except:
         print "Could not get job id"
 
-    if not SW_CACHE.get(job_id, {}):
+    if not SW_CACHE.get(job_id+regex, {}):
         cmd = ["dx", "watch", job_id]
-        log = subprocess.check_output(cmd)
+        log = subprocess.check_output(cmd, stderr=subprocess.STDOUT) # DEVNULL ?
         swre = re.compile(regex)
         sw = swre.findall(log)
 
         if not sw:
             return {}
-        SW_CACHE[job_id] =  {
+        SW_CACHE[job_id+regex] =  {
             "software_versions":
                     [ { "software": i,
                         "version":  j }  for (i,j) in sw ]
         }
-    return SW_CACHE[job_id]
+    return SW_CACHE[job_id+regex]
 
 def create_notes(dxfile, addons={}):
     ''' creates temporary notes storage for file metadat from dxfile object '''
@@ -909,4 +950,74 @@ def create_notes(dxfile, addons={}):
     notes.update(addons)
     return notes
 
+def dx_file_get_properties(fid,proj_id=None):
+    '''Returns dx file's properties.'''
+    if proj_id != None:
+        dxfile = dxpy.DXFile(fid,project=proj_id)
+    else:
+        dxfile = file_handler_from_fid(fid)
+    return dxfile.get_properties()
+
+def dx_file_get_property(fid,key,return_json=False,fail_on_parse_error=True):
+    '''Returns dx file's property matching 'key'.'''
+    properties = dx_file_get_properties(fid)
+    if not properties or key not in properties:
+        return None
+    if return_json:
+        try:
+            return json.loads(properties[key])
+        except:
+            try:
+                return json.loads("{"+properties[key]+"}")
+            except:
+                print "JSON parsing failed:"
+                print properties[key]
+                if fail_on_parse_error:
+                    sys.exit(1)
+                return None
+    
+    return properties[key]
+
+def dx_property_accesion_key(server):
+    '''Returns the dx file propery key to use for the accession property.  Depends on the server being posted to.'''
+    acc_key = "accession"
+    server_key = server[server.find('/')+2:server.find('.')]# beta: "http://v25rc2.demo.encodedcc.org"
+    if server_key != 'www':
+        acc_key = server_key + '_accession'
+    return acc_key
+    
+def dx_file_set_property(fid,key,value,proj_id=None,add_only=False,test=False,verbose=False):
+    '''Adds/replaces key=value in a dx file's properties.
+       Returns the value of the property after this operation.'''
+    if proj_id != None:
+        dxfile = dxpy.DXFile(fid,project=proj_id)
+    else:
+        dxfile = file_handler_from_fid(fid)
+    properties = dxfile.get_properties()
+    if verbose:
+        path = '/' + dxfile.name
+        if dxfile.folder != '/':
+            path = dxfile.folder + path
+        folder = dxfile.folder
+    if key in properties:
+        if properties[key] == value:
+            if verbose:
+                print "Note: file %s already has property '%s' set to '%s'" % (path,key,properties[key])
+            return properties[key]
+        elif add_only:
+            if verbose:
+                print "Error: file %s already has property '%s' and is not being updated from '%s'" % (path,key,properties[key])
+            return properties[key]
+        elif verbose:
+                print "Warning: file %s has property '%s' but is being updated to '%s'" % (path,key,value)
+    properties[key] = value
+    if test:
+        if verbose:
+            print "  - Test set %s with %s='%s'" % (path,key,value)
+    else:
+        dxfile.set_properties(properties)
+        if verbose:
+            print "  - set %s with %s='%s'" % (path,key,value)
+    return properties[key]
+    
 
