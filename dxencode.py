@@ -35,7 +35,7 @@ KEYFILE = 'keypairs.json'  ## see processkey() Note this file must be in gitigno
 DEFAULT_SERVER = 'https://www.encodeproject.org'
 S3_SERVER='s3://encode-files/'
 
-logger = logging.getLogger("DXENCODE")  # not sure this goes here.
+logger = logging.getLogger('dxencode') # Callers should either use dxencode.logger or set dxencode.logger = local.logger()
 
 def calc_md5(path):
     ''' Calculate md5 sum from file as specified by valid path name'''
@@ -105,7 +105,7 @@ def encoded_post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
     item = r.json()['@graph'][0]
     return item
 
-def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
+def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
     ''' take a file object on local file system, post meta data and cp to AWS '''
     HEADERS = {
         'Content-type': 'application/json',
@@ -140,7 +140,7 @@ def encoded_post_file(file_meta, SERVER, AUTHID, AUTHPW):
     logger.debug("Uploading file.")
     start = datetime.now()
     try:
-        subprocess.check_call(['aws', 's3', 'cp', file_meta['submitted_file_name'], creds['upload_url']], env=env)
+        subprocess.check_call(['aws', 's3', 'cp', filename, creds['upload_url']], env=env)
         end = datetime.now()
         duration = end - start
         logger.debug("Uploaded in %.2f seconds" % duration.seconds)
@@ -275,7 +275,7 @@ def file_handler_from_fid(fid):
     try:
         dxlink = FILES[fid]
     except:
-        dxlink = fid
+        dxlink = dxpy.dxlink(fid)
     return dxpy.get_handler(dxlink)
 
 
@@ -333,7 +333,6 @@ def find_or_create_folder(project, sub_folder, root_folder='/'):
 
 def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
     ''' returns aws s3 bucket and file name from encodeD file object (f_obj)'''
-
     #make the URL that will get redirected - get it from the file object's href property
     encode_url = urlparse.urljoin(SERVER,f_obj.get('href'))
     logger.debug(encode_url)
@@ -721,7 +720,7 @@ def choose_mapping_for_experiment(experiment,warn=True):
                     if mate:
                         rep_files.remove(mate)
                     elif warn:
-                        logging.warning('%s:%s could not find mate' %(experiment.get('accession'), file_object.get('accession')))
+                        logger.warning('%s:%s could not find mate' %(experiment.get('accession'), file_object.get('accession')))
                         mate = {}
                     paired_files.extend([ (file_object, mate) ])
 
@@ -734,9 +733,9 @@ def choose_mapping_for_experiment(experiment,warn=True):
                 "replicate_id": rep['@id']
             }
             if rep_files and warn:
-                logging.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
+                logger.warning('%s: leftover file(s) %s' % (exp_id, rep_files))
     elif warn:
-        logging.warning('%s: No files to map' % exp_id)
+        logger.warning('%s: No files to map' % exp_id)
     return mapping
 
 def get_exp(experiment,must_find=True,warn=False,key='default'):
@@ -892,10 +891,13 @@ def create_notes(dxfile, addons={}):
     notes.update(addons)
     return notes
 
-def dx_file_get_properties(fid):
+def dx_file_get_properties(fid,proj_id=None):
     '''Returns dx file's properties.'''
-    file_handler = file_handler_from_fid(fid)
-    return file_handler.get_properties()
+    if proj_id != None:
+        dxfile = dxpy.DXFile(fid,project=proj_id)
+    else:
+        dxfile = file_handler_from_fid(fid)
+    return dxfile.get_properties()
 
 def dx_file_get_property(fid,key,return_json=False,fail_on_parse_error=True):
     '''Returns dx file's property matching 'key'.'''
@@ -917,22 +919,27 @@ def dx_file_get_property(fid,key,return_json=False,fail_on_parse_error=True):
     
     return properties[key]
 
-def dx_property_accesion_key(server_key):
+def dx_property_accesion_key(server):
     '''Returns the dx file propery key to use for the accession property.  Depends on the server being posted to.'''
-    acc_key = "beta_accession"
-    if server_key == "test":
-        acc_key = "test_accession"
-    elif server_key == "www":
-        acc_key = "accession"
+    acc_key = "accession"
+    server_key = server[server.find('/')+2:server.find('.')]# beta: "http://v25rc2.demo.encodedcc.org"
+    if server_key != 'www':
+        acc_key = server_key + '_accession'
     return acc_key
     
-def dx_file_set_property(fid,key,value,add_only=False,test=False,verbose=False):
+def dx_file_set_property(fid,key,value,proj_id=None,add_only=False,test=False,verbose=False):
     '''Adds/replaces key=value in a dx file's properties.
        Returns the value of the property after this operation.'''
-    file_handler = file_handler_from_fid(fid)
-    properties = file_handler.get_properties()
+    if proj_id != None:
+        dxfile = dxpy.DXFile(fid,project=proj_id)
+    else:
+        dxfile = file_handler_from_fid(fid)
+    properties = dxfile.get_properties()
     if verbose:
-        path = file_path_from_fid(fid)
+        path = '/' + dxfile.name
+        if dxfile.folder != '/':
+            path = dxfile.folder + path
+        folder = dxfile.folder
     if key in properties:
         if properties[key] == value:
             if verbose:
@@ -949,10 +956,9 @@ def dx_file_set_property(fid,key,value,add_only=False,test=False,verbose=False):
         if verbose:
             print "  - Test set %s with %s='%s'" % (path,key,value)
     else:
-        file_handler.set_properties(properties)
+        dxfile.set_properties(properties)
         if verbose:
             print "  - set %s with %s='%s'" % (path,key,value)
     return properties[key]
-
-
+    
 

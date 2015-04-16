@@ -137,9 +137,10 @@ class Splashdown(object):
         self.replicates = None # lost replicate folders currently found beneath experiment folder
         self.test = True # assume Test until told otherwise
         self.obj_cache = {} # certain things take time to find or create and are needed multiple times
-        dxencode.logger = logging.getLogger(__name__) # I need this to avoid some errors
+        logging.basicConfig(format='%(asctime)s  %(levelname)s: %(message)s')
+        dxencode.logger = logging.getLogger(__name__ + '.dxe') # I need this to avoid some errors
         dxencode.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
-        print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
+
 
 
     def get_args(self):
@@ -269,14 +270,14 @@ class Splashdown(object):
             genome = properties["genome"]
             if genome in self.ASSEMBLIES_SUPPORTED.keys():
                 self.genome = self.ASSEMBLIES_SUPPORTED[genome]
-                msg += "genome[%s]" % self.genome
+                msg += " genome[%s]" % self.genome
         if self.annotation == None and "annotation" in properties:
             annotation = properties["annotation"].upper() # BRITTLE: v19 in dx but V19 in encoded
             if annotation in self.ANNOTATIONS_SUPPORTED:
                 self.annotation = annotation
-                msg += "annotation[%s]" % self.annotation
+                msg += " annotation[%s]" % self.annotation
         if len(msg) > 0:
-            print "  - Found " + msg
+            print "  - Found" + msg
         return self.genome
 
 
@@ -325,52 +326,83 @@ class Splashdown(object):
         return expected
 
 
-    def find_in_encode(self,fid,verbose=False):
-        '''Looks for file in encode with the same submitted file name as the fid has.'''
-        file_name = dxencode.file_path_from_fid(fid,projectToo=True).split(':')[-1]
-        file_size = dxencode.description_from_fid(fid).get('size')
-
-        # TODO: encoded should allow searching on fid !!!
-        #authid, authpw, server = dxencode.processkey(self.server_key)
-        url = urlparse.urljoin(self.server,
-                'search/?type=file&frame=object&submitted_file_name=%s' % file_name)
-        response = dxencode.encoded_get(url,self.authid, self.authpw)
+    def enc_lookup_json(self,path,must_find=False):
+        '''Attempts to retrieve an ENCODEd json object.'''
+        url = self.server + path + '/?format=json&frame=embedded'
+        #print url
+        response = dxencode.encoded_get(url, self.authid, self.authpw)
         try:
-            if verbose:
-                print "-- Looking for %s (size:%d) in %s" % (file_name, file_size, server)
             response.raise_for_status()
-            if response.json()['@graph']:
-                #for encode_file in response.json()['@graph']:
-                #    for ext_id in encode_file.get('dbxrefs'):
-                #        if ext_id == 'dxid:' + fid:
-                #            if verbose:
-                #                print("%s %s: File sizes match in dxid,." % \
-                #                                           (fid, encode_file.get('file_size')))
-                #            return encode_file
-                            
-                encode_file = response.json()['@graph'][0]
-                #logger.info("Found potential duplicate: %s" %(duplicate_item.get('accession')))
-                if file_size ==  encode_file.get('file_size'):
-                    if verbose:
-                        print("%s %s: File sizes match, assuming duplicate." % \
-                                                   (str(file_size), encode_file.get('file_size')))
-                    return encode_file
-                else:
-                    if verbose:
-                        print("%s %s: File sizes differ, assuming new file." % \
-                                                   (str(file_size), encode_file.get('file_size')))
-                    return None
-            else:
-                if verbose:
-                    print("No duplicate ... proceeding")
-                    print(response.text)
-                    print(response.json())
-                return None
+            json_obj = response.json()
         except:
-            if verbose:
-                print('Duplicate accession check failed: %s %s' % (response.status_code, response.reason))
-                print(response.text)
+            if must_find:
+                print "Path to json object '%s' not found." % path
+                print 'Lookup failed: %s %s' % (response.status_code, response.reason)
+                sys.exit(1)
             return None
+        return json_obj
+
+
+    def enc_file_find_find_by_dxid(self,dx_fid):
+        '''Finds a encoded 'file' object by dnanexus alias.'''
+        file_obj = None
+        
+        file_alias = 'dnanexus:' + dx_fid
+        #if pipe_alias in self.obj_cache:
+        #    return self.obj_cache[pipe_alias]
+        file_obj = self.enc_lookup_json( 'files/' + file_alias,must_find=False)
+        #if v:
+        #    self.obj_cache[file_alias] = file_obj
+        #    print "  - Found file: '%s'" % file_alias
+        return file_obj
+       
+
+    #def find_in_encode(self,fid,verbose=False):
+    #    '''Looks for file in encode with the same submitted file name as the fid has.'''
+    #    file_name = dxencode.file_path_from_fid(fid,projectToo=True).split(':')[-1]
+    #    file_size = dxencode.description_from_fid(fid).get('size')
+    #
+    #    # TODO: encoded should allow searching on fid !!!
+    #    #authid, authpw, server = dxencode.processkey(self.server_key)
+    #    url = urlparse.urljoin(self.server,
+    #            'search/?type=file&frame=object&submitted_file_name=%s' % file_name)
+    #    response = dxencode.encoded_get(url,self.authid, self.authpw)
+    #    try:
+    #        if verbose:
+    #            print "-- Looking for %s (size:%d) in %s" % (file_name, file_size, server)
+    #        response.raise_for_status()
+    #        if response.json()['@graph']:
+    #            #for encode_file in response.json()['@graph']:
+    #            #    for ext_id in encode_file.get('dbxrefs'):
+    #            #        if ext_id == 'dxid:' + fid:
+    #            #            if verbose:
+    #            #                print("%s %s: File sizes match in dxid,." % \
+    #            #                                           (fid, encode_file.get('file_size')))
+    #            #            return encode_file
+    #                        
+    #            encode_file = response.json()['@graph'][0]
+    #            #logger.info("Found potential duplicate: %s" %(duplicate_item.get('accession')))
+    #            if file_size ==  encode_file.get('file_size'):
+    #                if verbose:
+    #                    print("%s %s: File sizes match, assuming duplicate." % \
+    #                                               (str(file_size), encode_file.get('file_size')))
+    #                return encode_file
+    #            else:
+    #                if verbose:
+    #                    print("%s %s: File sizes differ, assuming new file." % \
+    #                                               (str(file_size), encode_file.get('file_size')))
+    #                return None
+    #        else:
+    #            if verbose:
+    #                print("No duplicate ... proceeding")
+    #                print(response.text)
+    #                print(response.json())
+    #            return None
+    #    except:
+    #        if verbose:
+    #            print('Duplicate accession check failed: %s %s' % (response.status_code, response.reason))
+    #            print(response.text)
+    #        return None
 
     def find_needed_files(self,files_expected,verbose=False):
         '''Returns the tuple list of files that NEED to be posted to ENCODE.'''
@@ -380,19 +412,24 @@ class Splashdown(object):
             # Current strategy is to complete an post before updating the accession field.
             # so existence of accession should mean it is already in encoded.
             fileDict = dxencode.description_from_fid(fid,properties=True)
-            acc_key = dxencode.dx_property_accesion_key(self.server_key)
+            acc_key = dxencode.dx_property_accesion_key(self.server)
             if not self.ignore:
                 # check file properties
                 if "properties" in fileDict and acc_key in fileDict["properties"]:
                     accession = fileDict["properties"][acc_key]
                     if accession.startswith(self.acc_prefix) and len(accession) == 11:
+                        #file_name = dxencode.file_path_from_fid(fid,projectToo=True).split(':')[-1]
+                        #print " - Already posted: " + file_name + " to " + accession
                         continue
             # No accession so try to match in encoded by submit_file_name and size
-            f_obj =  self.find_in_encode(fid,verbose)
+            #f_obj =  self.find_in_encode(fid,verbose)
+            f_obj =  self.enc_file_find_find_by_dxid(fid)
             if f_obj == None:
                 needed.append( (out_type,rep_tech,fid) )
             else:
                 self.found[fid] = f_obj
+            #    file_name = dxencode.file_path_from_fid(fid,projectToo=True).split(':')[-1]
+            #    print " - Already posted: " + file_name
 
         if verbose:
             print "Needed files:"
@@ -416,7 +453,7 @@ class Splashdown(object):
             inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
             if inp_obj != None:
                 self.genome = self.find_genome_annotation(inp_obj)
-                acc_key = dxencode.dx_property_accesion_key(self.server_key)
+                acc_key = dxencode.dx_property_accesion_key(self.server)
                 if "properties" in inp_obj and acc_key in inp_obj["properties"]:
                     # older runs don't have
                     accession = inp_obj["properties"][acc_key]
@@ -483,23 +520,6 @@ class Splashdown(object):
             
         return qc_metrics
         
-
-    def enc_lookup_json(self,path,must_find=False):
-        '''Attempts to retrieve an ENCODEd json object.'''
-        url = self.server + path + '/?format=json&frame=embedded'
-        #print url
-        response = dxencode.encoded_get(url, self.authid, self.authpw)
-        try:
-            response.raise_for_status()
-            json_obj = response.json()
-        except:
-            if must_find:
-                print "Path to json object '%s' not found." % path
-                print 'Lookup failed: %s %s' % (response.status_code, response.reason)
-                sys.exit(1)
-            return None
-        return json_obj
-
 
     def pipeline_qualifiers(self,rep_tech,app_name=None):
         '''Determines and pipeline_qualifiers in ugly special-case code.'''
@@ -803,7 +823,7 @@ class Splashdown(object):
         payload["derived_from"] = self.find_derived_from(fid,job, verbose)
         payload['submitted_file_name'] = dxencode.file_path_from_fid(fid,projectToo=True)
         payload['file_size'] = dx_obj["size"]
-        #payload['md5sum'] = calculated_md5 # TODO: Find from file properties???
+        #payload['md5sum'] = calculated_md5 # Done i  validate_post applet
         if self.genome == None:
             print "Warning: could not determine genome assembly! Add properties to reference files."
             #sys.exit(1)
@@ -835,22 +855,15 @@ class Splashdown(object):
                 payload["step_run"] = "/analysis-step-runs/dnanexus:" + step_run["dx_applet_details"][0].get("dx_job_id")
             if "notes" in step_run:
                 step_run_notes = json.loads(step_run.get("notes"))
-                payload["analysis_step"] = "/analysis-steps/" + step_run_notes.get("step_name")
-                payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
+                # analysis_step and pipeline are calculated properties.
+                #payload["analysis_step"] = "/analysis-steps/" + step_run_notes.get("step_name")
+                #payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
                 notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_workflow_id")
 
         notes["dx_project_id"] = self.proj_id
         notes["dx_project_name"] = self.proj_name
         payload['notes'] = json.dumps(notes)
         
-        # FIXME: temporary testing
-        #if qc_metrics:
-        #    print "payload:"
-        #    print json.dumps(payload,indent=4)
-        #    print "payload[notes]:"
-        #    print json.dumps(notes,indent=4)
-        #    sys.exit(1)
-
         if verbose:
             print "payload:"
             print json.dumps(payload,indent=4)
@@ -861,46 +874,33 @@ class Splashdown(object):
 
     def file_mark_accession(self,fid,accession,test=True):
         '''Adds/replaces accession to a file's properties.'''
-        acc_key = dxencode.dx_property_accesion_key(self.server_key)
+        acc_key = dxencode.dx_property_accesion_key(self.server)
         path = dxencode.file_path_from_fid(fid)
-        acc = dxencode.dx_file_set_property(fid,acc_key,accession,add_only=True,test=test,verbose=True) # verbose for now
-        #if acc:
-        #    print "Warning: file %s has accession %s but has been posted as accession %s" % \
-        #        (path,props[acc_key],accession)
-        #    props = dxencode.dx_file_set_property(fid,acc_key,accession,add_only=False,test=test)
+        acc = dxencode.dx_file_set_property(fid,acc_key,accession,add_only=True,test=test)
         if acc == None or acc != accession:
-            print "Error: failed to update accession for file %s to '%s'" % (path,accession)
+            print "Error: failed to update %s for file %s to '%s'" % (path,acc_key,accession)
         elif test:
-            print "  - Test flag %s with accession='%s'" % (path,accession)
+            print "  - Test flag %s with %s='%s'" % (path,acc_key,accession)
         else:
-            print "  - Flagged   %s with accession='%s'" % (path,accession)
+            print "  - Flagged   %s with %s='%s'" % (path,acc_key,accession)
 
-        #file_handler = dxencode.file_handler_from_fid(fid)
-        #properties = file_handler.get_properties()
-        #path = dxencode.file_path_from_fid(fid)
-        #if acc_key in properties and properties[acc_key] != accession:
-        #    if properties[acc_key] != accession:
-        #        print "Warning: file %s has accession %s but has been posted as accession %s" % \
-        #            (path,properties[acc_key],accession)
-        #        #sys.exit(1)
-        #properties[acc_key] = accession
-        #if test:
-        #    print "  - Test flag %s with accession='%s'" % (path,accession)
-        #else:
-        #    file_handler.set_properties(properties)
-        #    print "  - Flagged   %s with accession='%s'" % (path,accession)
 
+    def can_skip_validation(self,exp_type,output_type,test=True):
+        '''Returns True if validation can be skipped.'''
+        if exp_type.startswith("long-rna-seq"):
+            return True
+        return (output_type in self.SKIP_VALIDATE)
 
     def file_post(self,fid,payload,test=True):
         '''Posts a file to encoded.'''
         path = payload['submitted_file_name'].split(':')[1]
         derived_count = len(payload["derived_from"])
-        skip_validate = (payload["output_type"] in self.SKIP_VALIDATE)
-        val_msg = ""
-        if skip_validate:
-            val_msg = " UNVALIDATED"
+        skip_validate = self.can_skip_validation(self.exp_type,payload["output_type"])
+        job_name = "Post "+path
+        if not skip_validate:
+            job_name = job_name + " (must validate)"
         if test:
-            print "  - Test post %s (%d) to '%s'%s" % (path,derived_count,self.server_key,val_msg)
+            print "  - Test %s (derived:%d) to '%s'" % (job_name,derived_count,self.server_key)
             if self.server_key == "test":
                 return "TSTFF00FAKE"
             return "ENCFF00FAKE"
@@ -915,9 +915,9 @@ class Splashdown(object):
                 "skipvalidate": skip_validate,
                 "debug": True
                 },
-                folder=out_folder)
-            print "  - Submitting %s to '%s' (derived_from:%d)%s" % \
-                                                     (job.id,self.server_key, derived_count,val_msg)
+                folder=out_folder,name=job_name)
+            print "  - ToDX %s (%s) (derived:%d) to '%s'" % \
+                                                     (job_name,job.id, derived_count, self.server_key)
             sys.stdout.flush() # Slow running job should flush to piped log
             try:
                 job.wait_on_done(interval=1)
@@ -945,11 +945,11 @@ class Splashdown(object):
             print "Ignoring DXFile properties (will post to test server)"
             self.ignore = args.ignore_properties
             self.server_key = 'test' # mandated because option is dangerous
-
+            
         self.server_key = args.server
         self.authid, self.authpw, self.server = dxencode.processkey(self.server_key)
         
-        if self.server_key != "test":
+        if self.server_key == "www":
             self.acc_prefix = "ENCFF"
         self.proj_name = dxencode.env_get_current_project()
         if self.proj_name == None or args.project != None:
@@ -1023,13 +1023,19 @@ class Splashdown(object):
                                                                                     (self.exp_id)
                     halted += 1
                     break
+                elif accession == "NOT POSTED":
+                    print "* HALTING %s - validation failure prevented posting and could compromise 'derived_from'" % \
+                                                                                    (self.exp_id)
+                    halted += 1
+                    break
 
                 # d) Update dnanexus file with file accession tag.
                 if not args.test:
                     post_count += 1
-                self.file_mark_accession(fid,accession,args.test)
+                    
+                self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
 
-                #if post_count >= 1:  # Short circuit for test
+                #if file_count >= 1:  # FIXME: Short circuit for test
                 #    break
 
             print "- For %s Processed %d file(s), posted %s" % \
