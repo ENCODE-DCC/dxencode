@@ -90,21 +90,27 @@ def encoded_post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
         'Accept': 'application/json',
     }
 
+    r = requests.post(
+        SERVER + '/'+obj_type,
+        auth=(AUTHID, AUTHPW),
+        data=json.dumps(obj_meta),
+        headers=HEADERS,
+    )
+    try:
+        r.raise_for_status()
+    except:
+        logger.error('Submission failed: %s %s' % (r.status_code, r.reason))
+        logger.error(r.text)
+        raise
+    item = r.json()['@graph'][0]
+    return item
+
 def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
     ''' take a file object on local file system, post meta data and cp to AWS '''
     HEADERS = {
         'Content-type': 'application/json',
         'Accept': 'application/json',
     }
-
-    ## doublecheck file
-    localsize  = os.path.getsize(local_file)
-    if (localsize == 0):
-        logger.error("File size for %s (%s) is zero, exiting" % (local_file, file_meta['submitted_file_name']))
-        sys.exit(1)
-    if (localsize != file_meta['file_size']):
-        logger.error("File size for %s not equal to metadata value: %s" % (localsize, file_meta['file_size']))
-        sys.exit(1)
 
     r = requests.post(
         SERVER + '/file',
@@ -117,77 +123,12 @@ def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
     except:
         logger.error('Submission failed: %s %s' % (r.status_code, r.reason))
         logger.error(r.text)
-        if r.status_code == 409:
-            ### we asssume this is a md5sum issue
-            cr = requests.get(
-                    SERVER + "md5:"+file_meta['md5sum'],
-                    auth=(AUTHID,AUTHPW),
-                    headers=HEADERS
-            )
-            try:
-                cr.raise_for_status()
-            except:
-                logger.error("Failed attempting to find existing file")
-                raise
-            logger.debug("Using existing object: %s" % cr.json())
-            return cr.json()
-        else:
-            raise
+        raise
     item = r.json()['@graph'][0]
-    logger.debug("New object posted: %s" % item)
 
-    return aws_cp(local_file, item)
     ####################
     # POST file to S3
 
-def encoded_upload_existing(local_file, file_acc, SERVER, AUTHID, AUTHPW, dryrun=False):
-    ''' if a ENCFF object exists, get upload credentials and upload '''
-
-
-    HEADERS = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-    }
-    ## doublecheck file
-    ffr = encoded_get(SERVER+file_acc, AUTHID=AUTHID, AUTHPW=AUTHPW)
-    try:
-        ffr.raise_for_status()
-    except:
-        logger.error("File %s could not be found in db (%s %s)" % (file_acc, ffr.status_code, ffr.reason))
-        logger.error(ffr.text)
-        raise
-    file_meta = ffr.json()
-
-    localsize  = os.path.getsize(local_file)
-    if (localsize == 0):
-        logger.error("File size for %s (%s) is zero, exiting" % (local_file, file_meta['submitted_file_name']))
-        sys.exit(1)
-    if (localsize != file_meta['file_size']):
-        logger.error("File size for %s not equal to metadata value: %s" % (localsize, file_meta['file_size']))
-        sys.exit(1)
-
-    upr = requests.post(
-        SERVER + file_meta['@id'] + '/upload',
-        data=json.dumps({}),
-        auth=(AUTHID, AUTHPW),
-        headers=HEADERS,
-    )
-    try:
-        upr.raise_for_status()
-    except:
-        logger.error('Upload credential failed: %s %s' % (upr.status_code, upr.reason))
-        logger.error(upr.text)
-        raise
-    item = upr.json()['@graph'][0]
-
-    if dryrun:
-        return item
-    else:
-        return aws_cp(local_file, item)
-    ####################
-    # POST file to S3
-
-def aws_cp(local_file, item):
     creds = item['upload_credentials']
     env = os.environ.copy()
     env.update({
@@ -402,7 +343,7 @@ def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
         r.raise_for_status
     except:
         logger.error('%s href does not resolve' %(f_obj.get('accession')))
-        sys.exit(1)
+        sys.exit()
     logger.debug(r)
 
     #this is the actual S3 https URL after redirection
