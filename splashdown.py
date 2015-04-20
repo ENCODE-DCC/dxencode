@@ -896,11 +896,11 @@ class Splashdown(object):
         path = payload['submitted_file_name'].split(':')[1]
         derived_count = len(payload["derived_from"])
         skip_validate = self.can_skip_validation(self.exp_type,payload["output_type"])
-        job_name = "Post "+path
+        job_name = "Post "+path+" to "+self.server_key
         if not skip_validate:
             job_name = job_name + " (must validate)"
         if test:
-            print "  - Test %s (derived:%d) to '%s'" % (job_name,derived_count,self.server_key)
+            print "  - Test %s (derived:%d)" % (job_name,derived_count)
             if self.server_key == "test":
                 return "TSTFF00FAKE"
             return "ENCFF00FAKE"
@@ -916,8 +916,8 @@ class Splashdown(object):
                 "debug": True
                 },
                 folder=out_folder,name=job_name)
-            print "  - ToDX %s (%s) (derived:%d) to '%s'" % \
-                                                     (job_name,job.id, derived_count, self.server_key)
+            print "  - Job: %s <%s> (derived:%d)" % \
+                                                     (job_name,job.id, derived_count)
             sys.stdout.flush() # Slow running job should flush to piped log
             try:
                 job.wait_on_done(interval=1)
