@@ -69,8 +69,7 @@ class Splashdown(object):
                                      "unique plus signal":        "*_star_genome_plusUniq.bw"    },
                 "align-star":      { "alignments":                "*_star_genome.bam",
                                      "transcriptome alignments":  "*_star_anno.bam"              },
-                "quant-rsem":      { "transcript quantifications":"*_rsem.isoforms.results",
-                                     "genome quantifications":    "*_rsem.genes.results"         }  },
+                "quant-rsem":      { "genome quantifications":    "*_rsem.genes.results"         }  },
             "combined":   {}
         },
         "small-rna-seq": {
