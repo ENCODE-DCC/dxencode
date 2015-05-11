@@ -20,13 +20,20 @@ import dxencode
 #        must hard-code the pipeline json to handle repeated apps and dx name conflicts.
 #        Tokens are used to abstract dx.app input/outout file names to avoid collisions.
 #        - STEP_ORDER is the list of steps in the pipeline
-#        - STEPS contains step definitions and enforces dependencies by input file tokens matching
-#          to result file tokens of earlier steps.
+#        - REP_STEPS and COMBINED_STEPS contain step definitions and enforces dependencies by input
+#          file tokens matching to result file tokens of earlier steps.
 #        - FILE_GLOBS is needed for locating result files from prior runs.
 #      - Combined replicate processing is optional and depends upon COMBINED_STEP, etc.
 #        (e.g. rampageLaunch.py).
 #      - Control files are supported but most likely will require function overrides in derived
 #        classes (e.g. rampageLaunch.py)
+#      - In REP_STEPS and COMBINED_STEPS, both 'inputs' and 'results' are key:value lists where the key is used
+#        to attach results of one step to the inputs of another, while values must match dxapp.json names.
+#        Further, any input key ending in '_set' is expected to be an array of files (e.g. "input": { "reads_set": "reads" }  
+#        will expect one or more files to be found and used for dxapp.json input named "reads" ).
+#      - The FILE_GLOBS are matched by input/result keys, not values.
+#        (e.g. "input": { "pooled_bam": "bam" } matches file_glob "pooled_bam" and dxapp.json input named "bam".
+#        This example would allow the same applet to be used on replicate bams and poold bams in the same pipeline.)
 #
 # Example derived classes: long-rna-seq-pipeline: lrnaLaunch.py, srnaLaunch.py rampageLaunch.py
 
@@ -47,7 +54,7 @@ class Launch(object):
     SERVER_DEFAULT = 'www'
     '''At this time there is no need to use the any but the one true server for launching.'''
     
-    RESULT_FOLDER_DEFAULT = '/runs/'
+    FOLDER_DEFAULT = '/runs/'
     ''' This the default location to place results folders for each experiment.'''
     
     REP_STEP_ORDER = None # [ "MUST","REPLACE","IN","DREIVED","CLASS" ]
@@ -100,6 +107,7 @@ class Launch(object):
         self.proj_id = None
         self.exp = {}  # Will hold the encoded exp json
         self.psv = {} # will hold pipeline specific variables.
+        self.multi_rep = False  # Support multi-replicate workflows
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
     def get_args(self,parse=True):
@@ -153,10 +161,10 @@ class Launch(object):
                         default=dxencode.REF_FOLDER_DEFAULT,
                         required=False)
 
-        ap.add_argument('--resultsLoc',
+        ap.add_argument('-f','--folder',
                         help="The location to to place results folders (default: '<project>:" + \
-                                                                  self.RESULT_FOLDER_DEFAULT + "')",
-                        default=self.RESULT_FOLDER_DEFAULT,
+                                                                  self.FOLDER_DEFAULT + "')",
+                        default=self.FOLDER_DEFAULT,
                         required=False)
 
         ap.add_argument('--run',
@@ -285,8 +293,11 @@ class Launch(object):
         inputs = {}
         for step in self.psv['path']:
             for file_token in steps[step]['inputs'].keys():
-                rep_key = file_token[-1]
-                if rep_key not in self.psv['reps']:
+                if file_token[-2] != '_':
+                    continue
+                rep_key = file_token[-1].lower()
+                if rep_key not in self.psv['reps'].keys():
+                    print "*** " + rep_key + " not found in psv['reps']"
                     continue
                 rep = self.psv['reps'][rep_key]
                 # TODO: No need for multiples at this time.  Deal with it when it comes up.
@@ -295,7 +306,7 @@ class Launch(object):
                 if fid != None:
                     self.psv['priors'][file_token] = fid
                     inputs[file_token] = [ fid ]
-                else:
+                elif not self.multi_rep:
                     print "Error: Necessary '%s' for combined run, not found in '%s'." \
                                                                % (file_token, rep['resultsFolder'])
                     print "       Please run for single replicate first."
@@ -324,6 +335,7 @@ class Launch(object):
 
         # expecting either combined-replicates or biological and technical replicate
         if 'cr' in args and args.cr != None:
+            self.multi_rep = True
             if len(args.cr) != 2:
                 print "Specify which two replicates to compare (e.g. '1_2 2')."
                 sys.exit(1)
@@ -411,11 +423,7 @@ class Launch(object):
             cv['refLoc'] = dxencode.REF_FOLDER_DEFAULT + cv['genome'] + '/'
         if not cv['refLoc'].endswith('/'):
             cv['refLoc'] += '/' 
-        cv['resultsLoc'] = args.resultsLoc
-        if cv['resultsLoc'] == self.RESULT_FOLDER_DEFAULT:
-                cv['resultsLoc'] = self.RESULT_FOLDER_DEFAULT + cv['genome'] + '/'
-        if not cv['resultsLoc'].endswith('/'):
-            cv['resultsLoc'] += '/' 
+        cv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,cv['exp_type'],cv['genome'])
         cv['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/'
         cv['reps']['a']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
                                                               cv['reps']['a']['rep_tech'] + '/'
@@ -465,7 +473,6 @@ class Launch(object):
             if controls:
                 if 'controlled_by' in mapping['unpaired']:
                     load_to['controls'] += mapping['unpaired']['controlled_by']
-
         return paired_end
 
     def build_a_step(self, applet, file_globs, proj_id):
@@ -587,7 +594,7 @@ class Launch(object):
 
         print "Checking for input files..."
         # Find all reads files and move into place
-        # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
+        # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...)
         #       or possibly local, Currently only DX locations are supported.
         for rep in self.psv['reps'].values():
             rep['inputs'] = {}
@@ -681,16 +688,18 @@ class Launch(object):
         print "Determining steps to run..."
         # NOTE: stepsToDo is an ordered list of steps that need to be run
         for rep in self.psv['reps'].values():
+            rep['steps'] = replicate_steps
             rep['deprecate'] = [] # old results will need to be moved/removed if step is rerun
             rep['stepsToDo'] = self.determine_steps_to_run(rep['path'], replicate_steps, \
                                                     rep['priors'], rep['deprecate'], force=force)
         if self.psv['combined']:
+            self.psv['steps'] = combined_steps
             self.psv['deprecate'] = [] # old results will need to be moved/removed if step is rerun
             self.psv['stepsToDo'] = self.determine_steps_to_run(self.psv['path'], combined_steps, \
                                             self.psv['priors'], self.psv['deprecate'], force=force)
 
 
-    def create_workflow(self,run, app_proj_id=None,test=False,template=False):
+    def create_or_extend_workflow(self,run, run_id, wf=None,app_proj_id=None,test=False,template=False):
         '''
         This function will populate a workflow for the steps in run['stepsToDo'] and return 
         the workflow unlaunched.   It relies on steps dict which contains input and output
@@ -705,28 +714,45 @@ class Launch(object):
             app_proj_id = self.proj_id
 
         # create a workflow object
-        if not test:
-            wf = dxpy.new_dxworkflow(title=run['name'],name=run['name'],folder=run['resultsFolder'],
+        if self.multi_rep:
+            wf_folder = self.psv['resultsFolder']
+            wf_name = self.psv['name']
+        else:
+            wf_name = run['name']
+            wf_folder = run['resultsFolder']
+        if not test and wf == None:
+            wf = dxpy.new_dxworkflow(title=wf_name,name=wf_name,folder=wf_folder,
                                            project=self.proj_id,description=self.psv['description'])
 
         # NOTE: prevStepResults dict contains links to result files to be generated by previous steps
-        prevStepResults = {}
+        if 'prevStepResults' not in run:
+            run['prevStepResults'] = {}
         steps = run['steps']
         for step in run['stepsToDo']:
             appName = steps[step]['app']
             app = dxencode.find_applet_by_name(appName, app_proj_id)
+            inp_defs = app.describe().get('inputSpec') or []
             appInputs = {}
             # file inputs
             for fileToken in steps[step]['inputs'].keys():
                 appInp = steps[step]['inputs'][fileToken]
-                if fileToken in prevStepResults:
-                    appInputs[ appInp ] = prevStepResults[fileToken]
+                if fileToken in run['prevStepResults']:
+                    appInputs[ appInp ] = run['prevStepResults'][fileToken]
                 elif fileToken in run['priors']:
-                    if isinstance(run['priors'][fileToken], list):
-                        appInputs[ appInp ] = []
-                        for fid in run['priors'][fileToken]:
-                            appInputs[ appInp ] += [ dxencode.FILES[fid] ]
+                    for inp_def in inp_defs:
+                        if inp_def["name"] == appInp:
+                            break
+                    assert(inp_def["name"] == appInp)
+                    #print json.dumps(inp_def,indent=4)
+                    if inp_def["class"] == 'array:file':
+                        if isinstance(run['priors'][fileToken], list):
+                            appInputs[ appInp ] = []
+                            for fid in run['priors'][fileToken]:
+                                appInputs[ appInp ] += [ dxencode.FILES[fid] ]
+                        else:
+                            appInputs[ appInp ] = [ dxencode.FILES[ run['priors'][fileToken] ] ]
                     else:
+                        assert(not isinstance(run['priors'][fileToken], list))
                         appInputs[ appInp ] = dxencode.FILES[ run['priors'][fileToken] ]
                 elif not template:
                     print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
@@ -750,10 +776,21 @@ class Launch(object):
             for fileToken in steps[step]['results'].keys():
                 appOut = steps[step]['results'][fileToken]
                 if test:
-                    prevStepResults[ fileToken ] = 'fake-for-testing'
+                    run['prevStepResults'][ fileToken ] = 'fake-for-testing'
                 else:
-                    prevStepResults[ fileToken ] = dxpy.dxlink({'stage': stageId, \
+                    run['prevStepResults'][ fileToken ] = dxpy.dxlink({'stage': stageId, \
                                                                 'outputField': appOut })
+                # Secret sauce to tie rep results to combined inputs
+                if self.multi_rep and run_id != None:
+                    for cstep in self.psv['stepsToDo']:
+                        for key in self.psv['steps'][cstep]['inputs'].keys():
+                            if fileToken in self.FILE_GLOBS and key in self.FILE_GLOBS \
+                            and self.FILE_GLOBS[key] == self.FILE_GLOBS[fileToken]:
+                                if key[-1].lower() == run_id:
+                                    #print "combined inputs[%s] == %s %s" % (key, run['rep_tech'], fileToken)
+                                    if 'prevStepResults' not in self.psv:
+                                        self.psv['prevStepResults'] = {}
+                                    self.psv['prevStepResults'][key] = run['prevStepResults'][ fileToken ]
 
         if test:
             return None
@@ -761,36 +798,86 @@ class Launch(object):
             return wf
 
 
-    def report_run_plans(self,run):
+    def report_run_plans(self,run=None):
         '''Report the plans before executing them.'''
         # NOT EXPECTED TO OVERRIDE
 
+        combined = False
+        
+        if run == None:
+            combined = True
+            run = self.psv
         print "Running: "+run['title']
         if 'subTitle' in run:
             print "         "+run['subTitle']
+
+        # Inputs:
+        if combined:
+            for rep in self.psv['reps'].values():
+                for input_type in sorted( rep['inputs'].keys() ):
+                    if len(rep['inputs'][input_type]) > 0: 
+                        print "- " + input_type + " " + rep['rep_tech'] +':'
+                        for fid in rep['inputs'][input_type]:
+                            print "  " + dxencode.file_path_from_fid(fid)
         for input_type in sorted( run['inputs'].keys() ):
             if len(run['inputs'][input_type]) > 0: 
-                print "- " + input_type + ":"
+                print "- " + input_type + " " + run['rep_tech'] +':'
                 for fid in run['inputs'][input_type]:
                     print "  " + dxencode.file_path_from_fid(fid)
+
         print "- Reference files:"
+        # Should be enough to show the ref priors from run for single-rep or combined
         for token in self.psv['ref_files']:
             print "  " + dxencode.file_path_from_fid(run['priors'][token],True)
+
         print "- Results written to: " + self.psv['project'] + ":" +run['resultsFolder']
-        if len(run['stepsToDo']) == 0:
-            print "* All expected results are in the results folder, so there is nothing to do."
-            print "  If this experiment/replicate needs to be rerun, then use the --force flag to "
-            print "  rerun all steps; or remove suspect results from the folder before relaunching."
-            sys.exit(0)
+        if combined:
+            for rep in self.psv['reps'].values():
+                print "                      " + self.psv['project'] + ":" +rep['resultsFolder']
+
+        print "- Steps to run:"
+        to_run_count = 0
+        if combined:
+            for rep in self.psv['reps'].values():
+                for step in rep['path']:
+                    if step in rep['stepsToDo']:
+                        print "  * "+rep['rep_tech'] +': '+ rep['steps'][step]['app']+" will be run"
+                    else:
+                        if not step.find('concat') == 0:
+                            print "    "+rep['rep_tech'] +': '+ rep['steps'][step]['app']+" has already been run"
+                to_run_count += len(rep['stepsToDo'])
+            to_run_count += len(run['stepsToDo'])
+            for step in run['path']:
+                if step in run['stepsToDo']:
+                    print "  * "+run['rep_tech'] +': '+ run['steps'][step]['app']+" will be run"
+                else:
+                    if not step.find('concat') == 0:
+                        print "    "+run['rep_tech'] +': '+ run['steps'][step]['app']+" has already been run"
+        # single-rep and combined work both do run:
         else:
-            print "- Steps to run:"
+            to_run_count += len(run['stepsToDo'])
             for step in run['path']:
                 if step in run['stepsToDo']:
                     print "  * "+run['steps'][step]['app']+" will be run"
                 else:
                     if not step.find('concat') == 0:
                         print "    "+run['steps'][step]['app']+" has already been run"
+        if to_run_count == 0:
+            print "* All expected results are in the results folder, so there is nothing to do."
+            print "  If this experiment/replicate needs to be rerun, then use the --force flag to "
+            print "  rerun all steps; or remove suspect results from the folder before relaunching."
+            sys.exit(0)
 
+        if combined:
+            for rep in self.psv['reps'].values():
+                if len(rep['deprecate']) > 0:
+                    deprecated = rep['resultsFolder']+"/deprecated/"
+                    if rep['resultsFolder'].endswith('/'):
+                        deprecated = run['resultsFolder']+"deprecated/"
+                    print "Will move "+str(len(rep['deprecate']))+" prior result file(s) to '" + deprecated+"'."
+                    for fid in rep['deprecate']:
+                        print "  " + dxencode.file_path_from_fid(fid)
+        # single-rep and combined work both do run:
         if len(run['deprecate']) > 0:
             deprecated = run['resultsFolder']+"/deprecated/"
             if run['resultsFolder'].endswith('/'):
@@ -798,6 +885,53 @@ class Launch(object):
             print "Will move "+str(len(run['deprecate']))+" prior result file(s) to '" + deprecated+"'."
             for fid in run['deprecate']:
                 print "  " + dxencode.file_path_from_fid(fid)
+
+
+    def workflow_report_and_build(self,run,proj_id=None,template=False,test=True,verbose=False):
+        '''Builds the multi-rep/combined-rep workflow from parts, reporting plans and returning wf.'''
+        # NOT EXPECTED TO OVERRIDE
+        # Report the plans
+        if self.multi_rep:
+            self.report_run_plans()
+        else:
+            self.report_run_plans(run)
+
+        print "Checking for currently running analyses..."
+        self.check_run_log(run['resultsFolder'], proj_id, verbose=True)
+
+        # Move old files out of the way...
+        if self.multi_rep:
+            for rep in run['reps'].values():
+                if len(rep['deprecate']) > 0 and not test:
+                    deprecated = rep['resultsFolder']+"deprecated/"
+                    print "Moving "+str(len(rep['deprecate']))+" "+rep['rep_tech']+" prior result file(s) to '"+ \
+                                                                                        deprecated+"'..."
+                    dxencode.move_files(rep['deprecate'],deprecated,proj_id)
+        if len(run['deprecate']) > 0 and not test:
+            deprecated = run['resultsFolder']+"deprecated/"
+            print "Moving "+str(len(run['deprecate']))+" "+run['rep_tech']+" prior result file(s) to '"+ \
+                                                                                deprecated+"'..."
+            dxencode.move_files(run['deprecate'],deprecated,proj_id)
+        
+        # Build the workflow...
+        wf = None
+        if self.multi_rep:
+            for rep_id in run['reps'].keys():
+                rep = run['reps'][rep_id]
+                if len(rep['stepsToDo']) > 0: # Going to get noisy with multimple reps
+                    if test:
+                        print "Testing workflow assembly for "+rep['rep_tech']+"..."
+                    else:
+                        print "Assembling workflow for "+rep['rep_tech']+"..."
+                    wf = self.create_or_extend_workflow(rep, rep_id, wf=wf, test=test,template=template)
+        if len(run['stepsToDo']) > 0:
+            if test:
+                print "Testing workflow assembly for "+run['rep_tech']+"..."
+            else:
+                print "Assembling workflow for "+run['rep_tech']+"..."
+            wf = self.create_or_extend_workflow(run, None, wf=wf, test=test,template=template)
+            
+        return wf
 
 
     def check_run_log(self,results_folder,proj_id,verbose=False):
@@ -909,31 +1043,18 @@ class Launch(object):
         # deternine steps to run in a stadardized way
         self.determine_steps_needed(rep_steps,combined_steps,args.force)
 
-        # Preperation is done. At this point on we either run rep 'a' or combined.
-        if not self.psv['combined']:
-            run = self.psv['reps']['a']
-            run['steps'] = rep_steps
-        else:
+        # Preperation is done. Now build up multi-rep workflow
+        if self.multi_rep:
             run = self.psv
-            run['steps'] = combined_steps
-            
-        # Report the plans
-        self.report_run_plans(run)
+            wf = self.workflow_report_and_build(run,self.proj_id,test=args.test,template=(not args.run))
 
-        print "Checking for currently running analyses..."
-        self.check_run_log(run['resultsFolder'], self.proj_id, verbose=True)
-
-        if len(run['deprecate']) > 0 and not args.test:
-            deprecated = run['resultsFolder']+"deprecated/"
-            print "Moving "+str(len(run['deprecate']))+" prior result file(s) to '"+ \
-                                                                                deprecated+"'..."
-            dxencode.move_files(run['deprecate'],deprecated,self.proj_id)
-
-        if args.test:
-            print "Testing workflow assembly..."
-        else:
-            print "Assembling workflow..."
-        wf = self.create_workflow(run, test=args.test,template=(not args.run))
+        else:            
+            # Preperation is done. At this point on we either run rep 'a' or combined.
+            if not self.psv['combined']:
+                run = self.psv['reps']['a']
+            else:
+                run = self.psv
+            wf = self.workflow_report_and_build(run,self.proj_id,test=args.test,template=(not args.run))
 
         # Exit if test only
         if args.test:

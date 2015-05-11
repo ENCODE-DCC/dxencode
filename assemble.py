@@ -18,7 +18,7 @@ class Assemble(object):
     SERVER_DEFAULT = 'www'
     '''At this time there is no need to use the any but the one true server for assembling.'''
 
-    RESULT_FOLDER_DEFAULT = '/runs/'
+    FOLDER_DEFAULT = '/runs/'
     '''This the default location for creating experiment folders on dnanexus.'''
     
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq' ] #,"dnase" ,"dna-me","chip-seq" ]
@@ -134,10 +134,20 @@ class Assemble(object):
         #                default=dxencode.REF_FOLDER_DEFAULT,
         #                required=False)
 
-        ap.add_argument('--results_folder',
+        ap.add_argument('-g','--genome',
+                        help='Optionally enter genome to help organize folders',
+                        default=None,
+                        required=False)
+
+        ap.add_argument('-a','--annotation',
+                        help='Optionally enter annotation to help organize folders',
+                        default=None,
+                        required=False)
+
+        ap.add_argument('-f','--folder',
                         help="The location to place experiment folders (default: " + \
-                                                "'<project>:" + self.RESULT_FOLDER_DEFAULT + "')",
-                        default=self.RESULT_FOLDER_DEFAULT,
+                                                "'<project>:" + self.FOLDER_DEFAULT + "')",
+                        default=self.FOLDER_DEFAULT,
                         required=False)
 
         # Like splashdown either test or run.  No third option!
@@ -186,30 +196,8 @@ class Assemble(object):
             self.rep = { 'br': args.br, 'tr': args.tr, 'rep_tech': 'rep' + str(args.br) + '_' + str(args.tr) }
         else:
             self.rep = None
-
-        # Normalize results location        
-        self.results_folder = args.results_folder
-        if not self.results_folder.startswith('/'):
-            self.results_folder = '/' + self.results_folder
-        if not self.results_folder.endswith('/'):
-            self.results_folder += '/' 
         
         
-    def get_exp_type(self,exp_id,exp=None):
-        '''Looks up encoded experiment's assay_type, normalized to known supported tokens.'''
-        # TODO: common to splashdown and assemble
-        self.exp_id = exp_id
-        if exp == None and self.exp == None:
-            self.exp = get_exp(exp_id)
-        self.exp_type = dxencode.get_assay_type(self.exp_id,self.exp)
-
-        if self.exp_type not in self.EXPERIMENT_TYPES_SUPPORTED:
-            print "Experiment %s has unsupported assay type of '%s'" % \
-                                                            (exp_id,self.exp["assay_term_name"])
-            return None
-        return self.exp_type
-
-
     def find_replicates(self, exp_id, exp, verbose=False):
         '''Returns a list of replicates with input files for this experiment.'''
         if self.rep != None:
@@ -232,9 +220,9 @@ class Assemble(object):
         enc_file_names = []
         
         # Input file should match on format and have format
-        input_files = dxencode.files_to_map(self.exp) # TODO: Probably should use dxencode.exp_files           
+        input_files = dxencode.files_to_map(self.exp)
         for f_obj in input_files:
-            if f_obj.get('status') not in ["released","uploaded"]: # TODO: not needed if using dxencode.exp_files
+            if f_obj.get('status') not in ["released","uploaded"]:
                 continue
             file_path = f_obj['submitted_file_name']
             if file_path in enc_file_names:
@@ -275,7 +263,7 @@ class Assemble(object):
                 dx_file_name = os.path.basename(f_obj['href'])
                 file_path = exp_folder + dx_file_name
                 # Input files may be at exp folder level!
-                # TODO: actually input files can be found anywhere in the project!
+                # Actually input files can be found anywhere in the project, so use recurse
                 fid = dxencode.find_file(exp_folder + dx_file_name,self.proj_id,recurse=True)
                 if fid == None:
                     f_obj['dx_file_name'] = dx_file_name
@@ -393,14 +381,15 @@ class Assemble(object):
             sys.stdout.flush() # Slow running job should flush to piped log
             exp_count += 1
             # 1) Lookup experiment type from encoded, based on accession
-            self.exp = dxencode.get_exp(exp_id,must_find=False,key=self.server_key)
+            self.exp_id = exp_id
+            self.exp = dxencode.get_exp(self.exp_id,must_find=False,key=self.server_key)
             if self.exp == None or self.exp["status"] == "error":
                 print "Unable to locate experiment %s in encoded" % exp_id
                 skipped += 1
                 continue
             #print json.dumps(self.exp['files'],indent=4)
             #sys.exit(1)
-            self.exp_type = self.get_exp_type(exp_id)
+            self.exp_type = dxencode.get_exp_type(exp_id,self.exp,self.EXPERIMENT_TYPES_SUPPORTED)
             if self.exp_type == None:
                 skipped += 1
                 continue
@@ -423,9 +412,12 @@ class Assemble(object):
             print "There are %s files available in encoded for %s." % (len(available_files),self.exp_id)
             
             # 2) Locate the experiment accession named folder
-            self.exp_folder = dxencode.find_exp_folder(self.project,self.exp_id,self.results_folder)
+            # NOTE: genome and annotation may have been entered as args to help organize folders
+            self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.exp_type, \
+                                                                                            args.genome,args.annotation)
+            self.exp_folder = dxencode.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
             if self.exp_folder == None:
-                self.exp_folder = self.results_folder + exp_id + '/'
+                self.exp_folder = self.umbrella_folder + exp_id + '/'
                 # create it!
                 if not self.test:
                     self.project.new_folder(self.exp_folder,parents=True)
@@ -451,7 +443,7 @@ class Assemble(object):
                 print "* No files need to be copied to dx for %s" % self.exp_id
                 skipped += 1
                 continue
-            # FIXME: short circuit for test
+            ## short circuit for test
             #needed_files = needed_files[0:1]
             print "- Need to copy %d files to dx for %s" % (len(needed_files),self.exp_id)
             
