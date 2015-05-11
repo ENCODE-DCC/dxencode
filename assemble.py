@@ -21,7 +21,7 @@ class Assemble(object):
     RESULT_FOLDER_DEFAULT = '/runs/'
     '''This the default location for creating experiment folders on dnanexus.'''
     
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dnase" ,"dna-me","chip-seq" ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq' ] #,"dnase" ,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
     # Pipeline files includes inputs and results.  To assemble the files, there is no need to understand step order
@@ -48,7 +48,7 @@ class Assemble(object):
                          "multi-read minus signal":    [ "*_small_minusAll.bw"  ],
                          "multi-read plus signal":     [ "*_small_plusAll.bw"   ],
                          "unique minus signal":        [ "*_small_minusUniq.bw" ],
-                         "unique plus signal":         [ "*_small_plusUniq.bw"  ] },
+                         "unique plus signal":         [ "*_small_plusUniq.bw"  ] }
         },
         "rampage": {
             "inputs":  { "reads": [ "*.fastqs.gz" ] },
@@ -61,6 +61,10 @@ class Assemble(object):
                          "peaks":                      [ "*_rampage_idr.bb"          ] } # TODO: not really "peaks" ?
             # TODO: "controls"?  Punt at this time
             # TODO: "references" Probably not.  Assume that they are in place.
+        },
+        "dnase-seq": { # TODO: Flesh out the DNase results
+            "inputs":  { "reads": [ "*.fastqs.gz" ] },
+            "results": { "alignments":                 [ "*_bwa.bam"    ] }
         }
     }
     
@@ -447,25 +451,14 @@ class Assemble(object):
                 print "* No files need to be copied to dx for %s" % self.exp_id
                 skipped += 1
                 continue
+            # FIXME: short circuit for test
+            #needed_files = needed_files[0:1]
             print "- Need to copy %d files to dx for %s" % (len(needed_files),self.exp_id)
             
             # Now for each needed report it
             for f_obj in needed_files:
                 sys.stdout.flush() # Slow running job should flush to piped log
                 if not self.test: 
-            #        print "NEED TO WRITE dx applet to copy a file from encoded to dx."
-            #        sys.exit(1)
-            #        #fid = dxencode.copy_enc_file_to_dx(f_obj['accession'],self.proj_id,f_obj['dx_folder'],f_obj['dx_file_name'], \
-            #        #                                                                            f_obj=f_obj,key=self.server_key)
-            #        if fid == None:
-            #            print "  * Failure to copy %s to dx %s%s%s" % \
-            #                    (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
-            #            failed += 1
-            #            contine
-            #        else:
-            #            print "  - Copied %s to dx %s:%s%s" % \
-            #                    (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
-            #            copied += 1
                     print "  - Will try to copy %s to dx %s:%s%s" % \
                             (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
                 else:
