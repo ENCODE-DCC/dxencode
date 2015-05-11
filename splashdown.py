@@ -38,7 +38,7 @@ class Splashdown(object):
     SERVER_DEFAULT = 'test'
     '''This the default server to post files to.'''
 
-    RESULT_FOLDER_DEFAULT = "/"
+    FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dna-me","chip-seq" ]
@@ -69,7 +69,8 @@ class Splashdown(object):
                                      "unique plus signal":        "*_star_genome_plusUniq.bw"    },
                 "align-star":      { "alignments":                "*_star_genome.bam",
                                      "transcriptome alignments":  "*_star_anno.bam"              },
-                "quant-rsem":      { "genome quantifications":    "*_rsem.genes.results"         }  },
+                "quant-rsem":      { "gene quantifications":      "*_rsem.genes.results",
+                                     "transcript quantifications":"*_rsem.isoforms.results"      }  },
             "combined":   {}
         },
         "small-rna-seq": {
@@ -139,6 +140,7 @@ class Splashdown(object):
         logging.basicConfig(format='%(asctime)s  %(levelname)s: %(message)s')
         dxencode.logger = logging.getLogger(__name__ + '.dxe') # I need this to avoid some errors
         dxencode.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
+        print
 
 
 
@@ -163,10 +165,10 @@ class Splashdown(object):
                                                          dxencode.env_get_current_project() + "')",
                         required=False)
 
-        ap.add_argument('--results_folder',
+        ap.add_argument('-f','--folder',
                         help="The location to search for experiment folders (default: " + \
-                                                "'<project>:" + self.RESULT_FOLDER_DEFAULT + "')",
-                        default=self.RESULT_FOLDER_DEFAULT,
+                                                "'<project>:" + self.FOLDER_DEFAULT + "')",
+                        default=self.FOLDER_DEFAULT,
                         required=False)
 
         ap.add_argument('--server',
@@ -194,19 +196,6 @@ class Splashdown(object):
                         required=False)
 
         return ap.parse_args()
-
-    def get_exp_type(self,exp_id,exp=None):
-        '''Looks up encoded experiment's assay_type, normalized to known supported tokens.'''
-        self.exp_id = exp_id
-        if exp == None and self.exp == None:
-            self.exp = get_exp(exp_id)
-        self.exp_type = dxencode.get_assay_type(self.exp_id,self.exp)
-
-        if self.exp_type not in self.EXPERIMENT_TYPES_SUPPORTED:
-            print "Experiment %s has unsupported assay type of '%s'" % \
-                                                            (exp_id,self.exp["assay_term_name"])
-            return None
-        return self.exp_type
 
 
     def find_replicate_folders(self,exp_folder,verbose=False):
@@ -356,59 +345,12 @@ class Splashdown(object):
         return file_obj
        
 
-    #def find_in_encode(self,fid,verbose=False):
-    #    '''Looks for file in encode with the same submitted file name as the fid has.'''
-    #    file_name = dxencode.file_path_from_fid(fid,projectToo=True).split(':')[-1]
-    #    file_size = dxencode.description_from_fid(fid).get('size')
-    #
-    #    # TODO: encoded should allow searching on fid !!!
-    #    #authid, authpw, server = dxencode.processkey(self.server_key)
-    #    url = urlparse.urljoin(self.server,
-    #            'search/?type=file&frame=object&submitted_file_name=%s' % file_name)
-    #    response = dxencode.encoded_get(url,self.authid, self.authpw)
-    #    try:
-    #        if verbose:
-    #            print "-- Looking for %s (size:%d) in %s" % (file_name, file_size, server)
-    #        response.raise_for_status()
-    #        if response.json()['@graph']:
-    #            #for encode_file in response.json()['@graph']:
-    #            #    for ext_id in encode_file.get('dbxrefs'):
-    #            #        if ext_id == 'dxid:' + fid:
-    #            #            if verbose:
-    #            #                print("%s %s: File sizes match in dxid,." % \
-    #            #                                           (fid, encode_file.get('file_size')))
-    #            #            return encode_file
-    #                        
-    #            encode_file = response.json()['@graph'][0]
-    #            #logger.info("Found potential duplicate: %s" %(duplicate_item.get('accession')))
-    #            if file_size ==  encode_file.get('file_size'):
-    #                if verbose:
-    #                    print("%s %s: File sizes match, assuming duplicate." % \
-    #                                               (str(file_size), encode_file.get('file_size')))
-    #                return encode_file
-    #            else:
-    #                if verbose:
-    #                    print("%s %s: File sizes differ, assuming new file." % \
-    #                                               (str(file_size), encode_file.get('file_size')))
-    #                return None
-    #        else:
-    #            if verbose:
-    #                print("No duplicate ... proceeding")
-    #                print(response.text)
-    #                print(response.json())
-    #            return None
-    #    except:
-    #        if verbose:
-    #            print('Duplicate accession check failed: %s %s' % (response.status_code, response.reason))
-    #            print(response.text)
-    #        return None
-
     def find_needed_files(self,files_expected,verbose=False):
         '''Returns the tuple list of files that NEED to be posted to ENCODE.'''
         needed = []
         self.found = {}
         for (out_type, rep_tech, fid) in files_expected:
-            # Current strategy is to complete an post before updating the accession field.
+            # Current strategy is to complete and post before updating the accession field.
             # so existence of accession should mean it is already in encoded.
             fileDict = dxencode.description_from_fid(fid,properties=True)
             acc_key = dxencode.dx_property_accesion_key(self.server)
@@ -427,15 +369,58 @@ class Splashdown(object):
                 needed.append( (out_type,rep_tech,fid) )
             else:
                 self.found[fid] = f_obj
-            #    file_name = dxencode.file_path_from_fid(fid,projectToo=True).split(':')[-1]
-            #    print " - Already posted: " + file_name
 
         if verbose:
             print "Needed files:"
             print json.dumps(needed,indent=4)
         return needed
 
+    def find_sw_versions(self,dxFile,dx_app=False,verbose=False):
+        '''
+        Finds the software versions associated with a file.
+        Returns  { "software_versions": [ { "software": "star", "version": "2.4.0k" }, ... ] }
+        '''
+        sw_versions = {}
+        # looks first in dx file property.
+        # "SW" = {"DX applet": {"align-bwa-se.sh": "0.1.0"}, "samtools": "0.2.0", "bwa": "0.7.7-r441"}
+        SW =  dxencode.dx_file_get_property("SW",None,dxfile=dxFile,return_json=True)
+        if SW != None:
+            if dx_app:
+                if "DX applet" in SW:
+                    SW = SW["DX applet"]
+                else:
+                    SW = {}
+            versions = []
+            for key in SW.keys():
+                versions.append({"software": key, "version": SW[key]})
+            sw_versions = { "software_versions": versions }
+        else:
+            # if no 'SW' property then try grepping from the log.
+            regoop = '\* (\S+)\s+version:\s+(\S+)'
+            if dx_app:
+                regoop = '\* Running:\s(\S+)\s+\S*\[(\S+)\]'
+            sw_versions = dxencode.get_sw_from_log(dxFile, regoop) # * STAR version: 2.4.0k
+            
+        if verbose:
+            print "sw_versions: "
+            #print dxFile
+            print json.dumps(sw_versions,indent=4)
+        return sw_versions
 
+    def find_app_version(self,dxFile,verbose=False):
+        '''
+        Finds the app versions associated with a file.
+        Returns  { "software": "align-bwa-se.sh", "version": "1.0.2"}
+        '''
+        app_version = {}
+        sw_versions = self.find_sw_versions(dxFile,dx_app=True,verbose=verbose)
+        if sw_versions != None:
+            app_version =  sw_versions["software_versions"][0]
+        if verbose:
+            print "app_version: "
+            print json.dumps(app_version,indent=4)
+        return app_version
+        
     def find_derived_from(self,fid,job,verbose=False):
         '''Returns list of accessions a file is drived from based upon job inouts.'''
         derived_from = []
@@ -477,7 +462,7 @@ class Splashdown(object):
 
     def add_encoded_info(self,obj,rep_tech,fid,verbose=False):
         '''Updates an object with information from encoded database.'''
-        obj['lab'] = '/labs/j-michael-cherry/' # self.exp['lab']['@id'] Now hard-coded
+        obj['lab'] = '/labs/encode-processing-pipeline/' # self.exp['lab']['@id'] Now hard-coded
         obj['award'] = '/awards/U41HG006992/'  # self.exp['award']['@id']
 
         # Find replicate info
@@ -497,22 +482,36 @@ class Splashdown(object):
     def get_qc_metrics(self,fid,job,verbose=False):
         '''Returns an object containing 'QC_metrics' info found in the file and or job.'''
         qc_metrics = None
-        if "metadata" in job["output"]:
-            try:
-                qc_metrics = json.loads(job["output"]["metadata"]) # NOTE: output class=string name='metadata' in json format
-            except:
+        qc_for_job = None
+        
+        # if file level qc_metrics exist, then use those
+        qc_for_file = dxencode.dx_file_get_property("QC",fid,return_json=True)
+        if not qc_for_file:
+            if "metadata" in job["output"]:
                 try:
-                    qc_metrics = json.loads("{"+job["output"]["metadata"]+"}")
+                    qc_for_job = json.loads(job["output"]["metadata"]) # NOTE: output class=string name='metadata' in json format
                 except:
-                    print job["output"]["metadata"]
-                    sys.exit(1)
-                    
-        qc_for_file = dxencode.dx_file_get_property(fid,"QC",return_json=True)
-        if qc_for_file and qc_metrics:
-            qc_metrics.update(qc_for_file)  # Note that qc_for_file take priority over qc for the job
-        else:
+                    try:
+                        qc_for_job = json.loads("{"+job["output"]["metadata"]+"}")
+                    except:
+                        print job["output"]["metadata"]
+                        sys.exit(1)
+            # if metadata is SW versions, then throw it out
+            if qc_for_job != None and "DX applet" in qc_for_job:
+                qc_for_job = None
+                
+        # We used to combine, giving qc_for_file priority.  Now we just return for qc_for_file if it exists.
+        #if qc_for_job:
+        #    qc_metrics = qc_for_job
+        #    if qc_for_file:
+        #        qc_metrics.update(qc_for_file)  # Note that qc_for_file take priority over qc_for_job
+        #else:
+        #    qc_metrics = qc_for_file
+        if qc_for_file:
             qc_metrics = qc_for_file
-                 
+        else:
+            qc_metrics = qc_for_job
+                    
         if qc_metrics and verbose:
             print "qc_metrics:"
             print json.dumps(qc_metrics,indent=4)
@@ -624,10 +623,10 @@ class Splashdown(object):
         return ana_step
 
 
-    def enc_workflow_run_find_or_create(self,dx_wf_id,rep_tech,test=False,verbose=False):
+    def enc_workflow_run_find_or_create(self,dx_wfr_id,rep_tech,test=False,verbose=False):
         '''Finds or creates the 'workflow_run' encoded object that actually created the file.'''
         wf_run = None
-        wf_alias = 'dnanexus:' + dx_wf_id
+        wf_alias = 'dnanexus:' + dx_wfr_id
         # Find if you can:  /workflow-runs/dnanexus:analysis-BZKpZBQ0F1GJ7Z4ky8vBZpBx
         if "exp" in self.obj_cache and wf_alias in self.obj_cache["exp"]:
             wf_run = self.obj_cache["exp"][wf_alias]
@@ -646,14 +645,14 @@ class Splashdown(object):
             wf_run['aliases'] = [ wf_alias ]
             wf_run['status'] = "finished"
             wf_run['pipeline'] = "/pipelines/encode:" + pipe["name"]
-            wf_run["dx_workflow_id"] = dx_wf_id
+            wf_run["dx_analysis_id"] = dx_wfr_id
             # wf_run["software_version"] NO
             # wf_run["input_files"] NO
             # wf_run["dx_analysis_id"] NO
             # wf_run["dx_workflow_json"] NO
 
             # Look up the actual analysis
-            dx_wf = dxpy.api.analysis_describe(dx_wf_id)
+            dx_wf = dxpy.api.analysis_describe(dx_wfr_id)
             if dx_wf:  # Note that wf is created immediately before running, then last modified by dx to set status 'done'
                 if "created" in dx_wf:
                     then = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(dx_wf.get("created")/1000.0))
@@ -678,6 +677,7 @@ class Splashdown(object):
                 print "  - Would post workflow_run: '%s'" % wf_alias
             else:
                 try:
+                    #wf_run["@type"] = ["item", "workflow_run"]
                     posted_wf_run = dxencode.encoded_post_obj('workflow_run',wf_run, self.server, self.authid, self.authpw)
                 except:
                     print "Failed to post workflow_run: '%s'" % wf_alias
@@ -721,21 +721,20 @@ class Splashdown(object):
             # Note that qualifiers are not used here, but will be in workflow_run creation
 
             # Find or create the workflow
-            dx_wf_id = job.get('analysis')
-            #wf_run = self.enc_workflow_run_find_or_create(dx_wf_id,rep_tech,test=False,verbose=verbose)
-            wf_run = self.enc_workflow_run_find_or_create(dx_wf_id,rep_tech,test=self.test,verbose=verbose)
+            dx_wfr_id = job.get('analysis')
+            #wf_run = self.enc_workflow_run_find_or_create(dx_wfr_id,rep_tech,test=False,verbose=verbose)
+            wf_run = self.enc_workflow_run_find_or_create(dx_wfr_id,rep_tech,test=self.test,verbose=verbose)
             wf_run_notes = json.loads(wf_run["notes"])
-            step_run["workflow_run"] = "/workflow-runs/dnanexus:" + dx_wf_id
+            step_run["workflow_run"] = "/workflow-runs/dnanexus:" + dx_wfr_id
             
             # Find analysis_step
             dx_app_id = job.get('applet')
-            dx_app_ver = dxencode.get_sw_from_log(dxFile, '\* Running:\s(\S+)\s+\S*\[(\S+)\]') # * Running: align-star-pe.sh [v2.0.0]
-            if dx_app_ver and 'software_versions' in dx_app_ver:
-                dx_app_ver = dx_app_ver.get('software_versions')[0]
-                if dx_app_ver and 'version' in dx_app_ver:
-                    dx_app_ver = str( dx_app_ver.get('version') )
-                    if dx_app_ver[0] == 'v':
-                        dx_app_ver = dx_app_ver[1:]
+            #dx_app_ver = dxencode.get_sw_from_log(dxFile, '\* Running:\s(\S+)\s+\S*\[(\S+)\]') # * Running: align-star-pe.sh [v2.0.0]
+            dx_app_ver = self.find_app_version(dxFile)
+            if dx_app_ver and 'version' in dx_app_ver:
+                dx_app_ver = str( dx_app_ver.get('version') )
+                if dx_app_ver[0] == 'v':
+                    dx_app_ver = dx_app_ver[1:]
             if not dx_app_ver or not isinstance(dx_app_ver, str) or len(dx_app_ver) == 0:
                 print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
                 sys.exit(0)
@@ -776,7 +775,7 @@ class Splashdown(object):
             notes["dx_app_id"] = dx_app_id
             notes["step_name"] = ana_step['name']
             notes['pipeline_name'] = wf_run_notes["pipeline_name"]
-            notes["dx_workflow_id"] = dx_wf_id
+            notes["dx_analysis_id"] = dx_wfr_id
             notes["dx_project_id"] = self.proj_id
             notes["dx_project_name"] = self.proj_name
             notes["dx_cost"] = "$" + str(round(job['totalPrice'],2))
@@ -788,6 +787,7 @@ class Splashdown(object):
                 print "  - Would post step_run: '%s'" % step_alias
             else:
                 try:
+                    #step_run["@type"] = ["item", "analysis_step_run"]
                     posted_step_run = dxencode.encoded_post_obj('analysis_step_run',step_run, self.server, self.authid, self.authpw)
                 except:
                     print "Failed to post step_run: '%s'" % step_alias
@@ -832,7 +832,8 @@ class Splashdown(object):
             payload['genome_annotation'] = self.annotation
 
         dxFile = dxencode.file_handler_from_fid(fid)
-        versions = dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)') # * STAR version: 2.4.0k
+        #versions = dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)') # * STAR version: 2.4.0k
+        versions = self.find_sw_versions(dxFile)
         notes = dxencode.create_notes(dxFile, versions)
         notes["notes_version"] = "5" # Cricket requests starting at "5", since earlier files uploads were distingusihed by user
         if 'totalPrice' in job:
@@ -857,7 +858,10 @@ class Splashdown(object):
                 # analysis_step and pipeline are calculated properties.
                 #payload["analysis_step"] = "/analysis-steps/" + step_run_notes.get("step_name")
                 #payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
-                notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_workflow_id")
+                if "dx_analysis_id" in step_run_notes:
+                    notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_analysis_id")
+                elif "dx_workflow_id" in step_run_notes:
+                    notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_workflow_id")
 
         notes["dx_project_id"] = self.proj_id
         notes["dx_project_name"] = self.proj_name
@@ -974,12 +978,14 @@ class Splashdown(object):
             if self.exp == None or self.exp["status"] == "error":
                 print "Unable to locate experiment %s in encoded" % exp_id
                 continue
-            self.exp_type = self.get_exp_type(exp_id)
+            self.exp_type = dxencode.get_exp_type(exp_id,self.exp,self.EXPERIMENT_TYPES_SUPPORTED)
             if self.exp_type == None:
                 continue
 
             # 2) Locate the experiment accession named folder
-            self.exp_folder = dxencode.find_exp_folder(self.project,exp_id,args.results_folder,warn=True)
+            # NOTE: genome and annotation are not known for this exp yet, so the umbrella folder is just based on exp_type
+            self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.exp_type)
+            self.exp_folder = dxencode.find_exp_folder(self.project,exp_id,self.umbrella_folder,warn=True)
             if self.exp_folder == None:
                 continue
             print "- Examining %s:%s for '%s' results..." % \
@@ -1034,7 +1040,7 @@ class Splashdown(object):
                     
                 self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
 
-                #if file_count >= 1:  # FIXME: Short circuit for test
+                #if file_count >= 1:  # Short circuit for test
                 #    break
 
             print "- For %s Processed %d file(s), posted %s" % \
