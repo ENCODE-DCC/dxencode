@@ -89,9 +89,8 @@ def encoded_post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
         'Content-type': 'application/json',
         'Accept': 'application/json',
     }
-
     r = requests.post(
-        SERVER + '/'+obj_type,
+        SERVER + obj_type,
         auth=(AUTHID, AUTHPW),
         data=json.dumps(obj_meta),
         headers=HEADERS,
@@ -103,6 +102,15 @@ def encoded_post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
         logger.error(r.text)
         raise
     item = r.json()['@graph'][0]
+    # TODO: Look for returned["status"] == "success"
+    #returned = r.json()
+    #if "status" not in returned or returned["status"] != "success":
+    #    print "* WARNING: request to post '%s'..." % obj_type
+    #    print "Posting " + SERVER + obj_type
+    #    print json.dumps(obj_meta, indent=4, sort_keys=True)
+    #    print "Returned:"
+    #    print json.dumps(item, indent=4, sort_keys=True)
+    ##    print json.dumps(r.json(), indent=4, sort_keys=True)
     return item
 
 def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
@@ -113,7 +121,7 @@ def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
     }
 
     r = requests.post(
-        SERVER + '/file',
+        SERVER + 'file',
         auth=(AUTHID, AUTHPW),
         data=json.dumps(file_meta),
         headers=HEADERS,
@@ -128,7 +136,15 @@ def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
 
     ####################
     # POST file to S3
-
+    # TODO: Look for returned["status"] == "success"
+    #returned = r.json()
+    #if "status" not in returned or returned["status"] != "success" or \
+    if 'upload_credentials' not in item:
+        print "* ERROR: request to post %s to %s..." % (filename,SERVER)
+        print json.dumps(file_meta, indent=4, sort_keys=True)
+        print "* Returned..."
+        print json.dumps(item, indent=4, sort_keys=True)
+        # Just let it fail on the next statement
     creds = item['upload_credentials']
     env = os.environ.copy()
     env.update({
@@ -178,6 +194,22 @@ def project_has_folder(project, folder):
     return True
 
 
+def folder_normalize(folder,starting=True,trailing=True):
+    '''Normalizes a folder to always begin with and end with '/'.'''
+    if starting:
+        if not folder.startswith('/'):
+            folder = '/' + folder
+    else:
+        if folder.startswith('/'):
+            folder = folder[1:]
+    if trailing:
+        if not folder.endswith('/'):
+            folder = folder + '/'
+    else:
+        if folder.endswith('/'):
+            folder = folder[:-1]
+    return folder
+
 def find_folder(target_folder,project,root_folders='/',exclude_folders=["deprecated","data"]):
     '''
     Recursively attempts to find the first folder in a project and root that matches target_folder.
@@ -192,71 +224,68 @@ def find_folder(target_folder,project,root_folders='/',exclude_folders=["depreca
         return target_folder
 
     # Normalize target and root
-    if target_folder.endswith('/'):
-        target_folder = target_folder[:-1]
-    if root_folders[0] != '/':
-       root_folders = '/' + root_folders
+    target_folder = folder_normalize(target_folder)
+    root_folders = folder_normalize(root_folders)
 
     # If explicitly requesting one of the exluded folders then don't exclude it
     if exclude_folders == None:
         exclude_folders = []
+    exclude_these = []
     for exclude_folder in exclude_folders:
-        exclude = '/' + exclude_folder
-        if root_folders.find(exclude) != -1 or target_folder.find(exclude) != -1:
-            exclude_folders.remove(exclude_folder)
+        exclude = folder_normalize(exclude_folder)
+        # Note comaprisons should always be /folder/ to /folder/ to to distinguish folder1 from redfolder10
+        if root_folders.find(exclude) == -1 or target_folder.find(exclude) == -1:
+            exclude_these.append(exclude)
+    exclude_folders = exclude_these
+
+    # Final normalize with target stripped of framing '/'
+    target_folder = folder_normalize(target_folder,starting=False,trailing=False)
 
     # Because list_folder is only one level at a time, find_folder must recurse
     return rfind_folder(target_folder,project,root_folders,exclude_folders)
 
 def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[]):
     '''Recursive call for find_folder - DO NOT call directly.'''
+    root_folders = folder_normalize(root_folders)
+
     for exclude_folder in exclude_folders:
-        if root_folders.find('/' + exclude_folder) != -1:
+        if root_folders.find(exclude_folder) != -1:
             return None
     try:
         query_folders = project.list_folder(root_folders)['folders']
     except:
         return None
 
-    # Normalize
-    if root_folders.endswith('/'):
-        root_folders = root_folders[:-1]
-
     # match whole path to first target
     targets = target_folder.split('/')
-    full_query = root_folders + '/' + targets[0]
+    full_query = root_folders + targets[0]
 
     if full_query in query_folders:  # hash shortcut
         if len(targets) == 1:
-            return full_query
+            return full_query + '/' # normalized
         else:
-            full_query = root_folders + '/' + target_folder # shoot for it all
+            full_query = root_folders + target_folder # shoot for it all
             #print "- shooting [%s]" % full_query
             if project_has_folder(project, full_query):
-                return full_query
+                return full_query + '/' # normalized
 
     # nothing to do but recurse
     for query_folder in query_folders:
         found = rfind_folder(target_folder, project, query_folder,exclude_folders)
         if found != None:
-            return found
+            return found # already normalized
     return None
 
 
 def find_exp_folder(project,exp_id,results_folder='/',warn=False):
     '''Returns the full path to the experiment folder if found, else None.'''
-    # normalize
-    if not results_folder.startswith('/'):
-        results_folder = '/' + results_folder
-    if not results_folder.endswith('/'):
-        results_folder += '/'
     target_folder = find_folder(exp_id,project,results_folder)
     if target_folder == None or target_folder == "":
         if warn:
             print "Unable to locate target folder (%s) for %s in project %s" % \
                                                                         (results_folder, exp_id, project.describe()['name'])
         return None
-    return target_folder + '/'
+    return target_folder # already normalized
 
 
 def description_from_fid(fid,properties=False):
@@ -315,16 +344,7 @@ def get_project(projectName, level=None):
 
 def find_or_create_folder(project, sub_folder, root_folder='/'):
     ''' Finds or creates a sub_folder in the specified parent (root) folder'''
-    if root_folder.endswith('/'):
-        if sub_folder.startswith('/'):
-            folder = root_folder+sub_folder[1:]
-        else:
-            folder = root_folder+sub_folder
-    else: 
-        if sub_folder.startswith('/'):
-            folder = root_folder+sub_folder
-        else:
-            folder = root_folder+'/'+sub_folder
+    folder = folder_normalize(root_folder) + folder_normalize(sub_folder,starting=False)
     if project_has_folder(project, folder):
         return folder
     else:
@@ -628,6 +648,8 @@ def files_to_map(exp_obj):
         for file_obj in exp_obj.get('files'):
             if (file_obj.get('output_type') == 'reads' or file_obj.get('output_type') == 'raw data') and \
                file_obj.get('file_format') == 'fastq' and \
+               file_obj.get('replicate') and file_obj.get('replicate').get('biological_replicate_number') and \
+                                             file_obj.get('replicate').get('technical_replicate_number') and \
                file_obj.get('submitted_file_name') not in filenames_in(files):
                files.extend([file_obj])
             elif file_obj.get('submitted_file_name') in filenames_in(files):
@@ -682,7 +704,10 @@ def choose_mapping_for_experiment(experiment,warn=True):
     '''
 
     exp_id = experiment['accession']
-    files = files_to_map(experiment)
+    exp_files = files_to_map(experiment)
+    files = [f for f in exp_files if f.get('replicate') and 
+                                     f.get('replicate').get('biological_replicate_number') and
+                                     f.get('replicate').get('technical_replicate_number')]
     replicates = replicates_to_map(experiment, files)
     mapping = {}
 
@@ -775,6 +800,17 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     #    return "dna-me"
 
     return exp["assay_term_name"].lower()
+
+def get_exp_type(experiment,exp=None,supported_types=None):
+    '''Looks up encoded experiment's assay_type, normalized to known supported tokens.'''
+    if exp == None:
+        exp = get_exp(experiment)
+    exp_type = get_assay_type(experiment,exp)
+
+    if supported_types != None and exp_type not in supported_types:
+        print "Experiment %s has unsupported assay type of '%s'" % (experiment,exp["assay_term_name"])
+        return None
+    return exp_type
 
 def get_full_mapping(experiment,exp=None,key='default',must_find=True,warn=False):
     '''Returns all replicate mappings for an experiment from encoded.'''
@@ -891,17 +927,18 @@ def create_notes(dxfile, addons={}):
     notes.update(addons)
     return notes
 
-def dx_file_get_properties(fid,proj_id=None):
+def dx_file_get_properties(fid,dxfile=None,proj_id=None):
     '''Returns dx file's properties.'''
-    if proj_id != None:
-        dxfile = dxpy.DXFile(fid,project=proj_id)
-    else:
-        dxfile = file_handler_from_fid(fid)
+    if dxfile == None:
+        if proj_id != None:
+            dxfile = dxpy.DXFile(fid,project=proj_id)
+        else:
+            dxfile = file_handler_from_fid(fid)
     return dxfile.get_properties()
 
-def dx_file_get_property(fid,key,return_json=False,fail_on_parse_error=True):
+def dx_file_get_property(key,fid,dxfile=None,proj_id=None,return_json=False,fail_on_parse_error=True):
     '''Returns dx file's property matching 'key'.'''
-    properties = dx_file_get_properties(fid)
+    properties = dx_file_get_properties(fid,dxfile=dxfile,proj_id=proj_id)
     if not properties or key not in properties:
         return None
     if return_json:
@@ -961,4 +998,28 @@ def dx_file_set_property(fid,key,value,proj_id=None,add_only=False,test=False,ve
             print "  - set %s with %s='%s'" % (path,key,value)
     return properties[key]
     
+def umbrella_folder(folder,default,exp_type=None,genome=None,annotation=None):
+    '''Returns a normalized umbrella folder (that holds the experiments of a given type).'''
+    if folder != default:
+        return folder_normalize(folder)
+            
+    # No change to default, so build from parts if available
+    if exp_type == None:
+        return folder_normalize(folder)
+
+    if exp_type == "long-rna-seq":
+        folder = "/lrna/"
+    elif exp_type == "short-rna-seq":
+        folder = "/srna/"
+    elif exp_type == "dnase-seq":
+        folder = "/dnase/"
+    else:
+        folder = "/" + exp_type + '/'
+
+    if genome != None:
+        folder +=  genome + '/'
+        if annotation != None and genome == 'mm10':
+            folder += annotation + '/'
+            
+    return folder
 
