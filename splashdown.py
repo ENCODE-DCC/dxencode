@@ -69,7 +69,7 @@ class Splashdown(object):
                                      "unique plus signal":        "*_star_genome_plusUniq.bw"    },
                 "align-star":      { "alignments":                "*_star_genome.bam",
                                      "transcriptome alignments":  "*_star_anno.bam"              },
-                "quant-rsem":      { "gene quantifications":      "*_rsem.genes.results",
+                "quant-rsem":      { "genome quantifications":    "*_rsem.genes.results",
                                      "transcript quantifications":"*_rsem.isoforms.results"      }  },
             "combined":   {}
         },
@@ -646,6 +646,7 @@ class Splashdown(object):
             wf_run['status'] = "finished"
             wf_run['pipeline'] = "/pipelines/encode:" + pipe["name"]
             wf_run["dx_analysis_id"] = dx_wfr_id
+            wf_run["dx_workflow_id"] = dx_wfr_id # TODO: remove this when schema is updated
             # wf_run["software_version"] NO
             # wf_run["input_files"] NO
             # wf_run["dx_analysis_id"] NO
@@ -971,20 +972,21 @@ class Splashdown(object):
         total_posted = 0
         for exp_id in args.experiments:
             sys.stdout.flush() # Slow running job should flush to piped log
+            self.exp_id = exp_id
             self.obj_cache["exp"] = {}  # clear exp cache, which will hold exp specific wf_run and step_run objects
             # 1) Lookup experiment type from encoded, based on accession
-            print "Working on %s..." % exp_id
-            self.exp = dxencode.get_exp(exp_id,must_find=False,key=self.server_key)
+            print "Working on %s..." % self.exp_id
+            self.exp = dxencode.get_exp(self.exp_id,must_find=False,key=self.server_key)
             if self.exp == None or self.exp["status"] == "error":
-                print "Unable to locate experiment %s in encoded" % exp_id
+                print "Unable to locate experiment %s in encoded" % self.exp_id
                 continue
-            self.exp_type = dxencode.get_exp_type(exp_id,self.exp,self.EXPERIMENT_TYPES_SUPPORTED)
+            self.exp_type = dxencode.get_exp_type(self.exp_id,self.exp,self.EXPERIMENT_TYPES_SUPPORTED)
             if self.exp_type == None:
                 continue
 
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation are not known for this exp yet, so the umbrella folder is just based on exp_type
-            self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.exp_type)
+            self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,self.exp_type)
             self.exp_folder = dxencode.find_exp_folder(self.project,exp_id,self.umbrella_folder,warn=True)
             if self.exp_folder == None:
                 continue

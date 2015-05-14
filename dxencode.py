@@ -18,6 +18,8 @@ DXENCODE_VERSION = "1"
 GENOME_DEFAULTS = { 'human': 'hg19', 'mouse': 'mm10' }
 ''' This the default genomes for each supported organism.'''
 
+PRODUCTION_PROJECT = "ENCODE Universal Processing Pipelines"
+
 REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 ''' This the default DNA Nexus project to find reference files in.'''
 
@@ -998,7 +1000,7 @@ def dx_file_set_property(fid,key,value,proj_id=None,add_only=False,test=False,ve
             print "  - set %s with %s='%s'" % (path,key,value)
     return properties[key]
     
-def umbrella_folder(folder,default,exp_type=None,genome=None,annotation=None):
+def umbrella_folder(folder,default,proj_name=None,exp_type=None,genome=None,annotation=None):
     '''Returns a normalized umbrella folder (that holds the experiments of a given type).'''
     if folder != default:
         return folder_normalize(folder)
@@ -1007,14 +1009,32 @@ def umbrella_folder(folder,default,exp_type=None,genome=None,annotation=None):
     if exp_type == None:
         return folder_normalize(folder)
 
-    if exp_type == "long-rna-seq":
-        folder = "/lrna/"
-    elif exp_type == "short-rna-seq":
-        folder = "/srna/"
-    elif exp_type == "dnase-seq":
-        folder = "/dnase/"
+    if proj_name == PRODUCTION_PROJECT:
+        if exp_type == "long-rna-seq":
+            folder = "/long-RNA-seq/runs/"
+        elif exp_type == "small-rna-seq":
+            folder = "/small-RNA-seq/runs/"
+        #elif exp_type == "rampage":
+        #    folder = "/rampage/runs/"
+        elif exp_type == "dnase-seq":
+            folder = "/DNAse-seq/runs/"
+        elif exp_type == "dna-me":
+            folder = "/WG Bisulfite (Methylation)/runs/"
+        elif exp_type == "dna-me":
+            folder = "/WG Bisulfite (Methylation)/runs/"
+        elif exp_type == "chip-seq":
+            folder = "/ChIP-seq/runs/"
+        else:
+            folder = "/" + exp_type + '/runs/'
     else:
-        folder = "/" + exp_type + '/'
+        if exp_type == "long-rna-seq":
+            folder = "/lrna/"
+        elif exp_type == "small-rna-seq":
+            folder = "/srna/"
+        elif exp_type == "dnase-seq":
+            folder = "/dnase/"
+        else:
+            folder = "/" + exp_type + '/'
 
     if genome != None:
         folder +=  genome + '/'

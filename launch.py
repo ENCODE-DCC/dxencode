@@ -288,8 +288,6 @@ class Launch(object):
             return
 
         print "Checking for combined-replicate inputs..."
-        self.psv['priors'] = {}
-
         inputs = {}
         for step in self.psv['path']:
             for file_token in steps[step]['inputs'].keys():
@@ -423,7 +421,7 @@ class Launch(object):
             cv['refLoc'] = dxencode.REF_FOLDER_DEFAULT + cv['genome'] + '/'
         if not cv['refLoc'].endswith('/'):
             cv['refLoc'] += '/' 
-        cv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,cv['exp_type'],cv['genome'])
+        cv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,cv['exp_type'],cv['genome'])
         cv['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/'
         cv['reps']['a']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
                                                               cv['reps']['a']['rep_tech'] + '/'
@@ -609,6 +607,26 @@ class Launch(object):
                                                 rep['fastqs']['2'], test, 'reads2', \
                                                 rep['resultsFolder'], False, self.proj_id)
 
+
+    def finding_combined_inputs_and_priors(self,steps,globs,test):
+        '''Finds the inputs and priors for a combined run.'''
+        # NOT EXPECTED TO OVERRIDE
+        
+        if not self.psv['combined']:
+            return
+        
+        print "Checking for combined-replicate priors..."
+        if not test:
+            # should be a noop as replicate level folders were already created
+            if not dxencode.project_has_folder(self.project, self.psv['resultsFolder']):
+                self.project.new_folder(self.psv['resultsFolder'],parents=True)
+        self.psv['priors'] = self.find_prior_results(self.psv['path'],steps,self.psv['resultsFolder'],globs)
+
+        # Checking for combined input files...
+        # The following step may be overwritten in descendent class
+        self.find_combined_inputs(steps,globs)
+          
+            
     def find_all_ref_files(self):
         '''Locates all reference files based upon organism and gender.'''
         # NOT EXPECTED TO OVERRIDE
@@ -1034,8 +1052,8 @@ class Launch(object):
         #print "Checking for control files..."
         self.find_all_control_files(args.test)
 
-        # Checking for combined-replicate inputs...
-        self.find_combined_inputs(combined_steps,file_globs)
+        # Checking for combined-replicate inputs and priors...
+        self.finding_combined_inputs_and_priors(combined_steps,file_globs,args.test)
 
         # finding pipeline specific reference files in a stadardized way
         self.find_all_ref_files()

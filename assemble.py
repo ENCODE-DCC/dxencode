@@ -413,8 +413,8 @@ class Assemble(object):
             
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation may have been entered as args to help organize folders
-            self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.exp_type, \
-                                                                                            args.genome,args.annotation)
+            self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,proj_name=self.proj_name, \
+                                                                                    self.exp_type,args.genome,args.annotation)
             self.exp_folder = dxencode.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
             if self.exp_folder == None:
                 self.exp_folder = self.umbrella_folder + exp_id + '/'
