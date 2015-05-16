@@ -18,7 +18,7 @@ DXENCODE_VERSION = "1"
 GENOME_DEFAULTS = { 'human': 'hg19', 'mouse': 'mm10' }
 ''' This the default genomes for each supported organism.'''
 
-PRODUCTION_PROJECT = "ENCODE Universal Processing Pipelines"
+PRODUCTION_PROJECT = "ENCODE - Production runs"
 
 REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 ''' This the default DNA Nexus project to find reference files in.'''
