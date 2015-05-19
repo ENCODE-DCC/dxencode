@@ -799,12 +799,11 @@ class Launch(object):
                     run['prevStepResults'][ fileToken ] = dxpy.dxlink({'stage': stageId, \
                                                                 'outputField': appOut })
                 # Secret sauce to tie rep results to combined inputs
-                if self.multi_rep and run_id != None:
+                if self.multi_rep and run_id != None and fileToken in self.FILE_GLOBS:
                     for cstep in self.psv['stepsToDo']:
                         for key in self.psv['steps'][cstep]['inputs'].keys():
-                            if fileToken in self.FILE_GLOBS and key in self.FILE_GLOBS \
-                            and self.FILE_GLOBS[key] == self.FILE_GLOBS[fileToken]:
-                                if key[-1].lower() == run_id:
+                            if key.lower().endswith('_' + run_id): # '_a' or '_b'
+                                if key in self.FILE_GLOBS and self.FILE_GLOBS[key] == self.FILE_GLOBS[fileToken]:
                                     #print "combined inputs[%s] == %s %s" % (key, run['rep_tech'], fileToken)
                                     if 'prevStepResults' not in self.psv:
                                         self.psv['prevStepResults'] = {}

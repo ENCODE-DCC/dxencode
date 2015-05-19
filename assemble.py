@@ -2,7 +2,8 @@
 # assemble.py 0.0.2
 
 import argparse,os, sys, json
-#import urlparse, subprocess, itertools, logging
+import subprocess
+#import urlparse, itertools, logging
 #from datetime import datetime
 #import Lib/fnmatch.py
 import fnmatch
@@ -23,6 +24,11 @@ class Assemble(object):
     
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq' ] #,"dnase" ,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
+    
+    LAUNCHERS = {   'long-rna-seq':     '../long-rna-seq-pipeline/dnanexus/lrnaLaunch.py', 
+                    'small-rna-seq':    '../long-rna-seq-pipeline/dnanexus/small-rna/srnaLaunch.py', 
+                    'rampage':          '../long-rna-seq-pipeline/dnanexus/rampage/rampageLaunch.py', 
+                    'dnase-seq':        '../dnase_pipeline/dnanexus/dnaseLaunch.py' }
 
     # Pipeline files includes inputs and results.  To assemble the files, there is no need to understand step order
     # dependencies.  Even replicate vs. combined is not important information as folder destinations can be discovered
@@ -68,10 +74,6 @@ class Assemble(object):
         }
     }
     
-    GENOMES_SUPPORTED = ['hg19', 'mm10']
-    GENOME_DEFAULT = 'hg19'
-    ''' This the default Genome that long RNA-seq experiments are mapped to.'''
-
     def __init__(self):
         '''
         Assemble expects to be the only class for assembling experiments on for pipeline types.
@@ -81,6 +83,8 @@ class Assemble(object):
         self.proj_name = None
         self.project = None
         self.proj_id = None
+        self.genome = None
+        self.annotation = None
         self.exp = {}  # Will hold the encoded exp json
         self.psv = {} # will hold pipeline specific variables.
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
@@ -134,11 +138,6 @@ class Assemble(object):
         #                default=dxencode.REF_FOLDER_DEFAULT,
         #                required=False)
 
-        ap.add_argument('-g','--genome',
-                        help='Optionally enter genome to help organize folders',
-                        default=None,
-                        required=False)
-
         ap.add_argument('-a','--annotation',
                         help='Optionally enter annotation to help organize folders',
                         default=None,
@@ -161,8 +160,13 @@ class Assemble(object):
                         default=self.SERVER_DEFAULT,
                         required=False)
 
+        ap.add_argument('-l','--launch',
+                        help='Ignite the launcher after files have been assembled.',
+                        action='store_true',
+                        required=False)
+
         ap.add_argument('--test',
-                        help='Test run only, do not launch anything.',
+                        help='Test run only, do not assemble anything.',
                         action='store_true',
                         required=False)
 
@@ -208,6 +212,19 @@ class Assemble(object):
         replicates = []
         for (br,tr) in self.full_mapping.keys():
             replicates.append( { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) } )
+            
+            mapping = dxencode.get_replicate_mapping(exp_id,br,tr,self.full_mapping)
+            if self.genome == None:
+                if mapping['organism'] in dxencode.GENOME_DEFAULTS:
+                    self.genome = dxencode.GENOME_DEFAULTS[mapping['organism']]
+                else:
+                    print "Organism %s not currently supported" % mapping['organism']
+                    sys.exit(1)
+            elif self.genome != dxencode.GENOME_DEFAULTS[mapping['organism']]:
+                print "Mixing genomes in one assembly run not supported %s and %s" % \
+                                                    (self.genome, dxencode.GENOME_DEFAULTS[mapping['organism']])
+                sys.exit(1)
+        
             
         if verbose:
             print "Replicates:"
@@ -359,8 +376,81 @@ class Assemble(object):
         return needed_count # Returns the number of files NOT successfully fetched
 
 
+    def launch(self,exp_id,exp_type,replicates,genome,annotation,test=True,verbose=False):
+        '''
+        Spawns the appropriate launcher, not waiting around for the results.  
+        Returns pid, 0 for noop and -1 for error.
+        '''
+        # NOT EXPECTED TO OVERRIDE
+        
+        # look up the launcher launcher
+        if exp_type not in self.LAUNCHERS:
+            print "ERROR: No launcher defined for experiment of type " + exp_type
+            return -1
+        cmd = [ self.LAUNCHERS[exp_type] ]
+        cmd.append('-e')
+        cmd.append(exp_id)
+            
+        # determine arguments to launcher
+        # TODO: support more than 2 replicates and other tricky combinations
+        if len(replicates) == 2 and replicates[0]['br'] != replicates[1]['br']:
+            #if replicates[0]['br'] == replicates[1]['br']:
+            #    print "ERROR: Launchers cannot handle combining technical but not biological replicates at this time."
+            #    return -1 #sys.exit(1)
+            cmd.append('-cr')
+            for rep in replicates:
+                cmd.append(rep['rep_tech'][3:])
+        else:
+            # TODO: make launchers support multiple replicates that are not combined replicates
+            if len(replicates) != 1:
+                print "ERROR: Launchers cannot handle more than one replicate except as combined-replicates at this time."
+                return -1 #sys.exit(1)
+            cmd.append('-br')
+            for rep in replicates:
+                cmd.append(rep['br'])
+            cmd.append('-tr')
+            for rep in replicates:
+                cmd.append(rep['tr'])
+        # do anything about genome?  Defaults to hg19 or mm10 so not needed yet
+        if genome not in ['hg19','mm10']:
+            cmd.append('--genome')
+            cmd.append(genome)
+         
+        # do anything about annotation (lrna, rampage)?  Defaults to v19 or M4 which is okay for now
+        if annotation and annotation not in ['v19','M4']:
+            cmd.append('--annotation')
+            cmd.append(annotation)
+            
+        # TODO: Any additional arguments that a launcher might need.
+        
+        # Always run, because assemble --test will not actually spawn the command.
+        cmd.append('--run')
+            
+        if verbose:
+            print "Launch command:"
+            print json.dumps(cmd,indent=4)
+               
+        echo_cmd = ['echo','"']
+        echo_cmd.extend(cmd)
+        echo_cmd.append('"')
+        sys.stdout.flush() # Slow running job should flush to piped log
+        if test: # Wait for results and print them
+            # NOTE: It would be nice to wait for results of test command, but the command is going to fail since
+            #       files have not actually been assembled on a test!
+            # Instead, the best we can do is just print the command that would run:
+            print "  - Would ignite launcher as: "
+            subprocess.call(echo_cmd)
+            return 0
+        else: # spawn the demon child
+            print "  - Ignite launcher as: "
+            subprocess.call(echo_cmd)
+            subprocess.call(['mkdir','-p','logs/launch/'])
+            log_file = 'logs/launch/' + exp_id + '.log'
+            with open(log_file,"a") as out:  # append log
+                return subprocess.Popen(cmd,stdout=out,stderr=subprocess.STDOUT).pid
+        
     def run(self):
-        '''Runs launch from start to finish using command line arguments.'''
+        '''Runs assemble from start to finish using command line arguments.'''
         # NOT EXPECTED TO OVERRIDE
         
         #try:
@@ -377,6 +467,7 @@ class Assemble(object):
         skipped = 0
         total_copied = 0
         total_failed = 0 
+        total_launched = 0 
         for exp_id in args.experiments:
             sys.stdout.flush() # Slow running job should flush to piped log
             exp_count += 1
@@ -414,7 +505,7 @@ class Assemble(object):
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation may have been entered as args to help organize folders
             self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name, \
-                                                                                    self.exp_type,args.genome,args.annotation)
+                                                                                    self.exp_type,self.genome,args.annotation)
             self.exp_folder = dxencode.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
             if self.exp_folder == None:
                 self.exp_folder = self.umbrella_folder + exp_id + '/'
@@ -460,23 +551,33 @@ class Assemble(object):
             failed = 0
             failed = self.fetch_to_dx(self.exp_id,self.exp_folder,needed_files,test=self.test)
             copied = len(needed_files) - failed
+            launched = 0
+            
+            # Ignite a launcher here...
+            if args.launch:
+                pid = self.launch(self.exp_id,self.exp_type,self.replicates,self.genome,args.annotation,test=self.test)
+                if pid > 0:
+                    #print "- Launcher ignited for %s, pid %d" % (self.exp_id, pid)
+                    launched = 1
             
             if self.test:
                 print "- For %s Processed %d file(s), would try to copy %d file(s)" % \
                                                             (self.exp_id, len(needed_files), copied)
             else:
-                print "- For %s Processed %d file(s), copied %d, failed %d" % \
-                                                            (self.exp_id, len(needed_files), copied, failed)
+                print "- For %s Processed %d file(s), copied %d, failed %d, launched %d" % \
+                                                            (self.exp_id, len(needed_files), copied, failed, launched)
+                                                            
             total_copied += copied
             total_failed += failed
+            total_launched += launched
         
         if exp_count > 1:
             if self.test:
                 print "Processed %d experiment(s), skipped %d, would try to copy %d file(s)" % \
                                                                 (exp_count, skipped, total_copied)
             else:    
-                print "Processed %d experiment(s), skipped %d, copied %d file(s) failures %d" % \
-                                                                (exp_count, skipped, total_copied, total_failed)
+                print "Processed %d experiment(s), skipped %d, copied %d file(s), failures %d, launched %d" % \
+                                                            (exp_count, skipped, total_copied, total_failed, total_launched)
         if total_failed != 0:
             print "(finished with failures)"
             sys.exit(1)    
