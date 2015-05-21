@@ -1,7 +1,11 @@
 #!/usr/bin/env python2.7
 # splashdown.py 0.0.1
 #
-# Initial starting point accessonator.py in tf_chipseq.py and lrnaSplashdown.py
+### TODO:
+#   1) The creation of the workflow_run encoded object should be migrated to the launchers.
+#   2) Splashdown should update the workflow_run object if it already exists.
+#   3) Ideally, splashdown.py could poll encoded for workflow_run objects that have not completed,
+#      then determine if the have finished or failed and then begin the process of posting any results that are available.
 #
 # Splashdown is meant to run outside of dnanexus and to examine experiment directories to
 # find results tp post to encoded.

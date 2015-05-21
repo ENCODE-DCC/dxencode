@@ -11,6 +11,17 @@ import fnmatch
 import dxpy
 import dxencode
 
+### TODO:
+#   1) Assemble *could* create a workflow_run object that represents a request for launch.
+#   2) Ideally, a workflow_run object could be created on encoded as a request for assemble/launch.
+
+# Assemble is meant to be run directly for most experiment types.  That is, no derived class should be needed.
+#   Its purpose is to recognize all files (for a given experiment) that are available in ENCODEd and are needed to 
+#   complete a pipeline run (including fastqs and intermediate results); then if they are not already on DX copy them there.  
+#   Ideally assemble.py is run for a single experiment, but can act on a list of experiments.  The files are "fetched" to 
+#   DX by a DX applet and assemble.py waits for the fetch to complete for one experiment, before moving on to the next.
+#   After a successful fetch, assemble.py can kick-off (ignite) the appropriate Launcher, so that the pipeline will be run.
+
 class Assemble(object):
     '''
     Assembles all input files in dx for a given accessioned experiment and replicate (or combined replicates).  
@@ -207,23 +218,37 @@ class Assemble(object):
         if self.rep != None:
             return [ self.rep ]
             
+            
         # Must look through exp and find all replicates!
         self.full_mapping = dxencode.get_full_mapping(exp_id,exp,key=self.server_key)
-        replicates = []
-        for (br,tr) in self.full_mapping.keys():
-            replicates.append( { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) } )
-            
-            mapping = dxencode.get_replicate_mapping(exp_id,br,tr,self.full_mapping)
+        if self.full_mapping == None:
+        replicates = dxencode.get_reps_from_enc(exp_id, exp=exp, full_mapping=self.full_mapping, key=self.server_key)
+        for rep in replicates:
             if self.genome == None:
-                if mapping['organism'] in dxencode.GENOME_DEFAULTS:
-                    self.genome = dxencode.GENOME_DEFAULTS[mapping['organism']]
+                if rep['organism'] in dxencode.GENOME_DEFAULTS:
+                    self.genome = dxencode.GENOME_DEFAULTS[rep['organism']]
                 else:
-                    print "Organism %s not currently supported" % mapping['organism']
+                    print "Organism %s not currently supported" % rep['organism']
                     sys.exit(1)
-            elif self.genome != dxencode.GENOME_DEFAULTS[mapping['organism']]:
+            elif self.genome != dxencode.GENOME_DEFAULTS[rep['organism']]:
                 print "Mixing genomes in one assembly run not supported %s and %s" % \
-                                                    (self.genome, dxencode.GENOME_DEFAULTS[mapping['organism']])
+                                                    (self.genome, dxencode.GENOME_DEFAULTS[rep['organism']])
                 sys.exit(1)
+        #replicates = []
+        #for (br,tr) in self.full_mapping.keys():
+        #    replicates.append( { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) } )
+        #    
+        #    mapping = dxencode.get_replicate_mapping(exp_id,br,tr,self.full_mapping)
+        #    if self.genome == None:
+        #        if mapping['organism'] in dxencode.GENOME_DEFAULTS:
+        #            self.genome = dxencode.GENOME_DEFAULTS[mapping['organism']]
+        #        else:
+        #            print "Organism %s not currently supported" % mapping['organism']
+        #            sys.exit(1)
+        #    elif self.genome != dxencode.GENOME_DEFAULTS[mapping['organism']]:
+        #        print "Mixing genomes in one assembly run not supported %s and %s" % \
+        #                                            (self.genome, dxencode.GENOME_DEFAULTS[mapping['organism']])
+        #        sys.exit(1)
         
             
         if verbose:
@@ -392,25 +417,6 @@ class Assemble(object):
         cmd.append(exp_id)
             
         # determine arguments to launcher
-        # TODO: support more than 2 replicates and other tricky combinations
-        if len(replicates) == 2 and replicates[0]['br'] != replicates[1]['br']:
-            #if replicates[0]['br'] == replicates[1]['br']:
-            #    print "ERROR: Launchers cannot handle combining technical but not biological replicates at this time."
-            #    return -1 #sys.exit(1)
-            cmd.append('-cr')
-            for rep in replicates:
-                cmd.append(rep['rep_tech'][3:])
-        else:
-            # TODO: make launchers support multiple replicates that are not combined replicates
-            if len(replicates) != 1:
-                print "ERROR: Launchers cannot handle more than one replicate except as combined-replicates at this time."
-                return -1 #sys.exit(1)
-            cmd.append('-br')
-            for rep in replicates:
-                cmd.append(rep['br'])
-            cmd.append('-tr')
-            for rep in replicates:
-                cmd.append(rep['tr'])
         # do anything about genome?  Defaults to hg19 or mm10 so not needed yet
         if genome not in ['hg19','mm10']:
             cmd.append('--genome')

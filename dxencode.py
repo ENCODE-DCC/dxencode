@@ -844,6 +844,60 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
             sys.exit(1)
     return None
 
+def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key='default'):
+    '''For a given exp_id (accession) returns a "rep" list as used by assemble, launch, etc.'''
+        
+    reps = []
+    # Must look through exp and find all replicates!
+    if full_mapping == None:
+        full_mapping = dxencode.get_full_mapping(exp_id,exp,key=key)
+    if full_mapping != None:
+        for (br,tr) in sorted( full_mapping.keys() ):
+            rep = { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) }
+            mapping = get_replicate_mapping(exp_id,br,tr,full_mapping) # must_find
+            rep['organism'] = mapping['organism']
+            rep['sex'] = mapping['sex']
+            rep['library_id'] = mapping['library']
+            rep['replicate_id'] = mapping['replicate_id']
+            rep['paired_end'] = False  # Default in case read files are missing
+            rep['has_reads'] = False
+            if mapping['paired'] and not mapping['unpaired']:
+                rep['paired_end'] = True
+                rep['has_reads'] = True
+            elif mapping['unpaired'] and not mapping['paired']:
+                rep['paired_end'] = False
+                rep['has_reads'] = True
+            elif mapping['paired'] and mapping['unpaired']:
+                print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
+                    (len(mapping['paired'], len(mapping['unpaired'])))
+                print json.dumps(mapping,indent=4)
+                sys.exit(1)
+                
+            # Load read and control files, only if requested.
+            if load_reads and rep['has_reads']:
+                rep['fastqs'] = { "1": [], "2": [] }
+                rep['controls'] = []
+                if rep['paired_end']:
+                    for (p1, p2) in mapping['paired']:
+                        rep['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
+                        if p2 != None and 'paired_end' in p2:
+                            rep['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
+                        if 'controlled_by' in p1:
+                            rep['controls'] += p1['controlled_by']
+                        if p2 != None and 'controlled_by' in p2:
+                            rep['controls'] += p2['controlled_by']
+                else: # not rep['paired_end']:
+                    rep['fastqs']['1'] = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
+                    if 'controlled_by' in mapping['unpaired']:
+                        rep['controls'] += mapping['unpaired']['controlled_by']
+                if len(rep['controls']) == 0:
+                    rep['controls'] = None
+            
+            
+            reps.append( rep )
+
+    return reps
+
 def get_enc_file(file_acc,must_find=False,key='default'):
     '''Returns all replicate mappings for an experiment from encoded.'''
 

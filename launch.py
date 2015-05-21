@@ -4,9 +4,15 @@
 import argparse,os, sys, json
 #import urlparse, subprocess, itertools, logging
 from datetime import datetime
+from collections import deque
 
 import dxpy
 import dxencode
+
+### TODO:
+#   1) Launchers should create the workflow_run encoded objects.  REQUIRED new status: 'launch_error', 'started', 'failed', 'partial_success')
+#   2) Launchers should be able to support 3 level combinations [br:[tr,tr],br:[tr,tr]] -> [br,br] -> cr (DNase needs)
+#   3) Launchers may fail, so how to report this to encoded?
 
 # NOTES: This command-line utility will run the a pipeline for a single replicate or combined reps.
 #      - All results will be written to a folder /<results_folder>/<exp_id>/rep<#>_<#>.
@@ -93,6 +99,14 @@ class Launch(object):
     GENOMES_SUPPORTED = ['hg19', 'mm10']
     GENOME_DEFAULT = 'hg19'
     ''' This the default Genome that long RNA-seq experiments are mapped to.'''
+    
+    STANDARD_LABELS = {
+        'long-rna-seq':  { 'long': 'Long-RNA-seq',  'short': 'lrna',  'se_and_pe': True  }, 
+        'small-rna-seq': { 'long': 'Small-RNA-seq', 'short': 'srna',  'se_and_pe': False }, 
+        'rampage':       { 'long': 'Rampage',       'short': 'ramp',  'se_and_pe': False }, 
+        'dnase-seq':     { 'long': 'DNase-seq',     'short': 'dnase', 'se_and_pe': True  },
+    }
+    '''Standard labelling requires exp_type specific labels.  This can be overridden in descendent classes.'''
 
     def __init__(self):
         '''
@@ -107,7 +121,8 @@ class Launch(object):
         self.proj_id = None
         self.exp = {}  # Will hold the encoded exp json
         self.psv = {} # will hold pipeline specific variables.
-        self.multi_rep = False  # Support multi-replicate workflows
+        self.multi_rep = False       # This run includes more than one replicate
+        self.combined_reps = False   # This run includes combined replicate workflows
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
     def get_args(self,parse=True):
@@ -284,7 +299,7 @@ class Launch(object):
         '''Finds the inputs for a combined run in the directories of the replicate runs.'''
         # MAY NEED TO REPLACE for pipelines with combined steps
         
-        if not self.psv['combined']:
+        if not self.combined_reps:
             return
 
         print "Checking for combined-replicate inputs..."
@@ -330,92 +345,31 @@ class Launch(object):
 
         cv['project']    = self.proj_name
         cv['experiment'] = args.experiment
-
-        # expecting either combined-replicates or biological and technical replicate
-        if 'cr' in args and args.cr != None:
-            self.multi_rep = True
-            if len(args.cr) != 2:
-                print "Specify which two replicates to compare (e.g. '1_2 2')."
-                sys.exit(1)
-            cv['combined'] = True
-            cv['reps'] = {}
-            for rep_tech in args.cr:
-                # Normalize rep_tech string
-                if '_' not in rep_tech:
-                    rep_tech = rep_tech + '_1' # default to tech_rep 1
-                if not rep_tech.startswith('rep'):
-                    rep_tech = 'rep' + rep_tech
-                # parse out biological and technical replicates
-                br_tr = rep_tech[3:]
-                (br,tr) = br_tr.split('_')
-                if 'a' in cv['reps']:
-                    cv['reps']['b'] = { 'br': int(br), 'tr': int(tr) }
-                    cv['reps']['b']['rep_tech'] = rep_tech
-                else:
-                    cv['reps']['a'] = { 'br': int(br), 'tr': int(tr) }
-                    cv['reps']['a']['rep_tech'] = rep_tech
-                    
-            if cv['reps']['a']['rep_tech'] == cv['reps']['b']['rep_tech']:
-                print "Specify different replicates to compare (e.g. 'rep1_1 rep2_1')."
-                sys.exit(1)
-            args.br = cv['reps']['a']['br']
-            args.tr = cv['reps']['a']['tr']
-            cv['rep_tech'] = 'reps' + cv['reps']['a']['rep_tech'][3:] + \
-                                '-' + cv['reps']['b']['rep_tech'][3:]
-        else:
-            if args.br == None:
-                if self.COMBINED_STEPS == None:
-                    print "Specify which '--biolgical-replicate'."
-                else:
-                    print "Specify '--biolgical-replicate' or '--combined-replicates'."
-                sys.exit(1)
-
-            cv['combined'] = False
-            if args.br == 0:
-                print "Must specify either --biological-replicate or --compare-replicates." 
-                sys.exit(1)
-            cv['reps'] = {'a': { 'br': args.br, 'tr': args.tr} }
-            cv['reps']['a']['rep_tech'] = 'rep' + str(args.br) + '_' + str(args.tr)
-
+        
+        ### TODO: get all replicates, not relying on -cr, -br, -tr
         self.exp = dxencode.get_exp(cv['experiment'],key=key)
-        full_mapping = dxencode.get_full_mapping(cv['experiment'],self.exp)
         cv['exp_type'] = dxencode.get_assay_type(cv['experiment'],self.exp)
-        controls = ('control' in args)
-        for cv_rep in cv['reps'].keys():
-            rep = cv['reps'][cv_rep]
-            # TODO get rep_mapping once and then subset "mapping" multiple times
-            mapping = dxencode.get_replicate_mapping(cv['experiment'],rep['br'],rep['tr'], full_mapping)
+        full_mapping = dxencode.get_full_mapping(cv['experiment'],self.exp)
+        cv['reps'] = self.load_reps(args, cv, cv['experiment'], self.exp, full_mapping)
+        
+        assert 'a' in cv['reps']
 
-            # Not a common var but convenient and cheap
-            rep['library_id'] = mapping['library']
-            rep['replicate_id'] = mapping['replicate_id']
-            
-            # TODO add enough info that individual pipelines can varify the experiment matches pipeline
-            
-            if fastqs:
-                rep['paired_end'] = self.load_fastqs_from_mapping(rep,mapping,controls)
-                # Non-file app inputs
-                rep['concat_id'] = 'reads'
-                if rep['paired_end']: 
-                    rep['concat_id2'] = 'reads2'
-
-            if cv_rep == 'a':
-                # Only supported genomes
-                if mapping['organism'] in dxencode.GENOME_DEFAULTS:
-                    cv['genome'] = dxencode.GENOME_DEFAULTS[mapping['organism']]
-                else:
-                    print "Organism %s not currently supported" % mapping['organism']
-                    sys.exit(1)
-
-                cv['gender'] = mapping['sex']
+        # Only supported genomes
+        cv['gender'] = cv['reps']['a']['sex']
+        organism = cv['reps']['a']['organism']
+        if organism in dxencode.GENOME_DEFAULTS:
+            cv['genome'] = dxencode.GENOME_DEFAULTS[organism]
+        else:
+            print "Organism %s not currently supported" % organism
+            sys.exit(1)
 
         # Paired ends?
-        if cv['combined'] and cv['reps']['a']['paired_end'] != cv['reps']['a']['paired_end']:
+        if self.combined_reps and cv['reps']['a']['paired_end'] != cv['reps']['b']['paired_end']:
             print "Replicates are expected to be both paired-end or single-end!  Check encoded."
             sys.exit(1)
         cv['paired_end'] = cv['reps']['a']['paired_end']
 
-        # Default locations (with adjustments)
+        # Default locations
         cv['refLoc'] = args.refLoc
         if cv['refLoc'] == dxencode.REF_FOLDER_DEFAULT:
             cv['refLoc'] = dxencode.REF_FOLDER_DEFAULT + cv['genome'] + '/'
@@ -423,55 +377,125 @@ class Launch(object):
             cv['refLoc'] += '/' 
         cv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,cv['exp_type'],cv['genome'])
         cv['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/'
-        cv['reps']['a']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
-                                                              cv['reps']['a']['rep_tech'] + '/'
-        if cv['combined']:
-            cv['reps']['b']['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + \
-                                                                  cv['reps']['b']['rep_tech'] + '/'
+        for ltr in cv['reps'].keys():
+            cv['reps'][ltr]['resultsFolder'] = cv['resultsLoc'] + cv['experiment'] + '/' + cv['reps'][ltr]['rep_tech'] + '/'
+        
+        # Standard labels:
+        if cv['exp_type'] in self.STANDARD_LABELS:
+            labels = self.STANDARD_LABELS[cv['exp_type']]
+            cv['description'] = "The ENCODE "+labels['long']+" pipeline"
+            cv['title'] = labels['long']
+            cv['name'] = labels['short'] + "_"+cv['genome']
+            if cv['gender'] == 'female':
+                cv['name'] += "XX"
+            else:
+                cv['name'] += "XY"
+            if labels['se_and_pe']:
+                if cv['paired_end']:
+                    cv['title'] += " paired-end"
+                    cv['name'] += "PE"
+                else:
+                    cv['title'] += " single-end"
+                    cv['name']  += "SE"
+            cv['title'] += " " + cv['experiment']
+            cv['name']  += "_" + cv['experiment']
+            for ltr in cv['reps'].keys():
+                rep = cv['reps'][ltr]
+                rep['title'] = cv['title'] + " - "+rep['rep_tech']
+                if 'library_id' in rep:
+                    rep['title'] += " (library '"+rep['library_id']+"')"
+                rep['title'] += " on "+cv['genome']+", "+cv['gender']
+                rep['name']  = cv['name']  + rep['rep_tech']
+            cv['title']   += " - "+cv['rep_tech']+" on "+cv['genome']+", "+cv['gender']
+            cv['name']    += "_"+cv['rep_tech']
 
         return cv
 
-    def load_fastqs_from_mapping(self,load_to, mapping, controls=False):
+    def load_reps(self,args, cv, exp_id, exp=None, full_mapping=None):
         '''
-        Resolves fastq file names from mapping and puts them into load_to dict (hint psv).
-        Note: load_to['fastqs'] will always be { "1":[],"2":[]} though '2' is an empty set for unpaired
-        Returns True or False for paired end.  Failures exit.
+        Gathers replicates from encoded, then builds the cv['reps'] list from requested or all.
         '''
         # NOT EXPECTED TO OVERRIDE
+        cv_reps = {}
+        reps = dxencode.get_reps_from_enc(exp_id, load_reads=True, exp=exp, full_mapping=full_mapping)
+        rep_techs = []
+        if 'cr' in args and args.cr != None:
+            self.multi_rep = True
+            if len(args.cr) != 2:
+                print "Specify which two replicates to compare (e.g. '1_2 2')."
+                sys.exit(1)
+            self.combined_reps = True
+            for rep_tech in args.cr:
+                # Normalize rep_tech string
+                if '_' not in rep_tech:
+                    rep_tech = rep_tech + '_1' # default to tech_rep 1
+                if not rep_tech.startswith('rep'):
+                    rep_tech = 'rep' + rep_tech
+                rep_techs.append(rep_tech)
+        elif args.br != None and args.br != 0:
+            rep_tech = 'rep' + str(args.br) + '_' + str(args.tr)
+            rep_techs.append(rep_tech)
+            # TODO: support arrays for br, tr
+            #self.combined_reps = False
+            #for ix,br in enumerate(args.br):
+            #    tr = 1
+            #    if ix < len(args.tr):
+            #        tr = args.tr[ix]
+            #    rep_tech = 'rep' + str(br) + '_' + str(tr)
+            #    rep_techs.append(rep_tech)
+            
+        # Find each requested rep_tech in reps
+        letters = deque('abcdefghijklmnopqrstuvwxyz')
+        if len(rep_techs) > 0:
+            # Add specifically requested rep_techs to lettered slots
+            self.multi_rep = (len(rep_techs) > 1)
+            for rep_tech in sorted( rep_techs ):
+                found_ix = -1
+                for ix,rep in enumerate(reps):
+                    if rep['rep_tech'] == rep_tech:
+                        found_ix = ix
+                if found_ix == -1:
+                    for ltr in cv_reps.keys():
+                        if cv_reps[ltr]['rep_tech'] == rep_tech:
+                            print "Specify different replicates to compare (e.g. 'rep1_1 rep2_1')."
+                            sys.exit(1)
+                    print "ERROR: requested '"+rep_tech+"' not found in ENCODE " + cv['experiment']
+                    sys.exit(1)
+                ltr = letters.popleft()
+                cv_reps[ltr] = reps[found_ix]
+                del reps[found_ix] # rep is only used once!
+        else:
+            # Assume combined if exactly 2 replicates are available
+            for rep in reps:
+                ltr = letters.popleft()
+                cv_reps[ltr] = rep
+            # Assume combined reps if supported AND exactly 2 reps AND for different biological reps
+            if self.COMBINED_STEP_ORDER != None and len( self.COMBINED_STEP_ORDER ) > 0:
+                if len(reps) == 2 and cv_reps['a']['br'] != cv_reps['b']['br']:
+                    self.combined_reps = True
+            self.multi_rep = (len(reps) > 1)
+            
+        # Add all reps if none were requested
+        if self.combined_reps:
+            cv['rep_tech'] = 'reps' + cv_reps['a']['rep_tech'][3:] + \
+                                '-' + cv_reps['b']['rep_tech'][3:]
+        elif self.multi_rep:
+            cv['rep_tech'] = 'reps:' + cv_reps['a']['rep_tech'][3:]
+            for ltr in sorted(cv_reps.keys()):
+                if ltr != 'a':
+                    cv['rep_tech'] += ','+cv_reps[ltr]['rep_tech'][3:]
+        else:
+            cv['rep_tech'] = cv_reps['a']['rep_tech'] 
 
-        # Paired ends?  Read files?
-        if mapping['unpaired'] and not mapping['paired']:
-            paired_end = False
-        elif mapping['paired'] and not mapping['unpaired']:
-            paired_end = True
-        elif not mapping['unpaired'] and not mapping['paired']:
-            print "Replicate has no reads either paired or unpaired"
-            print json.dumps(mapping,indent=4)
-            sys.exit(1)
-        else:
-            print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
-                (len(mapping['paired'], len(mapping['unpaired'])))
-            print json.dumps(mapping,indent=4)
-            sys.exit(1)
-        if controls:
-            load_to['controls'] = []
-        load_to['fastqs'] = { "1": [], "2": [] }
-        if paired_end:
-            for (p1, p2) in mapping['paired']:
-                load_to['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
-                if p2 != None and 'paired_end' in p2:
-                    load_to['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
-                if controls:
-                    if 'controlled_by' in p1:
-                        load_to['controls'] += p1['controlled_by']
-                    if p2 != None and 'controlled_by' in p2:
-                        load_to['controls'] += p2['controlled_by']
-        else:
-            load_to['fastqs']['1'] = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
-            if controls:
-                if 'controlled_by' in mapping['unpaired']:
-                    load_to['controls'] += mapping['unpaired']['controlled_by']
-        return paired_end
+        # A little more rep tidying
+        for ltr in cv_reps.keys():
+            rep = cv_reps[ltr]
+            rep['concat_id'] = 'reads'
+            if rep['paired_end']: 
+                rep['concat_id2'] = 'reads2'
+                
+        return cv_reps
+
 
     def build_a_step(self, applet, file_globs, proj_id):
         ''' create input object for a step and extends the file_globs dict as appropriate.'''
@@ -511,6 +535,7 @@ class Launch(object):
             'inputs': inputs,
             'results': results
         }
+
 
     def build_simple_steps(self,pipe_path, proj_id, verbose=False):
         '''
@@ -612,7 +637,7 @@ class Launch(object):
         '''Finds the inputs and priors for a combined run.'''
         # NOT EXPECTED TO OVERRIDE
         
-        if not self.psv['combined']:
+        if not self.combined_reps:
             return
         
         print "Checking for combined-replicate priors..."
@@ -635,7 +660,7 @@ class Launch(object):
         for rep in self.psv['reps'].values():
             # Need multiple copies of control files because they are put into priors!
             self.find_ref_files(rep['priors']) # pipeline specific
-        if self.psv['combined']:
+        if self.combined_reps:
             self.find_ref_files(self.psv['priors'])
 
 
@@ -710,7 +735,7 @@ class Launch(object):
             rep['deprecate'] = [] # old results will need to be moved/removed if step is rerun
             rep['stepsToDo'] = self.determine_steps_to_run(rep['path'], replicate_steps, \
                                                     rep['priors'], rep['deprecate'], force=force)
-        if self.psv['combined']:
+        if self.combined_reps:
             self.psv['steps'] = combined_steps
             self.psv['deprecate'] = [] # old results will need to be moved/removed if step is rerun
             self.psv['stepsToDo'] = self.determine_steps_to_run(self.psv['path'], combined_steps, \
@@ -799,7 +824,7 @@ class Launch(object):
                     run['prevStepResults'][ fileToken ] = dxpy.dxlink({'stage': stageId, \
                                                                 'outputField': appOut })
                 # Secret sauce to tie rep results to combined inputs
-                if self.multi_rep and run_id != None and fileToken in self.FILE_GLOBS:
+                if self.combined_reps and run_id != None and fileToken in self.FILE_GLOBS:
                     for cstep in self.psv['stepsToDo']:
                         for key in self.psv['steps'][cstep]['inputs'].keys():
                             if key.lower().endswith('_' + run_id): # '_a' or '_b'
@@ -819,43 +844,45 @@ class Launch(object):
         '''Report the plans before executing them.'''
         # NOT EXPECTED TO OVERRIDE
 
-        combined = False
-        
         if run == None:
-            combined = True
             run = self.psv
         print "Running: "+run['title']
         if 'subTitle' in run:
             print "         "+run['subTitle']
 
         # Inputs:
-        if combined:
-            for rep in self.psv['reps'].values():
+        if self.multi_rep:
+            for ltr in sorted( self.psv['reps'].keys() ):
+                rep = self.psv['reps'][ltr]
                 for input_type in sorted( rep['inputs'].keys() ):
                     if len(rep['inputs'][input_type]) > 0: 
                         print "- " + input_type + " " + rep['rep_tech'] +':'
                         for fid in rep['inputs'][input_type]:
                             print "  " + dxencode.file_path_from_fid(fid)
-        for input_type in sorted( run['inputs'].keys() ):
-            if len(run['inputs'][input_type]) > 0: 
-                print "- " + input_type + " " + run['rep_tech'] +':'
-                for fid in run['inputs'][input_type]:
-                    print "  " + dxencode.file_path_from_fid(fid)
+        # single-rep and combined work both do run:
+        if not self.multi_rep or self.combined_reps:
+            for input_type in sorted( run['inputs'].keys() ):
+                if len(run['inputs'][input_type]) > 0: 
+                    print "- " + input_type + " " + run['rep_tech'] +':'
+                    for fid in run['inputs'][input_type]:
+                        print "  " + dxencode.file_path_from_fid(fid)
 
         print "- Reference files:"
-        # Should be enough to show the ref priors from run for single-rep or combined
+        # Should be enough to show the ref priors from 'a' rep for single-rep, multi or combined
         for token in self.psv['ref_files']:
-            print "  " + dxencode.file_path_from_fid(run['priors'][token],True)
+            print "  " + dxencode.file_path_from_fid(self.psv['reps']['a']['priors'][token],True)
 
         print "- Results written to: " + self.psv['project'] + ":" +run['resultsFolder']
-        if combined:
-            for rep in self.psv['reps'].values():
+        if self.multi_rep:
+            for ltr in sorted( self.psv['reps'].keys() ):
+                rep = self.psv['reps'][ltr]
                 print "                      " + self.psv['project'] + ":" +rep['resultsFolder']
 
         print "- Steps to run:"
         to_run_count = 0
-        if combined:
-            for rep in self.psv['reps'].values():
+        if self.multi_rep:
+            for ltr in sorted( self.psv['reps'].keys() ):
+                rep = self.psv['reps'][ltr]
                 for step in rep['path']:
                     if step in rep['stepsToDo']:
                         print "  * "+rep['rep_tech'] +': '+ rep['steps'][step]['app']+" will be run"
@@ -863,14 +890,14 @@ class Launch(object):
                         if not step.find('concat') == 0:
                             print "    "+rep['rep_tech'] +': '+ rep['steps'][step]['app']+" has already been run"
                 to_run_count += len(rep['stepsToDo'])
-            to_run_count += len(run['stepsToDo'])
-            for step in run['path']:
-                if step in run['stepsToDo']:
-                    print "  * "+run['rep_tech'] +': '+ run['steps'][step]['app']+" will be run"
-                else:
-                    if not step.find('concat') == 0:
-                        print "    "+run['rep_tech'] +': '+ run['steps'][step]['app']+" has already been run"
-        # single-rep and combined work both do run:
+            if self.combined_reps:
+                to_run_count += len(run['stepsToDo'])
+                for step in run['path']:
+                    if step in run['stepsToDo']:
+                        print "  * "+run['rep_tech'] +': '+ run['steps'][step]['app']+" will be run"
+                    else:
+                        if not step.find('concat') == 0:
+                            print "    "+run['rep_tech'] +': '+ run['steps'][step]['app']+" has already been run"
         else:
             to_run_count += len(run['stepsToDo'])
             for step in run['path']:
@@ -885,8 +912,9 @@ class Launch(object):
             print "  rerun all steps; or remove suspect results from the folder before relaunching."
             sys.exit(0)
 
-        if combined:
-            for rep in self.psv['reps'].values():
+        if self.multi_rep:
+            for ltr in sorted( self.psv['reps'].keys() ):
+                rep = self.psv['reps'][ltr]
                 if len(rep['deprecate']) > 0:
                     deprecated = rep['resultsFolder']+"/deprecated/"
                     if rep['resultsFolder'].endswith('/'):
@@ -895,13 +923,14 @@ class Launch(object):
                     for fid in rep['deprecate']:
                         print "  " + dxencode.file_path_from_fid(fid)
         # single-rep and combined work both do run:
-        if len(run['deprecate']) > 0:
-            deprecated = run['resultsFolder']+"/deprecated/"
-            if run['resultsFolder'].endswith('/'):
-                deprecated = run['resultsFolder']+"deprecated/"
-            print "Will move "+str(len(run['deprecate']))+" prior result file(s) to '" + deprecated+"'."
-            for fid in run['deprecate']:
-                print "  " + dxencode.file_path_from_fid(fid)
+        if not self.multi_rep or self.combined_reps:
+            if len(run['deprecate']) > 0:
+                deprecated = run['resultsFolder']+"/deprecated/"
+                if run['resultsFolder'].endswith('/'):
+                    deprecated = run['resultsFolder']+"deprecated/"
+                print "Will move "+str(len(run['deprecate']))+" prior result file(s) to '" + deprecated+"'."
+                for fid in run['deprecate']:
+                    print "  " + dxencode.file_path_from_fid(fid)
 
 
     def workflow_report_and_build(self,run,proj_id=None,template=False,test=True,verbose=False):
@@ -924,16 +953,17 @@ class Launch(object):
                     print "Moving "+str(len(rep['deprecate']))+" "+rep['rep_tech']+" prior result file(s) to '"+ \
                                                                                         deprecated+"'..."
                     dxencode.move_files(rep['deprecate'],deprecated,proj_id)
-        if len(run['deprecate']) > 0 and not test:
-            deprecated = run['resultsFolder']+"deprecated/"
-            print "Moving "+str(len(run['deprecate']))+" "+run['rep_tech']+" prior result file(s) to '"+ \
-                                                                                deprecated+"'..."
-            dxencode.move_files(run['deprecate'],deprecated,proj_id)
+        if not self.multi_rep or self.combined_reps:
+            if len(run['deprecate']) > 0 and not test:
+                deprecated = run['resultsFolder']+"deprecated/"
+                print "Moving "+str(len(run['deprecate']))+" "+run['rep_tech']+" prior result file(s) to '"+ \
+                                                                                    deprecated+"'..."
+                dxencode.move_files(run['deprecate'],deprecated,proj_id)
         
         # Build the workflow...
         wf = None
         if self.multi_rep:
-            for rep_id in run['reps'].keys():
+            for rep_id in sorted( run['reps'].keys() ):
                 rep = run['reps'][rep_id]
                 if len(rep['stepsToDo']) > 0: # Going to get noisy with multimple reps
                     if test:
@@ -941,12 +971,13 @@ class Launch(object):
                     else:
                         print "Assembling workflow for "+rep['rep_tech']+"..."
                     wf = self.create_or_extend_workflow(rep, rep_id, wf=wf, test=test,template=template)
-        if len(run['stepsToDo']) > 0:
-            if test:
-                print "Testing workflow assembly for "+run['rep_tech']+"..."
-            else:
-                print "Assembling workflow for "+run['rep_tech']+"..."
-            wf = self.create_or_extend_workflow(run, None, wf=wf, test=test,template=template)
+        if not self.multi_rep or self.combined_reps:
+            if len(run['stepsToDo']) > 0:
+                if test:
+                    print "Testing workflow assembly for "+run['rep_tech']+"..."
+                else:
+                    print "Assembling workflow for "+run['rep_tech']+"..."
+                wf = self.create_or_extend_workflow(run, None, wf=wf, test=test,template=template)
             
         return wf
 
@@ -1042,7 +1073,7 @@ class Launch(object):
         print "Building apps dictionary..."
         rep_steps, file_globs = self.assemble_steps_and_globs(self.REP_STEP_ORDER)
         combined_steps = None
-        if self.psv['combined']:
+        if self.combined_reps:
             combined_steps, file_globs = self.assemble_steps_and_globs(self.COMBINED_STEP_ORDER,True)
 
         # finding fastqs and prior results in a stadardized way
@@ -1067,7 +1098,7 @@ class Launch(object):
 
         else:            
             # Preperation is done. At this point on we either run rep 'a' or combined.
-            if not self.psv['combined']:
+            if not self.combined_reps:
                 run = self.psv['reps']['a']
             else:
                 run = self.psv
