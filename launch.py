@@ -475,15 +475,25 @@ class Launch(object):
                     self.combined_reps = True
             self.multi_rep = (len(reps) > 1)
             
-        # Add all reps if none were requested
+        # NOTE: Plans for combining more than 2 reps and multi-levels
+        # Currently reps are keyed on single letter (e.g. 'a') and added to workflow in sort order
+        # Combined level keying should build workflows in order AND allow tying results to inputs of combined steps
+        # Combined reps need to be added after last rep in combination, so just add to the end:
+        # Example reps['a'] and reps['b'] are combined in reps['z-ab']
+        # However, more complex levels still could need to be combined it is best to have combined reps point
+        # their dependent reps.  reps['z-ab']['parents'] = ['a','b']
+        # Notice that psv is essentially reps['z-ab']
+            
+        # mult-rep rep_tech: 
         if self.combined_reps:
             cv['rep_tech'] = 'reps' + cv_reps['a']['rep_tech'][3:] + \
-                                '-' + cv_reps['b']['rep_tech'][3:]
+                                '-' + cv_reps['b']['rep_tech'][3:]  # combined delimited by '-'
+            cv['tributaries'] = ['a','b']
         elif self.multi_rep:
             cv['rep_tech'] = 'reps:' + cv_reps['a']['rep_tech'][3:]
             for ltr in sorted(cv_reps.keys()):
                 if ltr != 'a':
-                    cv['rep_tech'] += ','+cv_reps[ltr]['rep_tech'][3:]
+                    cv['rep_tech'] += ','+cv_reps[ltr]['rep_tech'][3:] # not combined are delimited by ','
         else:
             cv['rep_tech'] = cv_reps['a']['rep_tech'] 
 
@@ -742,6 +752,66 @@ class Launch(object):
                                             self.psv['priors'], self.psv['deprecate'], force=force)
 
 
+    def find_resuts_from_prev_branch(self, this_branch, branches, inp_token, expect_set):
+        '''
+        If combined_reps step, look for input from results of replicate level step.
+        '''
+        if not self.combined_reps:    # Not even doing a wf with combining branches 
+            return None
+        if 'tributaries' not in this_branch:  # Not a combining branch
+            return None
+        if inp_token not in self.FILE_GLOBS: # assertable
+            return None
+        # The combined_step input tokens should either end in '_a', '_b' or the like,
+        # Or the step expects to combine N files so expect_set=True and all matching results should be combined.
+        
+        # Using letters since 3 tech_rep branches could be combined into 2 bio_rep branches and then 1 experiment level branch
+        # Thus tr branch_ids would be: 'a','b','c','d','e','f'
+        #  and br branch_ids would be 'za','zb', and those branches flow into psv (or 'zc').
+        # So if br branch 'za' expects 3 inputs ending '_a','_b','_c' then
+        #       br branch 'zb' would expect the same 3, not '_d','_e','_f'
+        letters = deque('abcdefghijklmnopqrstuvwxyz')
+        looking_for = None
+        if expect_set:
+            # TODO: Establish expectation that joingin results either end in '_a', etc. or '_set'
+            # TODO: Refactor naming to refer to reps, branches and rarely "runs' 
+            if not inp_token.endswith('_set'):
+                return None
+            #looking_for = 'set'  # How to handle sets?
+            results_array = []
+        elif inp_token[-2] == '_' and inp_token.lower()[-1] in letters:
+            looking_for = inp_token.lower()[-1]
+        if looking_for == '': # Can we do this
+            return None
+            
+        for branch_id in this_branch['tributaries']:
+            ltr = letters.popleft()
+            if looking_for != None and looking_for != ltr:
+                continue
+            if branch_id not in branches:  # assertable
+                continue
+            if 'prevStepResults' not in branches[branch_id]:
+                continue
+            prev_results = branches[branch_id]['prevStepResults']
+            # How to match prevResults[file_token='bwa_bam'] in prevResults to compare to step['inputs'][file_token='bam_a']
+            # The only way is by matching file globs which MUST tie branch leaps together.
+            for result_token in prev_results.keys():
+                if result_token in self.FILE_GLOBS:
+                    if self.FILE_GLOBS[result_token] == self.FILE_GLOBS[inp_token]:
+                        if expect_set:
+                            results_array.append(prev_results[result_token])
+                            break  # Done with this branch, but look for more results in next branches
+                        if looking_for == ltr:
+                            return prev_results[result_token] # found result on branch matched by letter
+                        else:
+                            return prev_results[result_token] # return first match from first branch
+        
+        # Went through all branches so return any results found
+        if not expect_set or len(results_array) == 0:
+            return None
+        return results_array
+
+
     def create_or_extend_workflow(self,run, run_id, wf=None,app_proj_id=None,test=False,template=False):
         '''
         This function will populate a workflow for the steps in run['stepsToDo'] and return 
@@ -781,23 +851,28 @@ class Launch(object):
                 appInp = steps[step]['inputs'][fileToken]
                 if fileToken in run['prevStepResults']:
                     appInputs[ appInp ] = run['prevStepResults'][fileToken]
-                elif fileToken in run['priors']:
+                else:
                     for inp_def in inp_defs:
                         if inp_def["name"] == appInp:
                             break
                     assert(inp_def["name"] == appInp)
-                    #print json.dumps(inp_def,indent=4)
-                    if inp_def["class"] == 'array:file':
-                        if isinstance(run['priors'][fileToken], list):
-                            appInputs[ appInp ] = []
-                            for fid in run['priors'][fileToken]:
-                                appInputs[ appInp ] += [ dxencode.FILES[fid] ]
+                    # Check to see if results from a previous branch (e.g. rep level pipeline) is input to the combining step
+                    expect_set = inp_def["class"] == 'array:file'
+                    prev_results = self.find_resuts_from_prev_branch(run, self.psv['reps'], fileToken, expect_set)
+                    if prev_results != None:
+                        appInputs[ appInp ] = prev_results
+                    elif fileToken in run['priors']:
+                        if inp_def["class"] == 'array:file':
+                            if isinstance(run['priors'][fileToken], list):
+                                appInputs[ appInp ] = []
+                                for fid in run['priors'][fileToken]:
+                                    appInputs[ appInp ] += [ dxencode.FILES[fid] ]
+                            else:
+                                appInputs[ appInp ] = [ dxencode.FILES[ run['priors'][fileToken] ] ]
                         else:
-                            appInputs[ appInp ] = [ dxencode.FILES[ run['priors'][fileToken] ] ]
-                    else:
-                        assert(not isinstance(run['priors'][fileToken], list))
-                        appInputs[ appInp ] = dxencode.FILES[ run['priors'][fileToken] ]
-                elif not template:
+                            assert(not isinstance(run['priors'][fileToken], list))
+                            appInputs[ appInp ] = dxencode.FILES[ run['priors'][fileToken] ]
+                if appInp not in appInputs and not template:
                     print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
                     sys.exit(1)
             # Non-file app inputs
@@ -823,16 +898,6 @@ class Launch(object):
                 else:
                     run['prevStepResults'][ fileToken ] = dxpy.dxlink({'stage': stageId, \
                                                                 'outputField': appOut })
-                # Secret sauce to tie rep results to combined inputs
-                if self.combined_reps and run_id != None and fileToken in self.FILE_GLOBS:
-                    for cstep in self.psv['stepsToDo']:
-                        for key in self.psv['steps'][cstep]['inputs'].keys():
-                            if key.lower().endswith('_' + run_id): # '_a' or '_b'
-                                if key in self.FILE_GLOBS and self.FILE_GLOBS[key] == self.FILE_GLOBS[fileToken]:
-                                    #print "combined inputs[%s] == %s %s" % (key, run['rep_tech'], fileToken)
-                                    if 'prevStepResults' not in self.psv:
-                                        self.psv['prevStepResults'] = {}
-                                    self.psv['prevStepResults'][key] = run['prevStepResults'][ fileToken ]
 
         if test:
             return None
