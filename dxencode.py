@@ -776,6 +776,13 @@ def get_exp(experiment,must_find=True,warn=False,key='default'):
     except:
         if must_find:
             print "Experiment %s not found." % experiment
+            #print response.json()
+            sys.exit(1)
+        return None
+    if exp == None or exp["status"] == "error":
+        if must_find:
+            print "Experiment %s not found." % experiment
+            print response.json()
             sys.exit(1)
         return None
 
@@ -785,7 +792,11 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     '''Looks up encoded experiment's assay_type, normalized to lower case.'''
     if exp == None:
         exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
-
+    if "assay_term_name" not in exp:
+        if must_find:
+            print "No 'assay_term_name' found for experiment %s." % experiment
+            sys.exit(1)
+        return None
     if exp["assay_term_name"] == "RNA-seq" \
     or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq":
         if exp["replicates"][0]["library"]["size_range"] == ">200":

@@ -4,7 +4,8 @@
 ### TODO:
 #   1) The creation of the workflow_run encoded object should be migrated to the launchers.
 #   2) Splashdown should update the workflow_run object if it already exists.
-#   3) Ideally, splashdown.py could poll encoded for workflow_run objects that have not completed,
+#   3) Fix support for combined_reps pipline look-up
+#   4) Ideally, splashdown.py could poll encoded for workflow_run objects that have not completed,
 #      then determine if the have finished or failed and then begin the process of posting any results that are available.
 #
 # Splashdown is meant to run outside of dnanexus and to examine experiment directories to
@@ -51,55 +52,61 @@ class Splashdown(object):
     SKIP_VALIDATE = []
     '''Some output_types cannot currently be validated, theoretically'''
 
-    #Pipeline specifications include order of steps, steps per replicate, combined steps and
-    #within steps, the output_type: file_glob that define expected results.
+    # Pipeline specifications include order of steps, steps per replicate, combined steps and
+    # within steps, the output_type: file_glob that define expected results.
+    # Note: that some steps have multiple files with the same output_type (e.g. hotspot: bed & bb). 
+    #       When this happens, key on "output_type|format|format_type": file_glob 
+    #       (e.g. "hotspot|bed|narrowPeak": "*_hotspot.bed" and "hotspot|bb|narrowPeak": "*_hotspot.bb")
+    #       TODO: This could be done more gracefully.
     PIPELINE_SPECS = {
          "long-rna-seq": {
             "step-order": [ "align-tophat","signals-top-se","signals-top-pe",
                             "align-star","signals-star-se","signals-star-pe","quant-rsem"],
             "replicate":  {
-                "align-tophat":    { "alignments":                "*_tophat.bam"                 },
-                "signals-top-se":  { "multi-read signal":         "*_tophat_all.bw",
-                                     "unique signal":             "*_tophat_uniq.bw"             },
-                "signals-top-pe":  { "multi-read minus signal":   "*_tophat_minusAll.bw",
-                                     "multi-read plus signal":    "*_tophat_plusAll.bw",
-                                     "unique minus signal":       "*_tophat_minusUniq.bw",
-                                     "unique plus signal":        "*_tophat_plusUniq.bw"         },
-                "signals-star-se": { "multi-read signal":         "*_star_genome_all.bw",
-                                     "unique signal":             "*_star_genome_uniq.bw"        },
-                "signals-star-pe": { "multi-read minus signal":   "*_star_genome_minusAll.bw",
-                                     "multi-read plus signal":    "*_star_genome_plusAll.bw",
-                                     "unique minus signal":       "*_star_genome_minusUniq.bw",
-                                     "unique plus signal":        "*_star_genome_plusUniq.bw"    },
-                "align-star":      { "alignments":                "*_star_genome.bam",
-                                     "transcriptome alignments":  "*_star_anno.bam"              },
-                "quant-rsem":      { "genome quantifications":    "*_rsem.genes.results",
-                                     "transcript quantifications":"*_rsem.isoforms.results"      }  },
+                "align-tophat":    { "alignments":                                "*_tophat.bam"                 },
+                "signals-top-se":  { "signal of multi-mapped reads":              "*_tophat_all.bw",
+                                     "signal of unique reads":                    "*_tophat_uniq.bw"             },
+                "signals-top-pe":  { "minus strand signal of multi-mapped reads": "*_tophat_minusAll.bw",
+                                     "plus strand signal of multi-mapped reads":  "*_tophat_plusAll.bw",
+                                     "minus strand signal of unique reads":       "*_tophat_minusUniq.bw",
+                                     "plus strand signal of unique reads":        "*_tophat_plusUniq.bw"         },
+                "signals-star-se": { "signal of multi-mapped reads":              "*_star_genome_all.bw",
+                                     "signal of unique reads":                    "*_star_genome_uniq.bw"        },
+                "signals-star-pe": { "minus strand signal of multi-mapped reads": "*_star_genome_minusAll.bw",
+                                     "plus strand signal of multi-mapped reads":  "*_star_genome_plusAll.bw",
+                                     "minus strand signal of unique reads":       "*_star_genome_minusUniq.bw",
+                                     "plus strand signal of unique reads":        "*_star_genome_plusUniq.bw"    },
+                "align-star":      { "alignments":                                "*_star_genome.bam",
+                                     "transcriptome alignments":                  "*_star_anno.bam"              },
+                "quant-rsem":      { "gene quantifications":                      "*_rsem.genes.results",
+                                     "transcript quantifications":                "*_rsem.isoforms.results"      }  },
             "combined":   {}
         },
         "small-rna-seq": {
             "step-order": [ "align","signals"],
             "replicate":  {
-                "align":           { "alignments":                "*_star_genome.bam"            },
-                "signals":         { "multi-read plus signal":    "*_small_plusAll.bw",
-                                     "multi-read minus signal":   "*_small_minusAll.bw",
-                                     "unique plus signal":        "*_small_plusUniq.bw",
-                                     "unique minus signal":       "*_small_minusUniq.bw"         }  },
+                "align":           { "alignments":                                "*_star_genome.bam"            },
+                "signals":         { "plus strand signal of multi-mapped reads":  "*_small_plusAll.bw",
+                                     "minus strand signal of multi-mapped reads": "*_small_minusAll.bw",
+                                     "plus strand signal of unique reads":        "*_small_plusUniq.bw",
+                                     "minus strand signal of unique reads":       "*_small_minusUniq.bw"         }  },
             "combined":   {}
         },
         "rampage": {
             "step-order": [ "align","signals","peaks","idr"],
             "replicate":  {
-                "align":           { "alignments":                "*_rampage_star_marked.bam" },
-                "signals":         { "multi-read plus signal":    "*_rampage_5p_plusAll.bw",
-                                     "multi-read minus signal":   "*_rampage_5p_minusAll.bw",
-                                     "unique plus signal":        "*_rampage_5p_plusUniq.bw",
-                                     "unique minus signal":       "*_rampage_5p_minusUniq.bw" },
-                "peaks":           { "peaks":                     "*_rampage_peaks.bb",
-                                     "sites":                     "*_rampage_peaks.gff"       } },
+                "align":           { "alignments":                                "*_rampage_star_marked.bam" },
+                "signals":         { "plus strand signal of multi-mapped reads":  "*_rampage_5p_plusAll.bw",
+                                     "minus strand signal of multi-mapped reads": "*_rampage_5p_minusAll.bw",
+                                     "plus strand signal of unique reads":        "*_rampage_5p_plusUniq.bw",
+                                     "minus strand signal of unique reads":       "*_rampage_5p_minusUniq.bw" },
+                "peaks":           { "transcription start sites|bb":              "*_rampage_peaks.bb",
+                                     "transcription start sites|bed|bed11":       "*_rampage_peaks.bed", # format_type not defined
+                                     "transcription start sites|gff|gff3":        "*_rampage_peaks.gff"       } },
             "combined":   {
-                "idr":             { "sites":                     "*_rampage_idr.gff",    # TODO: not really "sites"
-                                     "peaks":                     "*_rampage_idr.bb" }  } # TODO: not really "peaks" ?
+                "idr":             { "transcription start sites|gff|gff3":        "*_rampage_idr.gff",
+                                     "transcription start sites|bed|bed14":       "*_rampage_idr.bed", # format_type not defined
+                                     "transcription start sites|bb":              "*_rampage_idr.bb" }  }
         }
     }
 
@@ -109,12 +116,36 @@ class Splashdown(object):
     ANNOTATIONS_SUPPORTED = [ 'V19', 'M2', 'M3', 'M4' ]
     '''This module supports only these annotations.'''
 
-    FORMATS_SUPPORTED = ["bam", "bed", "bedLogR", "bed_bedLogR", "bedMethyl", "bed_bedMethyl",
-                         "bigBed", "bigWig", "broadPeak", "bed_broadPeak", "fasta", "fastq",
-                         "gtf", "idat", "narrowPeak", "bed_narrowPeak", "rcc", "CEL", "tsv", "csv" ]
-    EXTENSION_TO_FORMAT = { "bb":"bigBed", "bw":"bigWig",
-                            "fa":"fasta","fq":"fastq","results":"tsv",
-                            "gff": "gtf" }
+    FORMATS_SUPPORTED = ["bam","bed","bigBed","bigWig","fasta","fastq","gff","gtf","hdf5","idat","rcc","CEL",
+                         "tsv","csv","sam","tar","wig"]
+    FORMAT_TYPES_SUPPORTED = ["bed6","bed9","bed12","bedGraph","bedLogR","bedMethyl","broadPeak",
+                        "enhancerAssay","gappedPeak","gff2","gff3","narrowPeak" ]
+    # TODO: format types need to support rampage: tss, and idr
+    EXTENSION_TO_FORMAT = { 
+        "2bit":       "2bit",
+        "cel.gz":     "CEL",
+        "bam":        "bam",
+        "bed.gz":     "bed",     "bed":     "bed",
+        "bigBed":     "bigBed",  "bb":      "bigBed",
+        "bigWig":     "bigWig",  "bw":      "bigWig",
+        "csfasta.gz": "csfasta",
+        "csqual.gz":  "csqual",
+        "fasta.gz":   "fasta",   "fa.gz":   "fasta",  "fa": "fasta",
+        "fastq.gz":   "fastq",   "fq.gz":   "fastq",  "fq": "fastq",
+        "gff.gz":     "gff",     "gff":     "gff",
+        "gtf.gz":     "gtf",     "gtf":     "gtf",
+        "h5":         "hdf5",
+        "idat":       "idat",
+        "rcc":        "rcc",
+        "tar.gz":     "tar",     "tgz":     "tar",
+        "tsv":        "tsv",     "results": "tsv",
+        "csv":        "csv",
+        "wig.gz":     "wig",     "wig":     "wig",
+        "sam.gz":     "sam",     "sam":     "sam"
+        }
+    #EXTENSION_TO_FORMAT = { "bb":"bigBed", "bw":"bigWig",
+    #                        "fa":"fasta","fq":"fastq","results":"tsv",
+    #                        "gff": "gtf" }
     '''List of supported formats, and means of recognizing with file extensions.'''
 
     PRIMARY_INPUT_EXTENSION = [ "fastq","fq"]
@@ -545,7 +576,7 @@ class Splashdown(object):
                 elif app_name.endswith('-se'):
                     pipe_qualifiers["qualifier"] = '-se'
             if len(pipe_qualifiers["qualifier"]) == 0 and rep_tech and len(rep_tech):
-                if rep_tech.startswith("rep"):
+                if rep_tech.startswith("rep") and not rep_tech.startswith("reps"):
                     br_tr = rep_tech[3:]
                     (br,tr) = br_tr.split('_')
                     full_mapping = dxencode.get_full_mapping(self.exp_id,self.exp)
@@ -562,7 +593,7 @@ class Splashdown(object):
                             if try_rep in self.obj_cache["exp"] and "pipe_qualifiers" in self.obj_cache["exp"][try_rep]:
                                 pipe_qualifiers["qualifier"] = self.obj_cache["exp"][try_rep]["pipe_qualifiers"]["qualifier"]
             if len(pipe_qualifiers["qualifier"]) == 0:
-                print "Error: Can't determine pipeline qualifiers for '%s' replicate of '%' experiment" % \
+                print "Error: Can't determine pipeline qualifiers for '%s' replicate of '%s' experiment" % \
                                                                                     (replicate,self.exp_type)
                 sys.exit(1) 
                             
@@ -596,11 +627,11 @@ class Splashdown(object):
     def enc_analysis_step_find(self,dx_app_name,dx_app_ver,dx_app_id,pipe_name):
         '''Finds the 'analysis_step' encoded object used in creating the file.'''
         ana_step = None
-        ana_step_name = dx_app_name + '-v-' + dx_app_ver.replace('.','-')
+        ana_step_name = dx_app_name + '-v-' + '-'.join(dx_app_ver.split('.')[:-1])
         # NOTE: the special dnanexus: alias.  Because dx_ids will differ between projects, and the identical app can be
-        #       rebuilt, the dnanexus: alias will instead be the app_name and app_version!
+        #       rebuilt, the dnanexus: alias will instead be the app_name and first 2 digits of the app_version!
         #       The ana_step_name, on the otherhand, may be sanitized ('prep_star' => 'index_star')
-        # /analysis-steps/unstranded-signal-star-v-1-0-1/ or /analysis-steps/dnanexus:bam-to-bigwig-unstranded-v-1-0-1/
+        # /analysis-steps/unstranded-signal-star-v-1-0/ or /analysis-steps/dnanexus:bam-to-bigwig-unstranded-v-1-0/
         ana_step_alias = 'dnanexus:' + ana_step_name
         if ana_step_alias in self.obj_cache:
             return self.obj_cache[ana_step_alias]
@@ -639,6 +670,7 @@ class Splashdown(object):
             if wf_run:
                 self.obj_cache["exp"][wf_alias] = wf_run
                 print "  - Found workflow_run: '%s'" % wf_alias
+                # TODO: Update wf_run
         
         if wf_run == None:
             wf_run = {}
@@ -650,11 +682,6 @@ class Splashdown(object):
             wf_run['status'] = "finished"
             wf_run['pipeline'] = "/pipelines/encode:" + pipe["name"]
             wf_run["dx_analysis_id"] = dx_wfr_id
-            wf_run["dx_workflow_id"] = dx_wfr_id # TODO: remove this when schema is updated
-            # wf_run["software_version"] NO
-            # wf_run["input_files"] NO
-            # wf_run["dx_analysis_id"] NO
-            # wf_run["dx_workflow_json"] NO
 
             # Look up the actual analysis
             dx_wf = dxpy.api.analysis_describe(dx_wfr_id)
@@ -814,7 +841,10 @@ class Splashdown(object):
         '''Returns an object for submitting a file to encode, with all dx info filled in.'''
         payload = {}
         payload['dataset'] = self.exp_id
-        payload["output_type"] = out_type
+        output_format = out_type.split('|')  # comes from hard-coded json key and *may* be "output_type|format|format_type"
+        payload["output_type"] = output_format[0]  
+        if len(output_format) > 2:
+            payload["file_format_type"] = output_format[0]
 
         dx_obj = dxencode.description_from_fid(fid)
 
@@ -824,6 +854,9 @@ class Splashdown(object):
         payload["file_format"] = self.file_format(dx_obj["name"])
         if payload["file_format"] == None:
             print "Warning: file %s has unknown file format!" % dxencode.file_path_from_fid(fid)
+        if len(output_format) > 1 and payload["file_format"] != output_format[1]:
+            print "Warning: file %s has format %s but expecting %s!" % 
+                                        (dxencode.file_path_from_fid(fid),payload["file_format"], output_format[1])
         payload["derived_from"] = self.find_derived_from(fid,job, verbose)
         payload['submitted_file_name'] = dxencode.file_path_from_fid(fid,projectToo=True)
         payload['file_size'] = dx_obj["size"]
@@ -865,8 +898,6 @@ class Splashdown(object):
                 #payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
                 if "dx_analysis_id" in step_run_notes:
                     notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_analysis_id")
-                elif "dx_workflow_id" in step_run_notes:
-                    notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_workflow_id")
 
         notes["dx_project_id"] = self.proj_id
         notes["dx_project_name"] = self.proj_name
@@ -982,7 +1013,7 @@ class Splashdown(object):
             print "Working on %s..." % self.exp_id
             self.exp = dxencode.get_exp(self.exp_id,must_find=False,key=self.server_key)
             if self.exp == None or self.exp["status"] == "error":
-                print "Unable to locate experiment %s in encoded" % self.exp_id
+                print "Unable to locate experiment %s in encoded (%s)" % (self.exp_id, self.server_key)
                 continue
             self.exp_type = dxencode.get_exp_type(self.exp_id,self.exp,self.EXPERIMENT_TYPES_SUPPORTED)
             if self.exp_type == None:
