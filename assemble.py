@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # assemble.py 0.0.2
 
 import argparse,os, sys, json
@@ -97,6 +97,7 @@ class Assemble(object):
         self.genome = None
         self.annotation = None
         self.exp = {}  # Will hold the encoded exp json
+        self.full_mapping = None
         self.psv = {} # will hold pipeline specific variables.
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
@@ -220,8 +221,8 @@ class Assemble(object):
             
             
         # Must look through exp and find all replicates!
-        self.full_mapping = dxencode.get_full_mapping(exp_id,exp,key=self.server_key)
-        if self.full_mapping == None:
+        if exp != self.exp or self.full_mapping == None:
+            self.full_mapping = dxencode.get_full_mapping(exp_id,exp,key=self.server_key)
         replicates = dxencode.get_reps_from_enc(exp_id, exp=exp, full_mapping=self.full_mapping, key=self.server_key)
         for rep in replicates:
             if self.genome == None:
