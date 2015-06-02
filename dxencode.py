@@ -682,7 +682,7 @@ def is_paired_ended(experiment):
         else:
             print("Mixed mapping for replicate %s/%s" %(experiment['accession'], rep))
             print("Paired: %s" % ([ f['accession'] for f in p ]))
-            print("Unaired: %s" % ([ f['accession'] for f in up ]))
+            print("Unpaired: %s" % ([ f['accession'] for f in up ]))
             sys.exit(1)
 
     trues = len([ v for v in reps_paired.values() if v ])
@@ -882,15 +882,21 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
                 print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
                     (len(mapping['paired'], len(mapping['unpaired'])))
                 print json.dumps(mapping,indent=4)
-                sys.exit(1)
+                sys.exit(1)                
                 
             # Load read and control files, only if requested.
+            run_type = None  # The files should be consistent as all single-end or paired-end, but some mapping got it wrong
             if load_reads and rep['has_reads']:
                 rep['fastqs'] = { "1": [], "2": [] }
                 rep['controls'] = []
                 if rep['paired_end']:
                     for (p1, p2) in mapping['paired']:
                         rep['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
+                        if "run_type" in p1:
+                            if run_type == None or run_type == "single-ended":
+                                run_type = p1["run_type"]
+                            #elif run_type != p1["run_type"]:
+                            #    # Warn?
                         if p2 != None and 'paired_end' in p2:
                             rep['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
                         if 'controlled_by' in p1:
@@ -898,13 +904,20 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
                         if p2 != None and 'controlled_by' in p2:
                             rep['controls'] += p2['controlled_by']
                 else: # not rep['paired_end']:
-                    rep['fastqs']['1'] = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
+                    for f in mapping['unpaired']:
+                        rep['fastqs']['1'] = [ f['accession']+".fastq.gz" ]
+                        if "run_type" in f:
+                            if run_type == None or run_type == "single-ended":
+                                run_type = f["run_type"]
                     if 'controlled_by' in mapping['unpaired']:
                         rep['controls'] += mapping['unpaired']['controlled_by']
                 if len(rep['controls']) == 0:
                     rep['controls'] = None
             
-            
+            # One more test because of non-standard data: single-end data reporting 'paired' == 1 !
+            if rep['paired_end'] and run_type == "single-ended" and len(rep['fastqs']['2']) == 0:
+                rep['paired_end'] = False
+                
             reps.append( rep )
 
     return reps
