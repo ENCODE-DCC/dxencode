@@ -1,5 +1,5 @@
 #!/usr/bin/env python2.7
-# splashdown.py 0.0.1
+# splashdown.py 1.0.0
 #
 ### TODO:
 #   1) The creation of the workflow_run encoded object should be migrated to the launchers.
@@ -40,6 +40,10 @@ class Splashdown(object):
     a given experiment .
     '''
 
+    HELP_BANNER = "Handles splashdown of launched pipeline runs for supported experiment types. " + \
+                  "Can be run repeatedly and will only try to post result files that have not been previously posted. " 
+    ''' This help banner is displayed by get_args.'''
+
     SERVER_DEFAULT = 'test'
     '''This the default server to post files to.'''
 
@@ -49,7 +53,7 @@ class Splashdown(object):
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
 
-    SKIP_VALIDATE = []
+    SKIP_VALIDATE = {"transcription start sites":'bed'}
     '''Some output_types cannot currently be validated, theoretically'''
 
     # Pipeline specifications include order of steps, steps per replicate, combined steps and
@@ -100,13 +104,13 @@ class Splashdown(object):
                                      "minus strand signal of multi-mapped reads": "*_rampage_5p_minusAll.bw",
                                      "plus strand signal of unique reads":        "*_rampage_5p_plusUniq.bw",
                                      "minus strand signal of unique reads":       "*_rampage_5p_minusUniq.bw" },
-                "peaks":           { "transcription start sites|bb":              "*_rampage_peaks.bb",
-                                     "transcription start sites|bed|bed11":       "*_rampage_peaks.bed", # format_type not defined
-                                     "transcription start sites|gff|gff3":        "*_rampage_peaks.gff"       } },
+                "peaks":           { #"transcription start sites|gff|gff3":        "*_rampage_peaks.gff",
+                                     "transcription start sites|bed|unknown":     "*_rampage_peaks.bed", # format_type not defined
+                                     "transcription start sites|bigBed|unknown":  "*_rampage_peaks.bb" } },
             "combined":   {
-                "idr":             { "transcription start sites|gff|gff3":        "*_rampage_idr.gff",
-                                     "transcription start sites|bed|bed14":       "*_rampage_idr.bed", # format_type not defined
-                                     "transcription start sites|bb":              "*_rampage_idr.bb" }  }
+                "idr":             { #"transcription start sites|gff|gff3":        "*_idr.gff",
+                                     "transcription start sites|bed|unknown":     "*_idr.bed", # format_type not defined
+                                     "transcription start sites|bigBed|unknown":  "*_idr.bb" }  }
         }
     }
 
@@ -150,8 +154,13 @@ class Splashdown(object):
 
     PRIMARY_INPUT_EXTENSION = [ "fastq","fq"]
     '''List of file extensions used to recognize primary inputs to parse accessions.'''
-
-
+    
+    REFERENCE_EXTENSIONS = [ "tgz'", "tar","sizes", "fa", "fasta", "gtf" ]
+    '''List of file extensions used to recognize reference files  Could be a problem for gtf's!'''
+    
+    REFERERNCE_PROJECT_ID = 'project-BKbfvF00Qy5PZF5V7Gv003v7'
+    '''Simple way to recognize if a reference file is in the right project, and therefore has accessions.'''
+    
     def __init__(self):
         '''
         Splashdown expects one or more experiment ids as arguments and will find, document
@@ -172,6 +181,8 @@ class Splashdown(object):
         self.replicates = None # lost replicate folders currently found beneath experiment folder
         self.test = True # assume Test until told otherwise
         self.obj_cache = {} # certain things take time to find or create and are needed multiple times
+        self.workflow_runs_created = 0
+        self.step_runs_created = 0
         logging.basicConfig(format='%(asctime)s  %(levelname)s: %(message)s')
         dxencode.logger = logging.getLogger(__name__ + '.dxe') # I need this to avoid some errors
         dxencode.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
@@ -182,9 +193,7 @@ class Splashdown(object):
     def get_args(self):
         '''Parse the input arguments.'''
         ### PIPELINE SPECIFIC
-        ap = argparse.ArgumentParser(description="Handles splashdown of launched pipeline runs " +
-                    "for supported experiment types. Can be run repeatedly and will only try to " +
-                    "post result files that have not been previously posted. All results " +
+        ap = argparse.ArgumentParser(description=self.HELP_BANNER + "All results " +
                     "are expected to be in folder /<resultsLoc>/<experiment> and any replicate " +
                     "sub-folders named as " +
                     "<experiment>/rep<biological-replicate>_<technical-replicate>.")
@@ -216,6 +225,12 @@ class Splashdown(object):
                         action='store_true',
                         required=False)
 
+        ap.add_argument('--files',
+                        help="Just upload this number of files (default: all)",
+                        type=int,
+                        default=0,
+                        required=False)
+
         ap.add_argument('--verbose',
                         help='More debugging output.',
                         action='store_true',
@@ -240,7 +255,7 @@ class Splashdown(object):
             sub_folders = self.project.list_folder(exp_folder)['folders']
         except:
             if verbose:
-                print "No subfolders found for %s" % exp_folder
+                sys.stderr.write("No subfolders found for %s\n" % exp_folder)
             return []
 
         replicates = []
@@ -250,8 +265,8 @@ class Splashdown(object):
                 if len(folder[3:].split('_')) == 2:
                     replicates.append( folder )
         if verbose:
-            print "Replicate folders:"
-            print json.dumps(replicates,indent=4)
+            sys.stderr.write("Replicate folders:\n")
+            sys.stderr.write(json.dumps(replicates,indent=4) + '\n')
         return replicates
 
 
@@ -266,8 +281,8 @@ class Splashdown(object):
         self.annotation = None  # TODO: if appropriate, need way to determine annotation
 
         if verbose:
-            print "Pipeline specification:"
-            print json.dumps(pipeline_specs,indent=4)
+            sys.stderr.write("Pipeline specification:\n")
+            sys.stderr.write(json.dumps(pipeline_specs,indent=4) + '\n')
         return pipeline_specs
 
 
@@ -313,7 +328,7 @@ class Splashdown(object):
                 print "Error: file glob %s has unknown file format! Please fix" % file_globs[token]
                 sys.exit(1)
             if verbose:
-                print "-- Looking for %s" % (result_folder + file_globs[token])
+                sys.stderr.write("-- Looking for %s\n" % (result_folder + file_globs[token]))
             fid = dxencode.find_file(result_folder + file_globs[token],self.proj_id, recurse=False)
             if fid != None:
                 step_files.append( (token,rep_tech,fid) )
@@ -344,8 +359,8 @@ class Splashdown(object):
                  expected.extend(step_files) # keep them in order!
 
         if verbose:
-            print "Expected files:"
-            print json.dumps(expected,indent=4)
+            sys.stderr.write("Expected files:\n")
+            sys.stderr.write(json.dumps(expected,indent=4) + '\n')
         return expected
 
 
@@ -406,8 +421,8 @@ class Splashdown(object):
                 self.found[fid] = f_obj
 
         if verbose:
-            print "Needed files:"
-            print json.dumps(needed,indent=4)
+            sys.stderr.write("Needed files:\n")
+            sys.stderr.write(json.dumps(needed,indent=4) + '\n')
         return needed
 
     def find_sw_versions(self,dxFile,dx_app=False,verbose=False):
@@ -437,9 +452,8 @@ class Splashdown(object):
             sw_versions = dxencode.get_sw_from_log(dxFile, regoop) # * STAR version: 2.4.0k
             
         if verbose:
-            print "sw_versions: "
-            #print dxFile
-            print json.dumps(sw_versions,indent=4)
+            sys.stderr.write("sw_versions:\n")
+            sys.stderr.write(json.dumps(sw_versions,indent=4) + '\n')
         return sw_versions
 
     def find_app_version(self,dxFile,verbose=False):
@@ -452,17 +466,18 @@ class Splashdown(object):
         if sw_versions != None:
             app_version =  sw_versions["software_versions"][0]
         if verbose:
-            print "app_version: "
-            print json.dumps(app_version,indent=4)
+            sys.stderr.write("app_version:\n")
+            sys.stderr.write(json.dumps(app_version,indent=4) + '\n')
         return app_version
         
     def find_derived_from(self,fid,job,verbose=False):
         '''Returns list of accessions a file is drived from based upon job inouts.'''
-        derived_from = []
-        for input in job["input"].values():
-            if not type(input) == dict:
+        input_accessions = []
+        input_file_count = 0
+        for inp in job["input"].values():
+            if not type(inp) == dict:
                 continue # not a file input
-            dxlink = input.get("$dnanexus_link")
+            dxlink = inp.get("$dnanexus_link")
             if dxlink == None:
                 continue
             if not type(dxlink) == dict:
@@ -470,28 +485,63 @@ class Splashdown(object):
             else:
                 inp_fid = dxlink.get("id")
             inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
+            input_file_count += 1
+            if verbose: # NOTE: verbose can help find the missing accessions
+                sys.stderr.write("* derived from: " + inp_fid + " " + inp_obj["project"] + ":" + \
+                                                                        dxencode.file_path_from_fid(inp_fid) + '\n')
             if inp_obj != None:
                 self.genome = self.find_genome_annotation(inp_obj)
                 acc_key = dxencode.dx_property_accesion_key(self.server)
-                if "properties" in inp_obj and acc_key in inp_obj["properties"]:
-                    # older runs don't have
-                    accession = inp_obj["properties"][acc_key]
-                    if accession.startswith(self.acc_prefix) and len(accession) == 11:
-                        derived_from.append(accession)
-                else: # if file name is primary input (fastq) and is named as an accession
+                accession = None
+                if "properties" in inp_obj:
+                    if acc_key not in inp_obj["properties"] and self.server_key != 'www':   # test, beta replicated from www
+                        acc_key = dxencode.dx_property_accesion_key('https://www.encodeproject.org')
+                    if verbose:
+                        sys.stderr.write("Input file properties... looking for '"+acc_key+"'\n") 
+                        sys.stderr.write(json.dumps(inp_obj["properties"],indent=4) + '\n')
+                    if acc_key in inp_obj["properties"]:
+                        # older runs don't have accession in properties
+                        accession = inp_obj["properties"][acc_key]
+                        input_accessions.append(accession)
+                if accession == None:
+                    parts = inp_obj["name"].split('.')
+                    ext = parts[-1]
+                    if ext in ["gz","tgz"]:
+                        ext = parts[-2]
+                    if ext in self.REFERENCE_EXTENSIONS and inp_obj["project"] != self.REFERERNCE_PROJECT_ID:  
+                        # FIXME: if regular file extension is the same as ref extension, then trouble!
+                        print "Reference file (ext: '"+ext+"') in non-ref project: " + inp_obj["project"]
+                        sys.exit(0)
+                    # if file name is primary input (fastq) and is named as an accession
                     if inp_obj["name"].startswith("ENCFF"): # Not test version 'TSTFF'!
-                        parts = inp_obj["name"].split('.')
-                        ext = parts[-1]
-                        if ext in ["gz","tgz"]:
-                            ext = parts[-2]
-                        if ext in self.PRIMARY_INPUT_EXTENSION:
+                        if ext in self.PRIMARY_INPUT_EXTENSION or self.test:
                             root = parts[0]
                             for acc in root.split('_'): #usually only one
-                                if acc.startswith("ENCFF") and len(acc) == 11:
-                                    derived_from.append(acc)
+                                if acc.startswith("ENCFF"):
+                                    if len(acc) == 11:
+                                        input_accessions.append(acc)
+                                    elif '-' in acc:
+                                        for acc_part in acc.split('-'):
+                                            if acc_part.startswith("ENCFF") and len(acc_part) == 11:
+                                                input_accessions.append(acc_part)
+        if len(input_accessions) < input_file_count:
+            if self.test:
+                print "WARNING: not all input files are accounted for in 'derived_from'!"
+                print json.dumps(input_accessions,indent=4)
+            else:
+                print "ERROR: not all input files are accounted for in 'derived_from'!"
+                sys.exit(1)  # TODO: determine if this is appropriate
+        
+        # Now that we have the full derived_from, we can remove some         
+        # UGLY special cases:
+        derived_from = []
+        for acc in input_accessions:
+            if not acc.endswith("chrom.sizes"):  # Chrom.sizes is just a bit too much info
+                derived_from.append(acc)
+        
         if verbose:
-            print "Derived files: for " + dxencode.file_path_from_fid(fid)
-            print json.dumps(derived_from,indent=4)
+            sys.stderr.write("Derived files: for " + dxencode.file_path_from_fid(fid) + '\n')
+            sys.stderr.write(json.dumps(derived_from,indent=4) + '\n')
         return derived_from
 
 
@@ -509,8 +559,8 @@ class Splashdown(object):
             obj['replicate'] = mapping['replicate_id']
 
         if verbose:
-            print "After adding encoded info:"
-            print json.dumps(obj,indent=4)
+            sys.stderr.write("After adding encoded info:\n")
+            sys.stderr.write(json.dumps(obj,indent=4) + '\n')
         return obj
 
 
@@ -548,16 +598,21 @@ class Splashdown(object):
             qc_metrics = qc_for_job
                     
         if qc_metrics and verbose:
-            print "qc_metrics:"
-            print json.dumps(qc_metrics,indent=4)
+            sys.stderr.write("qc_metrics:\n")
+            sys.stderr.write(json.dumps(qc_metrics,indent=4) + '\n')
             
         return qc_metrics
         
 
     def pipeline_qualifiers(self,rep_tech,app_name=None):
         '''Determines and pipeline_qualifiers in ugly special-case code.'''
+        #if app_name != None:
+        #    print "Looking for pipe_qualifiers for '"+rep_tech+"' and '"+app_name+"'" # FIXME: debug
+        #else:
+        #    print "Looking for pipe_qualifiers for '"+rep_tech+"'" # FIXME: debug
         if "exp" in self.obj_cache and rep_tech in self.obj_cache["exp"] \
         and "pipe_qualifiers" in self.obj_cache["exp"][rep_tech]:
+            #print "FOUND cached pipeline_qualifiers" # FIXME: debug
             return self.obj_cache["exp"][rep_tech]["pipe_qualifiers"]
         #if "exp" in self.obj_cache and pipe_qualifiers in self.obj_cache["exp"]:
         #    return self.obj_cache["exp"]["pipe_qualifiers"]
@@ -569,7 +624,6 @@ class Splashdown(object):
 
         pipe_qualifiers["qualifier"] = ''
         if self.exp_type.startswith('long-rna-seq'): # FIXME: ugly special case
-            #pipe_qualifiers["qualifier"] = '-unknown'
             if app_name and len(app_name):
                 if app_name.endswith('-pe'):
                     pipe_qualifiers["qualifier"] = '-pe'
@@ -592,11 +646,14 @@ class Splashdown(object):
                         for try_rep in  ["rep1_1","rep2_1","rep1_2","rep2_2"]:
                             if try_rep in self.obj_cache["exp"] and "pipe_qualifiers" in self.obj_cache["exp"][try_rep]:
                                 pipe_qualifiers["qualifier"] = self.obj_cache["exp"][try_rep]["pipe_qualifiers"]["qualifier"]
-            if len(pipe_qualifiers["qualifier"]) == 0:
-                print "Error: Can't determine pipeline qualifiers for '%s' replicate of '%s' experiment" % \
-                                                                                    (replicate,self.exp_type)
-                sys.exit(1) 
+        elif self.exp_type.startswith('small-rna-seq'): # FIXME: ugly special case
+            pipe_qualifiers["qualifier"] = '-se'
+        elif self.exp_type.startswith('rampage'): # FIXME: ugly special case
+            pipe_qualifiers["qualifier"] = '-pe'
                             
+        if len(pipe_qualifiers["qualifier"]) == 0:
+            print "Error: Can't determine pipeline qualifiers for '%s' replicate of '%s' experiment" % \
+                                                                                (replicate,self.exp_type)
         if "exp" not in self.obj_cache:
              self.obj_cache["exp"] = {}
         if rep_tech not in self.obj_cache["exp"]:
@@ -619,6 +676,7 @@ class Splashdown(object):
             return self.obj_cache[pipe_alias]
         pipe = self.enc_lookup_json( 'pipelines/' + pipe_alias,must_find=True)
         if pipe:
+            # TODO: Should look for status 'active' and compare that analysis_step is in pipeline['analysis_steps'] list
             self.obj_cache[pipe_alias] = pipe
             print "  - Found pipeline: '%s'" % pipe_alias
         return pipe
@@ -628,6 +686,7 @@ class Splashdown(object):
         '''Finds the 'analysis_step' encoded object used in creating the file.'''
         ana_step = None
         ana_step_name = dx_app_name + '-v-' + '-'.join(dx_app_ver.split('.')[:-1])
+        
         # NOTE: the special dnanexus: alias.  Because dx_ids will differ between projects, and the identical app can be
         #       rebuilt, the dnanexus: alias will instead be the app_name and first 2 digits of the app_version!
         #       The ana_step_name, on the otherhand, may be sanitized ('prep_star' => 'index_star')
@@ -641,20 +700,6 @@ class Splashdown(object):
         if ana_step:
             self.obj_cache[ana_step_alias] = ana_step
             print "  - Found ananlsys_step: '%s'" % ana_step_alias
-        # Could attempt to create analysis-step
-        #if not ana_step:  
-        #    ana_step = {}
-        #    ana_step['aliases'] = [ ana_step_alias  ]
-        #    ana_step['name'] = ana_step_name  
-        #    ana_step['pipeline'] = "/pipelines/encode:" + pipe_name
-        #    #ana_step["pipeline"] = pipe
-        #
-        #    # Shoe-horn in:
-        #    notes = {}
-        #    notes['dx_app_name'] = dx_app_name
-        #    notes['dx_app_ver'] = dx_app_ver
-        #    ana_step["notes"] = json.dumps(notes)
-        #    #    ana_step = dxencode.encoded_post_obj('analysis-step-run',ana_step, self.server, self.authid, self.authpw)
         return ana_step
 
 
@@ -676,6 +721,7 @@ class Splashdown(object):
             wf_run = {}
             
             # Lookup pipeline as: /pipelines/encode:long-rna-seq-se-pipeline-2
+            # TODO: Should look for status 'active' and compare that analysis_step is in pipeline['analysis_steps'] list
             pipe = self.enc_pipeline_find(self.exp_type,rep_tech)
             
             wf_run['aliases'] = [ wf_alias ]
@@ -706,7 +752,7 @@ class Splashdown(object):
             # Now post this new object
             self.obj_cache["exp"][wf_alias] = wf_run
             if test:
-                print "  - Would post workflow_run: '%s'" % wf_alias
+                print "  * Would post workflow_run: '%s'" % wf_alias
             else:
                 try:
                     #wf_run["@type"] = ["item", "workflow_run"]
@@ -714,12 +760,12 @@ class Splashdown(object):
                 except:
                     print "Failed to post workflow_run: '%s'" % wf_alias
                     sys.exit(1)
-                print "  - Posted workflow_run: '%s'" % wf_alias
-                #sys.exit(1)  # TEST one case!
+                print "  * Posted workflow_run: '%s'" % wf_alias
+                self.workflow_runs_created += 1
             
         if verbose:
-            print "ENCODEd 'workflow_run':"
-            print json.dumps(wf_run,indent=4)
+            sys.stderr.write("ENCODEd 'workflow_run':\n")
+            sys.stderr.write(json.dumps(wf_run,indent=4) + '\n')
             if "notes" in wf_run:
                 wf_run_notes = json.loads(wf_run.get("notes"))
                 print "ENCODEd 'workflow_run[notes]':"
@@ -761,12 +807,15 @@ class Splashdown(object):
             
             # Find analysis_step
             dx_app_id = job.get('applet')
-            #dx_app_ver = dxencode.get_sw_from_log(dxFile, '\* Running:\s(\S+)\s+\S*\[(\S+)\]') # * Running: align-star-pe.sh [v2.0.0]
             dx_app_ver = self.find_app_version(dxFile)
             if dx_app_ver and 'version' in dx_app_ver:
                 dx_app_ver = str( dx_app_ver.get('version') )
                 if dx_app_ver[0] == 'v':
                     dx_app_ver = dx_app_ver[1:]
+            # FIXME: UGLY temporary special case!!!
+            if dx_app_name  == "rampage-peaks" and dx_app_ver == "1.0.1":
+                dx_app_version = "1.1.0"  # Because the version was supposed to bump the second digit if a tool changes.
+            # FIXME: UGLY temporary special case!!!
             if not dx_app_ver or not isinstance(dx_app_ver, str) or len(dx_app_ver) == 0:
                 print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
                 sys.exit(0)
@@ -816,7 +865,7 @@ class Splashdown(object):
             # Now post this new object
             self.obj_cache["exp"][step_alias] = step_run
             if test:
-                print "  - Would post step_run: '%s'" % step_alias
+                print "  * Would post step_run: '%s'" % step_alias
             else:
                 try:
                     #step_run["@type"] = ["item", "analysis_step_run"]
@@ -824,16 +873,16 @@ class Splashdown(object):
                 except:
                     print "Failed to post step_run: '%s'" % step_alias
                     sys.exit(1)
-                print "  - Posted step_run: '%s'" % step_alias
-                #sys.exit(1)  # TEST one case!
+                print "  * Posted step_run: '%s'" % step_alias
+                self.step_runs_created += 1
 
         if step_run and verbose:
-            print "ENCODEd 'analysis_step_run':"
-            print json.dumps(step_run,indent=4)
+            sys.stderr.write("ENCODEd 'analysis_step_run':\n")
+            sys.stderr.write(json.dumps(step_run,indent=4) + '\n')
             if "notes" in step_run:
                 step_run_notes = json.loads(step_run.get("notes"))
-                print "ENCODEd 'analysis_step_run[notes]':"
-                print json.dumps(step_run_notes,indent=4)
+                sys.stderr.write("ENCODEd 'analysis_step_run[notes]':\n")
+                sys.stderr.write(json.dumps(step_run_notes,indent=4) + '\n')
         return step_run
         
         
@@ -844,7 +893,7 @@ class Splashdown(object):
         output_format = out_type.split('|')  # comes from hard-coded json key and *may* be "output_type|format|format_type"
         payload["output_type"] = output_format[0]  
         if len(output_format) > 2:
-            payload["file_format_type"] = output_format[0]
+            payload["file_format_type"] = output_format[2]
 
         dx_obj = dxencode.description_from_fid(fid)
 
@@ -855,7 +904,7 @@ class Splashdown(object):
         if payload["file_format"] == None:
             print "Warning: file %s has unknown file format!" % dxencode.file_path_from_fid(fid)
         if len(output_format) > 1 and payload["file_format"] != output_format[1]:
-            print "Warning: file %s has format %s but expecting %s!" % 
+            print "Warning: file %s has format %s but expecting %s!" % \
                                         (dxencode.file_path_from_fid(fid),payload["file_format"], output_format[1])
         payload["derived_from"] = self.find_derived_from(fid,job, verbose)
         payload['submitted_file_name'] = dxencode.file_path_from_fid(fid,projectToo=True)
@@ -886,13 +935,27 @@ class Splashdown(object):
         payload = self.add_encoded_info(payload,rep_tech,fid)
 
         # Find or create step_run object
+        
         step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=self.test,verbose=verbose)
         #step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=False,verbose=verbose)
         if step_run:
             if "dx_applet_details" in step_run:
                 payload["step_run"] = "/analysis-step-runs/dnanexus:" + step_run["dx_applet_details"][0].get("dx_job_id")
+            elif 'aliases' in step_run and len(step_run['aliases']) == 1:
+                payload["step_run"] = "/analysis-step-runs/" + step_run.get('aliases')[0]
+            elif '@id' in step_run:
+                payload["step_run"] = step_run.get('@id')
+            #else: # What?
             if "notes" in step_run:
                 step_run_notes = json.loads(step_run.get("notes"))
+                # FIXME: UGLY special case
+                # Nathan rev'd call_peaks.py but not the --version.
+                if step_run_notes["dx_app_name"] == "rampage-peaks" and step_run_notes['dx_app_version'] == "1.1.0":
+                    if "software_versions" in notes:
+                        for tool in notes["software_versions"]:
+                            if tool["software"] == "call_peaks (grit)" and tool["version"] == "2.0.3":
+                                tool["version"] == "2.0.4"
+                # FIXME: UGLY special case
                 # analysis_step and pipeline are calculated properties.
                 #payload["analysis_step"] = "/analysis-steps/" + step_run_notes.get("step_name")
                 #payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
@@ -904,10 +967,10 @@ class Splashdown(object):
         payload['notes'] = json.dumps(notes)
         
         if verbose:
-            print "payload:"
-            print json.dumps(payload,indent=4)
-            print "payload[notes]:"
-            print json.dumps(notes,indent=4)
+            sys.stderr.write("payload:\n)")
+            sys.stderr.write(json.dumps(payload,indent=4) + '\n')
+            sys.stderr.write("payload[notes]:\n")
+            sys.stderr.write(json.dumps(notes,indent=4) + '\n')
         return payload
 
 
@@ -924,17 +987,19 @@ class Splashdown(object):
             print "  - Flagged   %s with %s='%s'" % (path,acc_key,accession)
 
 
-    def can_skip_validation(self,exp_type,output_type,test=True):
+    def can_skip_validation(self,exp_type,payload,test=True):
         '''Returns True if validation can be skipped.'''
         if exp_type.startswith("long-rna-seq"):
             return True
-        return (output_type in self.SKIP_VALIDATE)
+        if payload["output_type"] in self.SKIP_VALIDATE.keys():
+            return (self.SKIP_VALIDATE[payload["output_type"]] == payload["file_format"])
+        return False
 
     def file_post(self,fid,payload,test=True):
         '''Posts a file to encoded.'''
         path = payload['submitted_file_name'].split(':')[1]
         derived_count = len(payload["derived_from"])
-        skip_validate = self.can_skip_validation(self.exp_type,payload["output_type"])
+        skip_validate = self.can_skip_validation(self.exp_type,payload)
         job_name = "Post "+path+" to "+self.server_key
         if not skip_validate:
             job_name = job_name + " (must validate)"
@@ -1011,7 +1076,7 @@ class Splashdown(object):
             self.obj_cache["exp"] = {}  # clear exp cache, which will hold exp specific wf_run and step_run objects
             # 1) Lookup experiment type from encoded, based on accession
             print "Working on %s..." % self.exp_id
-            self.exp = dxencode.get_exp(self.exp_id,must_find=False,key=self.server_key)
+            self.exp = dxencode.get_exp(self.exp_id,must_find=True,key=self.server_key)
             if self.exp == None or self.exp["status"] == "error":
                 print "Unable to locate experiment %s in encoded (%s)" % (self.exp_id, self.server_key)
                 continue
@@ -1077,8 +1142,9 @@ class Splashdown(object):
                     
                 self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
 
-                #if file_count >= 1:  # Short circuit for test
-                #    break
+                if args.files != 0 and file_count >= args.files:  # Short circuit for test
+                    print "- Just trying %d file(s) by request" % file_count
+                    break
 
             print "- For %s Processed %d file(s), posted %s" % \
                                                         (self.exp_id, file_count, post_count)

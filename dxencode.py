@@ -168,6 +168,34 @@ def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
     return item
 
 
+def encoded_patch_obj(obj_id, obj_meta, SERVER, AUTHID, AUTHPW):
+    ''' Patches a json object of a given type to the encoded database. '''
+    #HEADERS = { 'Content-type': 'application/json' }
+    HEADERS = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+    }
+    r = requests.patch(
+        SERVER + obj_id,
+        auth=(AUTHID, AUTHPW),
+        data=json.dumps(obj_meta),
+        headers=HEADERS,
+    )
+    try:
+        r.raise_for_status()
+    except:
+	    #if not r.status_code == 200:
+		#    print >> sys.stderr, r.text
+        logger.error('Patch of %s failed: %s %s' % (obj_id, r.status_code, r.reason))
+        logger.error(r.text)
+        raise
+	#return r.json()
+    item = r.json()['@graph'][0]
+    #print "* request to patch %s to %s..." % (obj_id,SERVER)
+    #print json.dumps(item, indent=4, sort_keys=True)
+    return item
+           
+
 def encoded_get(url, AUTHID=None, AUTHPW=None):
     ''' executes GET on Encoded server without without authz '''
     ##TODO possibly add try/except looking for non 4xx?
@@ -776,7 +804,8 @@ def get_exp(experiment,must_find=True,warn=False,key='default'):
     except:
         if must_find:
             print "Experiment %s not found." % experiment
-            #print response.json()
+            print "Auth %s %s may not be valid for %s." % (AUTHID, AUTHPW, url)
+            #print response #.json()
             sys.exit(1)
         return None
     if exp == None or exp["status"] == "error":
