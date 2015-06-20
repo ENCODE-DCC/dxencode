@@ -190,7 +190,7 @@ class Splashdown(object):
 
 
 
-    def get_args(self):
+    def get_args(self,parse=True):
         '''Parse the input arguments.'''
         ### PIPELINE SPECIFIC
         ap = argparse.ArgumentParser(description=self.HELP_BANNER + "All results " +
@@ -245,7 +245,10 @@ class Splashdown(object):
                         action='store_true',
                         required=False)
 
-        return ap.parse_args()
+        if parse:
+            return ap.parse_args()
+        else:
+            return ap
 
 
     def find_replicate_folders(self,exp_folder,verbose=False):
@@ -491,6 +494,7 @@ class Splashdown(object):
                                                                         dxencode.file_path_from_fid(inp_fid) + '\n')
             if inp_obj != None:
                 self.genome = self.find_genome_annotation(inp_obj)
+                #acc_key = dxencode.dx_property_accesion_key('https://www.encodeproject.org')
                 acc_key = dxencode.dx_property_accesion_key(self.server)
                 accession = None
                 if "properties" in inp_obj:
@@ -699,7 +703,7 @@ class Splashdown(object):
             ana_step = self.enc_lookup_json( 'analysis-steps/' + ana_step_alias,must_find=True)
         if ana_step:
             self.obj_cache[ana_step_alias] = ana_step
-            print "  - Found ananlsys_step: '%s'" % ana_step_alias
+            print "  - Found analysis_step: '%s'" % ana_step_alias
         return ana_step
 
 

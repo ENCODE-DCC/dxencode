@@ -35,7 +35,18 @@ class Recovery(Splashdown):
     def __init__(self):
         Splashdown.__init__(self)
         self.step_runs_patched = 0
+        self.exp_files = None
         
+    def get_args(self):
+        '''Parse the input arguments.'''
+        ap = Splashdown.get_args(self,parse=False)
+        
+        ap.add_argument('--start_at',
+                        help="Start processing with this file accession.",
+                        default=None,
+                        required=False)
+        return ap.parse_args()
+
     def find_in_encode_old_way(self,fid,exp_files,verbose=False):
         '''Looks for file in encode with the same submitted file name as the fid has.'''
         file_path = dxencode.file_path_from_fid(fid,projectToo=True)
@@ -72,8 +83,8 @@ class Recovery(Splashdown):
         '''Returns the tuple list of files already posted to ENCODE.'''
         
         # get all files associated with the experiment up front, just in case it is needed:
-        exp_files = dxencode.get_enc_exp_files(self.exp,key=self.server_key)
-        if len(exp_files) == 0:
+        self.exp_files = dxencode.get_enc_exp_files(self.exp,key=self.server_key)
+        if len(self.exp_files) == 0:
             print "* ERROR: found no files associated with experiment: " + self.exp_id
 
         posted = []
@@ -150,7 +161,7 @@ class Recovery(Splashdown):
                     sys.stderr.write("* DEBUG   Not found by alias: dnanexus:" + fid + '\n')
 
             # Check the old fashion method of file name and size.
-            f_obj =  self.find_in_encode_old_way(fid,exp_files) 
+            f_obj =  self.find_in_encode_old_way(fid,self.exp_files) 
             if f_obj != None:
                 posted.append( (out_type,rep_tech,fid) )
                 self.found[fid] = f_obj
@@ -170,32 +181,119 @@ class Recovery(Splashdown):
                 continue
             if verbose:
                 sys.stderr.write("* DEBUG   Not Found the old fashion way.\nVERBOSE...\n")
-                f_obj =  self.find_in_encode_old_way(fid,exp_files,verbose=True) 
+                f_obj =  self.find_in_encode_old_way(fid,self.exp_files,verbose=True) 
 
         if verbose:
             sys.stderr.write("Posted files:" + '\n')
             sys.stderr.write(json.dumps(posted,indent=4) + '\n')
         return posted
 
-    #def enc_analysis_step_find(self,dx_app_name,dx_app_ver,dx_app_id,pipe_name):
-    #    '''Finds the 'analysis_step' encoded object used in creating the file.'''
-    #    ana_step = None
-    #    ana_step_name = dx_app_name + '-v-' + '-'.join(dx_app_ver.split('.')[:-1])
-    #    
-    #    # NOTE: the special dnanexus: alias.  Because dx_ids will differ between projects, and the identical app can be
-    #    #       rebuilt, the dnanexus: alias will instead be the app_name and first 2 digits of the app_version!
-    #    #       The ana_step_name, on the otherhand, may be sanitized ('prep_star' => 'index_star')
-    #    # /analysis-steps/unstranded-signal-star-v-1-0/ or /analysis-steps/dnanexus:bam-to-bigwig-unstranded-v-1-0/
-    #    ana_step_alias = 'dnanexus:' + ana_step_name
-    #    if ana_step_alias in self.obj_cache:
-    #        return self.obj_cache[ana_step_alias]
-    #    ana_step = self.enc_lookup_json( 'analysis-steps/' + ana_step_name,must_find=False)
-    #    if not ana_step:
-    #        ana_step = self.enc_lookup_json( 'analysis-steps/' + ana_step_alias,must_find=False)
-    #    if ana_step:
-    #        self.obj_cache[ana_step_alias] = ana_step
-    #        print "  - Found ananlsys_step: '%s'" % ana_step_alias
-    #    return ana_step
+    def find_derived_from(self,fid,job,verbose=False):
+        '''Returns list of accessions a file is drived from based upon job inouts.'''
+        input_accessions = []
+        input_file_count = 0
+        #verbose=True
+        for inp in job["input"].values():
+            if not type(inp) == dict:
+                continue # not a file input
+            dxlink = inp.get("$dnanexus_link")
+            if dxlink == None:
+                continue
+            if not type(dxlink) == dict:
+                inp_fid = dxlink
+            else:
+                inp_fid = dxlink.get("id")
+            inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
+            input_file_count += 1
+            if verbose: # NOTE: verbose can help find the missing accessions
+                sys.stderr.write("* derived from: " + inp_fid + " " + inp_obj["project"] + ":" + \
+                                                                        dxencode.file_path_from_fid(inp_fid) + '\n')
+            if inp_obj != None:
+                self.genome = self.find_genome_annotation(inp_obj)
+                acc_key = dxencode.dx_property_accesion_key('https://www.encodeproject.org') # Prefer production accession
+                accession = None
+                if "properties" in inp_obj:
+                    #if acc_key not in inp_obj["properties"] and self.server_key != 'www':   # test, beta replicated from www
+                    #    acc_key = dxencode.dx_property_accesion_key(self.server)
+                    #    #acc_key = dxencode.dx_property_accesion_key('https://www.encodeproject.org')
+                    if verbose:
+                        sys.stderr.write("Input file properties... looking for '"+acc_key+"'\n") 
+                        sys.stderr.write(json.dumps(inp_obj["properties"],indent=4) + '\n')
+                    # older runs don't have accession in properties
+                    if acc_key in inp_obj["properties"]:
+                        accession = inp_obj["properties"][acc_key]
+                        # Must check if file exists!!
+                        file_obj = self.enc_lookup_json( 'files/' + accession,must_find=False)
+                        if file_obj == None:
+                            accession = None
+                        else:
+                            input_accessions.append(accession)
+                    if accession == None and self.server_key != 'www':
+                        acc_key = dxencode.dx_property_accesion_key(self.server)  # demote to server's accession
+                        if verbose:
+                            sys.stderr.write("Now looking for '"+acc_key+"'\n") 
+                        if acc_key in inp_obj["properties"]:
+                            accession = inp_obj["properties"][acc_key]
+                            # Must check if file exists!!
+                            file_obj = self.enc_lookup_json( 'files/' + accession,must_find=False)
+                            if file_obj == None:
+                                accession = None
+                            else:
+                                input_accessions.append(accession)
+                if accession == None:
+                    if verbose:
+                        sys.stderr.write("Accession not found in properties or not in ENCODEd.\n") 
+                    parts = inp_obj["name"].split('.')
+                    ext = parts[-1]
+                    if ext in ["gz","tgz"]:
+                        ext = parts[-2]
+                    if ext in self.REFERENCE_EXTENSIONS and inp_obj["project"] != self.REFERERNCE_PROJECT_ID:  
+                        # FIXME: if regular file extension is the same as ref extension, then trouble!
+                        print "Reference file (ext: '"+ext+"') in non-ref project: " + inp_obj["project"]
+                        sys.exit(0)
+                    # if file name is primary input (fastq) and is named as an accession
+                    if inp_obj["name"].startswith("ENCFF"): # Not test version 'TSTFF'!
+                        if ext in self.PRIMARY_INPUT_EXTENSION or self.test:
+                            root = parts[0]
+                            for acc in root.split('_'): #usually only one
+                                if acc.startswith("ENCFF"):
+                                    if len(acc) == 11:
+                                        accession = acc
+                                        input_accessions.append(accession)
+                                    elif '-' in acc:
+                                        for acc_part in acc.split('-'):
+                                            if acc_part.startswith("ENCFF") and len(acc_part) == 11:
+                                                accession = acc_part
+                                                input_accessions.append(accession)
+                if accession == None:
+                    # If all else fails, try the old fashion way
+                    if verbose:
+                        sys.stderr.write("Accession still not found.  Trying the old fashion way.\n") 
+                    f_obj =  self.find_in_encode_old_way(inp_fid,self.exp_files)
+                    if f_obj != None and "accession" in f_obj:
+                        accession = f_obj["accession"]
+                        input_accessions.append(accession)
+
+        if len(input_accessions) < input_file_count:
+            if self.test:
+                print "WARNING: not all input files are accounted for in 'derived_from'!"
+                print json.dumps(input_accessions,indent=4)
+            else:
+                print "ERROR: not all input files are accounted for in 'derived_from'!"
+                print json.dumps(input_accessions,indent=4)
+                sys.exit(1)  # TODO: determine if this is appropriate
+        
+        # Now that we have the full derived_from, we can remove some         
+        # UGLY special cases:
+        derived_from = []
+        for acc in input_accessions:
+            if not acc.endswith("chrom.sizes"):  # Chrom.sizes is just a bit too much info
+                derived_from.append(acc)
+        
+        if verbose:
+            sys.stderr.write("Derived files: for " + dxencode.file_path_from_fid(fid) + '\n')
+            sys.stderr.write(json.dumps(derived_from,indent=4) + '\n')
+        return derived_from
 
 
     def pipeline_qualifiers(self,rep_tech,app_name=None):
@@ -306,7 +404,7 @@ class Recovery(Splashdown):
                         break
                 if patch_wf:
                     print "  + Need to update step_run['workflow_run'] new: '"+dx_wfr_id+"'"
-                    print json.dumps(enc_wf['aliases'],indent=4,sort_keys=True)
+                    #print json.dumps(enc_wf['aliases'],indent=4,sort_keys=True)
                     #print json.dumps(enc_wf,indent=4,sort_keys=True)
                     #enc_wf['aliases'].append("/workflow-runs/dnanexus:" + dx_wfr_id)
                     #step_run["workflow_run"] = "/workflow-runs/dnanexus:" + dx_wfr_id
@@ -339,10 +437,10 @@ class Recovery(Splashdown):
             step = step_run['analysis_step']
             if 'name' not in step or step['name'] != ana_step['name']:
                 print "  + Need to update step_run['step'] new: '"+ana_step['name']+"'"
-                if 'name' in step:
-                    print "    enc: '"+step['name']+"'"
-                else:
-                    print json.dumps(step,indent=4,sort_keys=True)
+                #if 'name' in step:
+                #    print "    enc: '"+step['name']+"'"
+                #else:
+                #    print json.dumps(step,indent=4,sort_keys=True)
                 step_run['analysis_step'] = "/analysis-steps/" + ana_step['name']
                 update_step_run['analysis_step'] = "/analysis-steps/" + ana_step['name']
                 patch_required = True
@@ -524,7 +622,7 @@ class Recovery(Splashdown):
         else:
             lab = enc_file.get('lab')
             if '@id' not in lab or lab['@id'] != payload['lab']:
-                print "  + Need to update 'lab' new: new:'"+payload['lab']+"'"
+                print "  + Need to update 'lab' new: '"+payload['lab']+"'"
                 print json.dumps(lab,indent=4,sort_keys=True)
                 update_payload['lab'] = payload['lab']
                 patch_required = True
@@ -534,17 +632,10 @@ class Recovery(Splashdown):
             print "  + Need to update missing 'award' new: '"+payload['award']+"'"
             update_payload['award'] = payload['award']
             patch_required = True
-        elif enc_file.get('award') != payload['award']:
-            print "  + Need to update 'award' new: new:'"+payload['award']+"'"
+        elif enc_file['award'] != payload['award']:
+            print "  + Need to update 'award' new: '"+payload['award']+"'  enc: '"+enc_file['award']+"'"
             update_payload['award'] = payload['award']
             patch_required = True
-        #else:
-        #    award = enc_file.get('award')
-        #    if '@id' not in award or award['@id'] != payload['award']:
-        #        print "  + Need to update 'award' new: new:'"+payload['award']+"'"
-        #        print json.dumps(award,indent=4,sort_keys=True)
-        #        update_payload['award'] = payload['award']
-        #        patch_required = True
 
         if patch_required:
             update_payload['notes'] = payload['notes'] # Only update notes if other things update, then always update notes
@@ -643,7 +734,15 @@ class Recovery(Splashdown):
                 sys.stdout.flush() # Slow running job should flush to piped log
                 # a) discover all necessary dx information needed for post.
                 # b) gather any other information necessary from dx and encoded.
-                print "  Handle file %s" % dxencode.file_path_from_fid(fid)
+                accession = self.found[fid]['accession']
+                if args.start_at != None:
+                    if accession != args.start_at:
+                        continue
+                    else:
+                        print "- Starting at %s" % (accession)
+                        args.start_at = None
+                    
+                print "- Handle file %s %s" % (accession,dxencode.file_path_from_fid(fid))
                 payload = self.make_payload_obj(out_type,rep_tech,fid, verbose=args.verbose)
 
                 file_count += 1
