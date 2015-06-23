@@ -34,7 +34,8 @@ APPLETS = {} ## Dict to cache known applets
 RUNS_LAUNCHED_FILE = "launchedRuns.txt"
 
 KEYFILE = 'keypairs.json'  ## see processkey() Note this file must be in gitignore!
-DEFAULT_SERVER = 'https://www.encodeproject.org'
+PRODUCTION_SERVER = 'https://www.encodeproject.org'
+DEFAULT_SERVER = PRODUCTION_SERVER
 S3_SERVER='s3://encode-files/'
 
 logger = logging.getLogger('dxencode') # Callers should either use dxencode.logger or set dxencode.logger = local.logger()
@@ -828,7 +829,7 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
         return None
     if exp["assay_term_name"] == "RNA-seq" \
     or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq":
-        if exp["replicates"][0]["library"]["size_range"] == ">200":
+        if exp["replicates"][0]["library"]["size_range"] in [">200", "300-350", "350-450"]:
             return "long-rna-seq"
         else:
             return "small-rna-seq"
@@ -850,7 +851,7 @@ def get_exp_type(experiment,exp=None,supported_types=None):
     exp_type = get_assay_type(experiment,exp)
 
     if supported_types != None and exp_type not in supported_types:
-        print "Experiment %s has unsupported assay type of '%s'" % (experiment,exp["assay_term_name"])
+        print "Experiment %s has unsupported assay type of '%s'" % (experiment,exp_type)
         return None
     return exp_type
 
@@ -890,7 +891,7 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
     reps = []
     # Must look through exp and find all replicates!
     if full_mapping == None:
-        full_mapping = dxencode.get_full_mapping(exp_id,exp,key=key)
+        full_mapping = get_full_mapping(exp_id,exp,key=key)
     if full_mapping != None:
         for (br,tr) in sorted( full_mapping.keys() ):
             rep = { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) }
@@ -1000,6 +1001,32 @@ def get_enc_exp_files(exp_obj,output_types=[],key='default'):
         if file_obj.get('submitted_file_name') not in filenames_in(files):
            files.extend([file_obj])
     return files
+
+def exp_is_pe(exp,exp_files=None,rep_tech=None,server_key='default'):
+    '''Determine if this experiment is expected to be 'paired-end' as opposed to 'single-end'.'''
+    
+    if rep_tech != None:
+        reps = get_reps_from_enc(exp_id=exp.get('accession'), load_reads=False, exp=exp, full_mapping=None, key=server_key)
+        for rep in reps:
+            if rep.get('rep_tech') == rep_tech:
+                if rep.get('paired_end') == False:
+                    return False  # no more is needed!
+        
+    # But if rep_tech not requested or not found, OR found to be paired, then must check all fastqs
+    found_fastq = False
+    all_fastqs_pe = True
+    
+    if exp_files == None:
+        exp_files = get_enc_exp_files(exp,key=server_key)
+        
+    for enc_f_obj in exp_files:
+        if enc_f_obj.get("file_format") != "fastq":
+            continue
+        found_fastq = True
+        if enc_f_obj.get("paired_with") == None and enc_f_obj.get("run_type") != "paired-ended":
+            all_fastqs_pe = False
+            
+    return (found_fastq and all_fastqs_pe) 
 
 SW_CACHE = {}
 def get_sw_from_log(dxfile, regex):
