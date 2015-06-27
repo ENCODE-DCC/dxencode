@@ -25,7 +25,7 @@ class Recovery(Splashdown):
     Recovery module updates posted files with information not handled during original post.
     Descendent from 'Splashdown' class.
     '''
-
+    TOOL_IS = 'recovery'
     HELP_BANNER = "Handles recovery of missing information for already posted files. For all files already posted " + \
                   "for an experiment, will generate normal payload package from DX and attempt to update ENCODEd " + \
                   "with missing information. " 
@@ -254,6 +254,10 @@ class Recovery(Splashdown):
         patch_required = False
         
         # Compare derived from and update if necessary
+        append_derived_by = False
+        if self.APPEND_FLAG in payload['derived_from']:
+            payload['derived_from'].remove(self.APPEND_FLAG)
+            append_derived_by = True
         derived_diffs = len(payload['derived_from'])
         if verbose:
             print >> sys.stderr, "> DX file derived_from:"
@@ -263,7 +267,7 @@ class Recovery(Splashdown):
             if verbose:
                 print >> sys.stderr, "> Enc file derived_from:"
                 print >> sys.stderr, json.dumps(enc_derived,indent=4)
-            if len(enc_derived) == derived_diffs:
+            if append_derived_by or len(enc_derived) == derived_diffs:
                 for acc in payload['derived_from']:
                     for inp_file in enc_derived:
                         if acc == inp_file.get('accession'):
@@ -272,7 +276,15 @@ class Recovery(Splashdown):
             if verbose:
                 print >> sys.stderr, "Enc file derived_from: Not Found"
         if derived_diffs > 0:
-            print "  + Need to update 'derived_from'."
+            if append_derived_by:
+                print "  + Need to append to 'derived_from'."
+                if enc_derived != None:
+                    for inp_file in enc_derived:
+                        acc = inp_file.get('accession')
+                        if acc != None and acc not in payload['derived_from']:
+                            payload['derived_from'].append(acc)
+            else:
+                print "  + Need to update 'derived_from'."
             update_payload['derived_from'] = payload['derived_from']
             patch_required = True
         

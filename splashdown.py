@@ -39,7 +39,7 @@ class Splashdown(object):
     Splashdown module posts from dnanexus to ENCODEd,  all files available and necessry for
     a given experiment .
     '''
-
+    TOOL_IS = 'splashdown'
     HELP_BANNER = "Handles splashdown of launched pipeline runs for supported experiment types. " + \
                   "Can be run repeatedly and will only try to post result files that have not been previously posted. " 
     ''' This help banner is displayed by get_args.'''
@@ -160,6 +160,9 @@ class Splashdown(object):
     
     REFERERNCE_PROJECT_ID = 'project-BKbfvF00Qy5PZF5V7Gv003v7'
     '''Simple way to recognize if a reference file is in the right project, and therefore has accessions.'''
+    
+    APPEND_FLAG = "APPEND_ME"
+    '''Special flag allows appending rather than replacing derived_by on recovery.'''
     
     def __init__(self):
         '''
@@ -623,7 +626,10 @@ class Splashdown(object):
         '''Returns list of accessions a file is drived from based upon job inouts.'''
         input_accessions = []
         input_file_count = 0
-        #verbose=True  # NOTE: verbose can help find the missing accessions  # FIXME: excessive verbosity helped debugging recovery.py
+        #verbose=True  # NOTE: verbose can help find the missing accessions  # excessive verbosity helped debugging recovery.py
+        # FIXME: What to do about concatenated files (that went through 'concat_fastqs')?
+        #        Can punt for now since recovery can append to derived_from
+        #        Probably the old way parsed the input file name
         for inp in job["input"].values():
             if not type(inp) == dict:
                 continue # not a file input
@@ -634,8 +640,12 @@ class Splashdown(object):
                 inp_fid = dxlink
             else:
                 inp_fid = dxlink.get("id")
-            inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
             input_file_count += 1
+            try:
+                inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
+            except:
+                print "WARNING: can't find "+ fid # may try to append derived_from below.
+                continue
             if verbose: 
                 print >> sys.stderr, "* derived from: " + inp_fid + " " + inp_obj["project"] + ":" + \
                                                                         dxencode.file_path_from_fid(inp_fid)
@@ -707,12 +717,20 @@ class Splashdown(object):
 
         if len(input_accessions) < input_file_count:
             if self.test:
-                print "WARNING: not all input files are accounted for in 'derived_from'!"
-                print json.dumps(input_accessions,indent=4)
+                if self.way_back_machine and self.TOOL_IS == 'recovery':
+                    print "WARNING: not all input files are accounted for in 'derived_from' so just appending!"
+                    input_accessions.append(self.APPEND_FLAG)
+                else:
+                    print "WARNING: not all input files are accounted for in 'derived_from'!"
+                    print json.dumps(input_accessions,indent=4)
             else:
-                print "ERROR: not all input files are accounted for in 'derived_from'!"
-                print json.dumps(input_accessions,indent=4)
-                sys.exit(1)  # TODO: determine if this is appropriate
+                if self.way_back_machine and self.TOOL_IS == 'recovery':
+                    print "WARNING: not all input files are accounted for in 'derived_from' so just appending!"
+                    input_accessions.append(self.APPEND_FLAG)
+                else:
+                    print "ERROR: not all input files are accounted for in 'derived_from'!"
+                    print json.dumps(input_accessions,indent=4)
+                    sys.exit(1)  # TODO: determine if this is appropriate
         
         # Now that we have the full derived_from, we can remove some         
         # UGLY special cases:

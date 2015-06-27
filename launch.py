@@ -921,6 +921,7 @@ class Launch(object):
         be pulled from the psv (pipeline specific variables) object.
         '''
         # NOT EXPECTED TO OVERRIDE
+        template=False # FIXME: debug
 
         if len(rep['stepsToDo']) < 1:
             return None
@@ -971,19 +972,22 @@ class Launch(object):
                     # Now the most likely: previous results of this branch
                     appInputs[ appInp ] = rep['prevStepResults'][fileToken]
                 elif fileToken in rep['priors'] \
-                  or (expect_set and fileToken + "_set" in rep['priors']):
+                  or (expect_set and fileToken + "_set" in rep['priors']) \
+                  or (expect_set and fileToken.startswith('reads') and "reads" in rep['priors']):
                     # Finally, look in prior files found in results folder
-                    if expect_set:
+                    if expect_set:  # FIXME: This logic will fail again, but debug when that case is in front of you.
                         alt_token = fileToken
-                        if fileToken not in rep['priors']:
+                        if alt_token not in rep['priors']:
                             alt_token = fileToken + "_set"  # Sometimes sets expect  the token to end in '_set'!
+                        if alt_token not in rep['priors'] and fileToken.startswith('reads'):
+                            alt_token = "reads"  # Sometimes sets are just reads.
                         if isinstance(rep['priors'][alt_token], list):
                             #print "- Expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
                             appInputs[ appInp ] = []
                             for fid in rep['priors'][alt_token]:
                                 appInputs[ appInp ] += [ dxencode.FILES[fid] ]
                         else:
-                            appInputs[ appInp ] = [ dxencode.FILES[ rep['priors'][fileToken] ] ]
+                            appInputs[ appInp ] = [ dxencode.FILES[ rep['priors'][alt_token] ] ]
                     else:
                         assert(not isinstance(rep['priors'][fileToken], list))
                         appInputs[ appInp ] = dxencode.FILES[ rep['priors'][fileToken] ]
@@ -991,6 +995,9 @@ class Launch(object):
                 #    print "- Looking for existing files but '"+fileToken+"' not in rep['priors']!"
                 if appInp not in appInputs and not template:
                     print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
+                    if expect_set:
+                        print "Expecting set!"
+                    print json.dumps(rep['priors'],indent=4,sort_keys=True)
                     sys.exit(1)
             
             # Non-file app inputs
