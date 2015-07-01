@@ -821,7 +821,7 @@ class Splashdown(object):
         #    return self.obj_cache["exp"]["pipe_qualifiers"]
             
         pipe_qualifiers = {}
-        pipe_qualifiers["version"] = "1"
+        pipe_qualifiers["version"] = "1.0"
         if self.exp_type.startswith('long-rna-seq'):
             if job == None:
                 if self.test:
@@ -832,7 +832,7 @@ class Splashdown(object):
             else:
                 job_created = job.get('created')
                 if job.get('created') >= 1427753403375:  # 2015-03-30 New index was run with star 2.4.0k
-                    pipe_qualifiers["version"] = "2"
+                    pipe_qualifiers["version"] = "1.1"
 
         pipe_qualifiers["qualifier"] = ''
         if self.exp_type.startswith('long-rna-seq'):

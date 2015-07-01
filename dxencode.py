@@ -489,7 +489,7 @@ def find_target_file_set(fileSet,targetFolder,project=None):
         parts.reverse()
         fid = find_file(path + "/" + parts[0],projId)
         if fid != None:
-            targetFids += [ fid ]
+            targetFids.append( fid )
     return targetFids
 
 
@@ -527,7 +527,7 @@ def find_file_set(fileSet,projectId=None):
         for oneFile in fileSet:
             fid = find_file(oneFile,projectId,verbose=True)
             if fid != None:
-                fids += [ fid ]
+                fids.append( fid )
         if len(fids) != len(fileSet):
             print "ERROR: expecting " + str(len(fileSet)) + " but only found " + str(len(fids)) + "."
             sys.exit(1) # verbose already gave an error message(s)
@@ -545,7 +545,7 @@ def copy_files(fids, projectId, folder, overwrite=False):
             # so just leave in place and pretend that we did!
             #proj = dxpy.DXProject(projectId)
             #proj.move(folder,[fid])
-            newFids += [ fid ]
+            newFids.append( fid )
             continue
 
         # Check to see if file already exists.
@@ -565,7 +565,7 @@ def copy_files(fids, projectId, folder, overwrite=False):
             sys.exit(1)
         newDict = dxpy.describe(newLink)
         FILES[newDict['id']] = newLink
-        newFids += [ newDict['id'] ]
+        newFids.append( newDict['id'] )
 
     return newFids
 
@@ -628,7 +628,7 @@ def find_file(filePath,project=None,verbose=False,multiple=False, recurse=True):
         fids = []
         for fileDict in fileDicts:
             FILES[fileDict['id']] = dxpy.dxlink(fileDict)
-            fids += [ fileDict['id'] ]
+            fids.append( fileDict['id'] )
         return fids
     else:
         #print "- FOUND '" + proj + ":" + filePath + "'."
@@ -930,17 +930,17 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
                         if p2 != None and 'paired_end' in p2:
                             rep['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
                         if 'controlled_by' in p1:
-                            rep['controls'] += p1['controlled_by']
+                            rep['controls'].append( p1['controlled_by'] )
                         if p2 != None and 'controlled_by' in p2:
-                            rep['controls'] += p2['controlled_by']
+                            rep['controls'].append( p2['controlled_by'] )
                 else: # not rep['paired_end']:
                     for f in mapping['unpaired']:
-                        rep['fastqs']['1'] = [ f['accession']+".fastq.gz" ]
+                        rep['fastqs']['1'].append( f['accession']+".fastq.gz" )
                         if "run_type" in f:
                             if run_type == None or run_type == "single-ended":
                                 run_type = f["run_type"]
                     if 'controlled_by' in mapping['unpaired']:
-                        rep['controls'] += mapping['unpaired']['controlled_by']
+                        rep['controls'].append( mapping['unpaired']['controlled_by'] )
                 if len(rep['controls']) == 0:
                     rep['controls'] = None
             

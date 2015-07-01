@@ -971,28 +971,29 @@ class Launch(object):
                 elif fileToken in rep['prevStepResults']:
                     # Now the most likely: previous results of this branch
                     appInputs[ appInp ] = rep['prevStepResults'][fileToken]
-                elif fileToken in rep['priors'] \
-                  or (expect_set and fileToken + "_set" in rep['priors']) \
-                  or (expect_set and fileToken.startswith('reads') and "reads" in rep['priors']):
-                    # Finally, look in prior files found in results folder
-                    if expect_set:  # FIXME: This logic will fail again, but debug when that case is in front of you.
-                        alt_token = fileToken
-                        if alt_token not in rep['priors']:
-                            alt_token = fileToken + "_set"  # Sometimes sets expect  the token to end in '_set'!
-                        if alt_token not in rep['priors'] and fileToken.startswith('reads'):
-                            alt_token = "reads"  # Sometimes sets are just reads.
+                else:
+                    alt_token = fileToken
+                    if alt_token not in rep['priors'] and expect_set:
+                        alt_token = fileToken + "_set"  # Sometimes sets expect  the token to end in '_set'!
+                    if alt_token not in rep['priors'] and fileToken.startswith('reads'):
+                        alt_token = "reads"  # Sometimes sets are just reads.
+                    if alt_token not in rep['priors'] and alt_token == "reads" and expect_set:
+                        alt_token = "reads_set"  # Sometimes reads are reads_sets. # FIXME: should really drop "_set" logic
+                    if alt_token in rep['priors']:
                         if isinstance(rep['priors'][alt_token], list):
-                            #print "- Expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
-                            appInputs[ appInp ] = []
-                            for fid in rep['priors'][alt_token]:
-                                appInputs[ appInp ] += [ dxencode.FILES[fid] ]
+                             if expect_set:
+                                appInputs[ appInp ] = []
+                                for fid in rep['priors'][alt_token]:
+                                    appInputs[ appInp ].append(  dxencode.FILES[fid] )
+                             else:
+                                print "ERROR: Not expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
+                                print json.dumps(rep['priors'],indent=4,sort_keys=True)
+                                sys.exit(1)
                         else:
-                            appInputs[ appInp ] = [ dxencode.FILES[ rep['priors'][alt_token] ] ]
-                    else:
-                        assert(not isinstance(rep['priors'][fileToken], list))
-                        appInputs[ appInp ] = dxencode.FILES[ rep['priors'][fileToken] ]
-                #elif not template:
-                #    print "- Looking for existing files but '"+fileToken+"' not in rep['priors']!"
+                            if expect_set:
+                                appInputs[ appInp ] = [ dxencode.FILES[ rep['priors'][alt_token] ] ]
+                            else:
+                                appInputs[ appInp ] = dxencode.FILES[ rep['priors'][alt_token] ]
                 if appInp not in appInputs and not template:
                     print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
                     if expect_set:
