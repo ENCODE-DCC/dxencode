@@ -230,6 +230,11 @@ class Splashdown(object):
                         action='store_true',
                         required=False)
 
+        ap.add_argument('--start_at',
+                        help="Start processing with this file name (or possibly accession).",
+                        default=None,
+                        required=False)
+
         ap.add_argument('--files',
                         help="Just upload this number of files (default: all)",
                         type=int,
@@ -627,11 +632,27 @@ class Splashdown(object):
         input_accessions = []
         input_file_count = 0
         #verbose=True  # NOTE: verbose can help find the missing accessions  # excessive verbosity helped debugging recovery.py
-        # FIXME: What to do about concatenated files (that went through 'concat_fastqs')?
-        #        Can punt for now since recovery can append to derived_from
-        #        Probably the old way parsed the input file name
+        # NOTE: What to do about concatenated files (that went through 'concat_fastqs')?
+        #       Can punt for now since recovery can append to derived_from
+        
+        # Find all expected inputs from the job
+        file_inputs = []
         for inp in job["input"].values():
+            if type(inp) not in [ dict, list ]:
+                continue # not a file input
+            if type(inp) == dict:
+                file_inputs.append(inp)
+                continue
+            for item in inp:
+                if type(item) == dict:
+                    file_inputs.append(item)
+        if verbose:
+            print >> sys.stderr, "* derived from: Expecting %d input files." % len(file_inputs)
+            
+        # For each file input, verify it is for a file and then look for an accession.
+        for inp in file_inputs:
             if not type(inp) == dict:
+                print type(inp)
                 continue # not a file input
             dxlink = inp.get("$dnanexus_link")
             if dxlink == None:
@@ -649,72 +670,85 @@ class Splashdown(object):
             if verbose: 
                 print >> sys.stderr, "* derived from: " + inp_fid + " " + inp_obj["project"] + ":" + \
                                                                         dxencode.file_path_from_fid(inp_fid)
-            if inp_obj != None:
-                self.genome = self.find_genome_annotation(inp_obj)
-                acc_key = dxencode.dx_property_accesion_key(dxencode.PRODUCTION_SERVER) # Always prefer production accession
-                accession = None
-                if "properties" in inp_obj:
+            if inp_obj == None:
+                continue
+                
+            # First best place to look for accession: properties
+            self.genome = self.find_genome_annotation(inp_obj)
+            acc_key = dxencode.dx_property_accesion_key(dxencode.PRODUCTION_SERVER) # Always prefer production accession
+            accession = None
+            if "properties" in inp_obj:
+                if verbose:
+                    print >> sys.stderr, "Input file properties... looking for '"+acc_key+"'" 
+                    print >> sys.stderr, json.dumps(inp_obj["properties"],indent=4)
+                # older runs don't have accession in properties
+                if acc_key in inp_obj["properties"]:
+                    accession = inp_obj["properties"][acc_key]
+                elif self.server_key != 'www':
+                    acc_key = dxencode.dx_property_accesion_key(self.server)  # demote to server's accession
                     if verbose:
-                        print >> sys.stderr, "Input file properties... looking for '"+acc_key+"'" 
-                        print >> sys.stderr, json.dumps(inp_obj["properties"],indent=4)
-                    # older runs don't have accession in properties
+                        print >> sys.stderr, "Now looking for '"+acc_key+"'" 
                     if acc_key in inp_obj["properties"]:
-                        if verbose:
-                            print >> sys.stderr, "Found accession."
                         accession = inp_obj["properties"][acc_key]
-                        # Must check if file exists!!
-                        file_obj = self.enc_lookup_json( 'files/' + accession,must_find=False)
-                        if file_obj == None:
-                            if verbose:
-                                print >> sys.stderr, "Accession found but file not on '"+self.server_key+"'"
-                            accession = None
-                        else:
-                            input_accessions.append(accession)
-                    if accession == None and self.server_key != 'www':
-                        acc_key = dxencode.dx_property_accesion_key(self.server)  # demote to server's accession
+                if accession != None:
+                    if verbose:
+                        print >> sys.stderr, "Found accession."
+                    # Must check if file exists!!
+                    file_obj = self.enc_lookup_json( 'files/' + accession,must_find=False)
+                    if file_obj == None:
                         if verbose:
-                            print >> sys.stderr, "Now looking for '"+acc_key+"'" 
-                        if acc_key in inp_obj["properties"]:
-                            accession = inp_obj["properties"][acc_key]
-                            # Must check if file exists!!
-                            file_obj = self.enc_lookup_json( 'files/' + accession,must_find=False)
-                            if file_obj == None:
-                                accession = None
-                            else:
-                                input_accessions.append(accession)
-                if accession == None:
-                    if verbose:
-                        print >> sys.stderr, "Accession not found in properties or not in ENCODEd." 
-                    parts = inp_obj["name"].split('.')
-                    ext = parts[-1]
-                    if ext in ["gz","tgz"]:
-                        ext = parts[-2]
-                    if ext in self.REFERENCE_EXTENSIONS and inp_obj["project"] != self.REFERERNCE_PROJECT_ID:  
-                        # FIXME: if regular file extension is the same as ref extension, then trouble!
-                        print "Reference file (ext: '"+ext+"') in non-ref project: " + inp_obj["project"]
-                        sys.exit(0)
-                    # if file name is primary input (fastq) and is named as an accession
-                    if inp_obj["name"].startswith("ENCFF"): # Not test version 'TSTFF'!
-                        if ext in self.PRIMARY_INPUT_EXTENSION or self.test:
-                            root = parts[0]
-                            for acc in root.split('_'): #usually only one
-                                if acc.startswith("ENCFF"):
-                                    if len(acc) == 11:
-                                        accession = acc
-                                        input_accessions.append(accession)
-                                    elif '-' in acc:
-                                        for acc_part in acc.split('-'):
-                                            if acc_part.startswith("ENCFF") and len(acc_part) == 11:
-                                                accession = acc_part
-                                                input_accessions.append(accession)
-                if accession == None and self.way_back_machine and self.exp_files != None:
-                    if verbose:
-                        print >> sys.stderr, "Accession still not found.  Trying the 'way back machine'." 
-                    f_obj =  self.find_files_using_way_back_machine(inp_fid,self.exp_files)
-                    if f_obj != None and "accession" in f_obj:
-                        accession = f_obj["accession"]
-                        input_accessions.append(accession)
+                            print >> sys.stderr, "Accession found but file not on '"+self.server_key+"'"
+                        accession = None
+                    else:
+                        input_accessions.append(accession)                        
+                            
+            # Now start the tricks to in the vain hope to turn up an accession
+            if accession == None:
+                if verbose:
+                    print >> sys.stderr, "Accession not found in properties or not in ENCODEd." 
+                parts = inp_obj["name"].split('.')
+                ext = parts[-1]
+                if ext in ["gz","tgz"]:
+                    ext = parts[-2]
+                if ext in self.REFERENCE_EXTENSIONS and inp_obj["project"] != self.REFERERNCE_PROJECT_ID:  
+                    # FIXME: if regular file extension is the same as ref extension, then trouble!
+                    print "Reference file (ext: '"+ext+"') in non-ref project: " + inp_obj["project"]
+                    sys.exit(0)
 
+                # if file name is primary input (fastq) and is named as an accession
+                if inp_obj["name"].startswith("ENCFF"): # Not test version 'TSTFF'!
+                    if ext in self.PRIMARY_INPUT_EXTENSION or self.test:
+                        root = parts[0]
+                        for acc in root.split('_'): #usually only one
+                            if acc.startswith("ENCFF"):
+                                if len(acc) == 11:
+                                    accession = acc
+                                    input_accessions.append(accession)
+                                elif '-' in acc:
+                                    for acc_part in acc.split('-'):
+                                        if acc_part.startswith("ENCFF") and len(acc_part) == 11:
+                                            accession = acc_part
+                                            input_accessions.append(accession)
+                                            
+                # no accession but test run of splashdown and not fastq just assume a real run would have posted by now.
+                if accession == None and self.test and self.TOOL_IS == 'splashdown' and \
+                    ext not in self.PRIMARY_INPUT_EXTENSION:
+                    # since we are testing splashdown, lets assume a real run would have posted the previous files
+                    if verbose:
+                        print >> sys.stderr, "Test run so using 'ENCFF00FAKE' as accession of derived from file."
+                    accession = "ENCFF00FAKE"
+                    input_accessions.append(accession)
+                        
+            # Still no accession, try the way back machine
+            if accession == None and self.way_back_machine and self.exp_files != None:
+                if verbose:
+                    print >> sys.stderr, "Accession still not found.  Trying the 'way back machine'." 
+                f_obj =  self.find_files_using_way_back_machine(inp_fid,self.exp_files)
+                if f_obj != None and "accession" in f_obj:
+                    accession = f_obj["accession"]
+                    input_accessions.append(accession)
+    
+        # All file_inputs were tested and we hope that the nimber of accessions match the number of input files.
         if len(input_accessions) < input_file_count:
             if self.test:
                 if self.way_back_machine and self.TOOL_IS == 'recovery':
@@ -730,7 +764,7 @@ class Splashdown(object):
                 else:
                     print "ERROR: not all input files are accounted for in 'derived_from'!"
                     print json.dumps(input_accessions,indent=4)
-                    sys.exit(1)  # TODO: determine if this is appropriate
+                    sys.exit(1)
         
         # Now that we have the full derived_from, we can remove some         
         # UGLY special cases:
@@ -1322,6 +1356,14 @@ class Splashdown(object):
             post_count = 0
             for (out_type,rep_tech,fid) in files_to_post:
                 sys.stdout.flush() # Slow running job should flush to piped log
+                file_name = dxencode.file_path_from_fid(fid)
+                if args.start_at != None:
+                    if not file_name.endswith(args.start_at):
+                        continue
+                    else:
+                        print "- Starting at %s" % (file_name)
+                        args.start_at = None
+                    
                 # a) discover all necessary dx information needed for post.
                 # b) gather any other information necessary from dx and encoded.
                 print "  Handle file %s" % dxencode.file_path_from_fid(fid)

@@ -39,16 +39,6 @@ class Recovery(Splashdown):
         self.step_runs_patched = 0
         self.way_back_machine = True # Support methods/expectations used on very old runs.
         
-    def get_args(self):
-        '''Parse the input arguments.'''
-        ap = Splashdown.get_args(self,parse=False)
-        
-        ap.add_argument('--start_at',
-                        help="Start processing with this file accession.",
-                        default=None,
-                        required=False)
-        return ap.parse_args()
-        
     def enc_step_run_find_or_create(self,job,dxFile,rep_tech,test=False,verbose=False):
         '''Finds or creates the 'analysis_step_run' encoded object that actually created the file.'''
         step_run = Splashdown.enc_step_run_find_or_create(self,job,dxFile,rep_tech,test=test,verbose=verbose)
@@ -444,16 +434,17 @@ class Recovery(Splashdown):
             recovery_count = 0
             for (out_type,rep_tech,fid) in files_posted:
                 sys.stdout.flush() # Slow running job should flush to piped log
-                # a) discover all necessary dx information needed for post.
-                # b) gather any other information necessary from dx and encoded.
                 accession = self.found[fid]['accession']
+                file_name = dxencode.file_path_from_fid(fid)
                 if args.start_at != None:
-                    if accession != args.start_at:
+                    if accession != args.start_at and not file_name.endswith(args.start_at):
                         continue
                     else:
-                        print "- Starting at %s" % (accession)
+                        print "- Starting at %s" % (file_name)
                         args.start_at = None
                     
+                # a) discover all necessary dx information needed for post.
+                # b) gather any other information necessary from dx and encoded.
                 print "- Handle file %s %s" % (accession,dxencode.file_path_from_fid(fid))
                 payload = self.make_payload_obj(out_type,rep_tech,fid, verbose=args.verbose)
 
