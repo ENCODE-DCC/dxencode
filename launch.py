@@ -11,8 +11,7 @@ import dxencode
 
 ### TODO:
 #   1) Launchers should create the workflow_run encoded objects.  REQUIRED new status: 'launch_error', 'started', 'failed', 'partial_success')
-#   2) Launchers should be able to support 3 level combinations [br:[tr,tr],br:[tr,tr]] -> [br,br] -> cr (DNase needs)
-#   3) Launchers may fail, so how to report this to encoded?
+#   2) Launchers may fail, so how to report this to encoded?
 
 # NOTES: This command-line utility will run the a pipeline for a single replicate or combined reps.
 #      - All results will be written to a folder /<results_folder>/<exp_id>/rep<#>_<#>.
@@ -32,16 +31,16 @@ import dxencode
 #      - Combined replicate processing is optional and depends upon PIPELINE_BRANCHES["COMBINED_REPS"], etc.
 #        - The standard combination expected PIPELINE_BRANCH_ORDER[ "REP", "COMBINED_REPS" ].
 #        - More complex combinations can be acheived by overriding add_combining_reps() in the derived class.
-#        - Tying results from one branch to inputs into another relies on input file tokens ending with '_a', '_b' or '_set'.
+#        - Tying results from one branch to inputs into another relies on input file tokens ending with '_A', '_B' or '_ABC'.
 #      - Control files are supported but most likely will require function overrides in derived
 #        classes (e.g. rampageLaunch.py)
 #      - In PIPELINE_BRANCHES[branch_id]["STEPS"], both 'inputs' and 'results' are key:value lists where the key is used
 #        to attach results of one step to the inputs of another, while values must match dxapp.json names.
-#        Further, any input key ending in '_set' is expected to be an array of files (e.g. "input": { "reads_set": "reads" }  
-#        will expect one or more files to be found and used for dxapp.json input named "reads" ).
 #      - The FILE_GLOBS are matched by input/result keys, not values.
 #        (e.g. "input": { "pooled_bam": "bam" } matches file_glob "pooled_bam" and dxapp.json input named "bam".
 #        This example would allow the same applet to be used on replicate bams and poold bams in the same pipeline.)
+#      - RARE cases using 'output_values' and 'param_links' can support non-file outputs as inputs to later steps,
+#        even across rep branch boundaries.
 #
 #   A design note about replicates in the launchers:
 #      - "rep" objects should contain (almost) all information necesary to launch processing against them.
@@ -105,7 +104,9 @@ class Launch(object):
     #        "app":     "dx-applet-name", # Must match applet
     #        "params":  { "param_token": "dx_input_name", ...}, # Non-files: Token must match psv key.
     #        "inputs":  { "input_token": "dx_input_name", ...},  # Files: Token *may* match name
-    #        "results": { "result_token": "dx_output_name", ...}} # Files: Token *may* match name
+    #        "results": { "result_token": "dx_output_name", ...}, # Files: Token *may* match name
+    #        "output_values": { "output_token": "dx_output_name" }, # RARE: non-file output used as input to another step
+    #        "param_links": { "param_token": {"name":"output_token", "rep":"sister"} }} # RARE: link input to non-file output 
     # Note, tokens *may* be the same as dx names, but MUST MATCH other tokens to define dependencies as: 
     #     stepA:result_token == stepB:input_token
     # Also result_tokens must be in FILE_GLOB.keys()
@@ -154,6 +155,7 @@ class Launch(object):
         self.psv = {} # will hold pipeline specific variables.
         self.multi_rep = False       # This run includes more than one replicate
         self.combined_reps = False   # This run includes combined replicate workflows
+        self.link_later = None       # Rare: when 2 sister branches link to each other, it requires a final wf pass.
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
     def get_args(self,parse=True):
@@ -221,6 +223,11 @@ class Launch(object):
         ap.add_argument('--server',
                         help="Server to post files to (default: '" + self.SERVER_DEFAULT + "')",
                         default=self.SERVER_DEFAULT,
+                        required=False)
+
+        ap.add_argument('--template',
+                        help='Build a template workflow only.', # TODO: Templating will require more work
+                        action='store_true',
                         required=False)
 
         ap.add_argument('--test',
@@ -350,44 +357,77 @@ class Launch(object):
             sea['tributaries'] = ['a','b']
             sea['rep_tech'] = 'reps' + reps['a']['rep_tech'][3:] + \
                                  '-' + reps['b']['rep_tech'][3:]  # combined delimited by '-'
+            # Special case of 2 allows for designating sisters
+            psv['reps'][sea['tributaries'][0]]['sister'] = sea['tributaries'][1]
+            psv['reps'][sea['tributaries'][1]]['sister'] = sea['tributaries'][0]
             psv['reps'][self.SEA_ID] = sea
             psv['rep_tech'] = sea['rep_tech']  # psv gets labelled the same as the sea
             
         
-    def find_combined_inputs(self,rep,steps,file_globs):
+    def find_combined_inputs(self,rep,steps,file_globs,verbose=False):
         '''Finds the inputs for a combined run in the directories of the replicate runs.'''
         # MAY NEED TO REPLACE for pipelines with combined steps
+        #verbose=True
         
-        if not self.combined_reps:
+        if not self.combined_reps or 'tributaries' not in rep:
             return
 
         print "Checking for combined-replicate inputs..."
         inputs = {}
         for step in rep['path']:
+            if verbose:
+                print "DEBUG: step: "+ step 
             for file_token in steps[step]['inputs'].keys():
-                if file_token[-2] != '_':
+                if verbose:
+                    print "DEBUG:   file_token: "+ file_token
+                if file_token[-2] == '_':
+                    letter = file_token[-1].lower()
+                    if letter in rep['tributaries']:
+                        tributaries = [ letter ]
+                    elif rep['tributaries'][0][1] == '-': # second level combining? (e.g. tributaties = ['b-biorep','e-biorep'])
+                        # Difficulty is that inp_a/inp_b are being matched to ['b-biorep','e-biorep'] by position
+                        letters = 'abcdefghijklmnopqrstuvwxyz'
+                        ix = letters.find(letter) # hopefully returns 0, then 1
+                        if ix != -1 and ix < len(rep['tributaries']):
+                            tributaries = [ rep['tributaries'][ix] ]  # Too clever by half?
+                    if len(tributaries) == 0:
+                        print "*** " + rep_key + " not found in rep['tributaries']"
+                        continue
+                elif file_token.endswith('_ABC'):  # Also too clever by 3/4ths: ending says all tributaries contribute to set.
+                    tributaries = rep['tributaries']
+                else:
                     continue
-                rep_key = file_token[-1].lower()
-                if rep_key not in self.psv['reps'].keys():
-                    print "*** " + rep_key + " not found in psv['reps']"
-                    continue
-                tributary = self.psv['reps'][rep_key]
-                # TODO: No need for multiples at this time.  Deal with it when it comes up.
-                fid = dxencode.find_file(tributary['resultsFolder'] + file_globs[file_token],\
+                if verbose:
+                    print "DEBUG:   - found "+str(len(tributaries))+" tributaries."
+                rep['priors'][file_token] = []
+                inputs[file_token] = []
+                for rep_key in tributaries:
+                    if verbose:
+                        print "DEBUG:   - tributary: " + rep_key
+                    tributary = self.psv['reps'][rep_key]
+                    fid = dxencode.find_file(tributary['resultsFolder'] + file_globs[file_token],\
                                                     self.proj_id, multiple=False, recurse=False)
-                if fid != None:
-                    rep['priors'][file_token] = fid
-                    inputs[file_token] = [ fid ]
-                elif not self.multi_rep:
-                    print "Error: Necessary '%s' for combined run, not found in '%s'." \
-                                                               % (file_token, rep['resultsFolder'])
-                    print "       Please run for single replicate first."
-                    sys.exit(1)
+                    if fid != None:
+                        if len(tributaries) == 1:
+                            rep['priors'][file_token] = fid
+                        else:
+                            rep['priors'][file_token].append( fid )
+                        inputs[file_token].append( fid )
+                    elif not self.multi_rep:
+                        print "Error: Necessary '%s' for combined run, not found in '%s'." \
+                                                                   % (file_token, rep['resultsFolder'])
+                        print "       Please run for single replicate first."
+                        sys.exit(1)
         
+        if inputs:
+            if verbose:
+                print "DEBUG: inputs:"
+                print json.dumps(inputs,indent=4,sort_keys=True)
+                #sys.exit(1)
         if 'inputs' not in rep:
             rep['inputs'] = inputs
         else:
-            rep['inputs'].update( inputs )
+            rep['inputs'].update( inputs )            
     
 
     ############## NOT EXPECTED TO OVERIDE THE FOLLOWING METHODS ############
@@ -686,6 +726,9 @@ class Launch(object):
         else:
             # Use for simple pipelines
             pipe_steps, file_globs = self.build_simple_steps(pipe_path,self.proj_id)
+            # NOTE: Useful for discovering pipeline json, which can be copied/modified for new launcher
+            #pipe_steps, file_globs = self.build_simple_steps(pipe_path,self.proj_id,verbose=True)
+            #sys.exit(1)
 
         for rep in self.psv['reps'].values():
             if rep["branch_id"] != branch_id:
@@ -772,9 +815,66 @@ class Launch(object):
             rep['priors'].update(ref_priors)
 
 
+    def find_all_app_non_file_outputs(self,verbose=False):
+        '''Finds app non-file outputs, or the file parameters that match by name.'''
+        # NOT EXPECTED TO OVERRIDE
+        # Another obscure and difficult one!
+        #verbose=True
+
+        print "Checking for prior app non-file outputs..."
+        
+        # After inputs and priors have been discovered... 
+        # 1) walk through all reps
+        for rep_id in sorted(self.psv["reps"].keys()):
+            rep = self.psv["reps"][rep_id]
+            if "params" not in rep:
+                rep["params"] = {}
+            # 2) walk through all steps in a rep
+            for step_id in rep["steps"]:
+                step = rep["steps"][step_id]
+                # 3) if step has an "output_values" then for each output_value key:
+                if "output_values" not in step:
+                    continue
+                if verbose:
+                    print "DEBUG: output_values in "+rep['rep_tech']+":"+step_id
+                # Note: set of files and set of outputs, but any file could lead to job and job should have all outputs
+                #       Still missing jobs or output not in job means look in files and only one file likely has an output
+                job = None # only need to find once per step
+                for file_token in step["results"]:
+                    # 4) if a result file is found...
+                    if file_token not in rep["priors"]:
+                        continue
+                    fid = rep["priors"][file_token]
+                    for out_key in step["output_values"].keys():
+                        if out_key in rep["params"]:
+                            continue
+                        out_name = step["output_values"][out_key]
+                        out_value = None
+                        # 5) look up the job, then look up the output value matching this one
+                        if job == None:
+                            job = dxencode.job_from_fid(fid)
+                        if job:
+                            if "output" in job and out_name in job["output"]:
+                                out_value = job["output"][out_name]
+                                if verbose:
+                                    print "DEBUG: found in job '"+out_name+"' = "+str(out_value)+", saved as "+ \
+                                                                                           rep_id+"['params']['"+out_key+"']"
+                        # 6) if not found then check in this file
+                        if out_value == None:
+                            out_value = dxencode.dx_file_get_property(out_name,fid)
+                            if out_value != None:
+                                if verbose:
+                                    print "DEBUG: found in file '"+out_name+"' = "+str(out_value)+", saved as "+ \
+                                                                                           rep_id+"['params']['"+out_key+"']"
+                        # 7) If found add value to rep["params"][out_key] and expect there are no name conflicts
+                        if out_value != None:  # Put this thing somewhere!
+                            rep["params"][out_key] = out_value
+
+
     def determine_steps_to_run(self,pipe_path, steps, priors, deprecate, force=False, verbose=False):
         '''Determine what steps need to be done, base upon prior results.'''
         # NOT EXPECTED TO OVERRIDE
+        #verbose=True  # Very useful when verifying new/updated launcher 
         will_create = []
         steps_to_run = []
         for step in pipe_path:
@@ -835,6 +935,7 @@ class Launch(object):
     def determine_steps_needed(self, force=False):
         '''Determine steps needed for replicate(s) and combined, base upon prior results.'''
         # NOT EXPECTED TO OVERRIDE
+        # FIXME: Currently steps_needed is not handled well across rep borders: tributaties -> rivers -> sea
         
         print "Determining steps to run..."
         # NOTE: stepsToDo is an ordered list of steps that need to be run
@@ -849,6 +950,7 @@ class Launch(object):
         '''
         If combined_reps step, look for input from results of replicate level step.
         '''
+        # NOT EXPECTED TO OVERRIDE
         if not self.combined_reps:    # Not even doing a wf with combining branches 
             return None
         if 'tributaries' not in river:  # Not a combining branch
@@ -866,17 +968,12 @@ class Launch(object):
         letters = deque('abcdefghijklmnopqrstuvwxyz')
         looking_for = None
         if expect_set:
-            # Expectation that when combining results, dx app's input names either end in '_a', etc. or '_set'
-            if not inp_token.endswith('_set'):
-                print "ERROR: set is expected but dx app's input name did not end in '_set'"
-                return None
+            # Expectation that when combining results, dx app's input names either end in '_A', '_ABC', etc. or '_set'
             results_array = []
         elif inp_token[-2] == '_' and inp_token.lower()[-1] in letters:
             looking_for = inp_token.lower()[-1]
         elif looking_for == None: 
-            # Can we do this?  NOT an warning: no current means to distinguish between expecting a prior from not expecting one
-            #print "- WARNING: Not looking in prior branch because DX app's input name does not end in '_a', '_b' or '_set' + \
-            #                                                        " (inp_token:"+inp_token+" inp_token:"+inp_token+")."
+            # NOT a warning: no current means to distinguish between expecting a prior from not expecting one
             return None
             
         for tributary_id in river['tributaries']:
@@ -912,6 +1009,79 @@ class Launch(object):
         return results_array
 
 
+    def find_mystery_param(self,rep,rep_id,step_id,param_name,link_later=False,verbose=False):
+        '''Finds parameters that are outputs of previous steps.'''
+        # NOT EXPECTED TO OVERRIDE, though only needed for dnaseLaunch.py so far
+
+        # Mystery params come from the non-file outputs of other steps (even from other reps!).
+        # If a step definition contains an "output_values" parameter then:
+        # - find_all_app_non_file_outputs will look for already run step values and place them in rep['params']
+        # - create_or_extend_workflow will create links in rep['prevStepResults'] for steps not yet run 
+        # If this step contains "param_links", then each param_spec should say what rep to look for: 'self', 'sister'
+        #verbose=True
+        
+        # Not easy, that is for sure! "param_links": { "target_size": {"name":"reads_filtered", "rep":"sister"} } 
+        if "param_links" not in rep["steps"][step_id]:
+            return None
+        param_links = rep["steps"][step_id]["param_links"]
+        if param_name not in param_links:
+            return None
+        param_spec = param_links[param_name]
+        mystery_rep_id = None
+        if param_spec["rep"] == "sister": # Hellena's 'brother sistra'?  Catch the reference anyone?
+            # How to find "brother sistra"?
+            if "sister" not in rep:
+                print "ERROR: Looking for mystery parameter but can't find sister of rep '"+rep_id+"'."
+                sys.exit(0)
+            mystery_rep_id = rep["sister"]
+        elif param_spec["rep"] == "self":
+            mystery_rep_id = rep_id
+        else: # or "parent" or "aunt" ??
+            print "ERROR: Looking for mystery parameter but don't (yet) support rep '"+param_spec["rep"]+"'."
+            sys.exit(0)
+            
+        mystery_rep = self.psv["reps"][mystery_rep_id]
+        if verbose:
+            print "DEBUG: Found rep "+rep['rep_tech']+"'s "+param_spec["rep"]+" as mystery rep '"+mystery_rep['rep_tech']+"'"
+        mystery_value = None
+        if "prevStepResults" in mystery_rep and param_spec["name"] in mystery_rep["prevStepResults"]:
+            mystery_value = mystery_rep["prevStepResults"][param_spec["name"]]  # not yet run result (dx link)
+            if verbose:
+                print "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
+                      "' from mystery rep '"+mystery_rep['rep_tech']+"' previous results, with value: " + str(mystery_value)
+            return mystery_value
+        elif "params" in mystery_rep and param_spec["name"] in mystery_rep["params"]:
+            mystery_value = mystery_rep["params"][param_spec["name"]] # prior run result (actual string value)
+            if verbose:
+                print "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
+                      "' from mystery rep '"+mystery_rep['rep_tech']+"' with value: " + str(mystery_value)
+            return mystery_value
+            
+        if not link_later or param_spec["rep"] == "self":  # Linking to self must be to prior step in rep
+            return None
+            
+        # Avoid failure to link BOTH mystery 'sister' params because one is always prior to the other
+        # Solution is to put in a known token 'link_later', then have a final pass after building whole workflow
+        # This link_later strategy should only be used if the mystery_step that produces the value can be found.
+        mystery_out = None
+        for mystery_step_key in mystery_rep["steps"].keys():
+            mystery_step = mystery_rep["steps"][mystery_step_key]
+            if "output_values" in mystery_step and param_spec["name"] in mystery_step["output_values"]:
+                mystery_out = mystery_step["output_values"][param_spec["name"]]
+                if verbose:
+                    print "DEBUG: Found mystery rep '"+mystery_rep_id+"' and step "+mystery_step_key+"' has '"+ \
+                                                                        param_name+" as '"+mystery_out+"'"
+                break
+        if mystery_out != None:
+            mystery_value = 'link_later'
+            if verbose:
+                print "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
+                      "' from rep '"+param_spec["rep"]+"' with value: " + str(mystery_value)
+            return mystery_value
+        
+        return None
+        
+
     def create_or_extend_workflow(self,rep, rep_id, wf=None,app_proj_id=None,test=False,template=False):
         '''
         This function will populate or extend a workflow with the steps in rep['stepsToDo'] and return 
@@ -921,7 +1091,8 @@ class Launch(object):
         be pulled from the psv (pipeline specific variables) object.
         '''
         # NOT EXPECTED TO OVERRIDE
-        template=False # FIXME: debug
+        # TODO: This routine has become crazy complex and should be simplified with sub-routines.
+        # FIXME: Currently set inputs from tributaries are not controlled by count of tributaries
 
         if len(rep['stepsToDo']) < 1:
             return None
@@ -944,6 +1115,7 @@ class Launch(object):
             rep['prevStepResults'] = {}
         steps = rep['steps']
         for step in rep['stepsToDo']:
+            step_link_later = False
             appName = steps[step]['app']
             app = dxencode.find_applet_by_name(appName, app_proj_id)
             inp_defs = app.describe().get('inputSpec') or []
@@ -1007,29 +1179,96 @@ class Launch(object):
                     appParam = steps[step]['params'][param]
                     if param in rep:
                         appInputs[ appParam ] = rep[param]
+                    #elif "params" in rep and param in rep["params"]: # watch it... this may have cross-fertilizing params
+                    #    appInputs[ appParam ] = rep["params"][param]
                     elif param in self.psv:
                         appInputs[ appParam ] = self.psv[param]
-                    elif not template:
+                    else:
+                        # Rare case of non-file outputs of one step being inputs of another
+                        mystery_param = self.find_mystery_param(rep, rep_id, step, appParam,link_later=True)
+                        if mystery_param != None:
+                            appInputs[ appParam ] = mystery_param
+                            # Since the mystery parameter could be from a sister rep, it may require linking later
+                            if isinstance(mystery_param,str) and mystery_param == 'link_later':
+                                step_link_later = True  # Need to save this step's stage for later
+                                # Need a final pass of workflow once all branches are built
+                                if self.link_later == None:
+                                    self.link_later = []
+                                later_link = { 'rep': rep, 'rep_id': rep_id, 'step_id': step, 'param': appParam }
+                                self.link_later.append(later_link)
+                    if appParam not in appInputs and not template:
                         print "ERROR: step '"+step+"' unable to locate '"+param+ \
                                                           "' in pipeline specific variables (psv)."
                         sys.exit(1)
             
             # Now we are ready to add wf stage
             if not test:
-                stageId = wf.add_stage(app, stage_input=appInputs, folder=rep['resultsFolder'])
+                stage_id = wf.add_stage(app, stage_input=appInputs, folder=rep['resultsFolder'])
+                if step_link_later:  # At least one parameter will requre linking later so save stage_id
+                    steps[step]['stage_id'] = stage_id
             # outputs, which we will need to link to
-            for fileToken in steps[step]['results'].keys():
-                appOut = steps[step]['results'][fileToken]
+            for file_token in steps[step]['results'].keys():
+                app_out = steps[step]['results'][file_token]
                 if test:
-                    rep['prevStepResults'][ fileToken ] = 'fake-for-testing'
+                    rep['prevStepResults'][ file_token ] = 'fake-for-testing'
                 else:
-                    rep['prevStepResults'][ fileToken ] = dxpy.dxlink({'stage': stageId, \
-                                                                'outputField': appOut })
+                    rep['prevStepResults'][ file_token ] = dxpy.dxlink({'stage': stage_id, \
+                                                                'outputField': app_out })
+            # need to add output_values to previous results also (to support param_link requests).
+            if "output_values" in steps[step]:
+                for out_token in steps[step]["output_values"].keys():
+                    app_out = steps[step]["output_values"][out_token]
+                    if test:
+                        rep['prevStepResults'][ out_token ] = 'fake-for-testing'
+                    else:
+                        rep['prevStepResults'][ out_token ] = dxpy.dxlink({'stage': stage_id, \
+                                                                     'outputField': app_out })
 
-        if test:
-            return None
-        else:
-            return wf
+        return wf
+
+
+    def workflow_final_pass(self, wf, app_proj_id=None,test=False,verbose=False):
+        '''
+        Final pass of workflow just in case any 'link_later' parameters need to be filled in.
+        '''
+        # NOT EXPECTED TO OVERRIDE
+        if self.link_later == None:
+            return
+        
+        # Since non-file outputs from one step might be input params to another step and since
+        # those outputs might be in 'sister' branches of the workflow, this final pass may be
+        # needed to fill in the links that were not available when the wf was built branch by branch.
+        # TODO: This logic could also be used for file results->inputs, but is not currently.
+        #verbose=True
+
+        print "Final pass through workflow..."
+        
+        for later_link in self.link_later:
+            rep       = later_link['rep']
+            rep_id    = later_link['rep_id']
+            step_id   = later_link['step_id']
+            app_param = later_link['param']
+            if verbose:
+                print "DEBUG: looking for '"+rep['rep_tech']+"' step '"+step_id+"' param '"+app_param+"'"
+            mystery_param = self.find_mystery_param(rep,rep_id,step_id, app_param)
+            if mystery_param == None:
+                print "ERROR: Link later for '"+rep['rep_tech']+"' step '"+step_id+"' param '"+app_param+"' failed to find link."
+                sys.exit(1)
+            # Could also assert that mystery_param is a dx link
+            steps = rep['steps']
+            step = steps[step_id]
+            stage_id = step['stage_id'] # should not be a key error!
+            stage = wf.get_stage(stage_id)
+            if verbose:
+                print "Stage:"
+                print stage
+            app_inputs = stage['input']
+            if verbose:
+                print "DEBUG: found '"+app_inputs[app_param]+"' which is being replaced with '"+mystery_param+"'"
+            app_inputs[app_param] = mystery_param
+            wf.update_stage(stage_id, stage_input=app_inputs)
+                
+        return
 
 
     def report_run_plans(self,run=None):
@@ -1169,6 +1408,10 @@ class Launch(object):
                 else:
                     print "Assembling workflow for "+run['rep_tech']+"..."
                 wf = self.create_or_extend_workflow(run, None, wf=wf, test=test,template=template)
+        
+        # Need a final pass over the whole workflow to patch in params set to 'link_later'
+        if wf != None:  # Only non-test case
+            self.workflow_final_pass(wf,test=test)
             
         return wf
 
@@ -1278,6 +1521,9 @@ class Launch(object):
         # finding pipeline specific reference files in a stadardized way
         self.find_all_ref_files()
 
+        # Look for any prior app outputs that may be used in later steps
+        self.find_all_app_non_file_outputs()
+
         # deternine steps to run in a stadardized way
         self.determine_steps_needed(args.force)
 
@@ -1286,7 +1532,7 @@ class Launch(object):
             run = self.psv
         else:            
             run = self.psv['reps']['a']
-        wf = self.workflow_report_and_build(run,self.proj_id,test=args.test,template=(not args.run))
+        wf = self.workflow_report_and_build(run,self.proj_id,test=args.test,template=args.template)
 
         # Exit if test only
         if args.test:
