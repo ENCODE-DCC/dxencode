@@ -1177,3 +1177,17 @@ def umbrella_folder(folder,default,proj_name=None,exp_type=None,genome=None,anno
             
     return folder
 
+
+def select_alias(aliases, prefix='dnanexus:',must_find=True):
+    '''returns the alias of a given prefix'''
+    for alias in aliases:
+        if alias.startswith(prefix):
+            return alias
+    if must_find:
+        print "ERROR: Failed to find alias of prefix: '"+prefix+"' in:"
+        print aliases
+        sys.exit(1)
+    
+    return None
+
+

@@ -1,5 +1,5 @@
 #!/usr/bin/env python2.7
-# launch.py 0.0.1
+# launch.py 1.0.1
 
 import argparse,os, sys, json
 #import urlparse, subprocess, itertools, logging
@@ -10,8 +10,7 @@ import dxpy
 import dxencode
 
 ### TODO:
-#   1) Launchers should create the workflow_run encoded objects.  REQUIRED new status: 'launch_error', 'started', 'failed', 'partial_success')
-#   2) Launchers may fail, so how to report this to encoded?
+# 1) NEED TO MAKE a --template version not relying on ENCODEd at all!
 
 # NOTES: This command-line utility will run the a pipeline for a single replicate or combined reps.
 #      - All results will be written to a folder /<results_folder>/<exp_id>/rep<#>_<#>.
@@ -774,8 +773,6 @@ class Launch(object):
 
         print "Checking for input files..."
         # Find all reads files and move into place
-        # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...)
-        #       or possibly local, Currently only DX locations are supported.
         for rep_id in self.psv['reps'].keys():
             if len(rep_id) > 1:  # input fastqs only expected for simple ENCODEd reps (keyed by single letters)
                 continue
@@ -935,22 +932,29 @@ class Launch(object):
     def determine_steps_needed(self, force=False):
         '''Determine steps needed for replicate(s) and combined, base upon prior results.'''
         # NOT EXPECTED TO OVERRIDE
-        # FIXME: Currently steps_needed is not handled well across rep borders: tributaties -> rivers -> sea
+        
+        redo_reps = []  
         
         print "Determining steps to run..."
         # NOTE: stepsToDo is an ordered list of steps that need to be run
         for rep_id in sorted( self.psv['reps'].keys() ):
             rep = self.psv['reps'][rep_id]
             rep['deprecate'] = [] # old results will need to be moved/removed if step is rerun
+            force_rep = force
+            if 'tributaries' in rep:
+                for trib_id in rep['tributaries']:
+                    if trib_id in redo_reps:
+                        force_rep = True  # While this is less than ideal, it is a decent simplifying assumption. 
             rep['stepsToDo'] = self.determine_steps_to_run(rep['path'], rep['steps'], \
-                                                    rep['priors'], rep['deprecate'], force=force)
+                                                    rep['priors'], rep['deprecate'], force=force_rep)
+            if len(rep['stepsToDo']) > 0:
+                redo_reps.append(rep_id)
 
 
     def find_results_from_prev_branch(self, river, inp_token, expect_set):
-        '''
-        If combined_reps step, look for input from results of replicate level step.
-        '''
+        '''If combined_reps step, look for input from results of replicate level step.'''
         # NOT EXPECTED TO OVERRIDE
+        
         if not self.combined_reps:    # Not even doing a wf with combining branches 
             return None
         if 'tributaries' not in river:  # Not a combining branch
@@ -1082,6 +1086,111 @@ class Launch(object):
         return None
         
 
+    def wf_find_file_input(self,rep,step_id,file_token,expect_set,template=False,verbose=False):
+        '''When buidling a workflow, finds a dx defined step file input (which may be for a set) 
+           from prior step results, tributary results, or prior files found.'''
+        # NOT EXPECTED TO OVERRIDE
+        #verbose=(file_token.startswith('bam_biorep'))
+        
+        # Now try to find prior results or existing files to fill in this input
+        file_input = []
+        expect_count = 1
+        if 'tributaries' in rep:
+            # First: check in previous branch (e.g. rep level pipeline) is input to the combining step
+            if expect_set and \
+               (file_token.endswith('_A') or file_token.endswith('_B') or file_token.endswith('_ABC')):
+                expect_count = len(rep['tributaries'])
+            prev_input = self.find_results_from_prev_branch(rep, file_token, expect_set)
+            if prev_input != None:
+                if isinstance(prev_input, list):
+                    file_input.extend( prev_input )
+                else:
+                    file_input.append( prev_input )
+            
+            if verbose:
+                print "DEBUG: Found %d file_inputs from prev_branch" % len(file_input)
+            
+        if len(file_input) != expect_count and file_token in rep['prevStepResults']:
+            if isinstance(rep['prevStepResults'][file_token], list):
+                file_input.extend( rep['prevStepResults'][file_token] )
+            else:
+                file_input.append( rep['prevStepResults'][file_token] )
+            if verbose:
+                print "DEBUG: Now %d file_inputs after prevStepResults" % len(file_input)
+        if len(file_input) != expect_count:
+            alt_token = file_token
+            if alt_token not in rep['priors'] and expect_set:
+                alt_token = file_token + "_set"  # Sometimes sets expect  the token to end in '_set'!
+            if alt_token not in rep['priors'] and file_token.startswith('reads'):
+                alt_token = "reads"  # Sometimes sets are just reads.
+            if alt_token not in rep['priors'] and alt_token == "reads" and expect_set:
+                alt_token = "reads_set"  # Sometimes reads are reads_sets. # FIXME: should really drop "_set" logic
+            if alt_token in rep['priors']:
+                if isinstance(rep['priors'][alt_token], list):
+                     if expect_set:
+                        for fid in rep['priors'][alt_token]:
+                            file_input.append( dxencode.FILES[fid] )
+                     ##else:
+                     #   print "ERROR: Not expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
+                     #   print json.dumps(rep['priors'],indent=4,sort_keys=True)
+                     #   sys.exit(1)
+                else:
+                    file_input.append( dxencode.FILES[ rep['priors'][alt_token] ] )
+                if verbose:
+                    print "DEBUG: Now %d file_inputs after priors, with '%s'" % (len(file_input),file_token)
+
+        if not template:          
+            if len(file_input) == 0:
+                print "ERROR: step '"+step_id+"' can't find input '"+file_token+"'!"
+                #print json.dumps(rep['priors'],indent=4,sort_keys=True)
+                sys.exit(1)
+            if len(file_input) != expect_count:
+                print "ERROR: step '"+step_id+"' input '"+file_token+"' expects %d files but found %d." % \
+                                                                                    (expect_count,len(file_input))
+                #print json.dumps(rep['priors'],indent=4,sort_keys=True)
+                sys.exit(1)
+            
+        if len(file_input) == 0:
+            return None
+        if not expect_set:
+            return file_input[0]
+        return file_input
+            
+
+    def wf_find_param_input(self,rep,rep_id,step_id,param,app_param,template=False,verbose=False):
+        '''When buidling a workflow, finds a dx defined step param input (sets not yet supported)
+           from rep, psv or in rare cases another step''' 
+        # NOT EXPECTED TO OVERRIDE
+        
+        # Now try to find prior results or existing files to fill in this input
+        param_input = None
+        if param in rep:
+            param_input = rep[param]
+        #elif "params" in rep and param in rep["params"]: # watch it... this may have cross-fertilizing params
+        #    param_input = rep["params"][param]
+        elif param in self.psv:
+            param_input = self.psv[param]
+        else:
+            # Rare case of non-file outputs of one step being inputs of another
+            mystery_param = self.find_mystery_param(rep, rep_id, step_id, app_param,link_later=True)
+            if mystery_param != None:
+                param_input = mystery_param
+                # Since the mystery parameter could be from a sister rep, it may require linking later
+                if isinstance(mystery_param,str) and mystery_param == 'link_later':
+                    step_link_later = True  # Need to save this step's stage for later
+                    # Need a final pass of workflow once all branches are built
+                    if self.link_later == None:
+                        self.link_later = []
+                    later_link = { 'rep': rep, 'rep_id': rep_id, 'step_id': step_id, 'param': app_param }
+                    self.link_later.append(later_link)
+        if param_input == None and not template:
+            print "ERROR: step '"+step_id+"' unable to locate '"+param+ \
+                                              "' in pipeline specific variables (psv)."
+            sys.exit(1)
+            
+        return param_input
+
+
     def create_or_extend_workflow(self,rep, rep_id, wf=None,app_proj_id=None,test=False,template=False):
         '''
         This function will populate or extend a workflow with the steps in rep['stepsToDo'] and return 
@@ -1091,8 +1200,6 @@ class Launch(object):
         be pulled from the psv (pipeline specific variables) object.
         '''
         # NOT EXPECTED TO OVERRIDE
-        # TODO: This routine has become crazy complex and should be simplified with sub-routines.
-        # FIXME: Currently set inputs from tributaries are not controlled by count of tributaries
 
         if len(rep['stepsToDo']) < 1:
             return None
@@ -1116,96 +1223,37 @@ class Launch(object):
         steps = rep['steps']
         for step in rep['stepsToDo']:
             step_link_later = False
-            appName = steps[step]['app']
-            app = dxencode.find_applet_by_name(appName, app_proj_id)
+            app_name = steps[step]['app']
+            app = dxencode.find_applet_by_name(app_name, app_proj_id)
             inp_defs = app.describe().get('inputSpec') or []
-            appInputs = {}
+            app_inputs = {}
+
             # file inputs
-            for fileToken in steps[step]['inputs'].keys():
-                appInp = steps[step]['inputs'][fileToken]
+            for file_token in steps[step]['inputs'].keys():
+                app_inp = steps[step]['inputs'][file_token]
                 # Need inp_def to see if set is expected
                 for inp_def in inp_defs:
-                    if inp_def["name"] == appInp:
+                    if inp_def["name"] == app_inp:
                         break
-                if inp_def["name"] != appInp:
-                    print "ERROR: Pipeline definition for applet '"+appName+"' fileToken '"+fileToken+"'"
-                    print "value of '"+appInp+"' not found in DX definition."
+                if inp_def["name"] != app_inp:
+                    print "ERROR: Pipeline definition for applet '"+app_name+"' file_token '"+file_token+"'"
+                    print "value of '"+app_inp+"' not found in DX definition."
                     sys.exit(1)
                 expect_set = (inp_def["class"] == 'array:file')
+                app_inputs[ app_inp ] = self.wf_find_file_input(rep,step,file_token,expect_set,template=template)
                 
-                # Now try to find prior results or existing files to fill in this input
-                prev_results = None
-                if 'tributaries' in rep:
-                    # First: check in previous branch (e.g. rep level pipeline) is input to the combining step
-                    prev_results = self.find_results_from_prev_branch(rep, fileToken, expect_set)
-                if prev_results != None:
-                    appInputs[ appInp ] = prev_results
-                elif fileToken in rep['prevStepResults']:
-                    # Now the most likely: previous results of this branch
-                    appInputs[ appInp ] = rep['prevStepResults'][fileToken]
-                else:
-                    alt_token = fileToken
-                    if alt_token not in rep['priors'] and expect_set:
-                        alt_token = fileToken + "_set"  # Sometimes sets expect  the token to end in '_set'!
-                    if alt_token not in rep['priors'] and fileToken.startswith('reads'):
-                        alt_token = "reads"  # Sometimes sets are just reads.
-                    if alt_token not in rep['priors'] and alt_token == "reads" and expect_set:
-                        alt_token = "reads_set"  # Sometimes reads are reads_sets. # FIXME: should really drop "_set" logic
-                    if alt_token in rep['priors']:
-                        if isinstance(rep['priors'][alt_token], list):
-                             if expect_set:
-                                appInputs[ appInp ] = []
-                                for fid in rep['priors'][alt_token]:
-                                    appInputs[ appInp ].append(  dxencode.FILES[fid] )
-                             else:
-                                print "ERROR: Not expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
-                                print json.dumps(rep['priors'],indent=4,sort_keys=True)
-                                sys.exit(1)
-                        else:
-                            if expect_set:
-                                appInputs[ appInp ] = [ dxencode.FILES[ rep['priors'][alt_token] ] ]
-                            else:
-                                appInputs[ appInp ] = dxencode.FILES[ rep['priors'][alt_token] ]
-                if appInp not in appInputs and not template:
-                    print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
-                    if expect_set:
-                        print "Expecting set!"
-                    print json.dumps(rep['priors'],indent=4,sort_keys=True)
-                    sys.exit(1)
-            
             # Non-file app inputs
             if 'params' in steps[step]:
                 for param in steps[step]['params'].keys():
-                    appParam = steps[step]['params'][param]
-                    if param in rep:
-                        appInputs[ appParam ] = rep[param]
-                    #elif "params" in rep and param in rep["params"]: # watch it... this may have cross-fertilizing params
-                    #    appInputs[ appParam ] = rep["params"][param]
-                    elif param in self.psv:
-                        appInputs[ appParam ] = self.psv[param]
-                    else:
-                        # Rare case of non-file outputs of one step being inputs of another
-                        mystery_param = self.find_mystery_param(rep, rep_id, step, appParam,link_later=True)
-                        if mystery_param != None:
-                            appInputs[ appParam ] = mystery_param
-                            # Since the mystery parameter could be from a sister rep, it may require linking later
-                            if isinstance(mystery_param,str) and mystery_param == 'link_later':
-                                step_link_later = True  # Need to save this step's stage for later
-                                # Need a final pass of workflow once all branches are built
-                                if self.link_later == None:
-                                    self.link_later = []
-                                later_link = { 'rep': rep, 'rep_id': rep_id, 'step_id': step, 'param': appParam }
-                                self.link_later.append(later_link)
-                    if appParam not in appInputs and not template:
-                        print "ERROR: step '"+step+"' unable to locate '"+param+ \
-                                                          "' in pipeline specific variables (psv)."
-                        sys.exit(1)
+                    app_param = steps[step]['params'][param]
+                    app_inputs[ app_param ] = self.wf_find_param_input(rep,rep_id,step,param,app_param,template=template)
             
             # Now we are ready to add wf stage
             if not test:
-                stage_id = wf.add_stage(app, stage_input=appInputs, folder=rep['resultsFolder'])
+                stage_id = wf.add_stage(app, stage_input=app_inputs, folder=rep['resultsFolder'])
                 if step_link_later:  # At least one parameter will requre linking later so save stage_id
                     steps[step]['stage_id'] = stage_id
+                    
             # outputs, which we will need to link to
             for file_token in steps[step]['results'].keys():
                 app_out = steps[step]['results'][file_token]
