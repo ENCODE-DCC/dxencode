@@ -1065,7 +1065,7 @@ class Launch(object):
             return None
             
         # Avoid failure to link BOTH mystery 'sister' params because one is always prior to the other
-        # Solution is to put in a known token 'link_later', then have a final pass after building whole workflow
+        # Solution is to put in a known token '@link_later@', then have a final pass after building whole workflow
         # This link_later strategy should only be used if the mystery_step that produces the value can be found.
         mystery_out = None
         for mystery_step_key in mystery_rep["steps"].keys():
@@ -1077,7 +1077,7 @@ class Launch(object):
                                                                         param_name+" as '"+mystery_out+"'"
                 break
         if mystery_out != None:
-            mystery_value = 'link_later'
+            mystery_value = '@link_later@'
             if verbose:
                 print "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
                       "' from rep '"+param_spec["rep"]+"' with value: " + str(mystery_value)
@@ -1172,17 +1172,7 @@ class Launch(object):
             param_input = self.psv[param]
         else:
             # Rare case of non-file outputs of one step being inputs of another
-            mystery_param = self.find_mystery_param(rep, rep_id, step_id, app_param,link_later=True)
-            if mystery_param != None:
-                param_input = mystery_param
-                # Since the mystery parameter could be from a sister rep, it may require linking later
-                if isinstance(mystery_param,str) and mystery_param == 'link_later':
-                    step_link_later = True  # Need to save this step's stage for later
-                    # Need a final pass of workflow once all branches are built
-                    if self.link_later == None:
-                        self.link_later = []
-                    later_link = { 'rep': rep, 'rep_id': rep_id, 'step_id': step_id, 'param': app_param }
-                    self.link_later.append(later_link)
+            param_input = self.find_mystery_param(rep, rep_id, step_id, app_param,link_later=True)
         if param_input == None and not template:
             print "ERROR: step '"+step_id+"' unable to locate '"+param+ \
                                               "' in pipeline specific variables (psv)."
@@ -1242,12 +1232,20 @@ class Launch(object):
                 expect_set = (inp_def["class"] == 'array:file')
                 app_inputs[ app_inp ] = self.wf_find_file_input(rep,step,file_token,expect_set,template=template)
                 
-            # Non-file app inputs
+            # Non-file app param inputs
             if 'params' in steps[step]:
                 for param in steps[step]['params'].keys():
                     app_param = steps[step]['params'][param]
                     app_inputs[ app_param ] = self.wf_find_param_input(rep,rep_id,step,param,app_param,template=template)
-            
+                    # Since a mystery parameter could be from a sister rep, it may require linking later
+                    if isinstance(app_inputs[ app_param ],str) and app_inputs[ app_param ] == '@link_later@':
+                        step_link_later = True  # Need to save this step's stage for later
+                        # Need a final pass of workflow once all branches are built
+                        if self.link_later == None:
+                            self.link_later = []
+                        later_link = { 'rep': rep, 'rep_id': rep_id, 'step_id': step, 'param': app_param }
+                        self.link_later.append(later_link)
+
             # Now we are ready to add wf stage
             if not test:
                 stage_id = wf.add_stage(app, stage_input=app_inputs, folder=rep['resultsFolder'])
@@ -1277,7 +1275,7 @@ class Launch(object):
 
     def workflow_final_pass(self, wf, app_proj_id=None,test=False,verbose=False):
         '''
-        Final pass of workflow just in case any 'link_later' parameters need to be filled in.
+        Final pass of workflow just in case any '@link_later@' parameters need to be filled in.
         '''
         # NOT EXPECTED TO OVERRIDE
         if self.link_later == None:
@@ -1457,7 +1455,7 @@ class Launch(object):
                     print "Assembling workflow for "+run['rep_tech']+"..."
                 wf = self.create_or_extend_workflow(run, None, wf=wf, test=test,template=template)
         
-        # Need a final pass over the whole workflow to patch in params set to 'link_later'
+        # Need a final pass over the whole workflow to patch in params set to '@link_later@'
         if wf != None:  # Only non-test case
             self.workflow_final_pass(wf,test=test)
             
