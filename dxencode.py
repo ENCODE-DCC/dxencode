@@ -1063,6 +1063,15 @@ def create_notes(dxfile, addons={}):
     notes.update(addons)
     return notes
 
+def dx_file_get_details(fid,dxfile=None,proj_id=None):
+    '''Returns dx file's details as json.'''
+    if dxfile == None:
+        if proj_id != None:
+            dxfile = dxpy.DXFile(fid,project=proj_id)
+        else:
+            dxfile = file_handler_from_fid(fid)
+    return dxfile.get_details()
+
 def dx_file_get_properties(fid,dxfile=None,proj_id=None):
     '''Returns dx file's properties.'''
     if dxfile == None:

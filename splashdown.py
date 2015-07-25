@@ -2,11 +2,11 @@
 # splashdown.py 1.0.0
 #
 ### TODO:
-#   1) The creation of the workflow_run encoded object should be migrated to the launchers.
-#   2) Splashdown should update the workflow_run object if it already exists.
-#   3) Fix support for combined_reps pipline look-up
-#   4) Ideally, splashdown.py could poll encoded for workflow_run objects that have not completed,
-#      then determine if the have finished or failed and then begin the process of posting any results that are available.
+#   A) Post QC_metrics
+#      - Pre-determine if a qc_metrics object needs to be posted
+#      - Extend support to un-posted files for objects like mad_qc
+#      - Support recovery like situations when a file is already posted but a qc_metrics object has yet to be
+#      - Figure out how to post a blob
 #
 # Splashdown is meant to run outside of dnanexus and to examine experiment directories to
 # find results tp post to encoded.
@@ -89,7 +89,8 @@ class Splashdown(object):
         "small-rna-seq": {
             "step-order": [ "align","signals"],
             "replicate":  {
-                "align":           { "alignments":                                "*_star_genome.bam"            },
+                "align":           { "alignments":                                "*_srna_star.bam",
+                                     "gene quantifications":                      "*_srna_star_quant.tsv"        },
                 "signals":         { "plus strand signal of multi-mapped reads":  "*_small_plusAll.bw",
                                      "minus strand signal of multi-mapped reads": "*_small_minusAll.bw",
                                      "plus strand signal of unique reads":        "*_small_plusUniq.bw",
@@ -151,6 +152,53 @@ class Splashdown(object):
     #                        "fa":"fasta","fq":"fastq","results":"tsv",
     #                        "gff": "gtf" }
     '''List of supported formats, and means of recognizing with file extensions.'''
+    
+    # Each QC object has its own particulars:
+    # The key should match a key found in a file details json
+    # type: (optional) the subset collection of qc_metric objects in encodeD. Default: key+"_qc_metric"
+    # post: (required) ["step" and or "file"]
+    # blob: (optional) How to find any files to be loaded as metric blob
+    # singleton: (optional) There is only one value.  It will be named as such.
+    # props: (optional) If not all properties in the dx json should be loaded to ENCODEd, or if any names need changing.
+    #                   Default: include all from dx json and use the same property names
+    # include: (optional) A list of the only props in dx json to be placed in enc object. Default: include all
+    # exclude: (optional) A list of props in dx json but not to be placed in enc object.  Default: exclude none
+    QC_SUPPORTED = {
+        "STAR_log_final":       { 
+                                    "type":"star_qc_metric", 
+                                    "post": ["step","file"], 
+                                    "blob": {   "suffix": "/*_star_Log.final.out",  "format": "txt" }, 
+                                    "exclude": [ "Finished on","Started job on","Started mapping on"],
+                                },
+        "MAD.R":                { 
+                                    "type":"mad_cc_lrna_qc_metric",  # TODO: should rename
+                                    "post": ["step"],        
+                                    "blob": { "suffix": "/*_mad_plot.png" }, 
+                                },
+        "IDR_summary":          { 
+                                    "type":"???_idr_qc_metric", 
+                                    "post": ["step"],        
+                                    "blob": { "suffix": "/*_idr.png" }, 
+                                },
+        "samtools_flagstats":   { 
+                                    "type":"flagstats_qc_metric", 
+                                    "post": ["step","file"], 
+                                    "blob": { "suffix": "/*_qc.txt" }, # Problem: non-specific: *_qc.txt 
+                                },
+        "samtools_stats":       { "post": ["step","file"], "blob": { "suffix": "/*_qc.txt"          } },
+        "hotspot":              { "post": ["step","file"], "blob": { "suffix": "/*_hotspot_qc.txt"  } },
+        "edwBamStats":          { "post": ["step","file"], "blob": { "suffix": "/*_qc.txt"          } },
+        "edwComparePeaks":      { "post": ["step"],        "blob": { "suffix": "/*_qc.txt"          } },
+        "bigWigCorrelate":      { "post": ["step"],        "blob": { "suffix": "/*_qc.txt"          }, "singleton":"bigWigCorrelate" },
+        #"peak_counts":         { "post": ["step"],        "blob": { "suffix": "/*_qc.txt"          } },
+        "pbc":                  { "post": ["step","file"], "blob": { "suffix": "/*_qc.txt"          } },
+        "phantompeaktools_spp": { 
+                                    "type":"???_spp_qc_metric", 
+                                    "post": ["step","file"], 
+                                    "blob": { "suffix": "/*_qc.txt" }, 
+                                },
+        # How to deal with *_qc.txt? file name stripped of ending add "_qc.txt" and see if it is found.
+    }
 
     PRIMARY_INPUT_EXTENSION = [ "fastq","fq"]
     '''List of file extensions used to recognize primary inputs to parse accessions.'''
@@ -382,9 +430,9 @@ class Splashdown(object):
         return expected
 
 
-    def enc_lookup_json(self,path,must_find=False):
-        '''Attempts to retrieve an ENCODEd json object.'''
-        url = self.server + path + '/?format=json&frame=embedded'
+    def enc_lookup_json(self, path,frame='object',must_find=False):
+        '''Commonly used method to get a json object from encodeD.'''
+        url = self.server + path + '/?format=json&frame=' + frame
         #print url
         response = dxencode.encoded_get(url, self.authid, self.authpw)
         try:
@@ -457,7 +505,7 @@ class Splashdown(object):
             #if ret == accession:
             print "  * Updated ENCODEd '"+accession+"' with alias."
         else:
-            print "  * Would updated ENCODEd '"+accession+"' with alias."
+            print "  * Would update ENCODEd '"+accession+"' with alias."
         return True
 
 
@@ -800,6 +848,7 @@ class Splashdown(object):
 
     def get_qc_metrics(self,fid,job,verbose=False):
         '''Returns an object containing 'QC_metrics' info found in the file and or job.'''
+        # TODO: OBSOLETE... Remove when starting to use handl_qc_metrics()
         qc_metrics = None
         qc_for_job = None
         
@@ -838,186 +887,229 @@ class Splashdown(object):
         return qc_metrics
         
 
-    def pipeline_qualifiers(self,rep_tech,job=None,verbose=False):
-        '''Determines and pipeline_qualifiers in ugly special-case code.'''
-        #verbose=True # debug
-        if verbose:
-            print >> sys.stderr, "Looking for pipe_qualifiers for '"+rep_tech+"'"
-        if "exp" in self.obj_cache and rep_tech in self.obj_cache["exp"] \
-        and "pipe_qualifiers" in self.obj_cache["exp"][rep_tech]:
-            if verbose:
-                print >> sys.stderr, "FOUND pipeline_qualifiers in rep_tech cache"
-            return self.obj_cache["exp"][rep_tech]["pipe_qualifiers"]
-        # Currently always expecting a rep_tech
-        #if "exp" in self.obj_cache and pipe_qualifiers in self.obj_cache["exp"]:
-        #    if verbose:
-        #        print >> sys.stderr, "FOUND pipeline_qualifiers in exp cache"
-        #    return self.obj_cache["exp"]["pipe_qualifiers"]
-            
-        pipe_qualifiers = {}
-        pipe_qualifiers["version"] = "1.0"
-        if self.exp_type.startswith('long-rna-seq'):
-            if job == None:
-                if self.test:
-                    print "WARNING: Pipeline version can't be resolved without job date"
-                else:
-                    print "ERROR: Pipeline version can't be resolved without job date"
-                    sys.exit(1)
-            else:
-                job_created = job.get('created')
-                if job.get('created') >= 1427753403375:  # 2015-03-30 New index was run with star 2.4.0k
-                    pipe_qualifiers["version"] = "1.1"
-
-        pipe_qualifiers["qualifier"] = ''
-        if self.exp_type.startswith('long-rna-seq'):
-            is_pe = dxencode.exp_is_pe(self.exp,self.exp_files,rep_tech,self.server_key)
-            if is_pe:
-                pipe_qualifiers["qualifier"] = '-pe'
-            else:
-                pipe_qualifiers["qualifier"] = '-se'
-        elif self.exp_type.startswith('small-rna-seq'):
-            pipe_qualifiers["qualifier"] = '-se'
-        elif self.exp_type.startswith('rampage'):
-            pipe_qualifiers["qualifier"] = '-pe'
-                            
-        if len(pipe_qualifiers["qualifier"]) == 0:
-            print "ERROR: Can't determine pipeline qualifiers for '%s' replicate of '%s' experiment" % \
-                                                                                (replicate,self.exp_type)
-            sys.exit(1)
-        if "exp" not in self.obj_cache:
-             self.obj_cache["exp"] = {}
-        if rep_tech not in self.obj_cache["exp"]:
-            self.obj_cache["exp"][rep_tech] = {}
-        self.obj_cache["exp"][rep_tech]["pipe_qualifiers"] = pipe_qualifiers
-        #self.obj_cache["exp"]["pipe_qualifiers"] = pipe_qualifiers
-        if verbose:
-            print >> sys.stderr, "FOUND pipeline_qualifiers:" 
-            print >> sys.stderr, json.dumps(pipe_qualifiers,indent=4,sort_keys=True)
-        return pipe_qualifiers
-
-
-    def enc_pipeline_find(self,dx_pipe_name,rep_tech):
-        '''Finds a 'pipeline' encoded object.'''
-        pipe = None
-        # First lookup pipe_qualifiers:
-        pipe_qualifiers = self.pipeline_qualifiers(rep_tech) 
-        
-        # Lookup pipeline as: /pipelines/encode:long-rna-seq-se-pipeline-2
-        pipe_name = dx_pipe_name + pipe_qualifiers["qualifier"] + '-pipeline-' + pipe_qualifiers["version"].replace('.','-')
-        pipe_alias = 'encode:' + pipe_name
-        if pipe_alias in self.obj_cache:
-            return self.obj_cache[pipe_alias]
-        pipe = self.enc_lookup_json( 'pipelines/' + pipe_alias,must_find=True)
-        if pipe:
-            # TODO: Should look for status 'active' and compare that analysis_step is in pipeline['analysis_steps'] list
-            self.obj_cache[pipe_alias] = pipe
-            print "  - Found pipeline: '%s'" % pipe_alias
-        return pipe
-       
-
-    def enc_analysis_step_find(self,dx_app_name,dx_app_ver,dx_app_id,pipe_name):
-        '''Finds the 'analysis_step' encoded object used in creating the file.'''
-        ana_step = None
-        ana_step_name = dx_app_name + '-v-' + '-'.join(dx_app_ver.split('.')[:-1])
-        
-        # NOTE: the special dnanexus: alias.  Because dx_ids will differ between projects, and the identical app can be
-        #       rebuilt, the dnanexus: alias will instead be the app_name and first 2 digits of the app_version!
-        #       The ana_step_name, on the otherhand, may be sanitized ('prep_star' => 'index_star')
-        # /analysis-steps/unstranded-signal-star-v-1-0/ or /analysis-steps/dnanexus:bam-to-bigwig-unstranded-v-1-0/
-        ana_step_alias = 'dnanexus:' + ana_step_name
-        if ana_step_alias in self.obj_cache:
-            return self.obj_cache[ana_step_alias]
-        ana_step = self.enc_lookup_json( 'analysis-steps/' + ana_step_name,must_find=False)
-        if not ana_step:
-            ana_step = self.enc_lookup_json( 'analysis-steps/' + ana_step_alias,must_find=True)
-        if ana_step:
-            self.obj_cache[ana_step_alias] = ana_step
-            print "  - Found analysis_step: '%s'" % ana_step_alias
-        return ana_step
-
-
-    def enc_workflow_run_find_or_create(self,dx_wfr_id,rep_tech,test=False,verbose=False):
-        '''Finds or creates the 'workflow_run' encoded object that actually created the file.'''
-        wf_run = None
-        wf_alias = 'dnanexus:' + dx_wfr_id
-        # Find if you can:  /workflow-runs/dnanexus:analysis-BZKpZBQ0F1GJ7Z4ky8vBZpBx
-        if "exp" in self.obj_cache and wf_alias in self.obj_cache["exp"]:
-            wf_run = self.obj_cache["exp"][wf_alias]
+    def fill_in_qc_props(self,qc_obj,qc_faq):
+        '''Fills in the qc properties from a dx_qc_obj, taking into account any inclues, excludes, etc.'''
+        qc_props = {}
+        if "singleton" in qc_faq:
+            qc_props[qc_faq["singleton"]] = qc_obj
+        elif "props" in qc_faq:
+            for key in qc_faq['props'].keys:
+                qc_props[qc_faq['props'][key]] = qc_obj[key]
+        elif "include" in qc_faq:
+            for key in qc_faq['include']:
+                qc_props[key] = qc_obj[key]
+        elif "exclude" in qc_faq:
+            for key in qc_obj.keys():
+                if key not in qc_faq['exclude']:
+                    qc_props[key] = qc_obj[key]
         else:
-            wf_run = self.enc_lookup_json( '/workflow-runs/' + wf_alias,must_find=False)
-            if wf_run:
-                self.obj_cache["exp"][wf_alias] = wf_run
-                print "  - Found workflow_run: '%s'" % wf_alias
-                # TODO: Update wf_run
-        
-        if wf_run == None:
-            wf_run = {}
-            
-            # Lookup pipeline as: /pipelines/encode:long-rna-seq-se-pipeline-2
-            # TODO: Should look for status 'active' and compare that analysis_step is in pipeline['analysis_steps'] list
-            pipe = self.enc_pipeline_find(self.exp_type,rep_tech)
-            
-            wf_run['aliases'] = [ wf_alias ]
-            wf_run['status'] = "finished"
-            if "aliases" in pipe and len(pipe['aliases']) == 1:
-                wf_run['pipeline'] = "/pipelines/" + pipe['aliases'][0]
-            else:    
-                wf_run['pipeline'] = "/pipelines/encode:" + pipe["name"]
-            wf_run["dx_analysis_id"] = dx_wfr_id
+            qc_props = qc_obj
+        return qc_props
 
-            # Look up the actual analysis
-            dx_wf = dxpy.api.analysis_describe(dx_wfr_id)
-            if dx_wf:  # Note that wf is created immediately before running, then last modified by dx to set status 'done'
-                if "created" in dx_wf:
-                    then = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(dx_wf.get("created")/1000.0))
-                    wf_run["started_running"] = then
-                if "modified" in dx_wf:
-                    then = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(dx_wf.get("modified")/1000.0))
-                    wf_run["stopped_running"] = then
-            
-            # shoe-horn into notes:
-            notes = {}
-            notes["notes_version"] = "1"
-            notes['pipeline_name'] = pipe["name"]
-            notes["dx_project_id"] = self.proj_id
-            notes["dx_project_name"] = self.proj_name
-            if dx_wf:
-                notes["dx_cost"] = "$" + str(round(dx_wf.get("totalPrice"),2)) 
-            wf_run["notes"] = json.dumps(notes)
-            
-            # Now post this new object
-            self.obj_cache["exp"][wf_alias] = wf_run
-            if test:
-                print "  * Would post workflow_run: '%s'" % wf_alias
-            else:
-                try:
-                    #wf_run["@type"] = ["item", "workflow_run"]
-                    posted_wf_run = dxencode.encoded_post_obj('workflow_run',wf_run, self.server, self.authid, self.authpw)
-                except:
-                    print "Failed to post workflow_run: '%s'" % wf_alias
-                    sys.exit(1)
-                print "  * Posted workflow_run: '%s'" % wf_alias
-                self.workflow_runs_created += 1
-            
-        if verbose:
-            print >> sys.stderr, "ENCODEd 'workflow_run':"
-            print >> sys.stderr, json.dumps(wf_run,indent=4)
-            if "notes" in wf_run:
-                wf_run_notes = json.loads(wf_run.get("notes"))
-                print "ENCODEd 'workflow_run[notes]':"
-                print json.dumps(wf_run_notes,indent=4)
-        return wf_run
+
+    def enc_qc_metrics_find_or_create(self,qc_key,qc_obj,qc_faq,fid,job_id,step_run_id,test=True,verbose=False):
+        '''Finds or creates the 'qc_metric' encoded object that will be attached to the step_run and/or file.'''
+        qc_metrics = None
+        qc_patch = {}
         
+        # Collection is the subset of qc_metrics objects that this object must conform to
+        if "type" in qc_faq:
+            collection = qc_faq["type"]
+        else:
+            collection = qc_key + "_qc_metric"
         
+        # FIXME: The difficulty is that qc_metric points to step_run (and/or) files
+        #        If files, then it must be successively updated.
+        qc_alias = 'dnanexus:qc-%s' % job_id
+        if "step" not in qc_faq["post"]:
+            qc_alias = 'dnanexus:qc-%s' % fid
+            
+        if "exp" in self.obj_cache and qc_alias in self.obj_cache["exp"]:
+            qc_metrics = self.obj_cache["exp"][qc_alias]
+        else:
+            # What if it is already posted?  Expect it to be identical?
+            # FIXME: "qc_metrics/" needs to be specific collection
+            qc_metrics = self.enc_lookup_json(collection+'/'+qc_alias,must_find=False)
+            if qc_metrics != None:
+                print "  - Found qc_metric: '%s'" % qc_alias
+                assert "step" in qc_faq["post"]
+                qc_props = self.fill_in_qc_props(qc_obj,qc_faq)
+                for prop in qc_props.keys():
+                    if prop != qc_props:
+                        print >> sys.stderr, "ERROR: Expecting '"+prop+"' in qc_metrics."
+                        qc_patch=qc_props
+                        break
+                    elif qc_metrics[prop] != qc_props[prop]:
+                        print >> sys.stderr, "ERROR: QC_metrics['"+prop+"'] expecing <"+qc_props[prop]+ \
+                                                                                    ">, but found <"+qc_metrics[prop]+">."
+                        qc_patch=qc_props
+                        break
+                #if not qc_patch:
+                #    # Risky attempt to remove obsolete properties.  Bad idea
+                #    for prop in qc_metric.keys:
+                #        if prop not in ['@id','@type','status','step_run','schema_version','assay_term_name','assay_term_id',
+                #                        'applies_to','status','aliases','files']:
+                #            if prop not in qc_props:
+                #                print >> sys.stderr, "ERROR: Unexpected '"+prop+"':'"+qc_metrics[prop]+"' in qc_metrics"
+                #                qc_patch=qc_props
+                #                break
+                
+        if qc_metrics:
+            if "file" in qc_faq['post']:
+                found_file = False
+                for afile in qc_metrics['files']:
+                    if isinstance(afile,str) and afile.startswith('dnanexus:'):
+                        if afile == 'dnanexus:'+fid:  # FIXME: files not likely to match this
+                            found_file=True
+                            break
+                    else: #What?
+                        print "ERROR: Don't know how to detect file in qc_metric['files']."
+                        sys.exit(1)
+                if not found_file:
+                    qc_metrics['files'].append('dnanexus:'+fid)
+                    qc_patch['files'] = qc_metrics['files']
+                    
+            if qc_patch:
+                self.obj_cache["exp"][qc_alias] = qc_metrics
+                if test:
+                    print "  * Would post qc_metric: '%s'" % qc_alias
+                else:
+                    try:
+                        patched_obj = dxencode.encoded_patch_obj(collection+'/'+qc_alias,qc_patch, self.server, \
+                                                                                                self.authid, self.authpw)
+                    except:
+                        print "Failed to post qc_metrics: '%s'" % qc_alias
+                        sys.exit(1)
+                    print "  * Posted qc_metrics: '%s'" % qc_alias
+                    #self.qc_metrics_created += 1
+                
+        # Now create if no qc_metric is found.
+        if qc_metrics == None:
+            qc_metrics = self.fill_in_qc_props(qc_obj,qc_faq)
+                
+            # TODO: What about blob attachment?
+            
+            if qc_metrics != None:
+                if "file" in qc_faq['post']:
+                    if 'files' not in qc_metrics:
+                        qc_metrics['files'] = []
+                    qc_metrics['files'].append('dnanexus:'+fid)
+                qc_metrics['step_run'] =  step_run_id
+                qc_metrics['assay_term_name'] = self.exp['assay_term_name']
+                qc_metrics['assay_term_id']   = self.exp['assay_term_id'] # self.exp_type 
+                qc_metrics['aliases'] = [ qc_alias ]
+                    
+                self.obj_cache["exp"][qc_alias] = qc_metrics
+                if test:
+                    print "  * Would post qc_metric: '%s'" % qc_alias
+                else:
+                    try:
+                        posted_obj = dxencode.encoded_post_obj(collection,qc_metrics, self.server, self.authid, self.authpw)
+                    except:
+                        print "Failed to post qc_metrics: '%s'" % qc_alias
+                        sys.exit(1)
+                    print "  * Posted qc_metrics: '%s'" % qc_alias
+                    #self.qc_metrics_created += 1
+                
+        if verbose and qc_metrics != None:
+            print >> sys.stderr, "ENCODEd 'qc_metrics':"
+            print >> sys.stderr, json.dumps(qc_metrics,indent=4,sort_keys=True)
+
+        return qc_metrics
+            
+        
+    def handle_qc_metrics(self,fid,payload,test=True,verbose=False):
+        '''After posting a file, post or patch any qc_metrics objects associated with it.'''
+        verbose=False
+        # TODO: post QC metrics objects
+        # Strategy:
+        # 1) read File's "details json string
+        # 2) For each key in object: if it matches known type: pass to specialized routine to
+        #    Find existing by dnanexus:qc-job-2342345:
+        #    a) If found, patch as necessary (expect to need to add file to files list)
+        #    b) If not found, create and post it
+        #    c) add/update blob (somehow)
+        # HOW TO DEAL WITH qc not associated with a file??
+        # a) Always associate with file BUT some files are NOT posted?
+        # b) OR if no file to post has QC, then look for QC on job??? Harder.
+        # TODO: Pre-determine IF qc_metric needs to be posted/patched.
+        # For example: 
+        # - star.bam already posted, but star_qc_metric isn't.
+        # - all files for LRNA are posted but mad_qc_metric now needs to be.
+        
+        # Needed identifiers
+        step_run_id = payload["step_run"]
+        step_run_alias = step_run_id.split('/')[-1]
+        if step_run_alias.startswith('dnanexus:'):
+            job_id = step_run_alias.split(':')[-1]
+        else:
+            job = dxencode.job_from_fid(fid)
+            job_id = job.get('id')
+            #step_run_alias = 'dnanexus:' + job_id
+
+        # if file level qc_metrics exist, then use those
+        qc_for_file = {}
+        details_file = dxencode.dx_file_get_details(fid)
+        if not details_file:
+            return None
+        if "QC" in details_file:  # Not likely but QC json could be subsection of details
+            details_file = qc_from_file["QC"]
+        for key in details_file:
+            if key not in self.QC_SUPPORTED:
+                continue
+            qc_faq = self.QC_SUPPORTED[key]
+            qc_metrics = self.enc_qc_metrics_find_or_create(key,details_file[key],qc_faq,fid,job_id,step_run_id, \
+                                                                                            test=test,verbose=verbose)
+            if qc_metrics != None:
+                qc_for_file[key] = details_file[key]
+                
+        if qc_for_file and verbose:
+            print >> sys.stderr, "qc_for_file:"
+            print >> sys.stderr, json.dumps(qc_for_file,indent=4,sort_keys=True)
+            
+        return len(qc_for_file)
+
+    def enc_step_version_find(self,step_ver_alias,verbose=False):
+        '''Finds the 'analysis_step_version' encoded object used in creating the file.'''
+        step_ver = None
+        
+        if step_ver_alias in self.obj_cache:
+            return self.obj_cache[step_ver_alias]
+        step_ver = self.enc_lookup_json( 'analysis-step-versions/' + step_ver_alias,must_find=True)
+        if step_ver:
+            self.obj_cache[step_ver_alias] = step_ver
+            print "  - Found step_ver: '%s'" % step_ver_alias
+            if verbose:
+                print json.dumps(step_ver,indent=4,sort_keys=True)
+        return step_ver
+
+
+    def format_duration(self,beg_seconds,end_seconds):
+        '''Returns formatted string difference between two times in seconds.'''
+        duration = end_seconds - beg_seconds
+        m, s = divmod(duration, 60)
+        h, m = divmod(m, 60)
+        d, h = divmod(m, 24)
+        if d > 0:
+            return "%dd%0dh%02dm%02s" % (d, h, m, s)
+        elif h > 0: 
+            return    "%dh%02dm%02ds" % (h, m, s) 
+        elif h > 0: 
+            return        "%2dm%02ds" % (m, s)
+        else: 
+            return             "%2ds" % (s)
+                  
     def enc_step_run_find_or_create(self,job,dxFile,rep_tech,test=False,verbose=False):
         '''Finds or creates the 'analysis_step_run' encoded object that actually created the file.'''
+        #verbose=True
+        
         step_run = None
         job_id = job.get('id')
         step_alias = 'dnanexus:' + job_id
         if "exp" in self.obj_cache and step_alias in self.obj_cache["exp"]:
             step_run = self.obj_cache["exp"][step_alias]
         else:
-            step_run = self.enc_lookup_json( '/analysis-step-runs/' + step_alias,must_find=False)
+            step_run = self.enc_lookup_json( 'analysis-step-runs/' + step_alias,must_find=False)
             if step_run:
                 if "exp" not in self.obj_cache:
                      self.obj_cache["exp"] = {}
@@ -1030,33 +1122,30 @@ class Splashdown(object):
             step_run['status'] = "finished"
             dx_app_name = job.get('executableName')
             
-            # MUST determine special case pipeline qualifiers before proceeding!
-            pipe_qualifiers = self.pipeline_qualifiers(rep_tech,job) 
-            # Note that qualifiers are not used here, but will be in workflow_run creation
-
-            # Find or create the workflow
-            dx_wfr_id = job.get('analysis')
-            #wf_run = self.enc_workflow_run_find_or_create(dx_wfr_id,rep_tech,test=False,verbose=verbose)
-            wf_run = self.enc_workflow_run_find_or_create(dx_wfr_id,rep_tech,test=self.test,verbose=verbose)
-            wf_run_notes = json.loads(wf_run["notes"])
-            step_run["workflow_run"] = "/workflow-runs/dnanexus:" + dx_wfr_id
-            
-            # Find analysis_step
+            # get applet and version
             dx_app_id = job.get('applet')
             dx_app_ver = self.find_app_version(dxFile)
             if dx_app_ver and 'version' in dx_app_ver:
                 dx_app_ver = str( dx_app_ver.get('version') )
                 if dx_app_ver[0] == 'v':
                     dx_app_ver = dx_app_ver[1:]
+            # FIXME: UGLY special case
+            if dx_app_ver.startswith('0.'):  # If posting results generated while still developing, assume v1.0.0
+                dx_app_ver = "1.0.0"
             # FIXME: UGLY temporary special case!!!
             if dx_app_name  == "rampage-peaks" and dx_app_ver == "1.0.1":
-                dx_app_version = "1.1.0"  # Because the version was supposed to bump the second digit if a tool changes.
+                dx_app_ver = "1.1.0"  # Because the version was supposed to bump the second digit if a tool changes.
             # FIXME: UGLY temporary special case!!!
             if not dx_app_ver or not isinstance(dx_app_ver, str) or len(dx_app_ver) == 0:
                 print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
                 sys.exit(0)
-            ana_step = self.enc_analysis_step_find(dx_app_name,dx_app_ver,dx_app_id,wf_run_notes["pipeline_name"])
-            step_run['analysis_step'] = "/analysis-steps/" + ana_step['name']
+                
+            # get analysis_step_version (aka step_ver):
+            # NOTE: the special dnanexus: alias.  Because dx_ids will differ between projects, and the identical app can be
+            #       rebuilt, the dnanexus: alias will instead be the app_name and first 2 digits of the app_version!
+            step_ver_alias = "dnanexus:" + dx_app_name + '-v-' + '-'.join(dx_app_ver.split('.')[:-1])
+            step_ver = self.enc_step_version_find(step_ver_alias)
+            step_run['analysis_step-version'] = '/analysis-step-versions/' +step_ver_alias
             
             # applet details:
             applet_details = {}
@@ -1071,9 +1160,12 @@ class Splashdown(object):
             # Parameters:
             params = {}
             inputs = job.get("originalInput")
+            if verbose:
+                print "DX JOB: originalInputs:"
+                print json.dumps(inputs,indent=4,sort_keys=True)
             for name in inputs.keys():
                 #if isinstance(inputs[name],str) or isinstance(inputs[name],int) or isinstance(inputs[name],unicode):
-                if not isinstance(inputs[name],dict):
+                if not isinstance(inputs[name],dict):  # not class file? and not class:array:file 
                     params[name] = inputs[name]
             if len(params) > 0:
                 applet_details["parameters"] = params
@@ -1086,16 +1178,19 @@ class Splashdown(object):
             
             # shoe-horn into notes:
             notes = {}
-            notes["notes_version"] = "1"
+            # analysis_step? No, can get that from analysis_step_version
+            # pipeline?      No, can get that from analysis_step
+            notes["notes_version"] = "2"
             notes["dx_app_name"] = dx_app_name
             notes['dx_app_version'] = dx_app_ver
             notes["dx_app_id"] = dx_app_id
-            notes["step_name"] = ana_step['name']
-            notes['pipeline_name'] = wf_run_notes["pipeline_name"]
-            notes["dx_analysis_id"] = dx_wfr_id
+            notes["step_name"] = step_ver['analysis_step']
+            notes["dx_analysis_id"] = job.get('analysis')
             notes["dx_project_id"] = self.proj_id
             notes["dx_project_name"] = self.proj_name
             notes["dx_cost"] = "$" + str(round(job['totalPrice'],2))
+            duration = self.format_duration(job.get('startedRunning')/1000,job.get('stoppedRunning')/1000)
+            notes["duration"] = duration
             step_run["notes"] = json.dumps(notes)
             
             # Now post this new object
@@ -1162,6 +1257,7 @@ class Splashdown(object):
         if 'totalPrice' in job:
             notes['dx_cost'] = "$" + str(round(job['totalPrice'],2))
 
+        # TODO: OBSOLETE.  Remove when handle_qc_metrics() support is turned on.  Also bump notes_version above
         # Put QC metrics in notes
         qc_metrics = self.get_qc_metrics(fid,job)
         if qc_metrics:
@@ -1171,14 +1267,13 @@ class Splashdown(object):
         payload = self.add_encoded_info(payload,rep_tech,fid)
 
         # Find or create step_run object
-        
         step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=self.test,verbose=verbose)
         #step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=False,verbose=verbose)
         if step_run:
             if "dx_applet_details" in step_run:
                 payload["step_run"] = "/analysis-step-runs/dnanexus:" + step_run["dx_applet_details"][0].get("dx_job_id")
-            elif 'aliases' in step_run and len(step_run['aliases']) == 1:
-                payload["step_run"] = "/analysis-step-runs/" + step_run.get('aliases')[0]
+            elif 'aliases' in step_run:
+                payload["step_run"] = "/analysis-step-runs/" + dxencode.select_alias(step_run.get('aliases'))
             elif '@id' in step_run:
                 payload["step_run"] = step_run.get('@id')
             #else: # What?
@@ -1196,7 +1291,7 @@ class Splashdown(object):
                 #payload["analysis_step"] = "/analysis-steps/" + step_run_notes.get("step_name")
                 #payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
                 if "dx_analysis_id" in step_run_notes:
-                    notes["workflow_run"] = "/workflow-runs/dnanexus:" + step_run_notes.get("dx_analysis_id")
+                    notes["dx_analysis_id"] = step_run_notes.get("dx_analysis_id")
 
         notes["dx_project_id"] = self.proj_id
         notes["dx_project_name"] = self.proj_name
@@ -1388,6 +1483,13 @@ class Splashdown(object):
                     post_count += 1
                     
                 self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
+                
+                # e) After the file is posted, post or patch qc_metrics objects.
+                # TODO: Start posting QC metrics
+                # TODO: Add support for non-posting files (and already posted files!!!
+                #qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)
+                #if qc_count > 0:
+                #    print "  - handles %d qc_metrics objects for file." % qc_count
 
                 if args.files != 0 and file_count >= args.files:  # Short circuit for test
                     print "- Just trying %d file(s) by request" % file_count
