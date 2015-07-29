@@ -87,7 +87,7 @@ class Splashdown(object):
             "combined":   {}
         },
         "small-rna-seq": {
-            "step-order": [ "align","signals"],
+            "step-order": [ "align","signals", "mad_qc"],
             "replicate":  {
                 "align":           { "alignments":                                "*_srna_star.bam",
                                      "gene quantifications":                      "*_srna_star_quant.tsv"        },
@@ -95,7 +95,8 @@ class Splashdown(object):
                                      "minus strand signal of multi-mapped reads": "*_small_minusAll.bw",
                                      "plus strand signal of unique reads":        "*_small_plusUniq.bw",
                                      "minus strand signal of unique reads":       "*_small_minusUniq.bw"         }  },
-            "combined":   {}
+            "combined":   { 
+                "mad_qc":          { "QC_only":                                   "*_mad_plot.png"               }  },
         },
         "rampage": {
             "step-order": [ "align","signals","peaks","idr"],
@@ -218,6 +219,7 @@ class Splashdown(object):
         and post files in the associated directory.
         '''
         self.args = {} # run time arguments
+        self.handle_qc = False   # TODO: remove this property when qc posting is finished.
         self.server_key = 'test'
         self.acc_prefix = "TSTFF"
         self.proj_name = None
@@ -390,14 +392,18 @@ class Splashdown(object):
         step_files = []
 
         for token in file_globs.keys():
-            if self.file_format(file_globs[token]) == None:
-                print "Error: file glob %s has unknown file format! Please fix" % file_globs[token]
-                sys.exit(1)
+            if token != "QC_only": # self.handle_qc... Use new qc_object posting methods 
+                if self.file_format(file_globs[token]) == None:
+                    print "Error: file glob %s has unknown file format! Please fix" % file_globs[token]
+                    sys.exit(1)
+            elif token == "QC_only" and not self.handle_qc: # Use new qc_object posting methods
+                continue
             if verbose:
                 print >> sys.stderr, "-- Looking for %s" % (result_folder + file_globs[token])
             fid = dxencode.find_file(result_folder + file_globs[token],self.proj_id, recurse=False)
             if fid != None:
-                step_files.append( (token,rep_tech,fid) )
+                QC_only = (token == "QC_only") # self.handle_qc... Use new qc_object posting methods  
+                step_files.append( (token,rep_tech,fid,QC_only) )
             else:
                 return []      # Only include files from completed steps!
         return step_files
@@ -519,7 +525,9 @@ class Splashdown(object):
 
         posted = []
         self.found = {}
-        for (out_type, rep_tech, fid) in files_expected:
+        for (out_type, rep_tech, fid, QC_only) in files_expected:
+            if QC_only: # self.handle_qc... Use new qc_object posting methods 
+                continue
             if fid in self.found.keys():
                 continue  # No need to handle the same file twice
             if verbose:
@@ -610,21 +618,26 @@ class Splashdown(object):
             print >> sys.stderr, "Posted files:"
             print >> sys.stderr, json.dumps(posted,indent=4)
         return posted
-
+        
     def find_needed_files(self,files_expected,test=True,verbose=False):
         '''Returns the tuple list of files that NEED to be posted to ENCODE.'''
-        self.found = {}
+        #verbose = True
         needed = []
         posted = self.find_posted_files(files_expected,test=test,verbose=verbose)
-        for (out_type, rep_tech, fid) in files_expected:
-            #need_it = True
-            #for (posted_out_type, posted_rep_tech, posted_fid) in files_expected:
-            #    if fid == posted_fid:
-            #        need_it = False
-            #if need_it:
-            if fid not in self.found:
-                needed.append( (out_type,rep_tech,fid) )
-
+        # Note that find_posted_files() fills in self.found
+        for (out_type, rep_tech, fid, QC_only) in files_expected:
+            if not QC_only and fid not in self.found.keys():
+                needed.append( (out_type,rep_tech,fid, False) )
+            elif self.handle_qc:    # Use new qc_object posting methods 
+                # TODO: Figure out if QC was already posted
+                qc_blob = dxencode.dx_file_get_details(fid)
+                if qc_blob:
+                    for qc_key in qc_blob.keys():
+                        if qc_key in self.QC_SUPPORTED:
+                            if verbose:
+                                print >> sys.stderr, "* DEBUG QC_only is needed for:" + fid
+                            needed.append( (out_type,rep_tech,fid, True) )
+                            break
         if verbose:
             print >> sys.stderr, "Needed files:"
             print >> sys.stderr, json.dumps(needed,indent=4)
@@ -849,6 +862,8 @@ class Splashdown(object):
     def get_qc_metrics(self,fid,job,verbose=False):
         '''Returns an object containing 'QC_metrics' info found in the file and or job.'''
         # TODO: OBSOLETE... Remove when starting to use handl_qc_metrics()
+        if self.handle_qc:    # Use new qc_object posting methods
+            return None
         qc_metrics = None
         qc_for_job = None
         
@@ -920,9 +935,9 @@ class Splashdown(object):
         
         # FIXME: The difficulty is that qc_metric points to step_run (and/or) files
         #        If files, then it must be successively updated.
-        qc_alias = 'dnanexus:qc-%s' % job_id
+        qc_alias = 'dnanexus:qc.%s.%s' % (qc_key,job_id)
         if "step" not in qc_faq["post"]:
-            qc_alias = 'dnanexus:qc-%s' % fid
+            qc_alias = 'dnanexus:qc.%s.%s' % (qc_key,fid)
             
         if "exp" in self.obj_cache and qc_alias in self.obj_cache["exp"]:
             qc_metrics = self.obj_cache["exp"][qc_alias]
@@ -958,12 +973,13 @@ class Splashdown(object):
             if "file" in qc_faq['post']:
                 found_file = False
                 for afile in qc_metrics['files']:
-                    if isinstance(afile,str) and afile.startswith('dnanexus:'):
-                        if afile == 'dnanexus:'+fid:  # FIXME: files not likely to match this
-                            found_file=True
-                            break
-                    else: #What?
+                    if isinstance(afile,str) and afile == 'dnanexus:'+fid:
+                        found_file=True
+                        break
+                    elif not test or not qc_metrics['files'][0].startswith('dnanexus:file-'): #What?
+                        # FIXME: need to detect the frame=object file id's here.
                         print "ERROR: Don't know how to detect file in qc_metric['files']."
+                        print >> sys.stderr, json.dumps(qc_metrics,indent=4,sort_keys=True)
                         sys.exit(1)
                 if not found_file:
                     qc_metrics['files'].append('dnanexus:'+fid)
@@ -972,15 +988,15 @@ class Splashdown(object):
             if qc_patch:
                 self.obj_cache["exp"][qc_alias] = qc_metrics
                 if test:
-                    print "  * Would post qc_metric: '%s'" % qc_alias
+                    print "  * Would patch qc_metric: '%s'" % qc_alias
                 else:
                     try:
                         patched_obj = dxencode.encoded_patch_obj(collection+'/'+qc_alias,qc_patch, self.server, \
                                                                                                 self.authid, self.authpw)
                     except:
-                        print "Failed to post qc_metrics: '%s'" % qc_alias
+                        print "Failed to patch qc_metrics: '%s'" % qc_alias
                         sys.exit(1)
-                    print "  * Posted qc_metrics: '%s'" % qc_alias
+                    print "  * Patched qc_metrics: '%s'" % qc_alias
                     #self.qc_metrics_created += 1
                 
         # Now create if no qc_metric is found.
@@ -1025,7 +1041,7 @@ class Splashdown(object):
         # Strategy:
         # 1) read File's "details json string
         # 2) For each key in object: if it matches known type: pass to specialized routine to
-        #    Find existing by dnanexus:qc-job-2342345:
+        #    Find existing by dnanexus:qc.qc_key.job-2342345:
         #    a) If found, patch as necessary (expect to need to add file to files list)
         #    b) If not found, create and post it
         #    c) add/update blob (somehow)
@@ -1036,6 +1052,23 @@ class Splashdown(object):
         # For example: 
         # - star.bam already posted, but star_qc_metric isn't.
         # - all files for LRNA are posted but mad_qc_metric now needs to be.
+        
+        # Redesign needed...
+        # Because of blob attachment: JSON does not support binary objects so:
+        # 1) the qc blob file DOES need to be posted from dx
+        # 2) need to make a new dx app - version of validate_post.
+        # 3) cycle through all QC objects BEFORE cycling through accessioned files to post.
+        #    a) Every qc_object MUST have a distinct dx "qc_file" that represents it (re-write dnase again)
+        #    b) The qc_object DOES NOT NEED to have the qc_file posted as a blob attachment. 
+        #       (simple post from splashdown vs. qc_file blob post from dx).
+        #    c) The qc_file MAY ALSO BE an accessionable file, in which case it CANNOT be an attachment blob.
+        #    d) stamp dx file with qc.qc_key.job-xxx alias (or possibly href)
+        # 4) in cycle on files to be accessioned, can patch (now already existing) qc_object with file id.
+        # But...
+        # - qc_objects with no blob?                                 OKAY (3.b)
+        # - blobs that can be seen from more than one qc_object?     NO (3.a)
+        # - blobs that might be accessioned independently?           Not QUITE (3.c)
+        # - more than one qc.qc_key.job-xxx alias to stamp to file.  NO (3.a)
         
         # Needed identifiers
         step_run_id = payload["step_run"]
@@ -1072,6 +1105,12 @@ class Splashdown(object):
     def enc_step_version_find(self,step_ver_alias,verbose=False):
         '''Finds the 'analysis_step_version' encoded object used in creating the file.'''
         step_ver = None
+        
+        # FIXME: TESTING
+        if self.handle_qc and step_ver_alias == "dnanexus:small-rna-mad-qc-v-1-0":
+            step_ver = {}
+            step_ver['analysis_step'] = "Fake it for the cameras!"
+            return step_ver
         
         if step_ver_alias in self.obj_cache:
             return self.obj_cache[step_ver_alias]
@@ -1231,12 +1270,13 @@ class Splashdown(object):
         # get job for this file
         job = dxencode.job_from_fid(fid)
 
-        payload["file_format"] = self.file_format(dx_obj["name"])
-        if payload["file_format"] == None:
-            print "Warning: file %s has unknown file format!" % dxencode.file_path_from_fid(fid)
-        if len(output_format) > 1 and payload["file_format"] != output_format[1]:
-            print "Warning: file %s has format %s but expecting %s!" % \
-                                        (dxencode.file_path_from_fid(fid),payload["file_format"], output_format[1])
+        if out_type != "QC_only": # self.handle_qc... Use new qc_object posting methods 
+            payload["file_format"] = self.file_format(dx_obj["name"])
+            if payload["file_format"] == None:
+                print "Warning: file %s has unknown file format!" % dxencode.file_path_from_fid(fid)
+            if len(output_format) > 1 and payload["file_format"] != output_format[1]:
+                print "Warning: file %s has format %s but expecting %s!" % \
+                                            (dxencode.file_path_from_fid(fid),payload["file_format"], output_format[1])
         payload["derived_from"] = self.find_derived_from(fid,job, verbose)
         payload['submitted_file_name'] = dxencode.file_path_from_fid(fid,projectToo=True)
         payload['file_size'] = dx_obj["size"]
@@ -1259,9 +1299,10 @@ class Splashdown(object):
 
         # TODO: OBSOLETE.  Remove when handle_qc_metrics() support is turned on.  Also bump notes_version above
         # Put QC metrics in notes
-        qc_metrics = self.get_qc_metrics(fid,job)
-        if qc_metrics:
-            notes['QC_metrics'] = qc_metrics
+        if not self.handle_qc:    # Use OLD qc values in file notes methods
+            qc_metrics = self.get_qc_metrics(fid,job)
+            if qc_metrics:
+                notes['QC_metrics'] = qc_metrics
         
         #print "  - Adding encoded information."
         payload = self.add_encoded_info(payload,rep_tech,fid)
@@ -1404,6 +1445,7 @@ class Splashdown(object):
         exp_count = 0
         halted = 0
         total_posted = 0
+        total_qc_objs = 0        
         for exp_id in args.experiments:
             sys.stdout.flush() # Slow running job should flush to piped log
             self.exp_id = exp_id
@@ -1441,7 +1483,7 @@ class Splashdown(object):
 
             # 5) For each file that should be posted, determine if the file needs to be posted.
             files_to_post = self.find_needed_files(files_expected, test=self.test, verbose=args.verbose)
-            print "- Found %d files that need to be posted" % len(files_to_post)
+            print "- Found %d files that need to be handled" % len(files_to_post)
             if len(files_to_post) == 0:
                 continue
 
@@ -1449,7 +1491,8 @@ class Splashdown(object):
             exp_count += 1
             file_count = 0
             post_count = 0
-            for (out_type,rep_tech,fid) in files_to_post:
+            qc_obj_count = 0
+            for (out_type,rep_tech,fid,QC_only) in files_to_post:
                 sys.stdout.flush() # Slow running job should flush to piped log
                 file_name = dxencode.file_path_from_fid(fid)
                 if args.start_at != None:
@@ -1466,41 +1509,46 @@ class Splashdown(object):
 
                 file_count += 1
                 # c) Post file and update encoded database.
-                accession = self.file_post(fid,payload,args.test)
-                if accession == None:
-                    print "* HALTING %s - post failure could compromise 'derived_from'" % \
-                                                                                    (self.exp_id)
-                    halted += 1
-                    break
-                elif accession == "NOT POSTED":
-                    print "* HALTING %s - validation failure prevented posting and could compromise 'derived_from'" % \
-                                                                                    (self.exp_id)
-                    halted += 1
-                    break
+                if not QC_only: # self.handle_qc... Use new qc_object posting methods 
+                    accession = self.file_post(fid,payload,args.test)
+                    if accession == None:
+                        print "* HALTING %s - post failure could compromise 'derived_from'" % \
+                                                                                        (self.exp_id)
+                        halted += 1
+                        break
+                    elif accession == "NOT POSTED":
+                        print "* HALTING %s - validation failure prevented posting and could compromise 'derived_from'" % \
+                                                                                        (self.exp_id)
+                        halted += 1
+                        break
 
-                # d) Update dnanexus file with file accession tag.
-                if not args.test:
-                    post_count += 1
-                    
-                self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
+                    # d) Update dnanexus file with file accession tag.
+                    if not args.test:
+                        post_count += 1
+                        
+                    self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
                 
                 # e) After the file is posted, post or patch qc_metrics objects.
                 # TODO: Start posting QC metrics
                 # TODO: Add support for non-posting files (and already posted files!!!
-                #qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)
-                #if qc_count > 0:
-                #    print "  - handles %d qc_metrics objects for file." % qc_count
+                if self.handle_qc:    # Use new qc_object posting methods                
+                    qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)
+                    if qc_count > 0:
+                        print "  - handled %d qc_metrics objects for file." % qc_count
+                        if not args.test:
+                            qc_obj_count += 1
+                            total_qc_objs += 1                                
 
                 if args.files != 0 and file_count >= args.files:  # Short circuit for test
                     print "- Just trying %d file(s) by request" % file_count
                     break
 
-            print "- For %s Processed %d file(s), posted %s" % \
-                                                        (self.exp_id, file_count, post_count)
+            print "- For %s Processed %d file(s), posted %d, qc %d" % \
+                                                        (self.exp_id, file_count, post_count,qc_obj_count)
             total_posted += post_count
 
-        print "Processed %d experiment(s), halted %d, posted %d file(s)" % \
-                                                            (exp_count, halted, total_posted)
+        print "Processed %d experiment(s), halted %d, posted %d file(s), %d qc object(s)" % \
+                                                            (exp_count, halted, total_posted, total_qc_objs)
         if halted == exp_count:
             sys.exit(1)
         print "(finished)"

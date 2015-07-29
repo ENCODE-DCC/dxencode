@@ -1144,7 +1144,7 @@ class Launch(object):
                 print "ERROR: step '"+step_id+"' can't find input '"+file_token+"'!"
                 #print json.dumps(rep['priors'],indent=4,sort_keys=True)
                 sys.exit(1)
-            if len(file_input) != expect_count:
+            if 'tributaries' in rep and len(file_input) != expect_count:
                 print "ERROR: step '"+step_id+"' input '"+file_token+"' expects %d files but found %d." % \
                                                                                     (expect_count,len(file_input))
                 #print json.dumps(rep['priors'],indent=4,sort_keys=True)
