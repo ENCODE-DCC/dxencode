@@ -2,11 +2,7 @@
 # splashdown.py 1.0.0
 #
 ### TODO:
-#   A) Post QC_metrics
-#      - Pre-determine if a qc_metrics object needs to be posted
-#      - Extend support to un-posted files for objects like mad_qc
-#      - Support recovery like situations when a file is already posted but a qc_metrics object has yet to be
-#      - Figure out how to post a blob
+# A) Post QC_metrics - written but not fully tested.
 #
 # Splashdown is meant to run outside of dnanexus and to examine experiment directories to
 # find results tp post to encoded.
@@ -30,6 +26,7 @@ import argparse,os, sys
 import json, urlparse, subprocess, itertools, logging, time
 #import requests, re, shlex, time
 from datetime import datetime
+from base64 import b64encode
 
 import dxpy
 import dxencode
@@ -158,7 +155,7 @@ class Splashdown(object):
     # The key should match a key found in a file details json
     # type: (optional) the subset collection of qc_metric objects in encodeD. Default: key+"_qc_metric"
     # post: (required) ["step" and or "file"]
-    # blob: (optional) How to find any files to be loaded as metric blob
+    # blob: (optional) The 'pattern' to match and (optional) 'mime_type' of a file to include as an attachment.
     # singleton: (optional) There is only one value.  It will be named as such.
     # props: (optional) If not all properties in the dx json should be loaded to ENCODEd, or if any names need changing.
     #                   Default: include all from dx json and use the same property names
@@ -168,37 +165,51 @@ class Splashdown(object):
         "STAR_log_final":       { 
                                     "type":"star_qc_metric", 
                                     "post": ["step","file"], 
-                                    "blob": {   "suffix": "/*_star_Log.final.out",  "format": "txt" }, 
+                                    "blob": {   "pattern": "/*_star_Log.final.out",  
+                                                "mime_type": "text/plain" }, 
                                     "exclude": [ "Finished on","Started job on","Started mapping on"],
                                 },
         "MAD.R":                { 
                                     "type":"mad_cc_lrna_qc_metric",  # TODO: should rename
                                     "post": ["step"],        
-                                    "blob": { "suffix": "/*_mad_plot.png" }, 
+                                    "blob": { "pattern": "/*_mad_plot.png" }, 
                                 },
         "IDR_summary":          { 
                                     "type":"???_idr_qc_metric", 
                                     "post": ["step"],        
-                                    "blob": { "suffix": "/*_idr.png" }, 
+                                    "blob": { "pattern": "/*_idr.png" }, 
                                 },
         "samtools_flagstats":   { 
                                     "type":"flagstats_qc_metric", 
                                     "post": ["step","file"], 
-                                    "blob": { "suffix": "/*_qc.txt" }, # Problem: non-specific: *_qc.txt 
+                                    "blob": { "pattern": "/*_qc.txt" }, # Problem: non-specific: *_qc.txt 
                                 },
-        "samtools_stats":       { "post": ["step","file"], "blob": { "suffix": "/*_qc.txt"          } },
-        "hotspot":              { "post": ["step","file"], "blob": { "suffix": "/*_hotspot_qc.txt"  } },
-        "edwBamStats":          { "post": ["step","file"], "blob": { "suffix": "/*_qc.txt"          } },
-        "edwComparePeaks":      { "post": ["step"],        "blob": { "suffix": "/*_qc.txt"          } },
-        "bigWigCorrelate":      { "post": ["step"],        "blob": { "suffix": "/*_qc.txt"          }, "singleton":"bigWigCorrelate" },
-        #"peak_counts":         { "post": ["step"],        "blob": { "suffix": "/*_qc.txt"          } },
-        "pbc":                  { "post": ["step","file"], "blob": { "suffix": "/*_qc.txt"          } },
+        "samtools_stats":       { "post": ["step","file"], "blob": { "pattern": "/*_qc.txt"          } },
+        "hotspot":              { "post": ["step","file"], "blob": { "pattern": "/*_hotspot_qc.txt"  } },
+        "edwBamStats":          { "post": ["step","file"], "blob": { "pattern": "/*_qc.txt"          } },
+        "edwComparePeaks":      { "post": ["step"],        "blob": { "pattern": "/*_qc.txt"          } },
+        "bigWigCorrelate":      { "post": ["step"],        "blob": { "pattern": "/*_qc.txt"          }, "singleton":"bigWigCorrelate" },
+        #"peak_counts":         { "post": ["step"],        "blob": { "pattern": "/*_qc.txt"          } },
+        "pbc":                  { "post": ["step","file"], "blob": { "pattern": "/*_qc.txt"          } },
         "phantompeaktools_spp": { 
                                     "type":"???_spp_qc_metric", 
                                     "post": ["step","file"], 
-                                    "blob": { "suffix": "/*_qc.txt" }, 
+                                    "blob": { "pattern": "/*_qc.txt" }, 
                                 },
         # How to deal with *_qc.txt? file name stripped of ending add "_qc.txt" and see if it is found.
+    }
+    
+    # blob attachments have mime_types recognizable by file extension
+    EXTENSION_TO_MIME = { 
+        "png":       "image/png",
+        "txt":       "text/plain",
+        "tsv":       "text/tab-separated-values",
+        "pdf":       "application/pdf",
+        "jpg":       "image/jpeg",
+        "gif":       "image/gif",
+        "tiff":      "image/tiff",
+        "html":      "text/html",
+        "as":        "text/autosql",
     }
 
     PRIMARY_INPUT_EXTENSION = [ "fastq","fq"]
@@ -363,6 +374,14 @@ class Splashdown(object):
             ext = self.EXTENSION_TO_FORMAT[ext]
         if ext in self.FORMATS_SUPPORTED:
             return ext
+        return None
+
+
+    def file_mime_type(self,file_name):
+        '''Try to determine mime_type from file extension.'''
+        ext = file_name.split(".")[-1]
+        if ext in self.EXTENSION_TO_MIME.keys():
+            return self.EXTENSION_TO_MIME[ext]
         return None
 
 
@@ -629,15 +648,17 @@ class Splashdown(object):
             if not QC_only and fid not in self.found.keys():
                 needed.append( (out_type,rep_tech,fid, False) )
             elif self.handle_qc:    # Use new qc_object posting methods 
-                # TODO: Figure out if QC was already posted
+                # Figure out if QC was already posted
                 qc_blob = dxencode.dx_file_get_details(fid)
                 if qc_blob:
                     for qc_key in qc_blob.keys():
                         if qc_key in self.QC_SUPPORTED:
-                            if verbose:
-                                print >> sys.stderr, "* DEBUG QC_only is needed for:" + fid
-                            needed.append( (out_type,rep_tech,fid, True) )
-                            break
+                            qc_metric = self.enc_qc_metric_find(fid,qc_key)
+                            if not qc_metric or qc_metric == None:
+                                if verbose:
+                                    print >> sys.stderr, "* DEBUG QC_only is needed for:" + fid
+                                needed.append( (out_type,rep_tech,fid, True) )
+                                break
         if verbose:
             print >> sys.stderr, "Needed files:"
             print >> sys.stderr, json.dumps(needed,indent=4)
@@ -902,7 +923,7 @@ class Splashdown(object):
         return qc_metrics
         
 
-    def fill_in_qc_props(self,qc_obj,qc_faq):
+    def qc_props_fill(self,qc_obj,qc_faq):
         '''Fills in the qc properties from a dx_qc_obj, taking into account any inclues, excludes, etc.'''
         qc_props = {}
         if "singleton" in qc_faq:
@@ -922,41 +943,115 @@ class Splashdown(object):
         return qc_props
 
 
-    def enc_qc_metrics_find_or_create(self,qc_key,qc_obj,qc_faq,fid,job_id,step_run_id,test=True,verbose=False):
+    def qc_metric_attachment(self,fid,blob_def):
+        '''Returns a QC metrics attachment property for posting an attachment with the QC object.'''
+        attachment = {}
+        blob_fid = None
+        # "blob": { "pattern": "/*_mad_plot.png" }, 
+        # from base64 import b64encode
+
+        # Need to find the dx file (fid)
+        # should be in same folder as fid
+        descr = dxencode.description_from_fid(fid)
+        
+        path = dxencode.file_path_from_fid(fid)
+        if descr['name'].endswith(blob_def['pattern'][2:]):  # is this the file?
+            blob_fid = fid
+            blob_name = descr['name']
+        else:
+            folder = descr['folder']
+            blob_fid = dxencode.find_file(folder + blob_def['pattern'],self.proj_id,multiple=False,recurse=False)
+            if blob_fid == None:
+                print >> sys.stderr, "ERROR: Failed to find blob attachment file: " +folder + blob_def['pattern']
+                return None # FIXME: do we want to halt?  Or is this not an error?
+            blob_descr = dxencode.description_from_fid(blob_fid)
+            blob_name = blob_descr['name']
+        
+        # What type of blob is this?
+        if "mime_type" in blob_def:
+            blob_mime = blob_def["mime_type"]
+        else:
+            blob_mime = self.file_mime_type(blob_name)
+            if blob_mime == None:
+                print >> sys.stderr, "ERROR: Unrecognizible mime_type for file: " + blob_name
+                sys.exit(1) 
+
+        # Need to download, then read or dx cat, or DXFile.read()
+		#blog_handle = dxencode.file_handler_from_fid(blob_fid)
+	    #dxpy.download_dxfile(blob_fid, "tmp.file")
+        try:
+            with dxpy.open_dxfile(blob_fid) as stream:
+                attachment = {
+                    'download': blob_name, #Just echoes the given filename as the download name
+                    'type':     blob_mime,
+                    'href': 'data:%s;base64,%s' % (blob_mime, b64encode(stream.read()))
+                }
+            return attachment
+        except:
+            print >> sys.stderr, "ERROR: Unable to open and read '"+blob_name+"' as stream."
+        return None
+
+
+    def qc_metric_make_alias(self,fid,qc_key,job_id=None):
+        '''Returns a qc_metric alias'''
+        if job_id == None:
+            try:
+                file_dict = dxencode.description_from_fid(fid)
+                job_id = file_dict["createdBy"]["job"]
+            except:
+                print >> sys.stderr, "ERROR: could not find job for "+fid
+                return None
+        return "dnanexus:qc."+qc_key+'.'+job_id
+        
+        
+    def qc_metric_schema_type(self,qc_key):
+        '''Returns the schema type (collection) a qc_metric belongs to'''
+        if qc_key in self.QC_SUPPORTED and "type" in self.QC_SUPPORTED[qc_key]:
+            return self.QC_SUPPORTED[qc_key]["type"]
+        else: 
+            return qc_key + "_qc_metric"
+
+
+    def enc_qc_metric_find(self,fid,qc_key,job_id=None,collection=None,must_find=False):
+        '''Returns the qc_mtrics object from either cache or encodeD.'''
+        qc_alias = self.qc_metric_make_alias(fid,qc_key,job_id) 
+        if "exp" in self.obj_cache and qc_alias in self.obj_cache["exp"]:
+            return self.obj_cache["exp"][qc_alias]
+
+        # What collection (schema type) will this metric belong to?
+        if collection == None:
+            collection = self.qc_metric_schema_type(qc_key)
+
+        qc_metric = self.enc_lookup_json(collection+'/'+qc_alias,must_find=must_find)
+        if qc_metric != None:
+            self.obj_cache["exp"][qc_alias] = qc_metric
+        return qc_metric
+        
+
+    def enc_qc_metric_find_or_create(self,qc_key,qc_obj,qc_faq,fid,job_id,step_run_id,test=True,verbose=False):
         '''Finds or creates the 'qc_metric' encoded object that will be attached to the step_run and/or file.'''
-        qc_metrics = None
+        qc_metric = None
         qc_patch = {}
         
-        # Collection is the subset of qc_metrics objects that this object must conform to
-        if "type" in qc_faq:
-            collection = qc_faq["type"]
-        else:
-            collection = qc_key + "_qc_metric"
-        
-        # FIXME: The difficulty is that qc_metric points to step_run (and/or) files
-        #        If files, then it must be successively updated.
-        qc_alias = 'dnanexus:qc.%s.%s' % (qc_key,job_id)
-        if "step" not in qc_faq["post"]:
-            qc_alias = 'dnanexus:qc.%s.%s' % (qc_key,fid)
-            
-        if "exp" in self.obj_cache and qc_alias in self.obj_cache["exp"]:
-            qc_metrics = self.obj_cache["exp"][qc_alias]
-        else:
-            # What if it is already posted?  Expect it to be identical?
-            # FIXME: "qc_metrics/" needs to be specific collection
-            qc_metrics = self.enc_lookup_json(collection+'/'+qc_alias,must_find=False)
-            if qc_metrics != None:
+        collection = self.qc_metric_schema_type(qc_key)
+        qc_alias = self.qc_metric_make_alias(fid,qc_key,job_id)        
+        qc_metric = self.enc_qc_metric_find(fid,qc_key,job_id,collection)
+        if qc_metric != None:
+            # How to tell if it was just created???
+            # The step_run will only be an alias on just created objects
+            if qc_metric['step_run'] != step_run_id:
                 print "  - Found qc_metric: '%s'" % qc_alias
+                self.obj_cache["exp"][qc_alias] = qc_metric
                 assert "step" in qc_faq["post"]
-                qc_props = self.fill_in_qc_props(qc_obj,qc_faq)
+                qc_props = self.qc_props_fill(qc_obj,qc_faq)
                 for prop in qc_props.keys():
                     if prop != qc_props:
-                        print >> sys.stderr, "ERROR: Expecting '"+prop+"' in qc_metrics."
+                        print >> sys.stderr, "ERROR: Expecting '"+prop+"' in qc_metric."
                         qc_patch=qc_props
                         break
-                    elif qc_metrics[prop] != qc_props[prop]:
-                        print >> sys.stderr, "ERROR: QC_metrics['"+prop+"'] expecing <"+qc_props[prop]+ \
-                                                                                    ">, but found <"+qc_metrics[prop]+">."
+                    elif qc_metric[prop] != qc_props[prop]:
+                        print >> sys.stderr, "ERROR: qc_metric['"+prop+"'] expecing <"+qc_props[prop]+ \
+                                                                                    ">, but found <"+qc_metric[prop]+">."
                         qc_patch=qc_props
                         break
                 #if not qc_patch:
@@ -965,28 +1060,28 @@ class Splashdown(object):
                 #        if prop not in ['@id','@type','status','step_run','schema_version','assay_term_name','assay_term_id',
                 #                        'applies_to','status','aliases','files']:
                 #            if prop not in qc_props:
-                #                print >> sys.stderr, "ERROR: Unexpected '"+prop+"':'"+qc_metrics[prop]+"' in qc_metrics"
+                #                print >> sys.stderr, "ERROR: Unexpected '"+prop+"':'"+qc_metric[prop]+"' in qc_metric"
                 #                qc_patch=qc_props
                 #                break
                 
-        if qc_metrics:
+        if qc_metric:
             if "file" in qc_faq['post']:
                 found_file = False
-                for afile in qc_metrics['files']:
+                for afile in qc_metric['files']:
                     if isinstance(afile,str) and afile == 'dnanexus:'+fid:
                         found_file=True
                         break
-                    elif not test or not qc_metrics['files'][0].startswith('dnanexus:file-'): #What?
+                    elif not test or not qc_metric['files'][0].startswith('dnanexus:file-'): #What?
                         # FIXME: need to detect the frame=object file id's here.
                         print "ERROR: Don't know how to detect file in qc_metric['files']."
-                        print >> sys.stderr, json.dumps(qc_metrics,indent=4,sort_keys=True)
+                        print >> sys.stderr, json.dumps(qc_metric,indent=4,sort_keys=True)
                         sys.exit(1)
                 if not found_file:
-                    qc_metrics['files'].append('dnanexus:'+fid)
-                    qc_patch['files'] = qc_metrics['files']
+                    qc_metric['files'].append('dnanexus:'+fid)
+                    qc_patch['files'] = qc_metric['files']
                     
             if qc_patch:
-                self.obj_cache["exp"][qc_alias] = qc_metrics
+                self.obj_cache["exp"][qc_alias] = qc_metric
                 if test:
                     print "  * Would patch qc_metric: '%s'" % qc_alias
                 else:
@@ -994,81 +1089,66 @@ class Splashdown(object):
                         patched_obj = dxencode.encoded_patch_obj(collection+'/'+qc_alias,qc_patch, self.server, \
                                                                                                 self.authid, self.authpw)
                     except:
-                        print "Failed to patch qc_metrics: '%s'" % qc_alias
+                        print "Failed to patch qc_metric: '%s'" % qc_alias
                         sys.exit(1)
-                    print "  * Patched qc_metrics: '%s'" % qc_alias
-                    #self.qc_metrics_created += 1
+                    print "  * Patched qc_metric: '%s'" % qc_alias
+                    #self.qc_metric_created += 1
                 
         # Now create if no qc_metric is found.
-        if qc_metrics == None:
-            qc_metrics = self.fill_in_qc_props(qc_obj,qc_faq)
+        if qc_metric == None:
+            qc_metric = self.qc_props_fill(qc_obj,qc_faq)
                 
             # TODO: What about blob attachment?
             
-            if qc_metrics != None:
+            if qc_metric != None:
                 if "file" in qc_faq['post']:
-                    if 'files' not in qc_metrics:
-                        qc_metrics['files'] = []
-                    qc_metrics['files'].append('dnanexus:'+fid)
-                qc_metrics['step_run'] =  step_run_id
-                qc_metrics['assay_term_name'] = self.exp['assay_term_name']
-                qc_metrics['assay_term_id']   = self.exp['assay_term_id'] # self.exp_type 
-                qc_metrics['aliases'] = [ qc_alias ]
+                    if 'files' not in qc_metric:
+                        qc_metric['files'] = []
+                    qc_metric['files'].append('dnanexus:'+fid)
+                qc_metric['step_run'] =  step_run_id
+                qc_metric['assay_term_name'] = self.exp['assay_term_name']
+                qc_metric['assay_term_id']   = self.exp['assay_term_id'] # self.exp_type 
+                qc_metric['aliases'] = [ qc_alias ]
+                if "blob" in qc_faq:
+                    attachment = self.qc_metric_attachment(fid,qc_faq["blob"])
+                    if attachment != None:
+                        qc_metric['attachment'] = attachment
                     
-                self.obj_cache["exp"][qc_alias] = qc_metrics
+                self.obj_cache["exp"][qc_alias] = qc_metric
                 if test:
                     print "  * Would post qc_metric: '%s'" % qc_alias
                 else:
                     try:
-                        posted_obj = dxencode.encoded_post_obj(collection,qc_metrics, self.server, self.authid, self.authpw)
+                        posted_obj = dxencode.encoded_post_obj(collection,qc_metric, self.server, self.authid, self.authpw)
                     except:
-                        print "Failed to post qc_metrics: '%s'" % qc_alias
+                        print "Failed to post qc_metric: '%s'" % qc_alias
                         sys.exit(1)
-                    print "  * Posted qc_metrics: '%s'" % qc_alias
-                    #self.qc_metrics_created += 1
+                    print "  * Posted qc_metric: '%s'" % qc_alias
+                    #self.qc_metric_created += 1
                 
-        if verbose and qc_metrics != None:
-            print >> sys.stderr, "ENCODEd 'qc_metrics':"
-            print >> sys.stderr, json.dumps(qc_metrics,indent=4,sort_keys=True)
+        if verbose and qc_metric != None:
+            print >> sys.stderr, "ENCODEd 'qc_metric':"
+            print >> sys.stderr, json.dumps(qc_metric,indent=4,sort_keys=True)
 
-        return qc_metrics
+        return qc_metric
             
         
     def handle_qc_metrics(self,fid,payload,test=True,verbose=False):
-        '''After posting a file, post or patch any qc_metrics objects associated with it.'''
+        '''After posting a file, post or patch any qc_metric objects associated with it.'''
         verbose=False
         # TODO: post QC metrics objects
         # Strategy:
-        # 1) read File's "details json string
-        # 2) For each key in object: if it matches known type: pass to specialized routine to
-        #    Find existing by dnanexus:qc.qc_key.job-2342345:
-        #    a) If found, patch as necessary (expect to need to add file to files list)
-        #    b) If not found, create and post it
-        #    c) add/update blob (somehow)
-        # HOW TO DEAL WITH qc not associated with a file??
-        # a) Always associate with file BUT some files are NOT posted?
-        # b) OR if no file to post has QC, then look for QC on job??? Harder.
-        # TODO: Pre-determine IF qc_metric needs to be posted/patched.
-        # For example: 
-        # - star.bam already posted, but star_qc_metric isn't.
-        # - all files for LRNA are posted but mad_qc_metric now needs to be.
-        
-        # Redesign needed...
-        # Because of blob attachment: JSON does not support binary objects so:
-        # 1) the qc blob file DOES need to be posted from dx
-        # 2) need to make a new dx app - version of validate_post.
-        # 3) cycle through all QC objects BEFORE cycling through accessioned files to post.
-        #    a) Every qc_object MUST have a distinct dx "qc_file" that represents it (re-write dnase again)
-        #    b) The qc_object DOES NOT NEED to have the qc_file posted as a blob attachment. 
-        #       (simple post from splashdown vs. qc_file blob post from dx).
-        #    c) The qc_file MAY ALSO BE an accessionable file, in which case it CANNOT be an attachment blob.
-        #    d) stamp dx file with qc.qc_key.job-xxx alias (or possibly href)
-        # 4) in cycle on files to be accessioned, can patch (now already existing) qc_object with file id.
-        # But...
-        # - qc_objects with no blob?                                 OKAY (3.b)
-        # - blobs that can be seen from more than one qc_object?     NO (3.a)
-        # - blobs that might be accessioned independently?           Not QUITE (3.c)
-        # - more than one qc.qc_key.job-xxx alias to stamp to file.  NO (3.a)
+        # 1) ALL qc metrics MUST be associated with a file - file may not be posted ('QC_only')
+        # 2) read file's "details" json string
+        # 3) For each key in object: if it matches known type: pass to specialized routine to
+        #    a) Find existing by dnanexus:qc.qc_key.job-2342345:
+        #    b) If found, patch as necessary (expect to need to add file to files list)
+        #    c) If not found, create, optionally attach blob, and post it
+        # Isues:
+        # - qc_object not associated with posted file              NO Problem - QC_only file
+        # - qc_objects with/without blob?                          NO Problem - qc_faq defined
+        # - blobs that can be seen from more than one qc_object?   NO Problem - embedded blob
+        # - pre-determine IF qc_metric needs to be posted/patched  Done.
         
         # Needed identifiers
         step_run_id = payload["step_run"]
@@ -1080,7 +1160,7 @@ class Splashdown(object):
             job_id = job.get('id')
             #step_run_alias = 'dnanexus:' + job_id
 
-        # if file level qc_metrics exist, then use those
+        # if file level qc_metric exist, then use those
         qc_for_file = {}
         details_file = dxencode.dx_file_get_details(fid)
         if not details_file:
@@ -1091,9 +1171,9 @@ class Splashdown(object):
             if key not in self.QC_SUPPORTED:
                 continue
             qc_faq = self.QC_SUPPORTED[key]
-            qc_metrics = self.enc_qc_metrics_find_or_create(key,details_file[key],qc_faq,fid,job_id,step_run_id, \
+            qc_metric = self.enc_qc_metric_find_or_create(key,details_file[key],qc_faq,fid,job_id,step_run_id, \
                                                                                             test=test,verbose=verbose)
-            if qc_metrics != None:
+            if qc_metric != None:
                 qc_for_file[key] = details_file[key]
                 
         if qc_for_file and verbose:
@@ -1528,13 +1608,13 @@ class Splashdown(object):
                         
                     self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
                 
-                # e) After the file is posted, post or patch qc_metrics objects.
+                # e) After the file is posted, post or patch qc_metric objects.
                 # TODO: Start posting QC metrics
                 # TODO: Add support for non-posting files (and already posted files!!!
                 if self.handle_qc:    # Use new qc_object posting methods                
                     qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)
                     if qc_count > 0:
-                        print "  - handled %d qc_metrics objects for file." % qc_count
+                        print "  - handled %d qc_metric objects for file." % qc_count
                         if not args.test:
                             qc_obj_count += 1
                             total_qc_objs += 1                                
