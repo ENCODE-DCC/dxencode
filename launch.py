@@ -155,6 +155,7 @@ class Launch(object):
         self.multi_rep = False       # This run includes more than one replicate
         self.combined_reps = False   # This run includes combined replicate workflows
         self.link_later = None       # Rare: when 2 sister branches link to each other, it requires a final wf pass.
+        self.deprecate = []          # Master list of files to deprecate.  Needed to cross rep boundaries in steps_to_run
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
     def get_args(self,parse=True):
@@ -904,6 +905,11 @@ class Launch(object):
                         if verbose:
                             print "- Adding step '"+step+"' due to prior step dependency."
                         break
+                    if inp in priors and priors[inp] in self.deprecate: # This should catch deprecations across rep boundaries.
+                        steps_to_run += [ step ]
+                        if verbose:
+                            print "- Adding step '"+step+"' due to tributary results being deprecated."
+                        break
             # Any step that is rerun, will cause prior results to be deprecated
             # NOTE: It is necessary to remove from 'priors' so succeeding steps are rerun
             # NOTE: It is also important to move prior results out of target folder to avoid confusion!
@@ -913,6 +919,9 @@ class Launch(object):
                     will_create += [ result ]
                     if result in priors:
                         deprecate += [ priors[result] ]
+                        self.deprecate.append(priors[result]) # needed to ensure tributaries affect river reps.
+                        if verbose:
+                            print "  - Will deprecate '"+dxencode.file_path_from_fid(priors[result])+"'\."
                         del priors[result]
                         # if results are in folder, then duplicate files cause a problem!
                         # So add to 'deprecate' to move or remove before launching
@@ -940,13 +949,8 @@ class Launch(object):
         for rep_id in sorted( self.psv['reps'].keys() ):
             rep = self.psv['reps'][rep_id]
             rep['deprecate'] = [] # old results will need to be moved/removed if step is rerun
-            force_rep = force
-            if 'tributaries' in rep:
-                for trib_id in rep['tributaries']:
-                    if trib_id in redo_reps:
-                        force_rep = True  # While this is less than ideal, it is a decent simplifying assumption. 
             rep['stepsToDo'] = self.determine_steps_to_run(rep['path'], rep['steps'], \
-                                                    rep['priors'], rep['deprecate'], force=force_rep)
+                                                    rep['priors'], rep['deprecate'], force=force)
             if len(rep['stepsToDo']) > 0:
                 redo_reps.append(rep_id)
 

@@ -910,7 +910,7 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
                 rep['has_reads'] = True
             elif mapping['paired'] and mapping['unpaired']:
                 print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
-                    (len(mapping['paired'], len(mapping['unpaired'])))
+                    (len(mapping['paired']), len(mapping['unpaired']))
                 print json.dumps(mapping,indent=4)
                 sys.exit(1)                
                 
@@ -953,7 +953,7 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
     return reps
 
 def get_enc_file(file_acc,must_find=False,key='default'):
-    '''Returns all replicate mappings for an experiment from encoded.'''
+    '''Returns file object from encoded, given an accession.'''
 
     (AUTHID,AUTHPW,SERVER) = processkey(key)
 

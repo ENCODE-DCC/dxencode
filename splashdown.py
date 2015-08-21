@@ -1,9 +1,6 @@
 #!/usr/bin/env python2.7
 # splashdown.py 1.0.0
 #
-### TODO:
-# -) old star_quality_metric to be posted are NOT in details.  Just the file!
-#
 # Splashdown is meant to run outside of dnanexus and to examine experiment directories to
 # find results tp post to encoded.
 #
@@ -63,7 +60,7 @@ class Splashdown(object):
     PIPELINE_SPECS = {
          "long-rna-seq": {
             "step-order": [ "align-tophat","signals-top-se","signals-top-pe",
-                            "align-star","signals-star-se","signals-star-pe","quant-rsem"],
+                            "align-star","signals-star-se","signals-star-pe","quant-rsem","mad-qc"],
             "replicate":  {
                 "align-tophat":    { "alignments":                                "*_tophat.bam"                 },
                 "signals-top-se":  { "signal of all reads":                       "*_tophat_all.bw",
@@ -82,10 +79,11 @@ class Splashdown(object):
                                      "transcriptome alignments":                  "*_star_anno.bam"              },
                 "quant-rsem":      { "gene quantifications":                      "*_rsem.genes.results",
                                      "transcript quantifications":                "*_rsem.isoforms.results"      }  },
-            "combined":   {}
+            "combined":   {
+                "mad-qc":          { "QC_only":                                   "*_mad_plot.png"               }  },
         },
         "small-rna-seq": {
-            "step-order": [ "align","signals" ], #,"mad_qc"],
+            "step-order": [ "align","signals","mad_qc"],
             "replicate":  {
                 "align":           { "alignments":                                "*_srna_star.bam",
                                      "gene quantifications":                      "*_srna_star_quant.tsv"        },
@@ -310,6 +308,11 @@ class Splashdown(object):
 
         ap.add_argument('-w','--way_back_machine',
                         help="Use the 'way back machine' to find files posted long ago.",
+                        action='store_true',
+                        required=False)
+
+        ap.add_argument('--qc_from_file',
+                        help="If available, generate qc from file instead of dx details.",
                         action='store_true',
                         required=False)
 
@@ -904,14 +907,17 @@ class Splashdown(object):
 
     def dx_qc_json_get(self,fid,verbose=False):
         '''Get the qc metrics blob from dx details, with very special exceptions'''
-        qc_json = dxencode.dx_file_get_details(fid)
-        if qc_json and "QC" in qc_json:  # Not likely but QC json could be subsection of details
-            qc_json = qc_json["QC"]
+        qc_json = {}
+        descr = dxencode.description_from_fid(fid)
+        file_name = descr['name']
+        # NOTE: So far only special case for getting qc_from_file 
+        if not self.qc_from_file or (not file_name.endswith('_star_genome.bam') and not file_name.endswith('_star_anno.bam')):
+            qc_json = dxencode.dx_file_get_details(fid)
+            if qc_json and "QC" in qc_json:  # Not likely but QC json could be subsection of details
+                qc_json = qc_json["QC"]
             
         # Try to make a qc_json in a very special case
         if not qc_json:
-            descr = dxencode.description_from_fid(fid)
-            file_name = descr['name']
             if not file_name.endswith('_star_genome.bam') and not file_name.endswith('_star_anno.bam'):
                 return {}
             folder = descr['folder']
@@ -920,15 +926,17 @@ class Splashdown(object):
                 return {}
                 
             # 1) copy locally to tmp.txt  (should be fast)
-            try:
-                dxpy.download_dxfile(qc_fid, "tmp.txt")  # should be short
-            except:
-                print >> sys.stderr, "ERROR: Unable to download '"+folder + "/*_star_Log.final.out'."
-                return {}
+            if not os.path.isfile("tmp/"+qc_fid+".txt") :
+                try:
+                    os.system('mkdir -p tmp > /dev/null 2>&1')
+                    dxpy.download_dxfile(qc_fid, "tmp/"+qc_fid+".txt")  # should be short
+                except:
+                    print >> sys.stderr, "ERROR: Unable to download '"+folder + "/*_star_Log.final.out'."
+                    return {}
 
             # 2) use qc_metrics.py to shlurp in the json 
             qc_parser = "~/tim/long-rna-seq-pipeline/dnanexus/tools/qc_metrics.py"
-            err, out = commands.getstatusoutput(qc_parser + " -n STAR_log_final --json -f tmp.txt 2> /dev/null")
+            err, out = commands.getstatusoutput(qc_parser + " -n STAR_log_final --json -f tmp/"+qc_fid+".txt 2> /dev/null")
             # ignore stderr as it is used to echo results
             if len(out) > 0:
                 qc_json = { "STAR_log_final": json.loads(out) } 
@@ -1553,6 +1561,7 @@ class Splashdown(object):
         '''Runs splasdown from start to finish using command line arguments.'''
         args = self.get_args()
         self.test = args.test
+        self.qc_from_file = args.qc_from_file
         self.ignore = False
         if args.ignore_properties:
             print "Ignoring DXFile properties (will post to test server)"
@@ -1660,28 +1669,33 @@ class Splashdown(object):
                         break
 
                     # d) Update dnanexus file with file accession tag.
-                    if not args.test:
-                        post_count += 1
-                        
+                    post_count += 1                        
                     self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
                 
                 # e) After the file is posted, post or patch qc_metric objects.
                 qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)
                 if qc_count > 0:
                     print "  - handled %d qc_metric objects for file." % qc_count
-                    if not args.test:
-                        qc_obj_count += 1
-                        total_qc_objs += 1                                
+                    qc_obj_count += 1
+                    total_qc_objs += 1                                
 
                 if args.files != 0 and file_count >= args.files:  # Short circuit for test
                     print "- Just trying %d file(s) by request" % file_count
                     break
 
-            print "- For %s Processed %d file(s), posted %d, qc %d" % \
+            if not args.test:
+                print "- For %s processed %d file(s), posted %d, qc %d" % \
+                                                        (self.exp_id, file_count, post_count,qc_obj_count)
+            else:
+                print "- For %s processed %d file(s), would post %d, qc %d" % \
                                                         (self.exp_id, file_count, post_count,qc_obj_count)
             total_posted += post_count
 
-        print "Processed %d experiment(s), halted %d, posted %d file(s), %d qc object(s)" % \
+        if not args.test:
+            print "Processed %d experiment(s), halted %d, posted %d file(s), %d qc object(s)" % \
+                                                            (exp_count, halted, total_posted, total_qc_objs)
+        else:
+            print "Processed %d experiment(s), halted %d, would post %d file(s), %d qc object(s)" % \
                                                             (exp_count, halted, total_posted, total_qc_objs)
         if halted == exp_count:
             sys.exit(1)
