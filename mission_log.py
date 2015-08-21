@@ -62,8 +62,8 @@ class Mission_log(object):
          'star-mad': {
              "long-rna-seq":  { "output_types": [ "transcriptome alignments",        "gene quantifications" ],
                                 "qc_metrics":   { "transcriptome alignments": 'star',"gene quantifications": 'mad' } },
-             "small-rna-seq": { "output_types": [ "transcriptome alignments",        "gene quantifications" ],
-                                "qc_metrics":   { "transcriptome alignments": 'star',"gene quantifications": 'mad' } }
+             "small-rna-seq": { "output_types": [ "alignments",        "gene quantifications" ],
+                                "qc_metrics":   { "alignments": 'star',"gene quantifications": 'mad' } }
          }
     }
     '''For each report type, these are the mappings for file 'output_types' to 'quality_metric' types.'''
@@ -325,7 +325,7 @@ class Mission_log(object):
                 self.exp_starts = len(self.min_stats)
             for col in metric_defs['columns']:
                 self.min_stats.append(999999999) # TODO: deal with non-numeric columns
-                self.max_stats.append(0)
+                self.max_stats.append(-999999999)
                 self.cum_stats.append(0.0)
 
     def print_metrics(self,exp_id,enc_files,qc_metrics,report_specs, verbose=False):
@@ -384,7 +384,7 @@ class Mission_log(object):
                 if val != None:
                     if  self.min_stats[cur_col] > val or self.min_stats[cur_col] == 999999999:
                         self.min_stats[cur_col] = val
-                    if  self.max_stats[cur_col] < val:
+                    if  self.max_stats[cur_col] < val or self.max_stats[cur_col] == -999999999:
                         self.max_stats[cur_col] = val
                     self.cum_stats[cur_col] += val
                 cur_col += 1  # Done with column
@@ -400,7 +400,7 @@ class Mission_log(object):
         Line = "# Totals\tmin:"
         cur_col = 0
         for val in self.min_stats:
-            if cur_col in self.not_tabulated_cols:
+            if cur_col in self.not_tabulated_cols or val == 999999999:
                 Line += '\t'
             else:
                 Line += '\t'+str(val)
@@ -411,7 +411,7 @@ class Mission_log(object):
         Line = "# \tmax:"
         cur_col = 0
         for val in self.max_stats:
-            if cur_col in self.not_tabulated_cols:
+            if cur_col in self.not_tabulated_cols or val == -999999999:
                 Line += '\t'
             else:
                 Line += '\t'+str(val)
@@ -427,9 +427,11 @@ class Mission_log(object):
                 Line += '\t'
             else:
                 if self.exp_starts != -1 and cur_col < self.exp_starts:
-                    val = val / self.rep_count # TODO: make sure it is a float!
+                    if self.rep_count > 0:
+                        val = val / self.rep_count # TODO: make sure it is a float!
                 else: 
-                    val = val / self.exp_count
+                    if self.exp_count > 0:
+                        val = val / self.exp_count
                 if val > 9999:
                     Line += '\t%.1f' % val
                 elif val > 999:
