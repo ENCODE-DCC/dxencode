@@ -389,7 +389,7 @@ class Mission_log(object):
                     self.cum_stats[cur_col] += val
                 cur_col += 1  # Done with column
             print Line
-            Line = '\t' # Successive lines do not repeat exp_id
+            Line = '' # Successive lines do not repeat exp_id
         self.exp_count += 1 # Done with experiment
                     
                                  

@@ -491,9 +491,7 @@ class Assemble(object):
             if self.exp_type == None:
                 skipped += 1
                 continue
-            expected_files = self.PIPELINE_FILES[self.exp_type]
-            print "Handling %s as '%s' experiment..." % (exp_id,self.exp_type)
-                
+
             # Find requested replicate or all replicates for experiment
             self.replicates = self.find_replicates(self.exp_id,self.exp)
             if self.replicates == None or len(self.replicates) == 0:
@@ -501,7 +499,30 @@ class Assemble(object):
                 skipped += 1
                 continue
 
+            # Ready to announce:
+            descr = "ENC2"
+            if self.exp.get('award') != None and self.exp['award'].get("rfa") == "ENCODE3":
+                descr = "ENC3"
+            if self.genome != None:
+                descr += "  " +self.genome
+            else:
+                descr += "  hg19"
+            if args.annotation != None:
+                descr += " " + args.annotation + " "
+            else:
+                descr += " v19 "
+            if 'shRNA' in self.exp.get('assay_term_name'):
+                descr += ' shRNA'
+            else:
+                descr += '      '
+            for rep in self.replicates:
+                if descr[-1] != ' ':
+                    descr += ','
+                descr += str(rep['br'])
+            print "Handling %s  %s  %s experiment..." % (exp_id, descr, self.exp_type)
+            
             # File list from encoded
+            expected_files = self.PIPELINE_FILES[self.exp_type]
             available_files = self.find_encoded_files(self.exp, expected_files)
             if len(available_files) == 0:
                 print "Warning: No files are available in encoded for %s." % self.exp_id

@@ -114,6 +114,9 @@ class Launch(object):
     #       "STEPS" objects can be generated directly from dx apps.  If unsure, print the json from
     #       self.build_simple_steps(verbose=True) to determine if it will work for your pipeline.
     
+    PRUNE_STEPS = None
+    '''Rare setting that allows dynamically pruning steps from a pipeline befpre running it.  Used by lrnaLaunch.py.'''
+    
     FILE_GLOBS = {"MAY": {}, "NEED": {}, "TO": {}, "REPLACE": {} }
     '''Globs for discovering existing results. Can be discoverd in simple piplines.'''
 
@@ -741,6 +744,13 @@ class Launch(object):
                     rep['path'] = pipe_path['se']
             else:
                 rep['path'] = pipe_path
+            # In a rare case, pruning of steps is done.            
+            if self.PRUNE_STEPS != None and len(self.PRUNE_STEPS) != 0:
+                for step in self.PRUNE_STEPS:
+                    if step in pipe_steps:
+                        del pipe_steps[step]
+                    if step in rep['path']:
+                        rep['path'].remove(step)
             rep['steps'] = pipe_steps
             
         return [ pipe_steps, file_globs ]
