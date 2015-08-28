@@ -892,6 +892,7 @@ class Splashdown(object):
         obj['award'] = '/awards/U41HG006992/'  # self.exp['award']['@id']
 
         # Find replicate info
+        #if rep_tech.startswith("rep") and len(rep_tech) == 6:
         if rep_tech.startswith("rep"):
             br_tr = rep_tech[3:]
             (br,tr) = br_tr.split('_')
@@ -1244,21 +1245,6 @@ class Splashdown(object):
         return step_ver
 
 
-    def format_duration(self,beg_seconds,end_seconds):
-        '''Returns formatted string difference between two times in seconds.'''
-        duration = end_seconds - beg_seconds
-        m, s = divmod(duration, 60)
-        h, m = divmod(m, 60)
-        d, h = divmod(m, 24)
-        if d > 0:
-            return "%dd%0dh%02dm%02s" % (d, h, m, s)
-        elif h > 0: 
-            return    "%dh%02dm%02ds" % (h, m, s) 
-        elif h > 0: 
-            return        "%2dm%02ds" % (m, s)
-        else: 
-            return             "%2ds" % (s)
-                  
     def enc_step_run_find_or_create(self,job,dxFile,rep_tech,test=False,verbose=False):
         '''Finds or creates the 'analysis_step_run' encoded object that actually created the file.'''
         #verbose=True
@@ -1346,10 +1332,14 @@ class Splashdown(object):
             notes["dx_app_id"] = dx_app_id
             notes["step_name"] = step_ver['analysis_step']
             notes["dx_analysis_id"] = job.get('analysis')
+            if "ana_id" not in self.obj_cache["exp"]:
+                self.obj_cache["exp"]["ana_id"] = [ notes["dx_analysis_id"] ]
+            elif notes["dx_analysis_id"] not in self.obj_cache["exp"]["ana_id"]:
+                self.obj_cache["exp"]["ana_id"].append( notes["dx_analysis_id"] )
             notes["dx_project_id"] = self.proj_id
             notes["dx_project_name"] = self.proj_name
             notes["dx_cost"] = "$" + str(round(job['totalPrice'],2))
-            duration = self.format_duration(job.get('startedRunning')/1000,job.get('stoppedRunning')/1000)
+            duration = dxencode.format_duration(job.get('startedRunning')/1000,job.get('stoppedRunning')/1000)
             notes["duration"] = duration
             step_run["notes"] = json.dumps(notes)
             
@@ -1557,6 +1547,29 @@ class Splashdown(object):
         return None
 
 
+    def print_analysis_totals(self,exp_id):
+        '''Prints totals for all analyses for an experiment.'''
+        if "ana_id" not in self.obj_cache["exp"]:
+            return
+        total_cost = 0
+        total_dur = 0
+        for ana_id in self.obj_cache["exp"]["ana_id"]:
+            #try:
+            ana = dxpy.api.analysis_describe(ana_id)
+            total_cost += ana["totalPrice"]
+            total_dur  += (ana["modified"] - ana["created"])
+            #except:
+            #    continue
+
+        if total_cost > 0 or total_dur > 0:
+            # 27888946 / 7.75 = 3598573.54838709677419
+            duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
+            #   Print lrna.txt line as....  Then use grep ENC3 *.log | sed s/^.*\log://
+            #print "%s ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     %s   $%.2f  2015-08-28" % \
+            #    (exp_id, duration, total_cost)
+            print "%s %d %s  cost: %s  $%.2f" % \
+                (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
+
     def run(self):
         '''Runs splasdown from start to finish using command line arguments.'''
         args = self.get_args()
@@ -1689,6 +1702,7 @@ class Splashdown(object):
             else:
                 print "- For %s processed %d file(s), would post %d, qc %d" % \
                                                         (self.exp_id, file_count, post_count,qc_obj_count)
+            self.print_analysis_totals(self.exp_id)
             total_posted += post_count
 
         if not args.test:

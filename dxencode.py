@@ -828,7 +828,8 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
             sys.exit(1)
         return None
     if exp["assay_term_name"] == "RNA-seq" \
-    or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq":
+    or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq" \
+    or exp["assay_term_name"] == "single cell isolation followed by RNA-seq":
         if exp["replicates"][0]["library"]["size_range"] in [">200", "300-350", "350-450"]:
             return "long-rna-seq"
         else:
@@ -972,7 +973,7 @@ def get_enc_file(file_acc,must_find=False,key='default'):
 
     return file_obj
 
-def get_enc_exp_files(exp_obj,output_types=[],key='default'):
+def get_enc_exp_files(exp_obj,output_types=[],lab=None,key='default'):
     '''Returns list of file objs associated with an experiment, filtered by zero or more output_types.'''
     if not exp_obj or not exp_obj.get('files'):
         return []
@@ -994,8 +995,16 @@ def get_enc_exp_files(exp_obj,output_types=[],key='default'):
             continue
         #print " * Found: %s [%s] status:%s %s" % \
         #                  (file_obj['accession'],file_obj['output_type'],file_obj['status'],file_obj['submitted_file_name'])
-        if len(output_types) > 0 and file_obj.get('output_type') not in output_types:
+        out_type = file_obj.get('output_type')
+        if len(output_types) > 0 and (out_type == None or out_type not in output_types):
             continue
+        if lab != None:
+            file_lab = file_obj.get('lab')
+            if file_lab != None:
+                if (isinstance(file_lab,unicode) or isinstance(file_lab,str)) and file_lab != "/labs/"+lab+"/":
+                    continue
+                elif "name" in file_lab and file_lab["name"] != lab:
+                    continue
         if file_obj.get('status') not in ["released","uploaded","in progress"]:
             continue
         if file_obj.get('submitted_file_name') not in filenames_in(files):
@@ -1199,4 +1208,39 @@ def select_alias(aliases, prefix='dnanexus:',must_find=True):
     
     return None
 
+
+def duration_string(total_seconds,include_seconds=True):
+    '''Returns a duration string.'''
+    try: 
+        secs = int(total_seconds)
+    except:
+        return None
+    m, s = divmod(secs, 60)
+    h, m = divmod(m, 60)
+    d, h = divmod(h, 24)
+    
+    if include_seconds:
+        if d > 0:
+            return "%dd%0dh%02dm%02s" % (d, h, m, s)
+        elif h > 0: 
+            return    "%dh%02dm%02ds" % (h, m, s) 
+        elif m > 0: 
+            return        "%2dm%02ds" % (m, s)
+        else: 
+            return             "%2ds" % (s)
+    else:
+        if s >= 30:
+            m +=1
+        if d > 0:
+            return "%dd%0dh%02dm" % (d, h, m)
+        elif h > 0: 
+            return     "%dh%02dm" % (h, m) 
+        else: 
+            return        "%2dm" % (m)
+
+
+    def format_duration(beg_seconds,end_seconds,include_seconds=True):
+        '''Returns formatted string difference between two times in seconds.'''
+        duration = end_seconds - beg_seconds
+        return duration_string(duration,include_seconds)
 
