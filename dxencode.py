@@ -7,6 +7,7 @@ import re
 import urlparse
 import hashlib
 from datetime import datetime
+import time
 import subprocess
 import commands
 import shlex
@@ -116,59 +117,6 @@ def encoded_post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
     ##    print json.dumps(r.json(), indent=4, sort_keys=True)
     return item
 
-def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
-    ''' take a file object on local file system, post meta data and cp to AWS '''
-    HEADERS = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-    }
-
-    r = requests.post(
-        SERVER + 'file',
-        auth=(AUTHID, AUTHPW),
-        data=json.dumps(file_meta),
-        headers=HEADERS,
-    )
-    try:
-        r.raise_for_status()
-    except:
-        logger.error('Submission failed: %s %s' % (r.status_code, r.reason))
-        logger.error(r.text)
-        raise
-    item = r.json()['@graph'][0]
-
-    ####################
-    # POST file to S3
-    # TODO: Look for returned["status"] == "success"
-    #returned = r.json()
-    #if "status" not in returned or returned["status"] != "success" or \
-    if 'upload_credentials' not in item:
-        print "* ERROR: request to post %s to %s..." % (filename,SERVER)
-        print json.dumps(file_meta, indent=4, sort_keys=True)
-        print "* Returned..."
-        print json.dumps(item, indent=4, sort_keys=True)
-        # Just let it fail on the next statement
-    creds = item['upload_credentials']
-    env = os.environ.copy()
-    env.update({
-        'AWS_ACCESS_KEY_ID': creds['access_key'],
-        'AWS_SECRET_ACCESS_KEY': creds['secret_key'],
-        'AWS_SECURITY_TOKEN': creds['session_token'],
-    })
-
-    logger.debug("Uploading file.")
-    start = datetime.now()
-    try:
-        subprocess.check_call(['aws', 's3', 'cp', filename, creds['upload_url']], env=env)
-        end = datetime.now()
-        duration = end - start
-        logger.debug("Uploaded in %.2f seconds" % duration.seconds)
-    except:
-        logger.debug("Upload failed")
-
-    return item
-
-
 def encoded_patch_obj(obj_id, obj_meta, SERVER, AUTHID, AUTHPW):
     ''' Patches a json object of a given type to the encoded database. '''
     #HEADERS = { 'Content-type': 'application/json' }
@@ -190,12 +138,81 @@ def encoded_patch_obj(obj_id, obj_meta, SERVER, AUTHID, AUTHPW):
         logger.error('Patch of %s failed: %s %s' % (obj_id, r.status_code, r.reason))
         logger.error(r.text)
         raise
-	#return r.json()
+
     item = r.json()['@graph'][0]
     #print "* request to patch %s to %s..." % (obj_id,SERVER)
     #print json.dumps(item, indent=4, sort_keys=True)
     return item
            
+
+def encoded_post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
+    ''' take a file object on local file system, post meta data and cp to AWS '''
+    HEADERS = {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+    }
+
+    # Handle case where file_obj is already there but file is not!
+    if file_meta.get('accession') != None:
+        logger.debug("Patching file object.")
+        assert file_meta['status'] == "upload failed"
+        file_meta['status'] = "uploading"  # Laurence will change encodeD function to take care of this
+        item = encoded_patch_obj('files/'+file_meta.get('accession'),file_meta, SERVER, AUTHID, AUTHPW)
+        item = encoded_post_obj('files/'+file_meta.get('accession')+"/@@upload",{}, SERVER, AUTHID, AUTHPW)
+    else:
+        logger.debug("Posting file object.")
+        assert file_meta.get('status') == None
+        item = encoded_post_obj('file',file_meta, SERVER, AUTHID, AUTHPW)
+
+    # Could look for returned["status"] == "success"
+    #returned = r.json()
+    #if "status" not in returned or returned["status"] != "success" or \
+    if 'upload_credentials' not in item:
+        print "* ERROR: request to post %s to %s..." % (filename,SERVER)
+        print json.dumps(file_meta, indent=4, sort_keys=True)
+        print "* Returned..."
+        print json.dumps(item, indent=4, sort_keys=True)
+
+    # if cred missing, just let it fail on the next statement
+    creds = item['upload_credentials']
+    env = os.environ.copy()
+    env.update({
+        'AWS_ACCESS_KEY_ID': creds['access_key'],
+        'AWS_SECRET_ACCESS_KEY': creds['secret_key'],
+        'AWS_SECURITY_TOKEN': creds['session_token'],
+    })
+
+    # POST file to S3
+    logger.debug("Uploading file.")
+    start = datetime.now()
+    try:
+        subprocess.check_call(['aws', 's3', 'cp', filename, creds['upload_url']], env=env)
+    except:
+        logger.debug("Retry 2/3 uploading in 1 minute...")
+        time.sleep(60)
+        try:
+            subprocess.check_call(['aws', 's3', 'cp', filename, creds['upload_url']], env=env)
+        except:
+            logger.debug("Retry 3/3 uploading in 3 minutes...")
+            time.sleep(180)
+            try:
+                subprocess.check_call(['aws', 's3', 'cp', filename, creds['upload_url']], env=env)
+            except:
+                logger.debug("Upload failed")
+                # Try to set status to "upload failed"
+                file_meta['status'] = "upload failed"
+                item = encoded_patch_obj('files/'+item.get('accession'),file_meta, SERVER, AUTHID, AUTHPW)
+                assert item['status'] == "upload failed"
+                #raise Don't raise exception on half error... the accession needs to be added to the dx file.
+
+    if item.get('status','uploading') != "upload failed":
+        #assert item['status'] == "uploading"
+        end = datetime.now()
+        duration = end - start
+        logger.debug("Uploaded in %.2f seconds" % duration.seconds)
+            
+    return item
+
 
 def encoded_get(url, AUTHID=None, AUTHPW=None):
     ''' executes GET on Encoded server without without authz '''
@@ -1239,8 +1256,8 @@ def duration_string(total_seconds,include_seconds=True):
             return        "%2dm" % (m)
 
 
-    def format_duration(beg_seconds,end_seconds,include_seconds=True):
-        '''Returns formatted string difference between two times in seconds.'''
-        duration = end_seconds - beg_seconds
-        return duration_string(duration,include_seconds)
+def format_duration(beg_seconds,end_seconds,include_seconds=True):
+    '''Returns formatted string difference between two times in seconds.'''
+    duration = end_seconds - beg_seconds
+    return duration_string(duration,include_seconds)
 

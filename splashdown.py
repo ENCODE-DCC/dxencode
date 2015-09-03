@@ -513,12 +513,10 @@ class Splashdown(object):
             if verbose:
                 print >> sys.stderr, "  %s %d" % (enc_file.get("submitted_file_name"),enc_file.get('file_size'))
                 
-                    
         if found_file != None and verbose:
             print >> sys.stderr, "Found file:"
             print >> sys.stderr, json.dumps(found_file,indent=4)
         return found_file
-        return None
 
 
     def enc_file_add_alias(self,fid,accession,f_obj,test=True):
@@ -543,7 +541,7 @@ class Splashdown(object):
 
     def find_posted_files(self,files_expected,test=True,verbose=False):
         '''Returns the tuple list of files already posted to ENCODEd.'''
-        
+        #verbose=True
         # get all files associated with the experiment up front, just in case it is needed:
         self.exp_files = dxencode.get_enc_exp_files(self.exp,key=self.server_key)
         if len(self.exp_files) == 0:
@@ -578,11 +576,14 @@ class Splashdown(object):
                         print >> sys.stderr, "* DEBUG   Accession: " + accession
                     f_obj =  self.enc_file_find_by_dxid(fid)  # Look by alias first incase ENCFF v. TSTFF mismatch
                     if f_obj != None: # Verifyably posted
-                        posted.append( (out_type,rep_tech,fid) )
                         self.found[fid] = f_obj
+                        if f_obj.get('status') != 'upload failed': 
+                            posted.append( (out_type,rep_tech,fid) )
                         # TODO: Compare accessions.  But not ENCFF to TSTFF
                         if verbose:
                             print >> sys.stderr, "* DEBUG   Found by alias"
+                            if f_obj.get('status') == 'upload failed': 
+                                print >> sys.stderr, "* DEBUG   But needs to be reposted"
                         continue
 
                     # look by accession
@@ -590,11 +591,14 @@ class Splashdown(object):
                         print >> sys.stderr, "* DEBUG   Not found by alias: dnanexus:" + fid
                     f_obj = self.enc_lookup_json( 'files/' + accession,must_find=False)
                     if f_obj != None: # Verifyably posted
-                        posted.append( (out_type,rep_tech,fid) )
                         self.found[fid] = f_obj
+                        if f_obj.get('status') != 'upload failed': 
+                            posted.append( (out_type,rep_tech,fid) )
                         self.enc_file_add_alias(fid,accession,f_obj,test=test)
                         if verbose:
                             print >> sys.stderr, "* DEBUG   Found by accession: " + accession
+                            if f_obj.get('status') == 'upload failed': 
+                                print >> sys.stderr, "* DEBUG   But needs to be reposted"
                         continue
                     else:
                         if verbose:
@@ -607,8 +611,9 @@ class Splashdown(object):
                 #f_obj =  self.find_in_encode(fid,verbose)
                 f_obj =  self.enc_file_find_by_dxid(fid)
                 if f_obj != None:
-                    posted.append( (out_type,rep_tech,fid) )
                     self.found[fid] = f_obj
+                    if f_obj.get('status') != 'upload failed': 
+                        posted.append( (out_type,rep_tech,fid) )
                     # update dx file property
                     accession = f_obj['accession']
                     if accession.startswith('ENCFF'):  # Only bother if it is the real thing.  Ambiguity with 'TSTFF'
@@ -618,6 +623,8 @@ class Splashdown(object):
                                 print "  * Updated DX property with accession."
                     if verbose:
                         print >> sys.stderr, "* DEBUG   Found by alias"
+                        if f_obj.get('status') == 'upload failed': 
+                            print >> sys.stderr, "* DEBUG   But needs to be reposted"
                     continue
 
                 if verbose:
@@ -627,8 +634,9 @@ class Splashdown(object):
             if self.way_back_machine:
                 f_obj =  self.find_files_using_way_back_machine(fid,self.exp_files) 
                 if f_obj != None:
-                    posted.append( (out_type,rep_tech,fid) )
                     self.found[fid] = f_obj
+                    if f_obj.get('status') != 'upload failed': 
+                        posted.append( (out_type,rep_tech,fid) )
                     # Update ENC and DX:
                     accession = f_obj['accession']
                     if accession.startswith('ENCFF'):  # Only bother if it is the real thing.  Ambiguity with 'TSTFF'
@@ -640,10 +648,12 @@ class Splashdown(object):
                                 
                     if verbose:
                         print >> sys.stderr, "* DEBUG   Found using 'way back machine'."
+                        if f_obj.get('status') == 'upload failed': 
+                            print >> sys.stderr, "* DEBUG   But needs to be reposted"
                     continue
                 if verbose:
                     print >> sys.stderr, "* DEBUG   Not Found using 'way back machine'.  VERBOSE..."
-                    f_obj =  self.find_files_using_way_back_machine(fid,self.exp_files,verbose=True) 
+                    f_obj =  self.find_files_using_way_back_machine(fid,self.exp_files,verbose=True)
 
         if verbose:
             print >> sys.stderr, "Posted files:"
@@ -657,22 +667,22 @@ class Splashdown(object):
         posted = self.find_posted_files(files_expected,test=test,verbose=verbose)
         # Note that find_posted_files() fills in self.found
         for (out_type, rep_tech, fid, QC_only) in files_expected:
-            if not QC_only and fid not in self.found.keys():
+            if not QC_only and (out_type, rep_tech, fid) not in posted:
                 needed.append( (out_type,rep_tech,fid, False) )
-            else:    # Use new qc_object posting methods 
-                # Figure out if QC was already posted
-                qc_json = self.dx_qc_json_get(fid)
-                if not qc_json:
+                continue
+            # Figure out if QC was already posted
+            qc_json = self.dx_qc_json_get(fid)
+            if not qc_json:
+                continue
+            for qc_key in qc_json.keys():
+                if qc_key not in self.QC_SUPPORTED:
                     continue
-                for qc_key in qc_json.keys():
-                    if qc_key not in self.QC_SUPPORTED:
-                        continue
-                    qc_metric = self.enc_qc_metric_find(fid,qc_key)
-                    if not qc_metric or qc_metric == None:
-                        if verbose:
-                            print >> sys.stderr, "* DEBUG QC_only is needed for:" + fid
-                        needed.append( (out_type,rep_tech,fid, True) )
-                        break
+                qc_metric = self.enc_qc_metric_find(fid,qc_key)
+                if not qc_metric or qc_metric == None:
+                    if verbose:
+                        print >> sys.stderr, "* DEBUG QC_only is needed for:" + fid
+                    needed.append( (out_type,rep_tech,fid, True) )
+                    break
         if verbose:
             print >> sys.stderr, "Needed files:"
             print >> sys.stderr, json.dumps(needed,indent=4)
@@ -1083,7 +1093,7 @@ class Splashdown(object):
         for qc_fid in qc_fids:
             acc = self.file_get_accession(qc_fid,fake_if_needed=self.test)
             if acc != None:
-                qc_accs.append('/files/'+acc)
+                qc_accs.append('/files/'+acc+'/')
         if verbose:
             print >> sys.stderr, "Expect qc_metric['quality_metric_of'] fids:"
             print >> sys.stderr, json.dumps(qc_fids,indent=4,sort_keys=True)
@@ -1376,6 +1386,13 @@ class Splashdown(object):
         if len(output_format) > 2:
             payload["file_format_type"] = output_format[2]
 
+        # Handle awkward condition where file object was posted, but then the file upload failed
+        f_obj = self.found.get(fid)
+        if f_obj != None:
+            assert f_obj['status'] == "upload failed"
+            payload['accession'] = f_obj['accession'] # accession tells dxencode.encoded_post_file() to patch obj, not post new
+            payload['status'] = f_obj['status']
+
         dx_obj = dxencode.description_from_fid(fid)
 
         # get job for this file
@@ -1410,7 +1427,7 @@ class Splashdown(object):
 
         #print "  - Adding encoded information."
         payload = self.add_encoded_info(payload,rep_tech,fid)
-
+        
         # Find or create step_run object
         step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=self.test,verbose=verbose)
         #step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=False,verbose=verbose)
@@ -1486,7 +1503,7 @@ class Splashdown(object):
         acc_key = dxencode.dx_property_accesion_key(self.server)
         path = dxencode.file_path_from_fid(fid)
         acc = dxencode.dx_file_set_property(fid,acc_key,accession,add_only=True,test=test)
-        if acc == None or acc != accession:
+        if acc == None or acc != accession and not accession.endswith('FAKE'):
             print "Error: failed to update %s for file %s to '%s'" % (path,acc_key,accession)
         elif test:
             print "  - Test flag %s with %s='%s'" % (path,acc_key,accession)
@@ -1553,11 +1570,13 @@ class Splashdown(object):
             return
         total_cost = 0
         total_dur = 0
+        count = 0
         for ana_id in self.obj_cache["exp"]["ana_id"]:
             #try:
             ana = dxpy.api.analysis_describe(ana_id)
             total_cost += ana["totalPrice"]
             total_dur  += (ana["modified"] - ana["created"])
+            count += 1
             #except:
             #    continue
 
@@ -1565,8 +1584,8 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use grep ENC3 *.log | sed s/^.*\log://
-            #print "%s ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     %s   $%.2f  2015-08-28" % \
-            #    (exp_id, duration, total_cost)
+            #print "%s  ENC3  hg19 v19       1,2     2015-08-26  2015-08-31     %s   $%.2f  %d" % \
+            #    (exp_id, duration, total_cost, count)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
 
