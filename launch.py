@@ -192,8 +192,14 @@ class Launch(object):
             # Include this argument for pipelines with controls
             ap.add_argument('-c', '--control',
                             help='The control file for this experiment.',
+                            default=None,
                             required=False)
 
+            ap.add_argument('-cp', '--control_path',
+                            help="Path to look in for control files (default: '" + self.CONTROL_ROOT_FOLDER + "')",
+                            default=self.CONTROL_ROOT_FOLDER,
+                            required=False)
+                        
         if self.PIPELINE_BRANCH_ORDER != None and "COMBINED_REPS" in self.PIPELINE_BRANCH_ORDER:
             # Include this argument for pipelines with combined replicate steps
             ap.add_argument('-cr','--cr','--combine-replicates',
@@ -331,7 +337,8 @@ class Launch(object):
             default_control = self.psv['control'] # akward but only rep1 may be run
         for rep in self.psv['reps'].values():
             control = self.find_control_file(rep,default_control)
-            rep['inputs']['Control'] = dxencode.find_and_copy_read_files(rep['priors'], \
+            if control != None:
+                rep['inputs']['Control'] = dxencode.find_and_copy_read_files(rep['priors'], \
                                                     [ control ], test, 'control_bam', \
                                                     rep['resultsFolder'], False, self.proj_id)
 
@@ -450,6 +457,12 @@ class Launch(object):
 
         cv['project']    = self.proj_name
         cv['experiment'] = args.experiment
+        
+        # A few experiment types have controls
+        if self.CONTROL_FILE_GLOB != None:
+            if args.control != None: # Very few cases do you want to explicitly set this
+                cv['control'] = args.control
+            cv['control_path'] = args.control_path  # My defining this, you can shorten the search time through dx paths
         
         self.exp = dxencode.get_exp(cv['experiment'],key=key)
         cv['exp_type'] = dxencode.get_assay_type(cv['experiment'],self.exp)
@@ -1578,6 +1591,9 @@ class Launch(object):
         for branch_id in self.PIPELINE_BRANCH_ORDER:
             self.find_inputs_and_priors(branch_id,file_globs,args.test)
 
+        # finding experiment specific control files in a stadardized way
+        self.find_all_control_files(args.test)
+        
         # finding pipeline specific reference files in a stadardized way
         self.find_all_ref_files()
 

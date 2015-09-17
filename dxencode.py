@@ -225,6 +225,24 @@ def encoded_get(url, AUTHID=None, AUTHPW=None):
     return response
 
 
+def enc_lookup_json(path, key='default', frame='object',must_find=False):
+    '''Commonly used method to get a json object from encodeD.'''
+    (AUTHID,AUTHPW,SERVER) = processkey(key)
+    url = SERVER + path + '/?format=json&frame=' + frame
+    #print url
+    response = encoded_get(url, AUTHID, AUTHPW)
+    try:
+        response.raise_for_status()
+        json_obj = response.json()
+    except:
+        if must_find:
+            print "Path to json object '%s' not found." % path
+            print 'Lookup failed: %s %s' % (response.status_code, response.reason)
+            sys.exit(1)
+        return None
+    return json_obj
+
+
 def env_get_current_project():
     ''' Returns the current project name for the command-line environment '''
     err, proj_name = commands.getstatusoutput('cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME')

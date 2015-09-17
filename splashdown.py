@@ -1441,14 +1441,6 @@ class Splashdown(object):
             #else: # What?
             if "notes" in step_run:
                 step_run_notes = json.loads(step_run.get("notes"))
-                # FIXME: UGLY special case
-                # Nathan rev'd call_peaks.py but not the --version.
-                if step_run_notes["dx_app_name"] == "rampage-peaks" and step_run_notes['dx_app_version'] == "1.1.0":
-                    if "software_versions" in notes:
-                        for tool in notes["software_versions"]:
-                            if tool["software"] == "call_peaks (grit)" and tool["version"] == "2.0.3":
-                                tool["version"] == "2.0.4"
-                # FIXME: UGLY special case
                 # analysis_step and pipeline are calculated properties.
                 #payload["analysis_step"] = "/analysis-steps/" + step_run_notes.get("step_name")
                 #payload["pipeline"] = "/pipelines/encode:" + step_run_notes.get("pipeline_name")
