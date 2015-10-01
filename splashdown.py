@@ -683,6 +683,15 @@ class Splashdown(object):
                         print >> sys.stderr, "* DEBUG QC_only is needed for:" + fid
                     needed.append( (out_type,rep_tech,fid, True) )
                     break
+                else:
+                    f_obj = self.found.get(fid)
+                    if f_obj != None and "accession" in f_obj:
+                        file_ref = "/files/%s/" %f_obj["accession"]
+                        if file_ref not in qc_metric["quality_metric_of"]:
+                            if verbose:
+                                print >> sys.stderr, "* DEBUG QC_only patch is needed for:" + fid
+                            needed.append( (out_type,rep_tech,fid, True) )
+                            break
         if verbose:
             print >> sys.stderr, "Needed files:"
             print >> sys.stderr, json.dumps(needed,indent=4)
@@ -1121,19 +1130,19 @@ class Splashdown(object):
         if qc_metric != None:
             # How to tell if it was just created???
             # The step_run will only be an alias on just created objects
-            if qc_metric['step_run'] != step_run_id:
+            if qc_metric['step_run'] == step_run_id:
                 print "  - Found qc_metric: '%s'" % qc_alias
                 self.obj_cache["exp"][qc_alias] = qc_metric
                 for prop in qc_props.keys():
                     if None == qc_metric.get(prop):
                         print >> sys.stderr, "ERROR: Expecting '"+prop+"' in qc_metric."
                         qc_patch=qc_props
-                        break
+                        #break
                     elif qc_metric[prop] != qc_props[prop]:
                         print >> sys.stderr, "ERROR: qc_metric['"+prop+"'] expecing <"+qc_props[prop]+ \
                                                                                     ">, but found <"+qc_metric[prop]+">."
                         qc_patch=qc_props
-                        break
+                        #break
                 
         if qc_metric:
             # update files in quality_metric_of list
@@ -1389,7 +1398,7 @@ class Splashdown(object):
         # Handle awkward condition where file object was posted, but then the file upload failed
         f_obj = self.found.get(fid)
         if f_obj != None:
-            assert f_obj['status'] == "upload failed"
+            #assert f_obj['status'] == "upload failed"  # Actually this could be a posted file for which qc_metric post failed.
             payload['accession'] = f_obj['accession'] # accession tells dxencode.encoded_post_file() to patch obj, not post new
             payload['status'] = f_obj['status']
 
@@ -1576,8 +1585,8 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use grep ENC3 *.log | sed s/^.*\log://
-            #print "%s  ENC3  hg19 v19       1,2     2015-08-26  2015-08-31     %s   $%.2f  %d" % \
-            #    (exp_id, duration, total_cost, count)
+            #print "%s  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-00-29  %s  $%.2f" % \
+            #    (exp_id, duration, total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
 
