@@ -95,20 +95,21 @@ class Splashdown(object):
                 "mad_qc":          { "QC_only":                                   "*_mad_plot.png"               }  },
         },
         "rampage": {
-            "step-order": [ "align","signals","peaks","idr"],
+            "step-order": [ "align","signals","peaks","idr","mad_qc"],
             "replicate":  {
                 "align":           { "alignments":                                "*_rampage_star_marked.bam" },
                 "signals":         { "plus strand signal of all reads":           "*_rampage_5p_plusAll.bw",
                                      "minus strand signal of all reads":          "*_rampage_5p_minusAll.bw",
                                      "plus strand signal of unique reads":        "*_rampage_5p_plusUniq.bw",
                                      "minus strand signal of unique reads":       "*_rampage_5p_minusUniq.bw" },
-                "peaks":           { #"transcription start sites|gff|gff3":        "*_rampage_peaks.gff",
-                                     "transcription start sites|bed|unknown":     "*_rampage_peaks.bed", # format_type not defined
-                                     "transcription start sites|bigBed|unknown":  "*_rampage_peaks.bb" } },
+                "peaks":           { "transcription start sites|gff|gff3":        "*_rampage_peaks.gff",
+                                     "transcription start sites|bed|tss_peak":    "*_rampage_peaks.bed",
+                                     "transcription start sites|bigBed|tss_peak": "*_rampage_peaks.bb",
+                                     "gene quantifications":                      "*_rampage_peaks_quant.tsv" } },
             "combined":   {
-                "idr":             { #"transcription start sites|gff|gff3":        "*_idr.gff",
-                                     "transcription start sites|bed|unknown":     "*_idr.bed", # format_type not defined
-                                     "transcription start sites|bigBed|unknown":  "*_idr.bb" }  }
+                "idr":             { "transcription start sites|bed|idr_peak":    "*_rampage_idr.bed",
+                                     "transcription start sites|bigBed|idr_peak": "*_rampage_idr.bb" },
+                "mad_qc":          { "QC_only":                                   "*_rampage_mad_plot.png" }  },
         }
     }
 
@@ -177,7 +178,7 @@ class Splashdown(object):
                                     "blob": { "pattern": "/*_mad_plot.png" }, 
                                 },
         "IDR_summary":          { 
-                                    "files": {"results": "detail", "inputs": ["peaks_a", "peaks_a"] },        
+                                    "files": {"results": "detail", "inputs": ["peaks_a", "peaks_b"] },        
                                     "blob": { "pattern": "/*_idr.png" }, 
                                 },
         # TODO: characterized DNase qc_metrics better.  Especially files.
@@ -909,6 +910,7 @@ class Splashdown(object):
         '''Updates an object with information from encoded database.'''
         obj['lab'] = '/labs/encode-processing-pipeline/' # self.exp['lab']['@id'] Now hard-coded
         obj['award'] = '/awards/U41HG006992/'  # self.exp['award']['@id']
+        #obj['submitted_by'] = '/users/8b1f8780-b5d6-4fb7-a5a2-ddcec9054288/' # or 'ENCODE Consortium' or '/labs/encode-consortium/' 
 
         # Find replicate info
         #if rep_tech.startswith("rep") and len(rep_tech) == 6:
@@ -1046,6 +1048,7 @@ class Splashdown(object):
                     'type':     blob_mime,
                     'href': 'data:%s;base64,%s' % (blob_mime, b64encode(stream.read()))
                 }
+            #print "  * Created attachemnt '"+blob_name+"'."
             return attachment
         except:
             print >> sys.stderr, "ERROR: Unable to open and read '"+blob_name+"' as stream."
@@ -1585,7 +1588,7 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use grep ENC3 *.log | sed s/^.*\log://
-            #print "%s  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-00-29  %s  $%.2f" % \
+            #print "%s  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-06  %s  $%.2f" % \
             #    (exp_id, duration, total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)

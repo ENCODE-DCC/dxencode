@@ -33,6 +33,9 @@ class Assemble(object):
     FOLDER_DEFAULT = '/runs/'
     '''This the default location for creating experiment folders on dnanexus.'''
     
+    FILE_STATUSES_ACCEPTED = [ "released" ]
+    '''By default only 'released' files may be assembled.  Use --status-accepted to allow others.'''
+    
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq' ] #,"dnase" ,"dna-me","chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
     
@@ -99,6 +102,7 @@ class Assemble(object):
         self.exp = {}  # Will hold the encoded exp json
         self.full_mapping = None
         self.psv = {} # will hold pipeline specific variables.
+        self.statuses_accepted = self.FILE_STATUSES_ACCEPTED
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
     
     def get_args(self,parse=True):
@@ -172,6 +176,12 @@ class Assemble(object):
                         default=self.SERVER_DEFAULT,
                         required=False)
 
+        ap.add_argument('--sa','--status-accepted',
+                        help='Optionally allow additional file statuses.',
+                        nargs='+',
+                        default=None,
+                        required=False)
+
         ap.add_argument('-l','--launch',
                         help='Ignite the launcher after files have been assembled.',
                         action='store_true',
@@ -201,6 +211,9 @@ class Assemble(object):
             print "Please enter a '--project' to run in."
             sys.exit(1)
 
+        if args.sa != None:
+            self.statuses_accepted.extend(args.sa)
+            
         self.project = dxencode.get_project(self.proj_name)
         self.proj_id = self.project.get_id()
 
@@ -264,8 +277,11 @@ class Assemble(object):
         
         # Input file should match on format and have format
         input_files = dxencode.files_to_map(self.exp)
+        if verbose or len(self.statuses_accepted) > len(self.FILE_STATUSES_ACCEPTED):
+            print "Accepted file statuses:"
+            print self.statuses_accepted
         for f_obj in input_files:
-            if f_obj.get('status') not in ["released","uploaded"]:
+            if f_obj.get('status') not in self.statuses_accepted:
                 continue
             file_path = f_obj['submitted_file_name']
             if file_path in enc_file_names:
