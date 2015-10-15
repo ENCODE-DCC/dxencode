@@ -1040,7 +1040,7 @@ def get_enc_exp_files(exp_obj,output_types=[],lab=None,key='default'):
                     continue
                 elif "name" in file_lab and file_lab["name"] != lab:
                     continue
-        if file_obj.get('status') not in ["released","uploaded","in progress"]:
+        if file_obj.get('status') not in ["released","uploaded","uploading","in progress"]: # further restricted by caller.
             continue
         if file_obj.get('submitted_file_name') not in filenames_in(files):
            files.extend([file_obj])

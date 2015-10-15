@@ -212,7 +212,10 @@ class Assemble(object):
             sys.exit(1)
 
         if args.sa != None:
-            self.statuses_accepted.extend(args.sa)
+            if isinstance(args.sa,list):
+                self.statuses_accepted.extend(args.sa)
+            else:
+                self.statuses_accepted.append(args.sa)
             
         self.project = dxencode.get_project(self.proj_name)
         self.proj_id = self.project.get_id()

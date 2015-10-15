@@ -520,23 +520,35 @@ class Splashdown(object):
         return found_file
 
 
-    def enc_file_add_alias(self,fid,accession,f_obj,test=True):
+    def enc_file_add_alias(self,fid,accession,f_obj,remove=False,test=True):
         '''Updates ENCODEd file with its 'fid' based alias.'''
         fid_alias = 'dnanexus:' + fid
         update_payload = {}
+
         if 'aliases' in f_obj:
-            if fid_alias in f_obj['aliases']:
+            if fid_alias in f_obj['aliases'] and not remove:
+                return False
+            elif fid_alias not in f_obj['aliases'] and remove:
                 return False
             update_payload['aliases'] = f_obj['aliases']
         else:
             update_payload['aliases'] = []
-        update_payload['aliases'].append(fid_alias)
+        if not remove:
+            update_payload['aliases'].append(fid_alias)
+        elif fid_alias in update_payload['aliases']:
+            update_payload['aliases'].remove(fid_alias)
         if not test:
             ret = dxencode.encoded_patch_obj(accession, update_payload, self.server, self.authid, self.authpw)
             #if ret == accession:
-            print "  * Updated ENCODEd '"+accession+"' with alias."
+            if not remove:
+                print "  * Updated ENCODEd '"+accession+"' with alias "+fid_alias+"."
+            else:
+                print "  * Removed ENCODEd '"+accession+"' alias "+fid_alias+"."
         else:
-            print "  * Would update ENCODEd '"+accession+"' with alias."
+            if not remove:
+                print "  * Would update ENCODEd '"+accession+"' with alias "+fid_alias+"."
+            else:
+                print "  * Would remove ENCODEd '"+accession+"' alias "+fid_alias+"."
         return True
 
 
@@ -550,6 +562,7 @@ class Splashdown(object):
 
         posted = []
         self.found = {}
+        self.revoked = []
         for (out_type, rep_tech, fid, QC_only) in files_expected:
             if QC_only: # Use new qc_object posting methods 
                 continue
@@ -565,6 +578,7 @@ class Splashdown(object):
             #    posted.append( (out_type,rep_tech,fid) )
             
             fileDict = dxencode.description_from_fid(fid,properties=True)
+            #file_name = dxencode.file_path_from_fid(fid,projectToo=False)
             acc_key = dxencode.dx_property_accesion_key('https://www.encodeproject.org') # prefer production accession
             # check file properties
             accession = ''
@@ -576,15 +590,25 @@ class Splashdown(object):
                     if verbose:
                         print >> sys.stderr, "* DEBUG   Accession: " + accession
                     f_obj =  self.enc_file_find_by_dxid(fid)  # Look by alias first incase ENCFF v. TSTFF mismatch
-                    if f_obj != None: # Verifyably posted
-                        self.found[fid] = f_obj
-                        if f_obj.get('status') != 'upload failed': 
-                            posted.append( (out_type,rep_tech,fid) )
-                        # TODO: Compare accessions.  But not ENCFF to TSTFF
-                        if verbose:
-                            print >> sys.stderr, "* DEBUG   Found by alias"
-                            if f_obj.get('status') == 'upload failed': 
-                                print >> sys.stderr, "* DEBUG   But needs to be reposted"
+                    if f_obj != None: # Verifiably posted
+                        if f_obj.get('status') == 'revoked':
+                            if verbose:
+                                print >> sys.stderr, "* DEBUG   Found REVOKED by alias"
+                            self.revoked.append(accession)
+                            self.enc_file_add_alias(fid,accession,f_obj,remove=True,test=test)
+                            ret = dxencode.dx_file_set_property(fid,'revoked_accession',accession,test=test)
+                            if not test and ret == accession:
+                                dxencode.dx_file_set_property(fid,'accession',null,test=test)
+                                print "  * Marked DX property with revoked_accession."
+                        else:
+                            self.found[fid] = f_obj
+                            if f_obj.get('status') != 'upload failed': 
+                                posted.append( (out_type,rep_tech,fid) )
+                            # TODO: Compare accessions.  But not ENCFF to TSTFF
+                            if verbose:
+                                print >> sys.stderr, "* DEBUG   Found by alias"
+                                if f_obj.get('status') == 'upload failed': 
+                                    print >> sys.stderr, "* DEBUG   But needs to be reposted"
                         continue
 
                     # look by accession
@@ -592,14 +616,23 @@ class Splashdown(object):
                         print >> sys.stderr, "* DEBUG   Not found by alias: dnanexus:" + fid
                     f_obj = self.enc_lookup_json( 'files/' + accession,must_find=False)
                     if f_obj != None: # Verifyably posted
-                        self.found[fid] = f_obj
-                        if f_obj.get('status') != 'upload failed': 
-                            posted.append( (out_type,rep_tech,fid) )
-                        self.enc_file_add_alias(fid,accession,f_obj,test=test)
-                        if verbose:
-                            print >> sys.stderr, "* DEBUG   Found by accession: " + accession
-                            if f_obj.get('status') == 'upload failed': 
-                                print >> sys.stderr, "* DEBUG   But needs to be reposted"
+                        if f_obj.get('status') == 'revoked':
+                            if verbose:
+                                print >> sys.stderr, "* DEBUG   Found REVOKED by accession"
+                            self.revoked.append(accession)
+                            ret = dxencode.dx_file_set_property(fid,'revoked_accession',accession,test=test)
+                            if not test and ret == accession:
+                                dxencode.dx_file_set_property(fid,'accession',null,test=test)
+                                print "  * Marked DX property with revoked_accession."
+                        else:
+                            self.found[fid] = f_obj
+                            if f_obj.get('status') != 'upload failed': 
+                                posted.append( (out_type,rep_tech,fid) )
+                            self.enc_file_add_alias(fid,accession,f_obj,test=test)
+                            if verbose:
+                                print >> sys.stderr, "* DEBUG   Found by accession: " + accession
+                                if f_obj.get('status') == 'upload failed': 
+                                    print >> sys.stderr, "* DEBUG   But needs to be reposted"
                         continue
                     else:
                         if verbose:
@@ -612,20 +645,26 @@ class Splashdown(object):
                 #f_obj =  self.find_in_encode(fid,verbose)
                 f_obj =  self.enc_file_find_by_dxid(fid)
                 if f_obj != None:
-                    self.found[fid] = f_obj
-                    if f_obj.get('status') != 'upload failed': 
-                        posted.append( (out_type,rep_tech,fid) )
-                    # update dx file property
                     accession = f_obj['accession']
-                    if accession.startswith('ENCFF'):  # Only bother if it is the real thing.  Ambiguity with 'TSTFF'
-                        ret = dxencode.dx_file_set_property(fid,'accession',accession,add_only=True,test=test)
-                        if not test:
-                            if ret == accession:
-                                print "  * Updated DX property with accession."
-                    if verbose:
-                        print >> sys.stderr, "* DEBUG   Found by alias"
-                        if f_obj.get('status') == 'upload failed': 
-                            print >> sys.stderr, "* DEBUG   But needs to be reposted"
+                    if f_obj.get('status') == 'revoked':
+                        if verbose:
+                            print >> sys.stderr, "* DEBUG   Found REVOKED by alias"
+                        self.revoked.append(accession)
+                        self.enc_file_add_alias(fid,accession,f_obj,remove=True,test=test)
+                    else:
+                        self.found[fid] = f_obj
+                        if f_obj.get('status') != 'upload failed': 
+                            posted.append( (out_type,rep_tech,fid) )
+                        # update dx file property
+                        if accession.startswith('ENCFF'):  # Only bother if it is the real thing.  Ambiguity with 'TSTFF'
+                            ret = dxencode.dx_file_set_property(fid,'accession',accession,add_only=True,test=test)
+                            if not test:
+                                if ret == accession:
+                                    print "  * Updated DX property with accession."
+                        if verbose:
+                            print >> sys.stderr, "* DEBUG   Found by alias"
+                            if f_obj.get('status') == 'upload failed': 
+                                print >> sys.stderr, "* DEBUG   But needs to be reposted"
                     continue
 
                 if verbose:
@@ -663,14 +702,39 @@ class Splashdown(object):
         
     def find_needed_files(self,files_expected,test=True,verbose=False):
         '''Returns the tuple list of files that NEED to be posted to ENCODE.'''
-        #verbose = True
         needed = []
         posted = self.find_posted_files(files_expected,test=test,verbose=verbose)
+        #verbose = True
+        # FIXME: special case to get around already updated aliases
+        #self.revoked.extend(['ENCFF905HBB','ENCFF374TIF','ENCFF659SBG','ENCFF308DBJ','ENCFF840CVB'])
+        # FIXME: special case to get around already updated aliases
+        
         # Note that find_posted_files() fills in self.found
         for (out_type, rep_tech, fid, QC_only) in files_expected:
             if not QC_only and (out_type, rep_tech, fid) not in posted:
                 needed.append( (out_type,rep_tech,fid, False) )
+                if verbose:
+                    print >> sys.stderr, "* DEBUG post needed for:" + fid
                 continue
+            # Figure out if a patch is needed
+            # WARNING: This will only work if the revoked files have the old dx aliases, and this run will update those...
+            #          so patching derived from when earlier files were revoke will only work on the first non-test run.
+            if not QC_only and (out_type, rep_tech, fid) in posted:
+                patch_needed = False
+                if fid in self.found.keys():
+                    f_obj = self.found[fid]
+                    derived_from = f_obj.get('derived_from')
+                    if derived_from != None and isinstance(derived_from,list):
+                        for file_url in derived_from:
+                            revoked_acc = file_url.split('/')[2]
+                            if revoked_acc in self.revoked:
+                                patch_needed = True
+                                break
+                if patch_needed:
+                    needed.append( (out_type,rep_tech,fid, False) )
+                    if verbose:
+                        print >> sys.stderr, "* DEBUG patch of derived_from is needed for:" + fid
+                    continue
             # Figure out if QC was already posted
             qc_json = self.dx_qc_json_get(fid)
             if not qc_json:
@@ -1303,6 +1367,8 @@ class Splashdown(object):
             # FIXME: UGLY temporary special case!!!
             if dx_app_name  == "rampage-peaks" and dx_app_ver == "1.0.1":
                 dx_app_ver = "1.1.0"  # Because the version was supposed to bump the second digit if a tool changes.
+            if dx_app_name in ["quant-rsem","quant-rsem-alt"] and dx_app_ver == "1.1.0":
+                dx_app_ver = "1.0.4"  # Because a test version of the step was accidentally run
             # FIXME: UGLY temporary special case!!!
             if not dx_app_ver or not isinstance(dx_app_ver, str) or len(dx_app_ver) == 0:
                 print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
@@ -1523,6 +1589,38 @@ class Splashdown(object):
             return (self.SKIP_VALIDATE[payload["output_type"]] == payload["file_format"])
         return False
 
+    def file_patch(self,fid,payload,test=True):
+        '''Patches ENCODEd file with payload.'''
+        f_obj = self.found.get(fid)
+        if f_obj == None:
+            return None
+        accession = f_obj.get('accession')
+        if accession == None:
+            return None
+            
+        assert f_obj.get('accession') == payload.get('accession')
+        assert f_obj.get('dataset') == "/experiments/" + payload.get('dataset') + "/"
+        assert f_obj.get('file_format') == payload.get('file_format')
+        assert f_obj.get('file_format_type') == payload.get('file_format_type')
+        assert f_obj.get('output_type') == payload.get('output_type')
+            
+        update_payload = payload
+        del update_payload['accession'] 
+        del update_payload['status']
+        del update_payload['dataset'] 
+        del update_payload['file_format']
+        del update_payload['file_format_type']
+        del update_payload['output_type']
+
+        if not test:
+            ret = dxencode.encoded_patch_obj(accession, update_payload, self.server, self.authid, self.authpw)
+            print "  * Patched '"+accession+"' with payload."
+        else:
+            print "  * Would patch '"+accession+"' with payload."
+            #print json.dumps(update_payload,indent=4,sort_keys=True)
+        return accession
+
+
     def file_post(self,fid,payload,test=True):
         '''Posts a file to encoded.'''
         path = payload['submitted_file_name'].split(':')[1]
@@ -1627,6 +1725,7 @@ class Splashdown(object):
         exp_count = 0
         halted = 0
         total_posted = 0
+        total_patched = 0
         total_qc_objs = 0        
         for exp_id in args.experiments:
             sys.stdout.flush() # Slow running job should flush to piped log
@@ -1673,6 +1772,7 @@ class Splashdown(object):
             exp_count += 1
             file_count = 0
             post_count = 0
+            patch_count = 0
             qc_obj_count = 0
             for (out_type,rep_tech,fid,QC_only) in files_to_post:
                 sys.stdout.flush() # Slow running job should flush to piped log
@@ -1692,21 +1792,25 @@ class Splashdown(object):
                 file_count += 1
                 # c) Post file and update encoded database.
                 if not QC_only: # Use new qc_object posting methods 
-                    accession = self.file_post(fid,payload,args.test)
-                    if accession == None:
-                        print "* HALTING %s - post failure could compromise 'derived_from'" % \
-                                                                                        (self.exp_id)
-                        halted += 1
-                        break
-                    elif accession == "NOT POSTED":
-                        print "* HALTING %s - validation failure prevented posting and could compromise 'derived_from'" % \
-                                                                                        (self.exp_id)
-                        halted += 1
-                        break
+                    accession = self.file_patch(fid,payload,args.test) # rare cases a patch is all that is needed.
+                    if accession != None:
+                        patch_count += 1
+                    else:
+                        accession = self.file_post(fid,payload,args.test)
+                        if accession == None:
+                            print "* HALTING %s - post failure could compromise 'derived_from'" % \
+                                                                                            (self.exp_id)
+                            halted += 1
+                            break
+                        elif accession == "NOT POSTED":
+                            print "* HALTING %s - validation failure prevented posting and could compromise 'derived_from'" % \
+                                                                                            (self.exp_id)
+                            halted += 1
+                            break
 
-                    # d) Update dnanexus file with file accession tag.
-                    post_count += 1                        
-                    self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
+                        # d) Update dnanexus file with file accession tag.
+                        post_count += 1                        
+                        self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
                 
                 # e) After the file is posted, post or patch qc_metric objects.
                 qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)
@@ -1720,20 +1824,21 @@ class Splashdown(object):
                     break
 
             if not args.test:
-                print "- For %s processed %d file(s), posted %d, qc %d" % \
-                                                        (self.exp_id, file_count, post_count,qc_obj_count)
+                print "- For %s processed %d file(s), posted %d, patched %d, qc %d" % \
+                                                        (self.exp_id, file_count, post_count, patch_count, qc_obj_count)
             else:
-                print "- For %s processed %d file(s), would post %d, qc %d" % \
-                                                        (self.exp_id, file_count, post_count,qc_obj_count)
+                print "- For %s processed %d file(s), would post %d, patched %d, qc %d" % \
+                                                        (self.exp_id, file_count, post_count, patch_count, qc_obj_count)
             self.print_analysis_totals(self.exp_id)
             total_posted += post_count
+            total_patched += patch_count
 
         if not args.test:
-            print "Processed %d experiment(s), halted %d, posted %d file(s), %d qc object(s)" % \
-                                                            (exp_count, halted, total_posted, total_qc_objs)
+            print "Processed %d experiment(s), halted %d, posted %d file(s), patched %d file(s), %d qc object(s)" % \
+                                                            (exp_count, halted, total_posted, total_patched, total_qc_objs)
         else:
-            print "Processed %d experiment(s), halted %d, would post %d file(s), %d qc object(s)" % \
-                                                            (exp_count, halted, total_posted, total_qc_objs)
+            print "Processed %d experiment(s), halted %d, would post %d file(s), patched %d file(s), %d qc object(s)" % \
+                                                            (exp_count, halted, total_posted, total_patched, total_qc_objs)
         if halted == exp_count:
             sys.exit(1)
         print "(finished)"

@@ -44,7 +44,7 @@ class Mission_log(object):
     SERVER_DEFAULT = 'www'
     '''This the default server to report from.'''
 
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq'] #, 'rampage','dnase','dna-me','chip-seq' ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage'] #, 'rampage','dnase','dna-me','chip-seq' ]
     '''This module supports only these experiment (pipeline) types.'''
 
     REPORT_DEFAULT = 'star-mad'
@@ -63,6 +63,8 @@ class Mission_log(object):
              "long-rna-seq":  { "output_types": [ "transcriptome alignments",        "gene quantifications" ],
                                 "metrics":      { "transcriptome alignments": 'star',"gene quantifications": 'mad' } },
              "small-rna-seq": { "output_types": [ "alignments",        "gene quantifications" ],
+                                "metrics":      { "alignments": 'star',"gene quantifications": 'mad' } },
+             "rampage":       { "output_types": [ "alignments",        "gene quantifications" ],
                                 "metrics":      { "alignments": 'star',"gene quantifications": 'mad' } }
          },
          'tophat_times': {
@@ -116,8 +118,8 @@ class Mission_log(object):
 
     def __init__(self):
         '''
-        Splashdown expects one or more experiment ids as arguments and will find, document
-        and post files in the associated directory.
+        Mission_log generates reports from pipeline results that include quality_metrics that have already been 
+        uploaded to encodeD.  
         '''
         self.args = {} # run time arguments
         self.server_key = 'www'
@@ -135,10 +137,8 @@ class Mission_log(object):
     def get_args(self,parse=True):
         '''Parse the input arguments.'''
         ### PIPELINE SPECIFIC
-        ap = argparse.ArgumentParser(description=self.HELP_BANNER + "All results " +
-                    "are expected to be in folder /<resultsLoc>/<experiment> and any replicate " +
-                    "sub-folders named as " +
-                    "<experiment>/rep<biological-replicate>_<technical-replicate>.")
+        ap = argparse.ArgumentParser(description=self.HELP_BANNER + "All report texts " +
+                    "is written to stdout, while progress and any warnings or errors is written to stderr. ")
         ### PIPELINE SPECIFIC
 
         ap.add_argument('-e', '--experiments',
