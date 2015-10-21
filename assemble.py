@@ -36,13 +36,15 @@ class Assemble(object):
     FILE_STATUSES_ACCEPTED = [ "released" ]
     '''By default only 'released' files may be assembled.  Use --status-accepted to allow others.'''
     
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq' ] #,"dnase" ,"dna-me","chip-seq" ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq', "dna-me" ] #,"chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
     
     LAUNCHERS = {   'long-rna-seq':     '../long-rna-seq-pipeline/dnanexus/lrnaLaunch.py', 
                     'small-rna-seq':    '../long-rna-seq-pipeline/dnanexus/small-rna/srnaLaunch.py', 
                     'rampage':          '../long-rna-seq-pipeline/dnanexus/rampage/rampageLaunch.py', 
-                    'dnase-seq':        '../dnase_pipeline/dnanexus/dnaseLaunch.py' }
+                    'dnase-seq':        '../dnase_pipeline/dnanexus/dnaseLaunch.py',
+                    'dna-me':           '../dna-me-pipeline/dnanexus/dmeLaunch.py',
+                }
 
     # Pipeline files includes inputs and results.  To assemble the files, there is no need to understand step order
     # dependencies.  Even replicate vs. combined is not important information as folder destinations can be discovered
@@ -85,7 +87,11 @@ class Assemble(object):
         "dnase-seq": { # TODO: Flesh out the DNase results
             "inputs":  { "reads": [ "*.fastqs.gz" ] },
             "results": { "alignments":                 [ "*_bwa.bam"    ] }
-        }
+        },
+        "dna-me": { # TODO: Flesh out the DNase results
+            "inputs":  { "reads": [ "*.fastqs.gz" ] },
+            "results": { "alignments":                 [ "*_bismark_techrep.bam" ] }
+        },
     }
     
     def __init__(self):

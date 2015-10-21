@@ -865,18 +865,25 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
     if exp["assay_term_name"] == "RNA-seq" \
     or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq" \
     or exp["assay_term_name"] == "single cell isolation followed by RNA-seq":
-        if exp["replicates"][0]["library"]["size_range"] in [">200", "300-350", "350-450"]:
+        #if exp["replicates"][0]["library"]["size_range"] in [">200", "300-350", "350-450"]:
+        # Now more: "150-400","149-512","151-499","153-499","157-497"        
+        size_range = exp["replicates"][0]["library"]["size_range"]
+        if size_range.startswith('>'):
+            size_range = size_range[1:]
+        try:
+            min_size = int(size_range.split('-')[0])
+        except:
+            min_size = 0
+        if min_size >= 149:
             return "long-rna-seq"
         else:
             return "small-rna-seq"
-    elif exp["assay_term_name"] == "whole genome bisulfite sequencing":
+    elif exp["assay_term_name"] == "whole-genome shotgun bisulfite sequencing":
         return "dna-me"
     #elif exp["assay_term_name"] == "RAMPAGE":
     #    return "rampage"
     #elif exp["assay_term_name"] == "ChIP-seq":
     #    return "chip-seq"
-    #elif exp["assay_term_name"] == "DNA methylation profiling by array assay":
-    #    return "dna-me"
 
     return exp["assay_term_name"].lower()
 
@@ -1220,6 +1227,8 @@ def umbrella_folder(folder,default,proj_name=None,exp_type=None,genome=None,anno
             folder = "/srna/"
         elif exp_type == "dnase-seq":
             folder = "/dnase/"
+        elif exp_type == "dna-me":
+            folder = "/dme/"
         else:
             folder = "/" + exp_type + '/'
 
