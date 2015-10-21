@@ -224,6 +224,12 @@ class Launch(object):
                         default=self.FOLDER_DEFAULT,
                         required=False)
 
+        ap.add_argument('-g','--genome',
+                        help="The genome assembly to run on (default: '<project>:" + \
+                                                                  dxencode.GENOME_DEFAULTS['human'] + "')",
+                        default=None,
+                        required=False)
+
         ap.add_argument('--run',
                         help='Run the workflow after assembling it.',
                         action='store_true',
@@ -477,6 +483,11 @@ class Launch(object):
         organism = cv['reps']['a']['organism']
         if organism in dxencode.GENOME_DEFAULTS:
             cv['genome'] = dxencode.GENOME_DEFAULTS[organism]
+            if args.genome != None and args.genome != dxencode.GENOME_DEFAULTS['human']:
+                if args.genome not in self.GENOMES_SUPPORTED:
+                    print "Genome %s not currently supported" % args.genome
+                    sys.exit(1)
+                cv['genome'] = args.genome            
         else:
             print "Organism %s not currently supported" % organism
             sys.exit(1)
