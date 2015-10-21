@@ -1042,7 +1042,7 @@ class Splashdown(object):
         if collection == None:
             collection = self.qc_metric_schema_type(qc_key)
 
-        qc_metric = self.enc_lookup_json(collection+'/'+qc_alias,must_find=must_find)
+        qc_metric = self.enc_lookup_json(qc_alias,must_find=must_find)
         if qc_metric != None:
             self.obj_cache["exp"][qc_alias] = qc_metric
         return qc_metric
@@ -1231,8 +1231,7 @@ class Splashdown(object):
                     print "  * Would patch qc_metric: '%s'" % qc_alias
                 else:
                     try:
-                        patched_obj = dxencode.encoded_patch_obj(collection+'/'+qc_alias,qc_patch, self.server, \
-                                                                                                self.authid, self.authpw)
+                        patched_obj = dxencode.encoded_patch_obj(qc_alias,qc_patch, self.server, self.authid, self.authpw)
                     except:
                         print "Failed to patch qc_metric: '%s'" % qc_alias
                         sys.exit(1)
