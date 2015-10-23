@@ -136,6 +136,7 @@ class Launch(object):
         'small-rna-seq': { 'long': 'Small-RNA-seq', 'short': 'srna',  'se_and_pe': False }, 
         'rampage':       { 'long': 'Rampage',       'short': 'ramp',  'se_and_pe': False }, 
         'dnase-seq':     { 'long': 'DNase-seq',     'short': 'dnase', 'se_and_pe': True  },
+        'dna-me':        { 'long': 'DNA-methlyation','short': 'dme',   'se_and_pe': True  },
     }
     '''Standard labelling requires exp_type specific labels.  This can be overridden in descendent classes.'''
     
