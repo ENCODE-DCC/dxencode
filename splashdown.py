@@ -1366,8 +1366,6 @@ class Splashdown(object):
             # FIXME: UGLY temporary special case!!!
             if dx_app_name  == "rampage-peaks" and dx_app_ver == "1.0.1":
                 dx_app_ver = "1.1.0"  # Because the version was supposed to bump the second digit if a tool changes.
-            if dx_app_name in ["quant-rsem","quant-rsem-alt"] and dx_app_ver == "1.1.0":
-                dx_app_ver = "1.0.4"  # Because a test version of the step was accidentally run
             # FIXME: UGLY temporary special case!!!
             if not dx_app_ver or not isinstance(dx_app_ver, str) or len(dx_app_ver) == 0:
                 print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
