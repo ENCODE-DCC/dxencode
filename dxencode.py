@@ -700,11 +700,12 @@ def find_applet_by_name(applet_name, applets_project_id):
     logger.debug(cached + "Resolved %s to %s" % (applet_name, APPLETS[(applet_name, applets_project_id)].get_id()))
     return APPLETS[(applet_name, applets_project_id)]
 
-def filenames_in(files=None):
-    if not len(files):
-        return []
-    else:
-        return [f.get('submitted_file_name') for f in files]
+def file_in_list(looking_for_file,file_list):
+    md5 = looking_for_file.get('md5sum')
+    for a_file in file_list:
+        if md5 == a_file.get('md5sum'):
+            return True
+    return False
 
 def files_to_map(exp_obj):
     if not exp_obj or not exp_obj.get('files'):
@@ -716,11 +717,12 @@ def files_to_map(exp_obj):
                file_obj.get('file_format') == 'fastq' and \
                file_obj.get('replicate') and file_obj.get('replicate').get('biological_replicate_number') and \
                                              file_obj.get('replicate').get('technical_replicate_number') and \
-               file_obj.get('submitted_file_name') not in filenames_in(files):
+               not file_in_list(file_obj,files):
                files.extend([file_obj])
-            elif file_obj.get('submitted_file_name') in filenames_in(files):
-                logger.warning('%s:%s Duplicate filename, ignoring.' %(exp_obj.get('accession'),file_obj.get('accession')))
-                return []
+            elif file_in_list(file_obj,files):
+                logger.warning('%s:%s Duplicate file md5sum, ignoring.' %(exp_obj.get('accession'),file_obj.get('accession')))
+                print('WARNING: %s:%s Duplicate filename, ignoring.' %(exp_obj.get('accession'),file_obj.get('accession')))
+                #return []
         return files
 
 def replicates_to_map(experiment, files):
@@ -1049,7 +1051,7 @@ def get_enc_exp_files(exp_obj,output_types=[],lab=None,key='default'):
                     continue
         if file_obj.get('status') not in ["released","uploaded","uploading","in progress"]: # further restricted by caller.
             continue
-        if file_obj.get('submitted_file_name') not in filenames_in(files):
+        if not file_in_list(file_obj,files):
            files.extend([file_obj])
     return files
 

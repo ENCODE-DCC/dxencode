@@ -240,12 +240,15 @@ class Assemble(object):
         '''Returns a list of replicates with input files for this experiment.'''
         if self.rep != None:
             return [ self.rep ]
-            
+        #verbose=True
             
         # Must look through exp and find all replicates!
         if exp != self.exp or self.full_mapping == None:
             self.full_mapping = dxencode.get_full_mapping(exp_id,exp,key=self.server_key)
         replicates = dxencode.get_reps_from_enc(exp_id, exp=exp, full_mapping=self.full_mapping, key=self.server_key)
+        if verbose:
+            print "Replicates from encoded:"
+            print json.dumps(replicates,indent=4,sort_keys=True)
         for rep in replicates:
             if self.genome == None:
                 if rep['organism'] in dxencode.GENOME_DEFAULTS:
@@ -283,6 +286,8 @@ class Assemble(object):
         '''Returns list of enc file_objects for all files available on encoded.'''
         enc_files = []
         enc_file_names = []
+        enc_file_md5sums = []
+        #verbose = True
         
         # Input file should match on format and have format
         input_files = dxencode.files_to_map(self.exp)
@@ -292,13 +297,13 @@ class Assemble(object):
         for f_obj in input_files:
             if f_obj.get('status') not in self.statuses_accepted:
                 continue
-            file_path = f_obj['submitted_file_name']
-            if file_path in enc_file_names:
+            file_md5 = f_obj['md5sum']
+            if file_md5 in enc_file_md5sums:
                 continue
             if f_obj.get('file_format') == 'fastq':
                 #f_obj['dx_file_name'] = f_obj['accession'] + ".fastq.gz'
                 enc_files.append( f_obj ) 
-                enc_file_names.append(file_path) 
+                enc_file_md5sums.append(file_md5) 
 
         # Result file must match their glob!
         if not self.inputs_only:
@@ -306,8 +311,12 @@ class Assemble(object):
             for obj_type in exp_files['results'].keys():
                 for f_obj in result_files:
                     if obj_type == f_obj['output_type']:
-                        file_path = f_obj['submitted_file_name']
-                        if file_path in enc_file_names:
+                        if f_obj.get('award') != '/awards/U41HG006992/':
+                            if verbose:
+                                print "Skipping file %s as it is not from DCC pipeline." % f_obj.get('accession')
+                            continue
+                        file_path = f_obj['submitted_file_name'] # Can check submitted_file_name because these should
+                        if file_path in enc_file_names:          # have been submitted from dx pipeline
                             continue
                         for glob in exp_files['results'][obj_type]:
                             if fnmatch.fnmatch(file_path, glob):
