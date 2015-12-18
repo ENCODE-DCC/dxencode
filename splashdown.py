@@ -184,7 +184,25 @@ class Splashdown(object):
         # TODO: characterized DNase qc_metrics better.  Especially files.
         "samtools_flagstats":   { 
                                     "files": {"results": "detail"}, 
-                                    "blob": { "pattern": "/*_qc.txt" }, # Problem: non-specific: *_qc.txt 
+                                    "blob": { "pattern": "/*_qc.txt" } 
+                                },
+        "tophat_flagstat":      { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": "_tophat.bam",
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_tophat_flagstat.txt" }, 
+                                },
+        "star_genome_flagstat": { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": "_star_genome.bam",
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_star_genome_flagstat.txt" }, 
+                                },
+        "star_anno_flagstat":   { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": "_star_anno.bam",
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_star_anno_flagstat.txt" }, 
                                 },
         "samtools_stats":       { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspot_qc.txt"  } },
@@ -1080,16 +1098,17 @@ class Splashdown(object):
         descr = dxencode.description_from_fid(fid)
         
         path = dxencode.file_path_from_fid(fid)
-        if descr['name'].endswith(blob_def['pattern'][2:]):  # is this the file?
+        folder = descr['folder']
+        file_name = descr['name']
+        if file_name.endswith(blob_def['pattern'][2:]):  # is this the file?
             blob_fid = fid
-            blob_name = descr['name']
+            blob_name = file_name
             blob_size = descr['size']
-        else:
-            folder = descr['folder']
+        if blob_fid == None:
             blob_fid = dxencode.find_file(folder + blob_def['pattern'],self.proj_id,multiple=False,recurse=False)
             if blob_fid == None:
                 print >> sys.stderr, "ERROR: Failed to find blob attachment file: " +folder + blob_def['pattern']
-                return None # FIXME: do we want to halt?  Or is this not an error?
+                sys.exit(1) # Make this a halt to see what is going on
             blob_descr = dxencode.description_from_fid(blob_fid)
             blob_name = blob_descr['name']
             blob_size = blob_descr['size']
@@ -1103,7 +1122,7 @@ class Splashdown(object):
             print >> sys.stderr, "ERROR: Unrecognizible mime_type for file: " + blob_name
             sys.exit(1) 
 
-        # Steram the file and fill in attachment
+        # Stream the file and fill in attachment
         try:
             with dxpy.open_dxfile(blob_fid) as stream:
                 attachment = {
@@ -1129,8 +1148,9 @@ class Splashdown(object):
                 print >> sys.stderr, "ERROR: could not find job for "+fid
                 return None
         qc_type = qc_key
-        if qc_key in self.QC_SUPPORTED and "type" in self.QC_SUPPORTED[qc_key]:
-            qc_type = self.QC_SUPPORTED[qc_key]["type"]
+        # The alias must have qc_key, NOT "type" because one job could have 2 different samtools_flagstats!
+        #if qc_key in self.QC_SUPPORTED and "type" in self.QC_SUPPORTED[qc_key]:
+        #    qc_type = self.QC_SUPPORTED[qc_key]["type"]
         return "dnanexus:qc."+qc_type+'.'+job_id
         
         
@@ -1205,11 +1225,13 @@ class Splashdown(object):
                         print >> sys.stderr, "ERROR: Expecting '"+prop+"' in qc_metric."
                         qc_patch=qc_props
                         #break
+                        sys.exit(1) # Until a legit case comes along, better exit and figure it out
                     elif qc_metric[prop] != qc_props[prop]:
-                        print >> sys.stderr, "ERROR: qc_metric['"+prop+"'] expecing <"+qc_props[prop]+ \
-                                                                                    ">, but found <"+qc_metric[prop]+">."
+                        print >> sys.stderr, "ERROR: qc_metric['"+prop+"'] expecing <"+str(qc_props[prop])+ \
+                                                                                    ">, but found <"+str(qc_metric[prop])+">."
                         qc_patch=qc_props
                         #break
+                        sys.exit(1) # Until a legit case comes along, better exit and figure it out
                 
         if qc_metric:
             # update files in quality_metric_of list
@@ -1273,6 +1295,17 @@ class Splashdown(object):
                 #self.qc_metric_created += 1
                 
         return qc_metric
+        
+    def find_qc_key(self,key,payload):
+        '''QC instructions may differ based upon file type.'''
+        for qc_key in self.QC_SUPPORTED.keys():
+            qc_faq = self.QC_SUPPORTED[qc_key]
+            if "only_for" in qc_faq:
+                if qc_faq.get("type") != key:
+                    continue
+                if payload["submitted_file_name"].endswith(qc_faq["only_for"]):
+                    return qc_key
+        return key
             
         
     def handle_qc_metrics(self,fid,payload,test=True,verbose=False):
@@ -1301,10 +1334,11 @@ class Splashdown(object):
         if not qc_json:
             return None
         for key in qc_json:
-            if key not in self.QC_SUPPORTED:
+            qc_key = self.find_qc_key(key,payload)
+            if qc_key not in self.QC_SUPPORTED:
                 continue
-            qc_faq = self.QC_SUPPORTED[key]
-            qc_metric = self.enc_qc_metric_find_or_create(key,qc_json[key],qc_faq,fid,job_id,step_run_id, \
+            qc_faq = self.QC_SUPPORTED[qc_key]
+            qc_metric = self.enc_qc_metric_find_or_create(qc_key,qc_json[key],qc_faq,fid,job_id,step_run_id, \
                                                                                             test=test,verbose=verbose)
             if qc_metric != None:
                 qc_for_file[key] = qc_json[key]
