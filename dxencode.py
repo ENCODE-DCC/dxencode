@@ -880,7 +880,8 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
             return "long-rna-seq"
         else:
             return "small-rna-seq"
-    elif exp["assay_term_name"] == "whole-genome shotgun bisulfite sequencing":
+    elif exp["assay_term_name"] == "whole-genome shotgun bisulfite sequencing" \
+      or exp["assay_term_name"] == "shotgun bisulfite-seq assay":
         return "dna-me"
     #elif exp["assay_term_name"] == "RAMPAGE":
     #    return "rampage"
