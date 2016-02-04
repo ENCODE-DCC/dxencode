@@ -45,7 +45,7 @@ class Splashdown(object):
     FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage' ] #,"dna-me","chip-seq" ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dna-me' ] #, 'dnase' ]
     '''This module supports only these experiment (pipeline) types.'''
 
     SKIP_VALIDATE = {"transcription start sites":'bed'}
@@ -110,10 +110,32 @@ class Splashdown(object):
                 "idr":             { "transcription start sites|bed|idr_peak":    "*_rampage_idr.bed",
                                      "transcription start sites|bigBed|idr_peak": "*_rampage_idr.bb" },
                 "mad_qc":          { "QC_only":                                   "*_rampage_mad_plot.png" }  },
-        }
+        },
+        "dna-me": {
+            "step-order": [ "align","quantification","corr"], # How to: 1) combine 3 steps into 1; 2) tech lvl, bio lvl, exp lvl
+            "replicate":  {
+                "align":           { "alignments":                                "*_bismark.bam" }, # *may* have samtools_flagstat, samtools_stats, Don't wan't bismark_map
+                "quantification":  { "methylation state at CpG|bigBed|bedMethyl": "*_bismark_biorep_CpG.bb",      # All have: samtools_flagstat, bismark_map
+                                     "methylation state at CpG|bed|bedMethyl":    "*_bismark_biorep_CpG.bed.gz",  # All have: samtools_flagstat, bismark_map
+                                     "methylation state at CHG|bigBed|bedMethyl": "*_bismark_biorep_CHG.bb",      # All have: samtools_flagstat, bismark_map
+                                     "methylation state at CHG|bed|bedMethyl":    "*_bismark_biorep_CHG.bed.gz",  # All have: samtools_flagstat, bismark_map
+                                     "methylation state at CHH|bigBed|bedMethyl": "*_bismark_biorep_CHH.bb",      # All have: samtools_flagstat, bismark_map
+                                     "methylation state at CHH|bed|bedMethyl":    "*_bismark_biorep_CHH.bed.gz",  # All have: samtools_flagstat, bismark_map
+                                     "signal":                                    "*_bismark_biorep.bw" } },      # All have: samtools_flagstat, bismark_map
+            "combined":   {
+                "corr":            { "QC_only":                                   "*_CpG_corr.txt" }  }, # Not yet defined in encodeD
+        },
     }
+    
+    # Step children are steps that should be combined with their parent step rather than be treated as a separate job 
+    STEP_CHILDREN = {
+        "dme-cx-to-bed":        "dme-extract-pe",
+        "dme-cx-to-bed-alt":    "dme-extract-se",
+        "dme-bg-to-signal":     "dme-extract-pe",
+        "dme-bg-to-signal-alt": "dme-extract-se",
+    } 
 
-    ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "hg38": "GRCh37", "mm10": "mm10" }
+    ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "GRCh38": "GRCh38", "mm10": "mm10" }
     '''This module supports only these assemblies.'''
 
     ANNOTATIONS_SUPPORTED = [ 'V19', 'M2', 'M3', 'M4' ]
@@ -204,7 +226,35 @@ class Splashdown(object):
                                     "files": {"results": "detail"}, 
                                     "blob": { "pattern": "/*_star_anno_flagstat.txt" }, 
                                 },
+        "star_srna_flagstat": { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": [ "_srna_star.bam", "_srna_star_quant.tsv" ],
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_srna_star_flagstat.txt" }, 
+                                },
+        "star_rampage_flagstat": { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": "_rampage_star_marked.bam",
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_rampage_star_marked_flagstat.txt" }, 
+                                },
         "samtools_stats":       { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
+        "bismark_map":          { 
+                                    "type":"bismark",
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_bismark_biorep_map_report.txt" },
+                                    "include": [
+                                        "C methylated in CHG context","lambda C methylated in CHG context", 
+                                        "C methylated in CHH context","lambda C methylated in CHH context",
+                                        "C methylated in CpG context","lambda C methylated in CpG context",
+                                        "Mapping efficiency",         "lambda Mapping efficiency",
+                                        "Sequences analysed in total","lambda Sequences analysed in total" ],
+                                },
+        "bedmethyl_corr":       { 
+                                    "type":"bismark_corr",
+                                    "files": {"results": "detail", "inputs": ["CpG_A", "CpG_B"]}, 
+                                    "blob": { "pattern": "/*_CpG_corr.txt"} 
+                                },
         "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspot_qc.txt"  } },
         "edwBamStats":          { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "edwComparePeaks":      { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          },"exclude": [ "aFileName","bFileName"] },
@@ -309,6 +359,11 @@ class Splashdown(object):
                         default=self.SERVER_DEFAULT,
                         required=False)
 
+        ap.add_argument('-g','--genome',
+                        help="The genome assembly that files were aligned to (default: discovered if possible)",
+                        default=None,
+                        required=False)
+
         ap.add_argument('--test',
                         help='Test run only, do not launch anything.',
                         action='store_true',
@@ -384,7 +439,6 @@ class Splashdown(object):
         #self.expected = copy.deepcopy(self.PIPELINE_SPECS[exp_type])
 
         pipeline_specs = self.PIPELINE_SPECS.get(exp_type)
-        self.genome = None  # TODO: need way to determine genome before any posts occur!
         self.annotation = None  # TODO: if appropriate, need way to determine annotation
 
         if verbose:
@@ -413,17 +467,26 @@ class Splashdown(object):
         return None
 
 
-    def find_genome_annotation(self,file_dict):
+    def find_genome_annotation(self,posting_fid,derived_from_file_dict):
         '''Try to determine genome from input file properties.'''
         # TODO: currently done in derived_from which is only run on needed files
         #       much change to do this on expected files.
-        properties = file_dict["properties"]
+        properties = derived_from_file_dict["properties"]
         msg = ""
-        if self.genome == None and "genome" in properties:
-            genome = properties["genome"]
-            if genome in self.ASSEMBLIES_SUPPORTED.keys():
-                self.genome = self.ASSEMBLIES_SUPPORTED[genome]
+        if self.genome == None:
+            if "genome" in properties:
+                genome = properties["genome"]
+                if genome in self.ASSEMBLIES_SUPPORTED.keys():
+                    self.genome = self.ASSEMBLIES_SUPPORTED[genome]
+            else:
+                file_path_parts = dxencode.file_path_from_fid(posting_fid).split('/')
+                for assembly in self.ASSEMBLIES_SUPPORTED.keys():
+                    if assembly in file_path_parts:
+                        self.genome = assembly
+                        break
+            if self.genome != None:
                 msg += " genome[%s]" % self.genome
+
         if self.annotation == None and "annotation" in properties:
             annotation = properties["annotation"].upper() # BRITTLE: v19 in dx but V19 in encoded
             if annotation in self.ANNOTATIONS_SUPPORTED:
@@ -872,7 +935,7 @@ class Splashdown(object):
                 continue
                 
             # First best place to look for accession: properties
-            self.genome = self.find_genome_annotation(inp_obj)
+            self.genome = self.find_genome_annotation(fid,inp_obj)
             acc_key = dxencode.dx_property_accesion_key(dxencode.PRODUCTION_SERVER) # Always prefer production accession
             accession = None
             if "properties" in inp_obj:
@@ -996,9 +1059,15 @@ class Splashdown(object):
 
         # Find replicate info
         #if rep_tech.startswith("rep") and len(rep_tech) == 6:
-        if rep_tech.startswith("rep"):
+        (br,tr) = (None,None)
+        if rep_tech.startswith("reps"):
+            br_tr = rep_tech[4:]
+            (br,tr) = br_tr.split('_')
+            tr = tr.split('.')[-1]       # TODO: Get buy in for bio_rep files being associated with the last tech_rep.
+        elif rep_tech.startswith("rep"):
             br_tr = rep_tech[3:]
             (br,tr) = br_tr.split('_')
+        if br != None and tr != None:
             full_mapping = dxencode.get_full_mapping(self.exp_id,self.exp)
             mapping = dxencode.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
             obj['replicate'] = mapping['replicate_id']
@@ -1303,8 +1372,13 @@ class Splashdown(object):
             if "only_for" in qc_faq:
                 if qc_faq.get("type") != key:
                     continue
-                if payload["submitted_file_name"].endswith(qc_faq["only_for"]):
-                    return qc_key
+                if isinstance(qc_faq["only_for"],str):
+                    if payload["submitted_file_name"].endswith(qc_faq["only_for"]):
+                        return qc_key
+                elif isinstance(qc_faq["only_for"],list):
+                    for one_ending in qc_faq["only_for"]:
+                        if payload["submitted_file_name"].endswith(one_ending):
+                            return qc_key
         return key
             
         
@@ -1317,6 +1391,7 @@ class Splashdown(object):
         #    a) Find existing by dnanexus:qc.qc_key.job-2342345:
         #    b) If found, patch as necessary (expect to need to add file to files list)
         #    c) If not found, create, optionally attach blob, and post it
+        #verbose=True
         
         # Needed identifiers
         step_run_id = payload["step_run"]
@@ -1335,6 +1410,8 @@ class Splashdown(object):
             return None
         for key in qc_json:
             qc_key = self.find_qc_key(key,payload)
+            if verbose:
+                print >> sys.stderr, "  * Working on qc_key: '%s'" % (qc_key)                
             if qc_key not in self.QC_SUPPORTED:
                 continue
             qc_faq = self.QC_SUPPORTED[qc_key]
@@ -1389,7 +1466,9 @@ class Splashdown(object):
             
             # get applet and version
             dx_app_id = job.get('applet')
-            dx_app_ver = self.find_app_version(dxFile)
+            dx_app_ver = job.get('step_parent_app_version') # Could have be different from child because this is a step parent.
+            if dx_app_ver == None:
+                dx_app_ver = self.find_app_version(dxFile)
             if dx_app_ver and 'version' in dx_app_ver:
                 dx_app_ver = str( dx_app_ver.get('version') )
                 if dx_app_ver[0] == 'v':
@@ -1486,6 +1565,62 @@ class Splashdown(object):
         return step_run
         
         
+    def find_step_parent(self,fid,child_job,step_child,step_parent,verbose=False):
+        '''Returns the parent job for a child that is not recoreded to encodeD.'''
+        #print >> sys.stderr, "Step-child %s points to %s" % (step_child,step_parent)
+        #print >> sys.stderr, json.dumps(child_job,indent=4,sort_keys=True)
+        #sys.exit(1)
+        
+        # Look for parent by walking up derived from files
+        file_inputs = []
+        for inp in child_job["input"].values():
+            if type(inp) not in [ dict, list ]:
+                continue # not a file input
+            if type(inp) == dict:
+                file_inputs.append(inp)
+                continue
+            for item in inp:
+                if type(item) == dict:
+                    file_inputs.append(item)
+            
+        # For each file input, verify it is for a file and then look for an accession.
+        parent_job = None
+        parent_fid = None
+        for inp in file_inputs:
+            if not type(inp) == dict:
+                print type(inp)
+                continue # not a file input
+            dxlink = inp.get("$dnanexus_link")
+            if dxlink == None:
+                continue
+            if not type(dxlink) == dict:
+                inp_fid = dxlink
+            else:
+                inp_fid = dxlink.get("id")
+            try:
+                job = dxencode.job_from_fid(inp_fid)
+            except:
+                print "WARNING: can't find parent_job for "+ fid # may try to append derived_from below.
+                continue
+            if job.get('executableName') == step_parent:
+                parent_job = job
+                parent_fid = inp_fid
+                break
+        if parent_job == None:
+            print "ERROR: Step-child %s cannot find it's step-parent %s" % (step_child,step_parent)
+            sys.exit(1)
+        
+        # Combine things like cost, time, executable versions???
+        parent_job['totalPrice'] = parent_job['totalPrice'] + child_job['totalPrice']
+        parent_job['stoppedRunning'] += child_job.get('stoppedRunning') - child_job.get('startedRunning')
+        parent_dxFile = dxencode.file_handler_from_fid(parent_fid)
+        parent_job['step_parent_app_version'] = self.find_app_version(parent_dxFile)
+
+        if verbose:
+            print >> sys.stderr, "Step-child %s has step-parent %s" % (step_child,step_parent)
+            print >> sys.stderr, json.dumps(parent_job,indent=4)
+        return parent_job
+
     def make_payload_obj(self,out_type,rep_tech,fid,verbose=False):
         '''Returns an object for submitting a file to encode, with all dx info filled in.'''
         payload = {}
@@ -1504,8 +1639,11 @@ class Splashdown(object):
 
         dx_obj = dxencode.description_from_fid(fid)
 
-        # get job for this file
+        # Some steps are child processes which are not known by encodeD so we must proceed with the "step-parent"
         job = dxencode.job_from_fid(fid)
+        if job.get('executableName') in self.STEP_CHILDREN.keys():
+            child_job = job
+            job = self.find_step_parent(fid,child_job,child_job['executableName'],self.STEP_CHILDREN[child_job['executableName']])
 
         if out_type != "QC_only": # Use new qc_object posting methods 
             payload["file_format"] = self.file_format(dx_obj["name"])
@@ -1519,8 +1657,8 @@ class Splashdown(object):
         payload['file_size'] = dx_obj["size"]
         #payload['md5sum'] = calculated_md5 # Done i  validate_post applet
         if self.genome == None:
-            print "Warning: could not determine genome assembly! Add properties to reference files."
-            #sys.exit(1)
+            print "ERROR: could not determine genome assembly! Add properties to reference files."
+            sys.exit(1)
         else:
             payload['assembly'] = self.genome
         if self.annotation != None:
@@ -1533,6 +1671,8 @@ class Splashdown(object):
         notes["notes_version"] = "5" # Cricket requests starting at "5", since earlier files uploads were distingusihed by user
         if 'totalPrice' in job:
             notes['dx_cost'] = "$" + str(round(job['totalPrice'],2))
+        if 'step_parent_app_version' in job:
+            notes['step_parent_app'] = job.get('step_parent_app_version') # One more little piece of the story.
 
         #print "  - Adding encoded information."
         payload = self.add_encoded_info(payload,rep_tech,fid)
@@ -1614,7 +1754,7 @@ class Splashdown(object):
 
     def can_skip_validation(self,exp_type,payload,test=True):
         '''Returns True if validation can be skipped.'''
-        if exp_type.startswith("long-rna-seq") or exp_type.startswith("small-rna-seq"):
+        if exp_type.startswith("long-rna-seq") or exp_type.startswith("small-rna-seq") or exp_type.startswith("rampage"):
             return True
         if payload["output_type"] in self.SKIP_VALIDATE.keys():
             return (self.SKIP_VALIDATE[payload["output_type"]] == payload["file_format"])
@@ -1728,6 +1868,7 @@ class Splashdown(object):
         self.test = args.test
         self.qc_from_file = args.qc_from_file
         self.ignore = False
+        self.genome = args.genome
         if args.ignore_properties:
             print "Ignoring DXFile properties (will post to test server)"
             self.ignore = args.ignore_properties
