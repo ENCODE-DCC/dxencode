@@ -16,7 +16,7 @@ import logging
 
 DXENCODE_VERSION = "1"
 
-GENOME_DEFAULTS = { 'human': 'hg19', 'mouse': 'mm10' }
+GENOME_DEFAULTS = { 'human': 'GRCh38', 'mouse': 'mm10' }
 ''' This the default genomes for each supported organism.'''
 
 PRODUCTION_PROJECT = "ENCODE - Production runs"
