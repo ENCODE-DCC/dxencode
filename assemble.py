@@ -33,7 +33,7 @@ class Assemble(object):
     FOLDER_DEFAULT = '/runs/'
     '''This the default location for creating experiment folders on dnanexus.'''
     
-    FILE_STATUSES_ACCEPTED = [ "released" ]
+    FILE_STATUSES_ACCEPTED = [ "released", "in progress" ]
     '''By default only 'released' files may be assembled.  Use --status-accepted to allow others.'''
     
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq', "dna-me" ] #,"chip-seq" ]
