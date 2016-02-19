@@ -170,6 +170,7 @@ class Launch(object):
         self.psv = {} # will hold pipeline specific variables.
         self.multi_rep = False       # This run includes more than one replicate
         self.combined_reps = False   # This run includes combined replicate workflows
+        self.combine_techreps = False# Only for special cases where there is only 1 bio_rep but 2 techreps.
         self.link_later = None       # Rare: when 2 sister branches link to each other, it requires a final wf pass.
         self.deprecate = []          # Master list of files to deprecate.  Needed to cross rep boundaries in steps_to_run
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
@@ -239,6 +240,11 @@ class Launch(object):
                         help="The genome assembly to run on (default: '<project>:" + \
                                                                   self.GENOME_DEFAULTS['human'] + "')",
                         default=None,
+                        required=False)
+
+        ap.add_argument('-ct', '--combine_techreps',
+                        help='Only for special cases where there is only 1 bio_rep but 2 techreps.',
+                        action='store_true',
                         required=False)
 
         ap.add_argument('--run',
@@ -524,6 +530,8 @@ class Launch(object):
                 self.no_refs = True
         if args.build_apps:
             self.build_apps = True
+        if args.combine_techreps:
+            self.combine_techreps = True
             
         cv = {}
         self.proj_name = dxencode.env_get_current_project()
@@ -724,8 +732,12 @@ class Launch(object):
         
         # Assume combined reps if supported AND exactly 2 reps AND for different biological reps
         if self.PIPELINE_BRANCH_ORDER != None and 'COMBINED_REPS' in self.PIPELINE_BRANCH_ORDER:
-            if len(reps) == 2 and cv_reps['a']['br'] != cv_reps['b']['br']:
-                self.combined_reps = True
+            if len(reps) == 2:
+                if cv_reps['a']['br'] != cv_reps['b']['br']:
+                    self.combined_reps = True
+                elif self.combine_techreps and cv_reps['a']['br'] == cv_reps['b']['br'] \
+                                           and cv_reps['a']['tr'] != cv_reps['b']['tr']:
+                    self.combined_reps = True
         self.multi_rep = (len(reps) > 1)
             
         # A little more rep tidying
