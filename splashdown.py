@@ -138,8 +138,11 @@ class Splashdown(object):
     ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "GRCh38": "GRCh38", "mm10": "mm10" }
     '''This module supports only these assemblies.'''
 
-    ANNOTATIONS_SUPPORTED = [ 'V19', 'M2', 'M3', 'M4' ]
+    ANNOTATIONS_SUPPORTED = [ 'V24', 'V19', 'M2', 'M3', 'M4' ]
     '''This module supports only these annotations.'''
+    
+    REQUIRE_ANNOTATION = [ 'long-rna-seq','small-rna-seq','rampage' ]
+    '''These assays require an annotation.'''
 
     FORMATS_SUPPORTED = ["bam","bed","bigBed","bigWig","fasta","fastq","gff","gtf","hdf5","idat","rcc","CEL",
                          "tsv","csv","sam","tar","wig"]
@@ -251,9 +254,9 @@ class Splashdown(object):
                                         "Sequences analysed in total","lambda Sequences analysed in total" ],
                                 },
         "bedmethyl_corr":       { 
-                                    "type":"bismark_corr",
-                                    "files": {"results": "detail", "inputs": ["CpG_A", "CpG_B"]}, 
-                                    "blob": { "pattern": "/*_CpG_corr.txt"} 
+                                    "type":"cpg_correlation",
+                                    "files": {"inputs": ["CpG_A", "CpG_B"]}, 
+                                    "blob": { "pattern": "/*_CpG_corr.txt"},
                                 },
         "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspot_qc.txt"  } },
         "edwBamStats":          { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
@@ -888,6 +891,14 @@ class Splashdown(object):
             print >> sys.stderr, json.dumps(app_version,indent=4)
         return app_version
         
+    def input_exception(self,inp_fid):
+        '''Returns True if this is one of a limit number of input files we do not track in encodeD.'''
+        # TODO: move specifics to json at top of file.
+        if self.exp_type == "dna-me" and dxencode.file_path_from_fid(inp_fid).endswith("_techrep_bismark_map_report.txt"):
+            #print "  Ignoring file: " + dxencode.file_path_from_fid(inp_fid)
+            return True
+        return False
+                
     def find_derived_from(self,fid,job,verbose=False):
         '''Returns list of accessions a file is drived from based upon job inouts.'''
         input_accessions = []
@@ -922,6 +933,8 @@ class Splashdown(object):
                 inp_fid = dxlink
             else:
                 inp_fid = dxlink.get("id")
+            if self.input_exception(inp_fid):  # Look for exceptions
+                continue
             input_file_count += 1
             try:
                 inp_obj = dxencode.description_from_fid(inp_fid,properties=True)
@@ -1024,17 +1037,20 @@ class Splashdown(object):
         if len(input_accessions) < input_file_count:
             if self.test:
                 if self.way_back_machine and self.TOOL_IS == 'recovery':
-                    print "WARNING: not all input files are accounted for in 'derived_from' so just appending!"
+                    print "WARNING: not all input files are accounted for in 'derived_from' so just appending! Found %d of %d." % \
+                                                                        (len(input_accessions),input_file_count)
                     input_accessions.append(self.APPEND_FLAG)
                 else:
-                    print "WARNING: not all input files are accounted for in 'derived_from'!"
+                    print "WARNING: not all input files are accounted for in 'derived_from'! Found %d of %d." % \
+                                                                        (len(input_accessions),input_file_count)
                     print json.dumps(input_accessions,indent=4)
             else:
                 if self.way_back_machine and self.TOOL_IS == 'recovery':
                     print "WARNING: not all input files are accounted for in 'derived_from' so just appending!"
                     input_accessions.append(self.APPEND_FLAG)
                 else:
-                    print "ERROR: not all input files are accounted for in 'derived_from'!"
+                    print "ERROR: not all input files are accounted for in 'derived_from'! Found %d of %d." % \
+                                                                        (len(input_accessions),input_file_count)
                     print json.dumps(input_accessions,indent=4)
                     sys.exit(1)
         
@@ -1141,7 +1157,7 @@ class Splashdown(object):
         if "singleton" in qc_faq:
             enc_qc_props[qc_faq["singleton"]] = dx_qc_obj
         elif "props" in qc_faq:
-            for key in qc_faq['props'].keys:
+            for key in qc_faq['props'].keys():
                 enc_qc_props[qc_faq['props'][key]] = dx_qc_obj[key]
         elif "include" in qc_faq:
             for key in qc_faq['include']:
@@ -1657,12 +1673,16 @@ class Splashdown(object):
         payload['file_size'] = dx_obj["size"]
         #payload['md5sum'] = calculated_md5 # Done i  validate_post applet
         if self.genome == None:
-            print "ERROR: could not determine genome assembly! Add properties to reference files."
+            print "ERROR: could not determine genome assembly! Check reference file properties."
             sys.exit(1)
         else:
             payload['assembly'] = self.genome
         if self.annotation != None:
             payload['genome_annotation'] = self.annotation
+        elif self.exp_type in self.REQUIRE_ANNOTATION:
+            print "ERROR: could not determine annotation on '%s' experiment! Check reference file properties." % (self.exp_type)
+            sys.exit(1)
+            
 
         dxFile = dxencode.file_handler_from_fid(fid)
         #versions = dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)') # * STAR version: 2.4.0k
@@ -1758,7 +1778,7 @@ class Splashdown(object):
             return True
         if payload["output_type"] in self.SKIP_VALIDATE.keys():
             return (self.SKIP_VALIDATE[payload["output_type"]] == payload["file_format"])
-        return False
+        return True
 
     def file_patch(self,fid,payload,test=True):
         '''Patches ENCODEd file with payload.'''
@@ -1857,8 +1877,8 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use grep ENC3 *.log | sed s/^.*\log://
-            #print "%s  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-06  %s  $%.2f" % \
-            #    (exp_id, duration, total_cost)
+            #print "cost:       GRCh38 v24 -     1,2   no     2016-02-17  2016-02-18  2016-02-18  2016-02-19  %s  $%.2f" % \
+            #    (duration, total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
 
