@@ -170,7 +170,7 @@ class Launch(object):
         self.psv = {} # will hold pipeline specific variables.
         self.multi_rep = False       # This run includes more than one replicate
         self.combined_reps = False   # This run includes combined replicate workflows
-        self.combine_techreps = False# Only for special cases where there is only 1 bio_rep but 2 techreps.
+        self.compare_techreps = False# Only for special cases where there is only 1 bio_rep but 2 techreps.
         self.link_later = None       # Rare: when 2 sister branches link to each other, it requires a final wf pass.
         self.deprecate = []          # Master list of files to deprecate.  Needed to cross rep boundaries in steps_to_run
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
@@ -242,7 +242,7 @@ class Launch(object):
                         default=None,
                         required=False)
 
-        ap.add_argument('-ct', '--combine_techreps',
+        ap.add_argument('-ct', '--compare_techreps',
                         help='Only for special cases where there is only 1 bio_rep but 2 techreps.',
                         action='store_true',
                         required=False)
@@ -376,7 +376,7 @@ class Launch(object):
         if default != None:
             return default
         #print json.dumps(rep,indent=4)
-        print "Unable to find control in search of %s" % rep['controls']
+        print >> sys.stderr, "ERROR: Unable to find control in search of %s" % rep['controls']
         sys.exit(1)
             
 
@@ -442,10 +442,10 @@ class Launch(object):
         inputs = {}
         for step in rep['path']:
             if verbose:
-                print "DEBUG: step: "+ step 
+                print >> sys.stderr, "DEBUG: step: "+ step 
             for file_token in steps[step]['inputs'].keys():
                 if verbose:
-                    print "DEBUG:   file_token: "+ file_token
+                    print >> sys.stderr, "DEBUG:   file_token: "+ file_token
                 if file_token[-2] == '_':
                     letter = file_token[-1].lower()
                     if letter in rep['tributaries']:
@@ -464,13 +464,13 @@ class Launch(object):
                 else:
                     continue
                 if verbose:
-                    print "DEBUG:   - found "+str(len(tributaries))+" tributaries."
+                    print >> sys.stderr, "DEBUG:   - found "+str(len(tributaries))+" tributaries."
                 rep['priors'][file_token] = []
                 inputs[file_token] = []
                 if not self.template:
                     for rep_key in tributaries:
                         if verbose:
-                            print "DEBUG:   - tributary: " + rep_key
+                            print >> sys.stderr, "DEBUG:   - tributary: " + rep_key
                         tributary = self.psv['reps'][rep_key]
                         fid = self.find_file(tributary['resultsFolder'] + file_globs[file_token],\
                                                         self.proj_id, multiple=False, recurse=False)
@@ -481,15 +481,15 @@ class Launch(object):
                                 rep['priors'][file_token].append( fid )
                             inputs[file_token].append( fid )
                         elif not self.multi_rep:
-                            print "Error: Necessary '%s' for combined run, not found in '%s'." \
+                            print >> sys.stderr, "ERROR: Necessary '%s' for combined run, not found in '%s'." \
                                                                        % (file_token, rep['resultsFolder'])
-                            print "       Please run for single replicate first."
+                            print >> sys.stderr, "       Please run for single replicate first."
                             sys.exit(1)
         
         if inputs:
             if verbose:
-                print "DEBUG: inputs:"
-                print json.dumps(inputs,indent=4,sort_keys=True)
+                print >> sys.stderr, "DEBUG: inputs:"
+                print >> sys.stderr, json.dumps(inputs,indent=4,sort_keys=True)
                 #sys.exit(1)
         if 'inputs' not in rep:
             rep['inputs'] = inputs
@@ -530,15 +530,15 @@ class Launch(object):
                 self.no_refs = True
         if args.build_apps:
             self.build_apps = True
-        if args.combine_techreps:
-            self.combine_techreps = True
+        if args.compare_techreps:
+            self.compare_techreps = True
             
         cv = {}
         self.proj_name = dxencode.env_get_current_project()
         if self.proj_name == None or args.project != None:
             self.proj_name = args.project
         if self.proj_name == None:
-            print "Please enter a '--project' to run in."
+            print >> sys.stderr, "ERROR: Please enter a '--project' to run in."
             sys.exit(1)
         self.project = dxencode.get_project(self.proj_name)
         self.proj_id = self.project.get_id()        
@@ -559,7 +559,7 @@ class Launch(object):
             self.exp = dxencode.get_exp(cv['experiment'],key=self.server_key)
             cv['exp_type'] = dxencode.get_assay_type(cv['experiment'],self.exp)
             if cv['exp_type'] != self.PIPELINE_NAME:
-                print "Experiment %s is not for '%s' but for '%s'" \
+                print >> sys.stderr, "ERROR: Experiment %s is not for '%s' but for '%s'" \
                                                % (cv['experiment'],self.PIPELINE_NAME,cv['exp_type'])
                 sys.exit(1)
             
@@ -577,13 +577,17 @@ class Launch(object):
         organism = cv['reps']['a']['organism']
         if organism in self.GENOME_DEFAULTS:
             cv['genome'] = self.GENOME_DEFAULTS[organism]
-            if args.genome != None and args.genome != self.GENOME_DEFAULTS['human']:
-                if args.genome not in self.GENOMES_SUPPORTED:
-                    print "Genome %s not currently supported" % args.genome
+            if args.genome != None:
+                if args.genome != self.GENOME_DEFAULTS['human']:
+                    if args.genome not in self.GENOMES_SUPPORTED:
+                        print >> sys.stderr, "ERROR: Genome %s not currently supported" % args.genome
+                        sys.exit(1)
+                elif cv['genome'] != args.genome:
+                    print >> sys.stderr, "ERROR: Genome %s does not match discovered genome %s" % (args.genome, cv['genome'])
                     sys.exit(1)
                 cv['genome'] = args.genome            
         else:
-            print "Organism %s not currently supported" % organism
+            print >> sys.stderr, "ERROR: Organism %s not currently supported" % organism
             sys.exit(1)
 
         # Paired ends?  Make sure combined reps reflect their tributaries and exp reflects all
@@ -607,10 +611,9 @@ class Launch(object):
                         if paired:
                             cv['paired_end'] = paired
                     elif paired != tributary['paired_end']:
-                        print "- WARNING: Combining replicates '"+first_rep_tech+"' and '"+tributary['rep_tech']+"' " + \
+                        print >> sys.stderr, "- WARNING: Combining replicates '"+first_rep_tech+"' and '"+tributary['rep_tech']+"' " + \
                                         "are expected to be all paired-end or single-end!"
                         river['paired_end'] = False  # Mixes will be treated as single end!
-                        #sys.exit(1)
         else:  # for independent simple replicates, top level doesn't really matter.
             cv['paired_end'] = cv['reps']['a']['paired_end']
 
@@ -717,9 +720,9 @@ class Launch(object):
                 if found_ix == -1:
                     for ltr in cv_reps.keys():
                         if cv_reps[ltr]['rep_tech'] == rep_tech:
-                            print "Specify different replicates to compare (e.g. 'rep1_1 rep2_1')."
+                            print >> sys.stderr, "ERROR: Specify different replicates to compare (e.g. 'rep1_1 rep2_1')."
                             sys.exit(1)
-                    print "ERROR: requested '"+rep_tech+"' not found in ENCODE " + cv['experiment']
+                    print "ERROR: >> sys.stderr, requested '"+rep_tech+"' not found in ENCODE " + cv['experiment']
                     sys.exit(1)
                 ltr = letters.popleft()
                 cv_reps[ltr] = reps[found_ix]
@@ -735,7 +738,7 @@ class Launch(object):
             if len(reps) == 2:
                 if cv_reps['a']['br'] != cv_reps['b']['br']:
                     self.combined_reps = True
-                elif self.combine_techreps and cv_reps['a']['br'] == cv_reps['b']['br'] \
+                elif self.compare_techreps and cv_reps['a']['br'] == cv_reps['b']['br'] \
                                            and cv_reps['a']['tr'] != cv_reps['b']['tr']:
                     self.combined_reps = True
         self.multi_rep = (len(reps) > 1)
@@ -905,7 +908,7 @@ class Launch(object):
             dxapp = dxpy.find_one_data_object(classname="applet", name=applet, project=proj_id,
                                               zero_ok=False, more_ok=False,describe=True)
         except IOError:
-            print "Cannot find applet '"+applet+"' in "+proj_id
+            print >> sys.stderr, "ERROR: Cannot find applet '"+applet+"' in "+proj_id
             sys.exit(1)
 
         params = {}
@@ -1090,7 +1093,7 @@ class Launch(object):
                 if "output_values" not in step:
                     continue
                 if verbose:
-                    print "DEBUG: output_values in "+rep['rep_tech']+":"+step_id
+                    print >> sys.stderr, "DEBUG: output_values in "+rep['rep_tech']+":"+step_id
                 # Note: set of files and set of outputs, but any file could lead to job and job should have all outputs
                 #       Still missing jobs or output not in job means look in files and only one file likely has an output
                 job = None # only need to find once per step
@@ -1111,14 +1114,14 @@ class Launch(object):
                             if "output" in job and out_name in job["output"]:
                                 out_value = job["output"][out_name]
                                 if verbose:
-                                    print "DEBUG: found in job '"+out_name+"' = "+str(out_value)+", saved as "+ \
+                                    print >> sys.stderr, "DEBUG: found in job '"+out_name+"' = "+str(out_value)+", saved as "+ \
                                                                                            rep_id+"['params']['"+out_key+"']"
                         # 6) if not found then check in this file
                         if out_value == None:
                             out_value = dxencode.dx_file_get_property(out_name,fid)
                             if out_value != None:
                                 if verbose:
-                                    print "DEBUG: found in file '"+out_name+"' = "+str(out_value)+", saved as "+ \
+                                    print >> sys.stderr, "DEBUG: found in file '"+out_name+"' = "+str(out_value)+", saved as "+ \
                                                                                            rep_id+"['params']['"+out_key+"']"
                         # 7) If found add value to rep["params"][out_key] and expect there are no name conflicts
                         if out_value != None:  # Put this thing somewhere!
@@ -1195,7 +1198,7 @@ class Launch(object):
             dxApp = dxpy.find_data_objects(classname='file', name=app, name_mode='exact',
                                                         project=self.proj_id, return_handler=False)
             if dxApp == None:
-                print "ERROR: failure to locate app '"+app+"'!"
+                print >> sys.stderr, "ERROR: failure to locate app '"+app+"'!"
                 sys.exit(1)
 
         return steps_to_run
@@ -1309,18 +1312,18 @@ class Launch(object):
             
         mystery_rep = self.psv["reps"][mystery_rep_id]
         if verbose:
-            print "DEBUG: Found rep "+rep['rep_tech']+"'s "+param_spec["rep"]+" as mystery rep '"+mystery_rep['rep_tech']+"'"
+            print >> sys.stderr, "DEBUG: Found rep "+rep['rep_tech']+"'s "+param_spec["rep"]+" as mystery rep '"+mystery_rep['rep_tech']+"'"
         mystery_value = None
         if "prevStepResults" in mystery_rep and param_spec["name"] in mystery_rep["prevStepResults"]:
             mystery_value = mystery_rep["prevStepResults"][param_spec["name"]]  # not yet run result (dx link)
             if verbose:
-                print "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
+                print >> sys.stderr, "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
                       "' from mystery rep '"+mystery_rep['rep_tech']+"' previous results, with value: " + str(mystery_value)
             return mystery_value
         elif "params" in mystery_rep and param_spec["name"] in mystery_rep["params"]:
             mystery_value = mystery_rep["params"][param_spec["name"]] # prior run result (actual string value)
             if verbose:
-                print "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
+                print >> sys.stderr, "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
                       "' from mystery rep '"+mystery_rep['rep_tech']+"' with value: " + str(mystery_value)
             return mystery_value
             
@@ -1336,13 +1339,13 @@ class Launch(object):
             if "output_values" in mystery_step and param_spec["name"] in mystery_step["output_values"]:
                 mystery_out = mystery_step["output_values"][param_spec["name"]]
                 if verbose:
-                    print "DEBUG: Found mystery rep '"+mystery_rep_id+"' and step "+mystery_step_key+"' has '"+ \
+                    print >> sys.stderr, "DEBUG: Found mystery rep '"+mystery_rep_id+"' and step "+mystery_step_key+"' has '"+ \
                                                                         param_name+" as '"+mystery_out+"'"
                 break
         if mystery_out != None:
             mystery_value = '@link_later@'
             if verbose:
-                print "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
+                print >> sys.stderr, "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
                       "' from rep '"+param_spec["rep"]+"' with value: " + str(mystery_value)
             return mystery_value
         
@@ -1371,7 +1374,7 @@ class Launch(object):
                     file_input.append( prev_input )
             
             if verbose:
-                print "DEBUG: Found %d file_inputs from prev_branch" % len(file_input)
+                print >> sys.stderr, "DEBUG: Found %d file_inputs from prev_branch" % len(file_input)
             
         if len(file_input) != expect_count and file_token in rep['prevStepResults']:
             if isinstance(rep['prevStepResults'][file_token], list):
@@ -1379,7 +1382,7 @@ class Launch(object):
             else:
                 file_input.append( rep['prevStepResults'][file_token] )
             if verbose:
-                print "DEBUG: Now %d file_inputs after prevStepResults" % len(file_input)
+                print >> sys.stderr, "DEBUG: Now %d file_inputs after prevStepResults" % len(file_input)
 
         if len(file_input) != expect_count:
             alt_token = file_token
@@ -1396,23 +1399,23 @@ class Launch(object):
                         for fid in rep['priors'][alt_token]:
                             file_input.append( dxencode.FILES[fid] )
                      ##else:
-                     #   print "ERROR: Not expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
-                     #   print json.dumps(rep['priors'],indent=4,sort_keys=True)
+                     #   print >> sys.stderr, "ERROR: Not expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
+                     #   print >> sys.stderr, json.dumps(rep['priors'],indent=4,sort_keys=True)
                      #   sys.exit(1)
                 else:
                     file_input.append( dxencode.FILES[ rep['priors'][alt_token] ] )
                 if verbose:
-                    print "DEBUG: Now %d file_inputs after priors, with '%s'" % (len(file_input),file_token)
+                    print >> sys.stderr, "DEBUG: Now %d file_inputs after priors, with '%s'" % (len(file_input),file_token)
 
         if not self.template:       
             if len(file_input) == 0:
-                print "ERROR: step '"+step_id+"' can't find input '"+file_token+"'!"
-                #print json.dumps(rep['priors'],indent=4,sort_keys=True)
+                print >> sys.stderr, "ERROR: step '"+step_id+"' can't find input '"+file_token+"'!"
+                #print >> sys.stderr, json.dumps(rep['priors'],indent=4,sort_keys=True)
                 sys.exit(1)
             if 'tributaries' in rep and len(file_input) != expect_count:
-                print "ERROR: step '"+step_id+"' input '"+file_token+"' expects %d files but found %d." % \
+                print >> sys.stderr, "ERROR: step '"+step_id+"' input '"+file_token+"' expects %d files but found %d." % \
                                                                                     (expect_count,len(file_input))
-                #print json.dumps(rep['priors'],indent=4,sort_keys=True)
+                #print >> sys.stderr, json.dumps(rep['priors'],indent=4,sort_keys=True)
                 sys.exit(1)
             
         if len(file_input) == 0:
@@ -1439,7 +1442,7 @@ class Launch(object):
             # Rare case of non-file outputs of one step being inputs of another
             param_input = self.find_mystery_param(rep, rep_id, step_id, app_param,link_later=True)
         if param_input == None and not self.template:
-            print "ERROR: step '"+step_id+"' unable to locate '"+param+ \
+            print >> sys.stderr, "ERROR: step '"+step_id+"' unable to locate '"+param+ \
                                               "' in pipeline specific variables (psv)."
             sys.exit(1)
             
@@ -1497,8 +1500,8 @@ class Launch(object):
                     if inp_def["name"] == app_inp:
                         break
                 if inp_def["name"] != app_inp:
-                    print "ERROR: Pipeline definition for applet '"+app_name+"' file_token '"+file_token+"'"
-                    print "value of '"+app_inp+"' not found in DX definition."
+                    print >> sys.stderr, "ERROR: Pipeline definition for applet '"+app_name+"' file_token '"+file_token+"'"
+                    print >> sys.stderr, "value of '"+app_inp+"' not found in DX definition."
                     sys.exit(1)
                 expect_set = (inp_def["class"] == 'array:file')
                 inp_file = self.wf_find_file_input(rep,step,file_token,expect_set)
@@ -1573,10 +1576,10 @@ class Launch(object):
             step_id   = later_link['step_id']
             app_param = later_link['param']
             if verbose:
-                print "DEBUG: looking for '"+rep['rep_tech']+"' step '"+step_id+"' param '"+app_param+"'"
+                print >> sys.stderr, "DEBUG: looking for '"+rep['rep_tech']+"' step '"+step_id+"' param '"+app_param+"'"
             mystery_param = self.find_mystery_param(rep,rep_id,step_id, app_param)
             if mystery_param == None:
-                print "ERROR: Link later for '"+rep['rep_tech']+"' step '"+step_id+"' param '"+app_param+"' failed to find link."
+                print >> sys.stderr, "ERROR: Link later for '"+rep['rep_tech']+"' step '"+step_id+"' param '"+app_param+"' failed to find link."
                 sys.exit(1)
             # Could also assert that mystery_param is a dx link
             steps = rep['steps']
@@ -1588,7 +1591,7 @@ class Launch(object):
                 print stage
             app_inputs = stage['input']
             if verbose:
-                print "DEBUG: found '"+app_inputs[app_param]+"' which is being replaced with '"+mystery_param+"'"
+                print >> sys.stderr, "DEBUG: found '"+app_inputs[app_param]+"' which is being replaced with '"+mystery_param+"'"
             app_inputs[app_param] = mystery_param
             wf.update_stage(stage_id, stage_input=app_inputs)
                 
@@ -1766,11 +1769,11 @@ class Launch(object):
                         state = analysis.describe()['state']
                         # states I have seen: in_progress, terminated, done, failed
                         if state not in [ "done", "failed", "terminated" ]:
-                            msg="Exiting: Can't launch because prior run ["+run_id[0]+"] "
+                            msg="ERROR: Exiting: Can't launch because prior run ["+run_id[0]+"] "
                             if len(run_id) > 1:
                                 msg+="("+run_id[1]+") "
                             msg+= "has not finished (currently '"+state+"')."
-                            print msg
+                            print >> sys.stderr, msg
                             sys.exit(1)
                         elif verbose:
                             msg="  Prior run ["+run_id[0]+"] "
@@ -1803,7 +1806,7 @@ class Launch(object):
         '''Launches or just advertises preassembled workflow.'''
         # NOT EXPECTED TO OVERRIDE
         if wf == None:
-            print "ERROR: failure to assemble workflow!"
+            print >> sys.stderr, "ERROR: failure to assemble workflow!"
             sys.exit(1)
 
         if self.template:
@@ -1812,7 +1815,7 @@ class Launch(object):
             print "Launch sequence initiating..."
             wf_run = wf.run({}, project=self.proj_id) # ,priorty="high")
             if wf_run == None:
-                print "ERROR: failure to lift off!"
+                print >> sys.stderr, "ERROR: failure to lift off!"
                 sys.exit(1)
             else:
                 print "  We have liftoff!"
