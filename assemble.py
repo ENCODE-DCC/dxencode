@@ -516,7 +516,12 @@ class Assemble(object):
             self.exp_id = exp_id
             self.exp = dxencode.get_exp(self.exp_id,must_find=False,key=self.server_key)
             if self.exp == None or self.exp["status"] == "error":
-                print "Unable to locate experiment %s in encoded" % exp_id
+                print "ERROR: Unable to locate experiment %s in encoded" % exp_id
+                skipped += 1
+                continue
+            if 'internal_status' in self.exp and self.exp['internal_status'] in dxencode.INTERNAL_STATUS_BLOCKS:
+                print "ERROR: Experiment %s with internal_status of '%s' cannot be assembled." % \
+                                                                        (self.exp_id,self.exp['internal_status']) 
                 skipped += 1
                 continue
             #print json.dumps(self.exp['files'],indent=4)
@@ -615,6 +620,11 @@ class Assemble(object):
             copied = len(needed_files) - failed
             launched = 0
             
+            if failed == 0:
+                dxencode.enc_exp_patch_internal_status(self.exp_id, 'pipeline ready', self.server_key, test=self.test)
+            #else:
+            #    dxencode.enc_exp_patch_internal_status(self.exp_id, 'unrunnable', self.server_key, test=self.test)
+                
             # Ignite a launcher here...
             if args.launch:
                 pid = self.launch(self.exp_id,self.exp_type,self.replicates,self.genome,args.annotation,test=self.test)

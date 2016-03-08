@@ -562,6 +562,10 @@ class Launch(object):
                 print >> sys.stderr, "ERROR: Experiment %s is not for '%s' but for '%s'" \
                                                % (cv['experiment'],self.PIPELINE_NAME,cv['exp_type'])
                 sys.exit(1)
+            if 'internal_status' in self.exp and self.exp['internal_status'] in dxencode.INTERNAL_STATUS_BLOCKS:
+                print "ERROR: Experiment %s with internal_status of '%s' cannot be launched." % \
+                                                                        (cv['experiment'],self.exp['internal_status']) 
+                sys.exit(1)
             
             # Load up the encoded and combining "reps" which will be processed by PIPELINE_BRANCHES
             self.load_reps(args, cv, cv['experiment'], self.exp)
@@ -1822,6 +1826,8 @@ class Launch(object):
                 wf_dict = wf_run.describe()
                 self.log_this_run(wf_dict['id'],run['resultsFolder'])
                 print "  Launched " + wf_dict['id']+" as '"+wf.name+"'"
+                dxencode.enc_exp_patch_internal_status(self.psv['experiment'], 'processing', self.server_key)
+
         else:
             print "Workflow '" + wf.name + "' has been assembled in "+run['resultsFolder'] + \
                                                                         ". Manual launch required."

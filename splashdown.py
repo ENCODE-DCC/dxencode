@@ -87,10 +87,10 @@ class Splashdown(object):
             "replicate":  {
                 "align":           { "alignments":                                "*_srna_star.bam",
                                      "gene quantifications":                      "*_srna_star_quant.tsv"        },
-                "signals":         { "plus strand signal of all reads":           "*_small_plusAll.bw",
-                                     "minus strand signal of all reads":          "*_small_minusAll.bw",
-                                     "plus strand signal of unique reads":        "*_small_plusUniq.bw",
-                                     "minus strand signal of unique reads":       "*_small_minusUniq.bw"         }  },
+                "signals":         { "plus strand signal of all reads":           "*_srna_star_plusAll.bw",
+                                     "minus strand signal of all reads":          "*_srna_star_minusAll.bw",
+                                     "plus strand signal of unique reads":        "*_srna_star_plusUniq.bw",
+                                     "minus strand signal of unique reads":       "*_srna_star_minusUniq.bw"     }  },
             "combined":   { 
                 "mad_qc":          { "QC_only":                                   "*_mad_plot.png"               }  },
         },
@@ -114,7 +114,7 @@ class Splashdown(object):
         "dna-me": {
             "step-order": [ "align","quantification","corr"], # How to: 1) combine 3 steps into 1; 2) tech lvl, bio lvl, exp lvl
             "replicate":  {
-                "align":           { "alignments":                                "*_bismark.bam" }, # *may* have samtools_flagstat, samtools_stats, Don't wan't bismark_map
+                "align":           { "alignments":  [ "*_techrep_bismark_pe.bam", "*_bismark.bam"  ] },   # *may* have samtools_flagstat, samtools_stats, Don't wan't bismark_map
                 "quantification":  { "methylation state at CpG|bigBed|bedMethyl": "*_bismark_biorep_CpG.bb",      # All have: samtools_flagstat, bismark_map
                                      "methylation state at CpG|bed|bedMethyl":    "*_bismark_biorep_CpG.bed.gz",  # All have: samtools_flagstat, bismark_map
                                      "methylation state at CHG|bigBed|bedMethyl": "*_bismark_biorep_CHG.bb",      # All have: samtools_flagstat, bismark_map
@@ -130,9 +130,9 @@ class Splashdown(object):
     # Step children are steps that should be combined with their parent step rather than be treated as a separate job 
     STEP_CHILDREN = {
         "dme-cx-to-bed":        "dme-extract-pe",
-        "dme-cx-to-bed-alt":    "dme-extract-se",
+        "dme-cx-to-bed-alt":    "dme-extract-se-alt",
         "dme-bg-to-signal":     "dme-extract-pe",
-        "dme-bg-to-signal-alt": "dme-extract-se",
+        "dme-bg-to-signal-alt": "dme-extract-se-alt",
     } 
 
     ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "GRCh38": "GRCh38", "mm10": "mm10" }
@@ -148,7 +148,6 @@ class Splashdown(object):
                          "tsv","csv","sam","tar","wig"]
     FORMAT_TYPES_SUPPORTED = ["bed6","bed9","bed12","bedGraph","bedLogR","bedMethyl","broadPeak",
                         "enhancerAssay","gappedPeak","gff2","gff3","narrowPeak" ]
-    # TODO: format types need to support rampage: tss, and idr
     EXTENSION_TO_FORMAT = { 
         "2bit":       "2bit",
         "cel.gz":     "CEL",
@@ -171,9 +170,6 @@ class Splashdown(object):
         "wig.gz":     "wig",     "wig":     "wig",
         "sam.gz":     "sam",     "sam":     "sam"
         }
-    #EXTENSION_TO_FORMAT = { "bb":"bigBed", "bw":"bigWig",
-    #                        "fa":"fasta","fq":"fastq","results":"tsv",
-    #                        "gff": "gtf" }
     '''List of supported formats, and means of recognizing with file extensions.'''
     
     # Each QC object has its own particulars:
@@ -241,7 +237,28 @@ class Splashdown(object):
                                     "files": {"results": "detail"}, 
                                     "blob": { "pattern": "/*_rampage_star_marked_flagstat.txt" }, 
                                 },
+        "bismark_techrep_flagstats":   { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": [ "_techrep_bismark_pe.bam", "_bismark.bam" ],
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_techrep_bismark*_qc.txt" } 
+                                },
+        "bismark_biorep_flagstats":   { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": [ "_bismark_biorep_CpG.bb", "_bismark_biorep_CpG.bed.gz",
+                                                  "_bismark_biorep_CHG.bb", "_bismark_biorep_CHG.bed.gz",
+                                                  "_bismark_biorep_CHH.bb", "_bismark_biorep_CHH.bed.gz",
+                                                  "_bismark_biorep.bw" ],
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_bismark_biorep_qc.txt" } 
+                                },
         "samtools_stats":       { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
+        "bismark_techrep_samstats":   { 
+                                    "type":"samtools_stats",
+                                    "only_for": [ "_techrep_bismark_pe.bam", "_bismark.bam" ],
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_techrep_bismark*_qc.txt" } 
+                                },
         "bismark_map":          { 
                                     "type":"bismark",
                                     "files": {"results": "detail"}, 
@@ -251,7 +268,13 @@ class Splashdown(object):
                                         "C methylated in CHH context","lambda C methylated in CHH context",
                                         "C methylated in CpG context","lambda C methylated in CpG context",
                                         "Mapping efficiency",         "lambda Mapping efficiency",
-                                        "Sequences analysed in total","lambda Sequences analysed in total" ],
+                                        "Sequences analysed in total","lambda Sequences analysed in total",
+    ## From:bismark_extract: "Bismark result lines processed" => "Sequences analysed in total" and "lambda Sequences analysed in total"
+    # I think a good plan is to patch the dx metric json with he second blob (bismark_extract) then proceed
+                                        ],
+                                    "extend_by": {"qc_json": "samtools_flagstats", 
+                                                  "props": { "mapped": [ "Sequences analysed in total",
+                                                                         "lambda Sequences analysed in total"] } },
                                 },
         "bedmethyl_corr":       { 
                                     "type":"cpg_correlation",
@@ -505,18 +528,32 @@ class Splashdown(object):
         step_files = []
 
         for token in file_globs.keys():
-            if token != "QC_only": 
-                if self.file_format(file_globs[token]) == None:
-                    print "Error: file glob %s has unknown file format! Please fix" % file_globs[token]
-                    sys.exit(1)
-            if verbose:
-                print >> sys.stderr, "-- Looking for %s" % (result_folder + file_globs[token])
-            fid = dxencode.find_file(result_folder + file_globs[token],self.proj_id, recurse=False)
-            if fid != None:
-                QC_only = (token == "QC_only") # Use new qc_object posting methods  
-                step_files.append( (token,rep_tech,fid,QC_only) )
+            if type(file_globs[token]) == list:
+                for file_glob in file_globs[token]:
+                    if token != "QC_only": 
+                        if self.file_format(file_glob) == None:
+                            print "Error: file glob %s has unknown file format! Please fix" % file_glob
+                            sys.exit(1)
+                    if verbose:
+                        print >> sys.stderr, "-- Looking for %s" % (result_folder + file_glob)
+                    fid = dxencode.find_file(result_folder + file_glob,self.proj_id, recurse=False)
+                    if fid != None:
+                        QC_only = (token == "QC_only") # Use new qc_object posting methods  
+                        step_files.append( (token,rep_tech,fid,QC_only) )
+                        break # Only looking for the first hit               
             else:
-                return []      # Only include files from completed steps!
+                if token != "QC_only": 
+                    if self.file_format(file_globs[token]) == None:
+                        print "Error: file glob %s has unknown file format! Please fix" % file_globs[token]
+                        sys.exit(1)
+                if verbose:
+                    print >> sys.stderr, "-- Looking for %s" % (result_folder + file_globs[token])
+                fid = dxencode.find_file(result_folder + file_globs[token],self.proj_id, recurse=False)
+                if fid != None:
+                    QC_only = (token == "QC_only") # Use new qc_object posting methods  
+                    step_files.append( (token,rep_tech,fid,QC_only) )
+                else:
+                    return []      # Only include files from completed steps!
         return step_files
 
     def find_expected_files(self,exp_folder,replicates,verbose=False):
@@ -808,7 +845,7 @@ class Splashdown(object):
                 if fid in self.found.keys():
                     f_obj = self.found[fid]
                     derived_from = f_obj.get('derived_from')
-                    if derived_from != None and isinstance(derived_from,list):
+                    if derived_from != None and type(derived_from) == list:
                         for file_url in derived_from:
                             revoked_acc = file_url.split('/')[2]
                             if revoked_acc in self.revoked:
@@ -894,8 +931,10 @@ class Splashdown(object):
     def input_exception(self,inp_fid):
         '''Returns True if this is one of a limit number of input files we do not track in encodeD.'''
         # TODO: move specifics to json at top of file.
-        if self.exp_type == "dna-me" and dxencode.file_path_from_fid(inp_fid).endswith("_techrep_bismark_map_report.txt"):
-            #print "  Ignoring file: " + dxencode.file_path_from_fid(inp_fid)
+        # Unfortunate special case: the map_report is essentially a QC_only file but is an input to a step in order to 
+        # combine multiple map_reports into a single qc_metric.
+        if self.exp_type == "dna-me" and dxencode.file_path_from_fid(inp_fid).endswith("_map_report.txt"):
+            #print "** Ignoring file: " + dxencode.file_path_from_fid(inp_fid)
             return True
         return False
                 
@@ -1171,7 +1210,7 @@ class Splashdown(object):
         return enc_qc_props
 
 
-    def qc_metric_attachment(self,fid,blob_def):
+    def qc_metric_attachment(self,qc_key,fid,blob_def):
         '''Returns a QC metrics attachment property for posting an attachment with the QC object.'''
         attachment = {}
         blob_fid = None
@@ -1192,7 +1231,8 @@ class Splashdown(object):
         if blob_fid == None:
             blob_fid = dxencode.find_file(folder + blob_def['pattern'],self.proj_id,multiple=False,recurse=False)
             if blob_fid == None:
-                print >> sys.stderr, "ERROR: Failed to find blob attachment file: " +folder + blob_def['pattern']
+                print >> sys.stderr, "ERROR: For '%s' failed to find blob attachment file: %s%s" % \
+                                                                                    (qc_key,folder, blob_def['pattern'])
                 sys.exit(1) # Make this a halt to see what is going on
             blob_descr = dxencode.description_from_fid(blob_fid)
             blob_name = blob_descr['name']
@@ -1265,7 +1305,7 @@ class Splashdown(object):
                     if verbose:
                         print >> sys.stderr, "Job inputs:"
                         print >> sys.stderr, json.dumps(dx_inp,indent=4,sort_keys=True)
-                    if isinstance(dx_inp,list):
+                    if type(dx_inp) == list:
                         for link in dx_inp:
                             qc_fids.append(link["$dnanexus_link"])
                     else:
@@ -1361,7 +1401,7 @@ class Splashdown(object):
 
             blob_msg = ""
             if "blob" in qc_faq:
-                attachment = self.qc_metric_attachment(fid,qc_faq["blob"])
+                attachment = self.qc_metric_attachment(qc_key,fid,qc_faq["blob"])
                 if attachment != None:
                     qc_metric['attachment'] = attachment
                     blob_msg = " (with attachment)"
@@ -1388,16 +1428,62 @@ class Splashdown(object):
             if "only_for" in qc_faq:
                 if qc_faq.get("type") != key:
                     continue
-                if isinstance(qc_faq["only_for"],str):
+                if type(qc_faq["only_for"]) == str:
                     if payload["submitted_file_name"].endswith(qc_faq["only_for"]):
                         return qc_key
-                elif isinstance(qc_faq["only_for"],list):
+                elif type(qc_faq["only_for"]) == list:
                     for one_ending in qc_faq["only_for"]:
                         if payload["submitted_file_name"].endswith(one_ending):
                             return qc_key
         return key
             
         
+    def qc_extend_one(self,extend_by,qc_json_target,qc_json,verbose=False):
+        '''Returns the qc_json for the given key with a single extensions request.'''
+        #"extend_by": {"qc_json": "samtools_flagstats", 
+        #              "props": { "mapped": [ "Sequences analysed in total",
+        #                                     "lambda Sequences analysed in total"] } },
+        if "qc_json" in extend_by: # Says look in another qc_json blob
+            if extend_by["qc_json"] in qc_json:
+                extra_qc = qc_json[extend_by["qc_json"]]
+                if "props" in extend_by:  # Says take props from extra_qc and add it to qc_json_target with new name
+                    for prop_key in extend_by["props"].keys():
+                        if prop_key not in extra_qc:
+                            continue
+                        prop = extend_by["props"][prop_key]
+                        val  = extra_qc[prop_key]
+                        if type(prop) == list:
+                            for target_prop in prop:
+                                qc_json_target[target_prop] = val
+                                if verbose:
+                                    print >> sys.stderr, 'qc extended: From %s[%s] to "%s": %s' % \
+                                        ( extend_by["qc_json"], prop_key, target_prop, val )
+                        else:
+                            qc_json_target[prop] = extra_qc[prop_key]
+                            if verbose:
+                                print >> sys.stderr, 'qc extended: From %s[%s] to "%s": %s' % \
+                                    ( extend_by["qc_json"], prop_key, prop, val )
+        #else: When other extensions are defined...
+        return qc_json_target
+        
+    def qc_json_extend(self,qc_faq,key,qc_json,verbose=False):
+        '''Returns the qc_json for the given key with any extensions requested extensions.'''
+        #verbose=True
+        if 'extend_by' not in qc_faq:
+            return qc_json[key]
+        qc_json_full = qc_json[key]
+        extend_by = qc_faq['extend_by']
+        if type(extend_by) == list:
+            for extend_one in extend_by:
+                qc_json_full = self.qc_extend_one(extend_one,qc_json_full,qc_json,verbose=verbose)
+        else:
+            qc_json_full = self.qc_extend_one(extend_by,qc_json_full,qc_json,verbose=verbose)
+        
+        if verbose:
+            print >> sys.stderr, "qc_json_full:"
+            print >> sys.stderr, json.dumps(qc_json_full,indent=4,sort_keys=True)
+        return qc_json_full
+
     def handle_qc_metrics(self,fid,payload,test=True,verbose=False):
         '''After posting a file, post or patch any qc_metric objects associated with it.'''
         # Strategy:
@@ -1431,10 +1517,11 @@ class Splashdown(object):
             if qc_key not in self.QC_SUPPORTED:
                 continue
             qc_faq = self.QC_SUPPORTED[qc_key]
-            qc_metric = self.enc_qc_metric_find_or_create(qc_key,qc_json[key],qc_faq,fid,job_id,step_run_id, \
+            qc_json_full = self.qc_json_extend(qc_faq,key,qc_json,verbose=verbose)
+            qc_metric = self.enc_qc_metric_find_or_create(qc_key,qc_json_full,qc_faq,fid,job_id,step_run_id, \
                                                                                             test=test,verbose=verbose)
             if qc_metric != None:
-                qc_for_file[key] = qc_json[key]
+                qc_for_file[key] = qc_json_full
                 
         if qc_for_file and verbose:
             print >> sys.stderr, "qc_for_file:"
@@ -1496,7 +1583,7 @@ class Splashdown(object):
             if dx_app_name  == "rampage-peaks" and dx_app_ver == "1.0.1":
                 dx_app_ver = "1.1.0"  # Because the version was supposed to bump the second digit if a tool changes.
             # FIXME: UGLY temporary special case!!!
-            if not dx_app_ver or not isinstance(dx_app_ver, str) or len(dx_app_ver) == 0:
+            if not dx_app_ver or not type(dx_app_ver) == str or len(dx_app_ver) == 0:
                 print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
                 sys.exit(0)
                 
@@ -1524,8 +1611,8 @@ class Splashdown(object):
                 print "DX JOB: originalInputs:"
                 print json.dumps(inputs,indent=4,sort_keys=True)
             for name in inputs.keys():
-                #if isinstance(inputs[name],str) or isinstance(inputs[name],int) or isinstance(inputs[name],unicode):
-                if not isinstance(inputs[name],dict):  # not class file? and not class:array:file 
+                #if type(inputs[name]) == in [ str, int, unicode\:
+                if type(inputs[name]) != dict:  # not class file? and not class:array:file 
                     params[name] = inputs[name]
             if len(params) > 0:
                 applet_details["parameters"] = params
@@ -1615,15 +1702,18 @@ class Splashdown(object):
                 inp_fid = dxlink.get("id")
             try:
                 job = dxencode.job_from_fid(inp_fid)
+                if job == None:  # could be a resource like chrom.sizes that has no job
+                    continue
             except:
                 print "WARNING: can't find parent_job for "+ fid # may try to append derived_from below.
                 continue
-            if job.get('executableName') == step_parent:
+            if job != None and job.get('executableName') == step_parent:
                 parent_job = job
                 parent_fid = inp_fid
                 break
         if parent_job == None:
             print "ERROR: Step-child %s cannot find it's step-parent %s" % (step_child,step_parent)
+            print json.dumps(file_inputs,indent=4)
             sys.exit(1)
         
         # Combine things like cost, time, executable versions???
@@ -1865,19 +1955,21 @@ class Splashdown(object):
         total_dur = 0
         count = 0
         for ana_id in self.obj_cache["exp"]["ana_id"]:
-            #try:
-            ana = dxpy.api.analysis_describe(ana_id)
-            total_cost += ana["totalPrice"]
-            total_dur  += (ana["modified"] - ana["created"])
             count += 1
-            #except:
-            #    continue
+            try:
+                ana = dxpy.api.analysis_describe(ana_id)
+                total_cost += ana["totalPrice"]
+                total_dur  += (ana["modified"] - ana["created"])
+            except:
+                #print "Failed to find analysis for " + str(ana_id)
+                #print json.dumps(self.obj_cache["exp"]["ana_id"],indent=4)
+                continue
 
         if total_cost > 0 or total_dur > 0:
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
-            #   Print lrna.txt line as....  Then use grep ENC3 *.log | sed s/^.*\log://
-            #print "cost:       GRCh38 v24 -     1,2   no     2016-02-17  2016-02-18  2016-02-18  2016-02-19  %s  $%.2f" % \
+            #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
+            #print "cost:       GRCh38 v24 shRNA 1,2   yes     -          2016-03-07  2016-03-08   %s  $%.2f" % \
             #    (duration, total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
@@ -1915,7 +2007,7 @@ class Splashdown(object):
                                                         (self.proj_name,self.server_key)
 
         exp_count = 0
-        halted = 0
+        total_halted = 0
         total_posted = 0
         total_patched = 0
         total_qc_objs = 0        
@@ -1962,12 +2054,20 @@ class Splashdown(object):
 
             # 6) For each file that needs to be posted:
             exp_count += 1
+            halted = False
+            partial = False
             file_count = 0
             post_count = 0
             patch_count = 0
             qc_obj_count = 0
             for (out_type,rep_tech,fid,QC_only) in files_to_post:
                 sys.stdout.flush() # Slow running job should flush to piped log
+
+                if args.files != 0 and file_count >= args.files:  # Short circuit for test
+                    print "- Just trying %d file(s) by request" % file_count
+                    partial = True
+                    break
+
                 file_name = dxencode.file_path_from_fid(fid)
                 if args.start_at != None:
                     if not file_name.endswith(args.start_at):
@@ -1992,12 +2092,12 @@ class Splashdown(object):
                         if accession == None:
                             print "* HALTING %s - post failure could compromise 'derived_from'" % \
                                                                                             (self.exp_id)
-                            halted += 1
+                            halted = True
                             break
                         elif accession == "NOT POSTED":
                             print "* HALTING %s - validation failure prevented posting and could compromise 'derived_from'" % \
                                                                                             (self.exp_id)
-                            halted += 1
+                            halted = True
                             break
 
                         # d) Update dnanexus file with file accession tag.
@@ -2011,9 +2111,11 @@ class Splashdown(object):
                     qc_obj_count += 1
                     total_qc_objs += 1                                
 
-                if args.files != 0 and file_count >= args.files:  # Short circuit for test
-                    print "- Just trying %d file(s) by request" % file_count
-                    break
+            if halted:
+                total_halted += 1
+            elif not partial:
+                if 'internal_status' in self.exp and self.exp['internal_status'] not in dxencode.INTERNAL_STATUS_BLOCKS:
+                    dxencode.enc_exp_patch_internal_status(self.exp_id, 'pipeline completed', self.server_key, test=self.test)
 
             if not args.test:
                 print "- For %s processed %d file(s), posted %d, patched %d, qc %d" % \
@@ -2024,14 +2126,14 @@ class Splashdown(object):
             self.print_analysis_totals(self.exp_id)
             total_posted += post_count
             total_patched += patch_count
-
+            
         if not args.test:
             print "Processed %d experiment(s), halted %d, posted %d file(s), patched %d file(s), %d qc object(s)" % \
-                                                            (exp_count, halted, total_posted, total_patched, total_qc_objs)
+                                                      (exp_count, total_halted, total_posted, total_patched, total_qc_objs)
         else:
             print "Processed %d experiment(s), halted %d, would post %d file(s), patched %d file(s), %d qc object(s)" % \
-                                                            (exp_count, halted, total_posted, total_patched, total_qc_objs)
-        if halted == exp_count:
+                                                      (exp_count, total_halted, total_posted, total_patched, total_qc_objs)
+        if total_halted == exp_count:
             sys.exit(1)
         print "(finished)"
 

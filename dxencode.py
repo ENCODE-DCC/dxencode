@@ -27,6 +27,8 @@ REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 REF_FOLDER_DEFAULT = '/'
 ''' This the default folder that reference files are found in.'''
 
+INTERNAL_STATUS_BLOCKS = ["requires lab review", "unrunnable"]
+'''Experients with these internal_statuses should not be assembled or launched.'''
 
 REFERENCE_FILES = {} ## Dict to cache known Reference Files
 FILES = {} ## Dict to cache files
@@ -1286,4 +1288,30 @@ def format_duration(beg_seconds,end_seconds,include_seconds=True):
     '''Returns formatted string difference between two times in seconds.'''
     duration = end_seconds - beg_seconds
     return duration_string(duration,include_seconds)
+
+def enc_exp_patch_internal_status(exp_id, internal_status, server, authid=None, authpw=None, test=False):
+    '''Updates encodeD Experiment with an internal status.'''
+    
+    allowed = [ 'pipeline ready', 'processing', 'pipeline completed', 'requires lab review' ]
+    
+    if internal_status not in allowed:
+        print "  * ERROR: Attempting to set internal status of %s to '%s'." % (exp_id,internal_status)
+        return False
+    if not exp_id.startswith('ENCSR'):
+        print "  * ERROR: Attempting to set internal status on experiment without valid accession %s." % exp_id
+        return False
+        
+    payload = { "internal_status": internal_status }
+    if not test:
+        if authid == None or authpw == None:
+            key = server
+            (authid,authpw,server) = processkey(key)
+        
+        ret = encoded_patch_obj('experiments/'+exp_id, payload, server, authid, authpw)
+        print "  * Updated encodeD %s with internal_status '%s'." % (exp_id,internal_status)
+    else:
+        print "  * Would update encodeD %s with internal_status '%s'." % (exp_id,internal_status)
+    return True
+
+
 
