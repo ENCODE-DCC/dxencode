@@ -160,6 +160,11 @@ class Assemble(object):
         #                default=dxencode.REF_FOLDER_DEFAULT,
         #                required=False)
 
+        ap.add_argument('-g','--genome',
+                        help="The genome assembly for folder organization (default: GRCh38)",
+                        default=None,
+                        required=False)
+
         ap.add_argument('-a','--annotation',
                         help='Optionally enter annotation to help organize folders',
                         default=None,
@@ -234,6 +239,9 @@ class Assemble(object):
             self.rep = { 'br': args.br, 'tr': args.tr, 'rep_tech': 'rep' + str(args.br) + '_' + str(args.tr) }
         else:
             self.rep = None
+            
+        if args.genome:
+            self.genome = args.genome
         
         
     def find_replicates(self, exp_id, exp, verbose=False):
@@ -256,10 +264,6 @@ class Assemble(object):
                 else:
                     print "Organism %s not currently supported" % rep['organism']
                     sys.exit(1)
-            elif self.genome != dxencode.GENOME_DEFAULTS[rep['organism']]:
-                print "Mixing genomes in one assembly run not supported %s and %s" % \
-                                                    (self.genome, dxencode.GENOME_DEFAULTS[rep['organism']])
-                sys.exit(1)
         #replicates = []
         #for (br,tr) in self.full_mapping.keys():
         #    replicates.append( { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) } )
