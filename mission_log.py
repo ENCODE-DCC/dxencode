@@ -156,6 +156,12 @@ class Mission_log(object):
                         default=self.REPORT_DEFAULT,
                         required=False)
 
+        ap.add_argument('-g','--genome',
+                        help="The genome assembly to run on (default: '<project>:" + \
+                                                                  dxencode.GENOME_DEFAULTS['human'] + "')",
+                        default=None,
+                        required=False)
+
         ap.add_argument('--server',
                         help="Server on which to look for posted files (default: '" + self.SERVER_DEFAULT + "')",
                         default=self.SERVER_DEFAULT,
@@ -263,10 +269,10 @@ class Mission_log(object):
                     print >> sys.stderr, "Organism %s not currently supported" % rep['organism']
                     sys.exit(1)
             elif self.genome != dxencode.GENOME_DEFAULTS[rep['organism']]:
-                if not self.genome_warning:
-                    print >> sys.stderr, "WARNING: Mixing genomes in one report: %s and %s" % \
-                                                        (self.genome, dxencode.GENOME_DEFAULTS[rep['organism']])
-                    self.genome_warning  = True
+                if self.genome_warning:
+                    print >> sys.stderr, "WARNING: Mixing genomes in one report: %s and %s.  Will only report '%s'" % \
+                                                        (self.genome, dxencode.GENOME_DEFAULTS[rep['organism']],self.genome)
+                    self.genome_warning  = False
                 
         if verbose:
             print >> sys.stderr, "Replicates:"
@@ -280,6 +286,8 @@ class Mission_log(object):
         matching_files = []
         for file_obj in files:
             if file_obj.get('output_type') != out_type:
+                continue
+            if self.genome != None and file_obj.get('assembly',self.genome) != self.genome:
                 continue
             if suffix != None:
                 file_name = file_obj["submitted_file_name"]
@@ -311,7 +319,9 @@ class Mission_log(object):
         new_list = []
         while len(files) > 0:
             file_obj = files.pop()
-            if "genome_annotation" not in file_obj or file_obj["genome_annotation"] in [u'V19',u'M4']: # Note: this is a good 
+            if self.genome != None and file_obj.get('assembly',self.genome) != self.genome:
+                continue
+            if "genome_annotation" not in file_obj or file_obj["genome_annotation"] in [u'V24',u'V19',u'M4']: # Note: this is a good 
                new_list.append(file_obj)
         files = new_list
         if len(files) == 0:
@@ -450,21 +460,33 @@ class Mission_log(object):
                         if verbose:
                             print >> sys.stderr, "Experiment "+exp_id+" file "+acc+" has no quality_metric objects."
                         continue
+                    #elif verbose:
+                    #    print >> sys.stderr, json.dumps(file_qc_metrics,indent=4,sort_keys=True)
                     for metric in file_qc_metrics:
                         #print >> sys.stderr, json.dumps(metric,indent=4)
-                        #if verbose:
-                        #    print >> sys.stderr, "  examining %s" % (metric["@type"])
+                        if verbose:
+                            print >> sys.stderr, "  examining %s" % (metric["@type"])
                         if "name" in metric_defs:
-                            if metric_defs["name"]+"_quality_metric" not in metric["@type"]:
+                            if metric_defs["name"].capitalize()+"QualityMetric" not in metric["@type"]:
+                                if verbose:
+                                    print >> sys.stderr, metric_defs["name"].capitalize()+"QualityMetric not in " + metric["@type"]
                                 continue
-                        elif metric_key+"_quality_metric" not in metric["@type"]:
+                        elif metric_key.capitalize()+"QualityMetric" not in metric["@type"]:
+                            if verbose:
+                                print >> sys.stderr, metric_key.capitalize()+"QualityMetric not in metric['@type']"
                             continue
                         metric_id = metric["@id"]
                         if metric_id not in metric_ids:  # Note that this will automatically give only one combined metric from 2 reps.
+                            if verbose:
+                                print >> sys.stderr, "  adding id %s" % (metric_id)
                             metric_ids.append(metric_id) 
                             if metric_defs["per"] == "experiment":
+                                if verbose:
+                                    print >> sys.stderr, "  combining %s" % (metric["@type"])
                                 combo_metrics.append((metric_key,"combined",metric_id))
                             else:
+                                if verbose:
+                                    print >> sys.stderr, "  not combining %s" % (metric["@type"])
                                 metrics.append((metric_key,rep_tech,metric_id))
                             self.obj_cache["exp"]["metrics"][metric_id] = metric
         if len(combo_metrics) > 0:
@@ -765,6 +787,12 @@ class Mission_log(object):
             print >> sys.stderr, "Report type %s is not supported" % (args.report_type)
             sys.exit(1)
 
+
+        if args.genome != None:
+            self.genome = args.genome
+        else:
+            self.genome_warning = True
+            
         #if args.verbose:
         print >> sys.stderr, "== Running mission_log from [%s] server ==" % (self.server_key)
         

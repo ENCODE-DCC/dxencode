@@ -868,6 +868,7 @@ def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
         return None
     if exp["assay_term_name"] == "RNA-seq" \
     or exp["assay_term_name"] == "shRNA knockdown followed by RNA-seq" \
+    or exp["assay_term_name"] == "CRISPR genome editing followed by RNA-seq" \
     or exp["assay_term_name"] == "single cell isolation followed by RNA-seq":
         #if exp["replicates"][0]["library"]["size_range"] in [">200", "300-350", "350-450"]:
         # Now more: "150-400","149-512","151-499","153-499","157-497"        

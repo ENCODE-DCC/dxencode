@@ -102,14 +102,14 @@ class Splashdown(object):
                                      "minus strand signal of all reads":          "*_rampage_5p_minusAll.bw",
                                      "plus strand signal of unique reads":        "*_rampage_5p_plusUniq.bw",
                                      "minus strand signal of unique reads":       "*_rampage_5p_minusUniq.bw" },
-                "peaks":           { "transcription start sites|gff|gff3":        "*_rampage_peaks.gff",
-                                     "transcription start sites|bed|tss_peak":    "*_rampage_peaks.bed",
+                "peaks":           { "transcription start sites|gff|gff3":        "*_rampage_peaks.gff.gz",
+                                     "transcription start sites|bed|tss_peak":    "*_rampage_peaks.bed.gz",
                                      "transcription start sites|bigBed|tss_peak": "*_rampage_peaks.bb",
                                      "gene quantifications":                      "*_rampage_peaks_quant.tsv" } },
             "combined":   {
-                "idr":             { "transcription start sites|bed|idr_peak":    "*_rampage_idr.bed",
+                "idr":             { "transcription start sites|bed|idr_peak":    "*_rampage_idr.bed.gz",
                                      "transcription start sites|bigBed|idr_peak": "*_rampage_idr.bb" },
-                "mad_qc":          { "QC_only":                                   "*_rampage_mad_plot.png" }  },
+                "mad_qc":          { "QC_only":                                   "*_mad_plot.png" }  },
         },
         "dna-me": {
             "step-order": [ "align","quantification","corr"], # How to: 1) combine 3 steps into 1; 2) tech lvl, bio lvl, exp lvl
@@ -130,9 +130,9 @@ class Splashdown(object):
     # Step children are steps that should be combined with their parent step rather than be treated as a separate job 
     STEP_CHILDREN = {
         "dme-cx-to-bed":        "dme-extract-pe",
-        "dme-cx-to-bed-alt":    "dme-extract-se-alt",
+        "dme-cx-to-bed-alt":    "dme-extract-se",
         "dme-bg-to-signal":     "dme-extract-pe",
-        "dme-bg-to-signal-alt": "dme-extract-se-alt",
+        "dme-bg-to-signal-alt": "dme-extract-se",
     } 
 
     ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "GRCh38": "GRCh38", "mm10": "mm10" }
@@ -594,7 +594,7 @@ class Splashdown(object):
             json_obj = response.json()
         except:
             if must_find:
-                print "Path to json object '%s' not found." % path
+                print "ERROR: Path to json object '%s' not found." % path
                 print 'Lookup failed: %s %s' % (response.status_code, response.reason)
                 sys.exit(1)
             return None
@@ -815,6 +815,10 @@ class Splashdown(object):
                 if verbose:
                     print >> sys.stderr, "* DEBUG   Not Found using 'way back machine'.  VERBOSE..."
                     f_obj =  self.find_files_using_way_back_machine(fid,self.exp_files,verbose=True)
+                    
+        # Special in order to ensure that cost accounting covers all files/jobs
+        for (out_type,rep_tech,fid) in posted:
+            job = self.dx_job_find(None,fid)
 
         if verbose:
             print >> sys.stderr, "Posted files:"
@@ -888,6 +892,7 @@ class Splashdown(object):
         Finds the software versions associated with a file.
         Returns  { "software_versions": [ { "software": "star", "version": "2.4.0k" }, ... ] }
         '''
+        #verbose=True
         sw_versions = {}
         # looks first in dx file property.
         # "SW" = {"DX applet": {"align-bwa-se.sh": "0.1.0"}, "samtools": "0.2.0", "bwa": "0.7.7-r441"}
@@ -921,8 +926,13 @@ class Splashdown(object):
         '''
         app_version = {}
         sw_versions = self.find_sw_versions(dxFile,dx_app=True,verbose=verbose)
-        if sw_versions != None:
+        if sw_versions:
             app_version =  sw_versions["software_versions"][0]
+        #else:
+        #    print >> sys.stderr, "ERROR: app_version: not found"
+        #    print >> sys.stderr, dxFile
+        #    sys.exit(1)
+            
         if verbose:
             print >> sys.stderr, "app_version:"
             print >> sys.stderr, json.dumps(app_version,indent=4)
@@ -933,10 +943,13 @@ class Splashdown(object):
         # TODO: move specifics to json at top of file.
         # Unfortunate special case: the map_report is essentially a QC_only file but is an input to a step in order to 
         # combine multiple map_reports into a single qc_metric.
-        if self.exp_type == "dna-me" and dxencode.file_path_from_fid(inp_fid).endswith("_map_report.txt"):
-            #print "** Ignoring file: " + dxencode.file_path_from_fid(inp_fid)
-            return True
-        return False
+        try:
+            if self.exp_type != "dna-me" or not dxencode.file_path_from_fid(inp_fid).endswith("_map_report.txt"):
+                #print "** Ignoring file: " + dxencode.file_path_from_fid(inp_fid)
+                return False
+        except:
+            pass
+        return True
                 
     def find_derived_from(self,fid,job,verbose=False):
         '''Returns list of accessions a file is drived from based upon job inouts.'''
@@ -1036,8 +1049,8 @@ class Splashdown(object):
                     ext = parts[-2]
                 if ext in self.REFERENCE_EXTENSIONS and inp_obj["project"] != self.REFERERNCE_PROJECT_ID:  
                     # FIXME: if regular file extension is the same as ref extension, then trouble!
-                    print "Reference file (ext: '"+ext+"') in non-ref project: " + inp_obj["project"]
-                    sys.exit(0)
+                    print "WARNING: Reference file (ext: '"+ext+"') in non-ref project: " + inp_obj["project"]
+                    #sys.exit(0)
 
                 # if file name is primary input (fastq) and is named as an accession
                 if inp_obj["name"].startswith("ENCFF"): # Not test version 'TSTFF'!
@@ -1297,7 +1310,7 @@ class Splashdown(object):
             qc_fids.append(fid) # if fid is for the attachment, the conversion to an accession will eliminate it.
         if "inputs" in qc_faq["files"].keys():
             inp_names = qc_faq["files"]["inputs"]
-            job = dxencode.job_from_fid(fid)
+            job = self.dx_job_find(None,fid)
             job_inputs = job.get('input')
             for name in inp_names:
                 if name in job_inputs:
@@ -1501,7 +1514,7 @@ class Splashdown(object):
         if step_run_alias.startswith('dnanexus:'):
             job_id = step_run_alias.split(':')[-1]
         else:
-            job = dxencode.job_from_fid(fid)
+            job = self.dx_job_find(None,fid)
             job_id = job.get('id')
             #step_run_alias = 'dnanexus:' + job_id
 
@@ -1528,6 +1541,35 @@ class Splashdown(object):
             print >> sys.stderr, json.dumps(qc_for_file,indent=4,sort_keys=True)
             
         return len(qc_for_file)
+
+    def dx_job_find(self,job_id=None,fid=None,verbose=False):
+        '''Returns the job blob, preferring cached versions.'''
+        step_ver = None
+        
+        if job_id == None:
+            try:
+                file_dict = dxencode.description_from_fid(fid)
+                job_id = file_dict["createdBy"]["job"]
+            except:
+                return None
+
+        if "exp" not in self.obj_cache:
+            self.obj_cache['exp'] = {}
+        if 'jobs' not in self.obj_cache['exp']:
+            self.obj_cache['exp']['jobs'] = {}
+        if job_id in self.obj_cache['exp']['jobs']:
+            return self.obj_cache['exp']['jobs'][job_id]
+        else:
+            try:
+                job =  dxpy.api.job_describe(job_id)
+            except:
+                return None
+        
+        self.obj_cache['exp']['jobs'][job_id] = job
+        if verbose:
+            print >> sys.stderr, "Found job:"
+            print >> sys.stderr, json.dumps(job,indent=4,sort_keys=True)
+        return job
 
     def enc_step_version_find(self,step_ver_alias,verbose=False):
         '''Finds the 'analysis_step_version' encoded object used in creating the file.'''
@@ -1673,6 +1715,7 @@ class Splashdown(object):
         #print >> sys.stderr, "Step-child %s points to %s" % (step_child,step_parent)
         #print >> sys.stderr, json.dumps(child_job,indent=4,sort_keys=True)
         #sys.exit(1)
+        #verbose=True
         
         # Look for parent by walking up derived from files
         file_inputs = []
@@ -1689,6 +1732,10 @@ class Splashdown(object):
         # For each file input, verify it is for a file and then look for an accession.
         parent_job = None
         parent_fid = None
+        if verbose:
+            print >> sys.stderr, "Found %d file_inputs" % len(file_inputs)
+            #print >> sys.stderr, json.dumps(step_run_notes,indent=4)
+        
         for inp in file_inputs:
             if not type(inp) == dict:
                 print type(inp)
@@ -1700,9 +1747,13 @@ class Splashdown(object):
                 inp_fid = dxlink
             else:
                 inp_fid = dxlink.get("id")
+            if verbose:
+                print >> sys.stderr, "Working on file_input %s" % dxencode.file_path_from_fid(inp_fid)
             try:
-                job = dxencode.job_from_fid(inp_fid)
+                job = self.dx_job_find(None,inp_fid)
                 if job == None:  # could be a resource like chrom.sizes that has no job
+                    if verbose:
+                        print >> sys.stderr, "No job found for %s" % dxencode.file_path_from_fid(inp_fid)
                     continue
             except:
                 print "WARNING: can't find parent_job for "+ fid # may try to append derived_from below.
@@ -1710,9 +1761,11 @@ class Splashdown(object):
             if job != None and job.get('executableName') == step_parent:
                 parent_job = job
                 parent_fid = inp_fid
+            elif verbose:
+                print >> sys.stderr, "Job executable: %s != step-parent: %s" % (job.get('executableName'), step_parent)
                 break
         if parent_job == None:
-            print "ERROR: Step-child %s cannot find it's step-parent %s" % (step_child,step_parent)
+            print "ERROR: Step-child %s cannot find its step-parent %s" % (step_child,step_parent)
             print json.dumps(file_inputs,indent=4)
             sys.exit(1)
         
@@ -1746,7 +1799,7 @@ class Splashdown(object):
         dx_obj = dxencode.description_from_fid(fid)
 
         # Some steps are child processes which are not known by encodeD so we must proceed with the "step-parent"
-        job = dxencode.job_from_fid(fid)
+        job = self.dx_job_find(None,fid)
         if job.get('executableName') in self.STEP_CHILDREN.keys():
             child_job = job
             job = self.find_step_parent(fid,child_job,child_job['executableName'],self.STEP_CHILDREN[child_job['executableName']])
@@ -1949,28 +2002,44 @@ class Splashdown(object):
 
     def print_analysis_totals(self,exp_id):
         '''Prints totals for all analyses for an experiment.'''
-        if "ana_id" not in self.obj_cache["exp"]:
-            return
         total_cost = 0
         total_dur = 0
         count = 0
-        for ana_id in self.obj_cache["exp"]["ana_id"]:
-            count += 1
-            try:
-                ana = dxpy.api.analysis_describe(ana_id)
-                total_cost += ana["totalPrice"]
-                total_dur  += (ana["modified"] - ana["created"])
-            except:
-                #print "Failed to find analysis for " + str(ana_id)
-                #print json.dumps(self.obj_cache["exp"]["ana_id"],indent=4)
+        if "jobs" not in self.obj_cache["exp"]:
+            print "Could not find jobs for cost analysis."
+            return
+        #print "Found %s jobs for cost analysis." % len(self.obj_cache["exp"]["jobs"].keys())
+        for job_id in self.obj_cache["exp"]["jobs"].keys():
+            job = self.obj_cache["exp"]["jobs"][job_id]
+            job_name = job.get("executableName")
+            if job_name == "url_fetcher":
                 continue
+            if job_name.startswith("prep-") or "-index" in job_name:
+                print "Not including job %s - '%s' in cost analysis." % (job_id, job["executableName"]) 
+                continue
+            #print "job %s - '%s'" % (job_id, job["executableName"]) 
+            count += 1
+            total_cost += job["totalPrice"]
+            total_dur  += (job["stoppedRunning"] - job["startedRunning"])
+            #total_dur  += (job["modified"] - job["created"])
+
+        #for ana_id in self.obj_cache["exp"]["ana_id"]:
+        #    count += 1
+        #    try:
+        #        ana = dxpy.api.analysis_describe(ana_id)
+        #        total_cost += ana["totalPrice"]
+        #        total_dur  += (ana["modified"] - ana["created"])
+        #    except:
+        #        #print "Failed to find analysis for " + str(ana_id)
+        #        #print json.dumps(self.obj_cache["exp"]["ana_id"],indent=4)
+        #        continue
 
         if total_cost > 0 or total_dur > 0:
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:       GRCh38 v24 shRNA 1,2   yes     -          2016-03-07  2016-03-08   %s  $%.2f" % \
-            #    (duration, total_cost)
+            #print "cost:       GRCh38 v24 shRNA  1,2   yes     -           2016-03-16  2016-03-17 %s  $%.2f" % \
+            #    (duration.rjust(8), total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
 
@@ -2050,6 +2119,7 @@ class Splashdown(object):
             files_to_post = self.find_needed_files(files_expected, test=self.test, verbose=args.verbose)
             print "- Found %d files that need to be handled" % len(files_to_post)
             if len(files_to_post) == 0:
+                self.print_analysis_totals(self.exp_id)
                 continue
 
             # 6) For each file that needs to be posted:
