@@ -1,35 +1,4 @@
-ENCSR000AEI    GRCh38 v24    1,2
-ENCSR000AER    GRCh38 v24    1,2
-ENCSR069LRO    GRCh38 v24    1,2
-ENCSR260RBO    GRCh38 v24    1,2
-ENCSR348DYP    GRCh38 v24    1
-ENCSR458JVO    GRCh38 v24    1,2
-ENCSR613JNT    GRCh38 v24    1,2
-ENCSR632GYF    GRCh38 v24    1,2
-ENCSR880BIV    GRCh38 v24    1,2
-ENCSR970OWZ    GRCh38 v24    1,2
-
-ENCSR000AEI_rep1_1_rampage_peaks.bed.gz",
-ENCSR000AEI_rep2_1_rampage_peaks.bed.gz",
-ENCSR000AER_rep1_1_rampage_peaks.bed.gz",
-ENCSR000AER_rep2_1_rampage_peaks.bed.gz",
-ENCSR069LRO_rep1_2_rampage_peaks.bed.gz",
-ENCSR069LRO_rep1_1_rampage_peaks.bed.gz",
-ENCSR260RBO_rep1_1_rampage_peaks.bed.gz",
-ENCSR260RBO_rep1_2_rampage_peaks.bed.gz",
-ENCSR348DYP_rep1_1_rampage_peaks.bed.gz",
-ENCSR458JVO_rep1_1_rampage_peaks.bed.gz",
-ENCSR458JVO_rep1_2_rampage_peaks.bed.gz",
-ENCSR613JNT_rep1_1_rampage_peaks.bed.gz",
-ENCSR613JNT_rep2_1_rampage_peaks.bed.gz",
-ENCSR632GYF_rep1_1_rampage_peaks.bed.gz",
-ENCSR632GYF_rep1_2_rampage_peaks.bed.gz",
-ENCSR880BIV_rep1_1_rampage_peaks.bed.gz",
-ENCSR880BIV_rep1_2_rampage_peaks.bed.gz",
-ENCSR970OWZ_rep1_1_rampage_peaks.bed.gz",
-ENCSR970OWZ_rep1_2_rampage_peaks.bed.gz",
-
-####### Working on: Rampage GRCh38 backlog
+####### TODO: Rampage GRCh38 backlog
 # Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
 ENCSR000AGJ    GRCh38 v24    1,2    -   
 ENCSR000AGK    GRCh38 v24    1,2    -   
@@ -66,6 +35,7 @@ ENCSR171YRA    GRCh38 v24    1,2    -
 ENCSR177YJM    GRCh38 v24    1,2    -   
 ENCSR187NWZ    GRCh38 v24    1      -   
 ENCSR208AWA    GRCh38 v24    1,2    -   
+
 ENCSR239ZQA    GRCh38 v24    1,2    -   
 ENCSR285LDX    GRCh38 v24    1      -   
 ENCSR290RXI    GRCh38 v24    1,2    -   
@@ -103,16 +73,17 @@ ENCSR985XGK    GRCh38 v24    1,2    -
 
 ####### GRCh38 Full list
 # Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
-ENCSR000AEI    GRCh38 v24    1,2    2016-01-26  2016-02-03  2016-03-10   4h15m  $11.75
-ENCSR000AER    GRCh38 v24    1,2    2016-01-26  2016-02-03  2016-03-10   4h35m  $11.84
-ENCSR069LRO    GRCh38 v24    1_1.2  2016-02-19  2016-03-08  2016-03-10   7h08m  $19.35  
-ENCSR260RBO    GRCh38 v24    1_1.2  2016-02-19  2016-03-08  2016-03-10   5h14m  $13.85  
-ENCSR348DYP    GRCh38 v24    1      2016-02-19  2016-03-08  2016-03-10   4h28m   $6.51  
-ENCSR458JVO    GRCh38 v24    1,2    2016-02-19  2016-03-08  2016-03-10   6h12m  $13.25  
-ENCSR613JNT    GRCh38 v24    1_1.2  2016-02-17  2016-03-08  2016-03-10   6h28m  $17.50  
-ENCSR632GYF    GRCh38 v24    1_1.2  2016-02-19  2016-03-08  2016-03-10   3h10m   $8.46  
-ENCSR880BIV    GRCh38 v24    1_1.2  2016-02-19  2016-03-08  2016-03-10   8h42m  $19.39  
-ENCSR970OWZ    GRCh38 v24    1_1.2  2016-02-19  2016-03-08  2016-03-10   7h25m  $15.78  
+ENCSR000AEI    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h04m  $11.38
+ENCSR000AER    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h15m  $11.63
+ENCSR069LRO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h17m  $11.68
+ENCSR260RBO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   9h49m  $13.86
+ENCSR348DYP    GRCh38 v24    1      2016-01-26  2016-03-21  2016-03-24   6h33m   $9.27
+ENCSR458JVO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   6h47m   $9.57
+ENCSR613JNT    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24  12h24m  $17.51
+ENCSR632GYF    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   5h58m   $8.41
+ENCSR880BIV    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24  10h07m  $14.28
+ENCSR970OWZ    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h19m  $11.73
+
 
 ####### Full (completed) list:
 #Experiment        On             Reps    Assembled   Finished    Last Posted  Time  Cost
@@ -190,6 +161,143 @@ ENCSR985XGK  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   3
 count 71
 
 #### History...
+
+### Done: Relaunch because of chrphiX bug infecting beds. http://redmine.encodedcc.org/issues/3156 notes 25, 29 and in the separate ticket #3883
+# Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
+ENCSR000AEI    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h04m  $11.38
+ENCSR000AER    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h15m  $11.63
+ENCSR069LRO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h17m  $11.68
+ENCSR260RBO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   9h49m  $13.86
+ENCSR348DYP    GRCh38 v24    1      2016-01-26  2016-03-21  2016-03-24   6h33m   $9.27
+ENCSR458JVO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   6h47m   $9.57
+ENCSR613JNT    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24  12h24m  $17.51
+ENCSR632GYF    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   5h58m   $8.41
+ENCSR880BIV    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24  10h07m  $14.28
+ENCSR970OWZ    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h19m  $11.73
+# ugly code in splashdown.
+    def supercedes(self,submitted_file_name):
+        '''Ugly mess for adding supercedes.'''
+        supers = {
+        #"ENCSR000AEI_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF501ZEL/", "uuid": "1934efeb-b52f-4299-a7ee-7cc18b5f1129" },
+        "ENCSR000AEI_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF050MHC/", "uuid": "ce4fce0a-1114-4597-9f6a-216a0860d21d" },
+        "ENCSR000AEI_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF113DUH/", "uuid": "bc36600e-36e4-4614-88b3-73db880ad3ca" },
+        "ENCSR000AEI_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF620ZAJ/", "uuid": "60c65b7f-dc4c-49c6-88a0-ce4f62e2f940" },
+        #"ENCSR000AEI_rep2_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF790NUL/", "uuid": "68d4610f-b5a2-4799-8356-d6e28cfd55df" },
+        "ENCSR000AEI_rep2_1_rampage_peaks.bb":        { "accession": "/files/ENCFF566DAD/", "uuid": "bc3956dd-ed7f-47b2-9bd6-5602ede51134" },
+        "ENCSR000AEI_rep2_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF894PWF/", "uuid": "db917315-4b03-4a1a-823c-21c3faecbd8e" },
+        "ENCSR000AEI_rep2_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF828PWT/", "uuid": "2b5ed6d8-4af4-4aa5-b8b3-51b2ef91c0b9" },
+        "ENCSR000AEI_rep1_1_ENCSR000AEI_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF483SUU/", "uuid": "f77fb8f3-774f-45a3-98b6-aa46ae061009" },
+        "ENCSR000AEI_rep1_1_ENCSR000AEI_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF245JFD/", "uuid": "7c3ce8c5-13e9-403e-a97d-862776f04eb5" },
+
+        #"ENCSR000AER_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF606ZCJ/", "uuid": "bd6e4a0f-d521-4479-bec7-a981ca2d5b08" },
+        "ENCSR000AER_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF157WSJ/", "uuid": "68752bd4-ac3e-4ed2-8f71-832c936bc617" },
+        "ENCSR000AER_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF476QRI/", "uuid": "4f460106-8e20-4670-8ba8-10b7d78de459" },
+        "ENCSR000AER_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF045QLC/", "uuid": "0f53a1c9-74a9-48d4-80d1-6bfda8876bcb" },
+        #"ENCSR000AER_rep2_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF307EOY/", "uuid": "451774da-0800-4e24-b966-62d2ab51f512" },
+        "ENCSR000AER_rep2_1_rampage_peaks.bb":        { "accession": "/files/ENCFF730WBX/", "uuid": "b96b959f-d800-4ce2-b59d-6450c320e015" },
+        "ENCSR000AER_rep2_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF403CCL/", "uuid": "35110761-4e65-4528-9962-363c2632d015" },
+        "ENCSR000AER_rep2_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF200BWF/", "uuid": "d0231928-03e2-4b94-b7ad-7a398e32e878" },
+        "ENCSR000AER_rep1_1_ENCSR000AER_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF613FCB/", "uuid": "4ab7d26e-491f-4e5d-8811-aa74479484a3" },
+        "ENCSR000AER_rep1_1_ENCSR000AER_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF659TDU/", "uuid": "8715a3e4-7565-4581-b710-77c31e667bb8" },
+
+        #"ENCSR069LRO_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF712KEG/", "uuid": "c990a538-7064-4d3c-973c-babc29992516" },
+        "ENCSR069LRO_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF829PYQ/", "uuid": "466ad972-3194-4660-b599-f0a31017c309" },
+        "ENCSR069LRO_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF075IIP/", "uuid": "d05912d7-4f35-4555-93e2-87550fd04304" },
+        "ENCSR069LRO_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF837RVI/", "uuid": "5f39aab8-1d16-4fe8-8b27-e7bb02558e21" },
+        #"ENCSR069LRO_rep1_2_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF815HRP/", "uuid": "b7633b8f-5267-4d74-97de-e80b690f3fb0" },
+        "ENCSR069LRO_rep1_2_rampage_peaks.bb":        { "accession": "/files/ENCFF621CLE/", "uuid": "1b1bb984-93df-4643-8688-d0f952b3b54f" },
+        "ENCSR069LRO_rep1_2_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF774VBS/", "uuid": "aba70ac3-1a99-47fe-be31-c0dfa088f3c7" },
+        "ENCSR069LRO_rep1_2_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF307OQS/", "uuid": "6648efe6-f475-4cd1-91c2-4082826141c0" },
+        "ENCSR069LRO_rep1_1_ENCSR069LRO_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF203EKN/", "uuid": "d712264f-e992-4932-9610-5b334d02c336" },
+        "ENCSR069LRO_rep1_1_ENCSR069LRO_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF625QLM/", "uuid": "6d4f472e-8746-437c-adb8-d4f621d3fc93" },
+
+        #"ENCSR260RBO_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF794LKG/", "uuid": "5f3f9a67-8255-4c48-9bd8-bbccb0ab5907" },
+        "ENCSR260RBO_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF975DRH/", "uuid": "09b77149-37a4-423d-a443-e785b27140ae" },
+        "ENCSR260RBO_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF543WKK/", "uuid": "401c975d-791e-4dfd-b2e5-8c7d984f8df4" },
+        "ENCSR260RBO_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF213ZMG/", "uuid": "ec13d329-e71e-4c27-8c22-835c84bb8354" },
+        #"ENCSR260RBO_rep1_2_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF215OAR/", "uuid": "b0b6ee95-1c35-4f60-b95a-295b9a5c8103" },
+        "ENCSR260RBO_rep1_2_rampage_peaks.bb":        { "accession": "/files/ENCFF100OTB/", "uuid": "5889662c-86f4-48aa-85a8-7b8a8baa4305" },
+        "ENCSR260RBO_rep1_2_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF992ZCJ/", "uuid": "e565d613-20c5-475e-88ac-c82bd4e72847" },
+        "ENCSR260RBO_rep1_2_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF094YKH/", "uuid": "8c859d33-86bd-46f7-b7dc-f93a5bb8e215" },
+        "ENCSR260RBO_rep1_1_ENCSR260RBO_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF800IGS/", "uuid": "bf369068-853c-4b49-826c-1dadd630d22b" },
+        "ENCSR260RBO_rep1_1_ENCSR260RBO_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF654RKG/", "uuid": "d9dff111-1b44-4683-acdc-91596be567c7" },
+
+        #"ENCSR348DYP_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF851BZO/", "uuid": "80846d3a-bbee-4117-b987-ffd28d78fe5e" },
+        "ENCSR348DYP_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF229XXJ/", "uuid": "a2fca5e4-cce6-4f98-9b21-f8c7de62d979" },
+        "ENCSR348DYP_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF719CDW/", "uuid": "da41f3f8-7e27-4786-a9dd-2614088c402d" },
+        "ENCSR348DYP_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF807NZK/", "uuid": "12dd275c-39d5-4f17-94db-ad2d6922ae70" },
+
+        #"ENCSR458JVO_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF330EOQ/", "uuid": "378e4513-7c36-4792-90a8-599740e5d194" },
+        "ENCSR458JVO_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF417YBT/", "uuid": "598edd44-20b6-4287-b0de-9d7119eec19e" },
+        "ENCSR458JVO_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF785GJE/", "uuid": "d63bf501-6e04-4501-b405-cccd9cb7a8e7" },
+        "ENCSR458JVO_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF579UYX/", "uuid": "18871ef0-d61d-43ce-86ec-9db24498e4be" },
+        #"ENCSR458JVO_rep1_2_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF382DGB/", "uuid": "2c7d5e98-6594-4f77-a704-b294fc7b0383" },
+        "ENCSR458JVO_rep1_2_rampage_peaks.bb":        { "accession": "/files/ENCFF706ZHK/", "uuid": "d6b2a410-71cb-4b67-9c28-13f174822960" },
+        "ENCSR458JVO_rep1_2_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF020HYS/", "uuid": "97d4788f-defc-4aa0-be95-982f78627071" },
+        "ENCSR458JVO_rep1_2_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF849DCW/", "uuid": "5610405a-f78b-458f-9829-108349d0b611" },
+        "ENCSR458JVO_rep1_1_ENCSR458JVO_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF458EDA/", "uuid": "5228aa9b-84b6-4917-90ae-30e933e48408" },
+        "ENCSR458JVO_rep1_1_ENCSR458JVO_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF574AXP/", "uuid": "f34c88c2-5b1a-447b-b658-a1c7b5c61273" },
+
+        #"ENCSR613JNT_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF050SDZ/", "uuid": "69fcf66b-9b4a-452a-9836-8cbe24fdbac7" },
+        "ENCSR613JNT_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF520QYE/", "uuid": "dee542ee-da83-46e5-ba82-5a7614fe08fc" },
+        "ENCSR613JNT_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF881YVA/", "uuid": "00b69c37-ce85-47f6-a080-ed74c04c2403" },
+        "ENCSR613JNT_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF123YKH/", "uuid": "9c103ca2-ecdb-45a3-bf30-d55e3a5d3100" },
+        #"ENCSR613JNT_rep2_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF919UON/", "uuid": "d4cdb60b-9b05-40ee-9c3c-90240fbb798c" },
+        "ENCSR613JNT_rep2_1_rampage_peaks.bb":        { "accession": "/files/ENCFF123SBE/", "uuid": "63e32cea-6fd6-4352-9f95-824bcfe2907e" },
+        "ENCSR613JNT_rep2_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF997BPT/", "uuid": "0afe288a-0bed-46a1-b61f-9d24215295e5" },
+        "ENCSR613JNT_rep2_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF650UGP/", "uuid": "cbfea79e-eba8-4b47-9d99-c336960b96e9" },
+        "ENCSR613JNT_rep1_1_ENCSR613JNT_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF740HEZ/", "uuid": "0e82b4a6-4843-4e7e-84a1-21e13584e898" },
+        "ENCSR613JNT_rep1_1_ENCSR613JNT_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF497AQH/", "uuid": "61757253-9d8b-4bd6-adae-de007e65c8ea" },
+
+        #"ENCSR632GYF_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF969TGT/", "uuid": "236251c3-4146-4a61-8d5a-afac6dcbe8fa" },
+        "ENCSR632GYF_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF671XIW/", "uuid": "e87a1998-f05d-40d3-a721-54bceebddd54" },
+        "ENCSR632GYF_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF350OPX/", "uuid": "968787ed-62b6-42e0-8d15-da59e99ca5aa" },
+        "ENCSR632GYF_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF852MMS/", "uuid": "faa1d06f-44a9-45a0-be89-a5f354c8ee6b" },
+        #"ENCSR632GYF_rep1_2_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF101PKS/", "uuid": "42d31fbe-26a3-4285-99be-b7fea1755c24" },
+        "ENCSR632GYF_rep1_2_rampage_peaks.bb":        { "accession": "/files/ENCFF695XME/", "uuid": "56238072-fc69-481f-b2ac-4d53696da31e" },
+        "ENCSR632GYF_rep1_2_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF502DVX/", "uuid": "33a4af46-ce50-425a-b8e7-60a077993120" },
+        "ENCSR632GYF_rep1_2_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF270QWT/", "uuid": "24f9abc5-6e38-4bbc-a433-a36b95d79700" },
+        "ENCSR632GYF_rep1_1_ENCSR632GYF_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF012PSP/", "uuid": "4925c522-6ce8-44f3-b2b5-489af4a7f206" },
+        "ENCSR632GYF_rep1_1_ENCSR632GYF_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF514TXU/", "uuid": "bd561bed-b4ab-487b-9339-00785ac6ef12" },
+
+        #"ENCSR880BIV_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF093NJG/", "uuid": "4b287473-c393-4a70-bf93-6f3cf5769547" },
+        "ENCSR880BIV_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF954CJH/", "uuid": "177796a0-ee8a-454a-8d94-e84d2dfd6039" },
+        "ENCSR880BIV_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF310THX/", "uuid": "c0d52069-bd5a-4db3-9ed3-e4489b2348f0" },
+        "ENCSR880BIV_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF096NQG/", "uuid": "dd94b83e-86b3-4481-80b8-8ee9f9eb7b2c" },
+        #"ENCSR880BIV_rep1_2_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF134SQU/", "uuid": "5b512607-624f-42bc-a771-552c2bf2d07a" },
+        "ENCSR880BIV_rep1_2_rampage_peaks.bb":        { "accession": "/files/ENCFF204PEP/", "uuid": "5d941c62-f2e4-4bf0-8534-adb583ba6e76" },
+        "ENCSR880BIV_rep1_2_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF960DPH/", "uuid": "32b0d660-03e8-4fb8-bc96-962843f5c242" },
+        "ENCSR880BIV_rep1_2_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF327SPX/", "uuid": "66df3d85-57cb-4f9a-8274-5f472aeb08b0" },
+        "ENCSR880BIV_rep1_1_ENCSR880BIV_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF246CMK/", "uuid": "20cf1f7f-c180-457c-9892-e91479c7ca78" },
+        "ENCSR880BIV_rep1_1_ENCSR880BIV_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF718ZGH/", "uuid": "6d4445e0-8f66-4865-a83a-372f929a6509" },
+
+        #"ENCSR970OWZ_rep1_1_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF223BOZ/", "uuid": "5845b210-08ad-4527-9cab-97c089e33a9a" },
+        "ENCSR970OWZ_rep1_1_rampage_peaks.bb":        { "accession": "/files/ENCFF293POW/", "uuid": "da67916e-deb5-46ec-acd5-05c5af728b34" },
+        "ENCSR970OWZ_rep1_1_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF583LSJ/", "uuid": "b3fc5249-b255-4865-83f9-8e88632b54ea" },
+        "ENCSR970OWZ_rep1_1_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF146JVO/", "uuid": "73146674-ddb9-43c9-9bda-471a07ba5371" },
+        #"ENCSR970OWZ_rep1_2_rampage_peaks.bed.gz":    { "accession": "/files/ENCFF677QIL/", "uuid": "29b00c2a-6704-4586-8356-33f10a586000" },
+        "ENCSR970OWZ_rep1_2_rampage_peaks.bb":        { "accession": "/files/ENCFF643KZW/", "uuid": "a578dac2-19a0-46cd-b7c7-177411616cbe" },
+        "ENCSR970OWZ_rep1_2_rampage_peaks.gff.gz":    { "accession": "/files/ENCFF433KFO/", "uuid": "fd3c4362-391d-480c-8c43-86701f274c40" },
+        "ENCSR970OWZ_rep1_2_rampage_peaks_quant.tsv": { "accession": "/files/ENCFF469XRJ/", "uuid": "e3860aa3-8335-4600-b3da-a9ab14e801e4" },
+        "ENCSR970OWZ_rep1_1_ENCSR970OWZ_rep1_1_rampage_idr.bed.gz": { "accession": "/files/ENCFF241MUT/", "uuid": "0509dba6-a933-414d-bbbd-4f41ed0f5674" },
+        "ENCSR970OWZ_rep1_1_ENCSR970OWZ_rep1_1_rampage_idr.bb":     { "accession": "/files/ENCFF314HPH/", "uuid": "545cab54-e0e7-4601-8df0-bfd0d17fe44d" },
+        }
+        file_name = submitted_file_name.split('/')[-1]
+        if file_name in supers:
+            return supers[file_name]['uuid']
+        else:
+            if file_name.endswith('_idr.bed.gz') or file_name.endswith('.bb') \
+            or file_name.endswith('.gff.gz') or file_name.endswith('.tsv'):   
+                print "ERROR: Unable to find superceded file name for %s" % file_name
+                sys.exit(0)
+        return None
+        
+    def make_payload_obj(self,out_type,rep_tech,fid,verbose=False):
+    ...
+        supers = self.supercedes(payload['submitted_file_name'])
+        if supers != None:
+            payload['supercedes'] = [ supers ]
+
 
 # Done: http://redmine.encodedcc.org/issues/3156#note-29
 # Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost

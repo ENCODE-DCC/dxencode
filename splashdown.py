@@ -1779,7 +1779,7 @@ class Splashdown(object):
             print >> sys.stderr, "Step-child %s has step-parent %s" % (step_child,step_parent)
             print >> sys.stderr, json.dumps(parent_job,indent=4)
         return parent_job
-
+        
     def make_payload_obj(self,out_type,rep_tech,fid,verbose=False):
         '''Returns an object for submitting a file to encode, with all dx info filled in.'''
         payload = {}
@@ -2038,7 +2038,7 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:       GRCh38 v24 shRNA  1,2   yes     -           2016-03-16  2016-03-17 %s  $%.2f" % \
+            #print "cost:       GRCh38 v24 shRNA  1,2   yes     -          2016-03-18  2016-03-21 %s  $%.2f" % \
             #    (duration.rjust(8), total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
@@ -2183,8 +2183,8 @@ class Splashdown(object):
 
             if halted:
                 total_halted += 1
-            elif not partial:
-                if 'internal_status' in self.exp and self.exp['internal_status'] not in dxencode.INTERNAL_STATUS_BLOCKS:
+            elif not partial and not args.test:
+                if 'internal_status' not in self.exp or self.exp['internal_status'] not in dxencode.INTERNAL_STATUS_BLOCKS:
                     dxencode.enc_exp_patch_internal_status(self.exp_id, 'pipeline completed', self.server_key, test=self.test)
 
             if not args.test:
