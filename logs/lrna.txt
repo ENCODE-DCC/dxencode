@@ -1,6 +1,6 @@
 ####### Working on: LRNA GRCh38 backlog
 
-# TODO: 7 Graveley shRNA with new fastqs (both hg19 and GRCh38): http://redmine.encodedcc.org/issues/3060#note-168
+# TODO POSTING: 7 Graveley shRNA with new fastqs (both hg19 and GRCh38): http://redmine.encodedcc.org/issues/3060#note-168
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
 ENCSR210RWL       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29     9h34m  $15.18
 ENCSR318OXM       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29  1d04h46m  $15.92
@@ -9,34 +9,6 @@ ENCSR788HVK       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21         
 ENCSR856ZRV       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29  1d00h32m  $18.14
 ENCSR927XBT       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-08-26  2015-08-31    13h43m  $16.24
 ENCSR992JGE       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29    20h26m  $25.77
-
-# GRCh38 replacements
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat.bam ENCFF943YZF ==> ENCFF751QOT 
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_minusUniq.bw ENCFF318XEQ ==> ENCFF309EDJ
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_plusUniq.bw ENCFF955ZCW ==> ENCFF637WNE
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_plusAll.bw ENCFF494VOR ==> ENCFF447HGE
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_minusAll.bw ENCFF343JAJ ==> ENCFF632QIX
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome.bam ENCFF050STS ==> ENCFF322VHP
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_anno.bam ENCFF285ZVF ==> ENCFF436UFH
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_minusUniq.bw ENCFF611EYJ ==> ENCFF315QWT
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_plusUniq.bw ENCFF628WHD ==> ENCFF945RML
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_plusAll.bw ENCFF486IUP ==> ENCFF255YZK
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_minusAll.bw ENCFF990SQL ==> ENCFF998SJB
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_rsem.genes.results ENCFF189MVH ==> ENCFF983GPF
-ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_rsem.isoforms.results ENCFF974QTE ==> ENCFF708GJR
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat.bam ENCFF391WCI ==> ENCFF188WYE
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_minusUniq.bw ENCFF287IBG ==> ENCFF872BUF
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_plusUniq.bw ENCFF790YBQ ==> ENCFF213OTU
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_plusAll.bw ENCFF103MJF ==> ENCFF836OJA
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_minusAll.bw ENCFF416AUN ==> ENCFF011SKE
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome.bam ENCFF275JMR ==> ENCFF983ZJV
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_anno.bam ENCFF445GZB ==> ENCFF227OTR
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_minusUniq.bw ENCFF839CGB ==> ENCFF623WEO
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_plusUniq.bw ENCFF256RUK ==> ENCFF778UQT
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_plusAll.bw ENCFF450NFH ==> ENCFF402PRJ
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_minusAll.bw ENCFF469ORB ==> ENCFF679EUQ
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_rsem.genes.results ENCFF570XYL ==> ENCFF011FFJ
-ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_rsem.isoforms.results ENCFF731AAF ==> ENCFF472DUE
 
 # Special case - "with internal_status of 'requires lab review' cannot be launched."
 ENCSR703QFF       GRCh38 v24 shRNA  1,2   yes     -
@@ -77,6 +49,7 @@ ENCSR000AEN       GRCh38 v24        1,2   yes     -          2016-01-22  2016-02
 ENCSR000AEO       GRCh38 v24        1,2   yes     -          2016-01-22  2016-02-03   21h09m  $78.20
 ENCSR000AEP       GRCh38 v24        1,2   no      -          2016-01-22  2016-02-04   12h49m  $33.79
 ENCSR000AEQ       GRCh38 v24        1,2   no      -          2016-01-22  2016-02-03   13h12m  $37.21
+ENCSR000AEU       GRCh38 v24 -      1,2   no      -          2016-03-25  2016-03-28  1d4h11m  $39.83         
 ENCSR000AEV       GRCh38 v24 -      1,2   no      -          2016-02-20  2016-02-24    7h58m  $22.36
 ENCSR000AEW       GRCh38 v24 -      1,2   no      -          2016-02-20  2016-02-24    6h42m  $19.45
 ENCSR000AEX       GRCh38 v24 -      1,2   no      -          2016-02-20  2016-02-24    6h12m  $17.71
@@ -291,7 +264,6 @@ ENCSR207QGW       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03
 ENCSR208GPE       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03    9h05m  $17.18
 ENCSR210DML       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   13h37m  $26.35
 ENCSR210KJB       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   10h23m  $22.23
-ENCSR210RWL       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03    3h28m  $13.77
 ENCSR210RWL       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    4h59m  $12.57
 ENCSR219DXZ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   11h06m  $35.94
 ENCSR220TBR       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   10h26m  $27.35
@@ -357,8 +329,7 @@ ENCSR313COD       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02
 ENCSR313IUO       GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02-26    2h29m   $6.91
 ENCSR314LXG       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25    6h25m  $17.24
 ENCSR318HAT       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    4h29m  $23.21
-ENCSR318OXM       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    7h55m  $14.41
-ENCSR318OXM       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    6h22m  $16.44
+ENCSR318OXM       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-03  2016-03-04    7h55m  $14.41
 ENCSR320BRR       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25    8h37m  $24.23
 ENCSR321PGV       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    5h48m   $8.44
 ENCSR322XVS       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    9h06m  $23.94
@@ -783,7 +754,7 @@ ENCSR995ZGJ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03
 ENCSR997FOT       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   14h58m  $21.71
 ENCSR998MZP       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   12h15m  $17.81
 ENCSR998RZI       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   19h39m  $28.56
-# Total: 740
+# Total: 739
 
 ####### hg19/mm10 Full list:
 # Experiment       On             Reps    First Post  Last Post   Total Time/Cost
@@ -1551,6 +1522,70 @@ ENCSR998RZI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h53m  $32.
 
 
 ####### Historical...
+
+### Done: Missing GRCh38
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000AEU       GRCh38 v24 -      1,2   no      -          2016-03-25  2016-03-28  1d4h11m  $39.83         
+
+# GRCh38 replacements
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat.bam ENCFF943YZF ==> ENCFF751QOT 
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_minusUniq.bw ENCFF318XEQ ==> ENCFF309EDJ
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_plusUniq.bw ENCFF955ZCW ==> ENCFF637WNE
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_plusAll.bw ENCFF494VOR ==> ENCFF447HGE
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_tophat_minusAll.bw ENCFF343JAJ ==> ENCFF632QIX
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome.bam ENCFF050STS ==> ENCFF322VHP
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_anno.bam ENCFF285ZVF ==> ENCFF436UFH
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_minusUniq.bw ENCFF611EYJ ==> ENCFF315QWT
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_plusUniq.bw ENCFF628WHD ==> ENCFF945RML
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_plusAll.bw ENCFF486IUP ==> ENCFF255YZK
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_star_genome_minusAll.bw ENCFF990SQL ==> ENCFF998SJB
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_rsem.genes.results ENCFF189MVH ==> ENCFF983GPF
+ENCSR210RWL/rep2_1/ENCSR210RWL_rep2_1_rsem.isoforms.results ENCFF974QTE ==> ENCFF708GJR
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat.bam ENCFF391WCI ==> ENCFF188WYE
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_minusUniq.bw ENCFF287IBG ==> ENCFF872BUF
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_plusUniq.bw ENCFF790YBQ ==> ENCFF213OTU
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_plusAll.bw ENCFF103MJF ==> ENCFF836OJA
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_tophat_minusAll.bw ENCFF416AUN ==> ENCFF011SKE
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome.bam ENCFF275JMR ==> ENCFF983ZJV
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_anno.bam ENCFF445GZB ==> ENCFF227OTR
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_minusUniq.bw ENCFF839CGB ==> ENCFF623WEO
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_plusUniq.bw ENCFF256RUK ==> ENCFF778UQT
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_plusAll.bw ENCFF450NFH ==> ENCFF402PRJ
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_star_genome_minusAll.bw ENCFF469ORB ==> ENCFF679EUQ
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_rsem.genes.results ENCFF570XYL ==> ENCFF011FFJ
+ENCSR318OXM/rep1_1/ENCSR318OXM_rep1_1_rsem.isoforms.results ENCFF731AAF ==> ENCFF472DUE
+
+# Done: Had to repost these manually.  504 timeout would set accession anyway, so that splashdown thought the file was already posted.
+# To do this: find job that failed. launch as new job but with accession added to the payload.
+#ENCFF336BSH ENCSR927TSP_rep2_1_star_anno.bam
+#{"accession":"ENCFF336BSH","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR927TSP/rep2_1/ENCSR927TSP_rep2_1_star_anno.bam","assembly":"GRCh38","file_format":"bam","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"align-star-pe\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_align_star_pe.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"0.1.19-96b5f2294a\", \"software\": \"samtools\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-BqfqpGj0XqfKJvz5fJyK9yqG\", \"dx-createdBy\": {\"job\": \"job-Bqfj1080J6Z6kG5Vz0Kb57Yf\", \"executable\": \"applet-BpxjJj80J6Z44JkjPGpkbfKQ\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$1.37\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj0y00J6Z6kG5Vz0Kb57Y0\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR927TSP","step_run":"/analysis-step-runs/dnanexus:job-Bqfj1080J6Z6kG5Vz0Kb57Yf","replicate":"/replicates/d4c45939-7f94-48dd-bbba-c048ef281ae1/","award":"/awards/U41HG006992/","derived_from":["ENCFF637CYG","ENCFF640OLN","ENCFF742NER"],"file_size":3856525486,"output_type":"transcriptome alignments"}
+#ENCFF116ERZ ENCSR945XKW_rep2_1_star_genome.bam
+#{"accession":"ENCFF116ERZ","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR945XKW/rep2_1/ENCSR945XKW_rep2_1_star_genome.bam","assembly":"GRCh38","file_format":"bam","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"align-star-pe\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_align_star_pe.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"0.1.19-96b5f2294a\", \"software\": \"samtools\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-Bqfxx900k00324vBPQpgB6qB\", \"dx-createdBy\": {\"job\": \"job-Bqfj11Q0J6Z67P6Jp4fpJv5B\", \"executable\": \"applet-BpxjJj80J6Z44JkjPGpkbfKQ\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$2.1\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj1180J6Z67P6Jp4fpJv50\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR945XKW","step_run":"/analysis-step-runs/dnanexus:job-Bqfj11Q0J6Z67P6Jp4fpJv5B","replicate":"/replicates/5efc71b2-0e5b-4a03-9496-9b9045228715/","award":"/awards/U41HG006992/","derived_from":["ENCFF653HYB","ENCFF501GRK","ENCFF742NER"],"file_size":5611518934,"output_type":"alignments"}
+#ENCFF744GRY ENCSR927SLP_rep2_1_star_genome.bam
+#{"accession":"ENCFF744GRY","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR927SLP/rep2_1/ENCSR927SLP_rep2_1_star_genome.bam","assembly":"GRCh38","file_format":"bam","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"align-star-pe\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_align_star_pe.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"0.1.19-96b5f2294a\", \"software\": \"samtools\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-BqfyBVQ04zp84zxz45qq2qZ2\", \"dx-createdBy\": {\"job\": \"job-Bqfj11j0J6ZPvFv2q83ByK5P\", \"executable\": \"applet-BpxjJj80J6Z44JkjPGpkbfKQ\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$1.98\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj11Q0J6ZPvFv2q83ByK55\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR927SLP","step_run":"/analysis-step-runs/dnanexus:job-Bqfj11j0J6ZPvFv2q83ByK5P","replicate":"/replicates/c5c5fc42-414b-4ce2-ae0d-f76c51d680d5/","award":"/awards/U41HG006992/","derived_from":["ENCFF910OAA","ENCFF840BKE","ENCFF742NER"],"file_size":5039853906,"output_type":"alignments"}
+#ENCFF476UZM ENCSR936VPP_rep1_1_star_anno.bam
+#{"accession":"ENCFF476UZM","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR936VPP/rep1_1/ENCSR936VPP_rep1_1_star_anno.bam","assembly":"GRCh38","file_format":"bam","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"align-star-pe\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_align_star_pe.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"0.1.19-96b5f2294a\", \"software\": \"samtools\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-BqfvPK80X9q19fxKZVyG7f7X\", \"dx-createdBy\": {\"job\": \"job-Bqfj10Q0J6ZK7Yg2Jv0jyfKv\", \"executable\": \"applet-BpxjJj80J6Z44JkjPGpkbfKQ\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$2.39\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj0y00J6ZK7Yg2Jv0jyfKP\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR936VPP","step_run":"/analysis-step-runs/dnanexus:job-Bqfj10Q0J6ZK7Yg2Jv0jyfKv","replicate":"/replicates/90a4ae66-04e0-4dbc-88e5-5b004e9675af/","award":"/awards/U41HG006992/","derived_from":["ENCFF002BYY","ENCFF002BYX","ENCFF742NER"],"file_size":5512878808,"output_type":"transcriptome alignments"}
+#ENCFF874STK ENCSR939ZRA_rep2_1_star_genome.bam
+#{"accession":"ENCFF874STK","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR939ZRA/rep2_1/ENCSR939ZRA_rep2_1_star_genome.bam","assembly":"GRCh38","file_format":"bam","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"align-star-pe\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_align_star_pe.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"0.1.19-96b5f2294a\", \"software\": \"samtools\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-Bqfp6bj0PfjXzvFzKQppB7V3\", \"dx-createdBy\": {\"job\": \"job-Bqfj0zQ0J6Z366Qqg8366vG5\", \"executable\": \"applet-BpxjJj80J6Z44JkjPGpkbfKQ\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$3.42\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj0v80J6Z366Qqg8366vFQ\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR939ZRA","step_run":"/analysis-step-runs/dnanexus:job-Bqfj0zQ0J6Z366Qqg8366vG5","replicate":"/replicates/8c450af1-cf2a-4e77-8f4c-fbbf60694270/","award":"/awards/U41HG006992/","derived_from":["ENCFF147BWT","ENCFF361CFU","ENCFF742NER"],"file_size":5997600397,"output_type":"alignments"}
+#ENCFF252LJU ENCSR945UYL_rep2_1_star_genome.bam
+#{"accession":"ENCFF252LJU","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR945UYL/rep2_1/ENCSR945UYL_rep2_1_star_genome.bam","assembly":"GRCh38","file_format":"bam","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"align-star-pe\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_align_star_pe.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"0.1.19-96b5f2294a\", \"software\": \"samtools\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-BqfzZkQ0Vgv2zvFzKQppGKkX\", \"dx-createdBy\": {\"job\": \"job-Bqfj12Q0J6ZJFfx6x9ZBKBY4\", \"executable\": \"applet-BpxjJj80J6Z44JkjPGpkbfKQ\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$3.27\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj12Q0J6ZJFfx6x9ZBKBXp\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR945UYL","step_run":"/analysis-step-runs/dnanexus:job-Bqfj12Q0J6ZJFfx6x9ZBKBY4","replicate":"/replicates/3b79b80b-06b8-421b-bdf8-0a2f31a582f8/","award":"/awards/U41HG006992/","derived_from":["ENCFF565IUW","ENCFF383DLH","ENCFF742NER"],"file_size":7050564658,"output_type":"alignments"}
+#ENCFF030CTM ENCSR938LSP_rep1_1_star_genome.bam  === Lost log
+#{"accession":"ENCFF030CTM","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR938LSP/rep1_1/ENCSR938LSP_rep1_1_star_genome.bam","assembly":"GRCh38","file_format":"bam","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"align-star-pe\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_align_star_pe.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"0.1.19-96b5f2294a\", \"software\": \"samtools\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-Bq79QgQ0y2Bfv62f049bq3j7\", \"dx-createdBy\": {\"job\": \"job-Bq74qB00J6Z50bjK18KGXKGp\", \"executable\": \"applet-BpxjJj80J6Z44JkjPGpkbfKQ\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$7.5\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bq74qB00J6Z50bjK18KGXKGg\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR938LSP","step_run":"/analysis-step-runs/dnanexus:job-Bq74qB00J6Z50bjK18KGXKGp","replicate":"/replicates/87d34700-f9f7-4bce-b55c-2baa140899b7/","award":"/awards/U41HG006992/","derived_from":["ENCFF002DHY","ENCFF002DHX","ENCFF742NER"],"file_size":21541733354,"output_type":"alignments"}
+#
+#ENCFF309KBJ ENCSR952RRH_rep2_1_star_genome_plusAll.bw
+#{"accession":"ENCFF309KBJ","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR952RRH/rep2_1/ENCSR952RRH_rep2_1_star_genome_plusAll.bw","assembly":"GRCh38","file_format":"bigWig","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"bam-to-bigwig-stranded\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_bam_to_stranded_signals.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"v4\", \"software\": \"bedGraphToBigWig\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-Bqfvq180XYbg1qJjYGpX5jJY\", \"dx-createdBy\": {\"job\": \"job-Bqfj10Q0J6Z9vVybQ5VpYVVq\", \"executable\": \"applet-BpxjJvj0J6Z2yqZF58gxx5zv\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$0.28\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj1080J6Z9vVybQ5VpYVVQ\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR952RRH","step_run":"/analysis-step-runs/dnanexus:job-Bqfj10Q0J6Z9vVybQ5VpYVVq","replicate":"/replicates/e9c281e3-e738-4213-85d0-38e73e47394c/","award":"/awards/U41HG006992/","derived_from":["ENCFF904USC"],"file_size":105226801,"output_type":"plus strand signal of all reads"}
+#ENCFF356QWP ENCSR942MBU_rep1_1_star_genome_plusAll.bw
+#{"accession":"ENCFF356QWP","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR942MBU/rep1_1/ENCSR942MBU_rep1_1_star_genome_plusAll.bw","assembly":"GRCh38","file_format":"bigWig","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"bam-to-bigwig-stranded\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_bam_to_stranded_signals.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"v4\", \"software\": \"bedGraphToBigWig\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-Bqfkv1Q003gg1qJjYGpX4K75\", \"dx-createdBy\": {\"job\": \"job-Bqfj0vQ0J6ZB3B0yP00xYPPK\", \"executable\": \"applet-BpxjJvj0J6Z2yqZF58gxx5zv\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$0.28\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj0v80J6ZB3B0yP00xYPP6\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR942MBU","step_run":"/analysis-step-runs/dnanexus:job-Bqfj0vQ0J6ZB3B0yP00xYPPK","replicate":"/replicates/939cdb74-de9f-4772-8f32-477b7ba82305/","award":"/awards/U41HG006992/","derived_from":["ENCFF326BPV"],"file_size":99572393,"output_type":"plus strand signal of all reads"}
+#ENCFF545RCZ ENCSR946OFN_rep1_1_star_genome_plusUniq.bw
+#{"accession":"ENCFF545RCZ","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR946OFN/rep1_1/ENCSR946OFN_rep1_1_star_genome_plusUniq.bw","assembly":"GRCh38","file_format":"bigWig","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"bam-to-bigwig-stranded\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_bam_to_stranded_signals.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"v4\", \"software\": \"bedGraphToBigWig\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-Bqfvgx80KKvPVpy1VQpg09Pp\", \"dx-createdBy\": {\"job\": \"job-Bqfj1180J6ZJJF52pvKYVz2P\", \"executable\": \"applet-BpxjJvj0J6Z2yqZF58gxx5zv\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$0.2\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj1100J6ZJJF52pvKYVz1z\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR946OFN","step_run":"/analysis-step-runs/dnanexus:job-Bqfj1180J6ZJJF52pvKYVz2P","replicate":"/replicates/4635fc0f-e522-4076-b9cb-fac2ec329c3a/","award":"/awards/U41HG006992/","derived_from":["ENCFF772JIO"],"file_size":53472348,"output_type":"plus strand signal of unique reads"}
+#ENCFF948GFV ENCSR942UNX_rep1_1_star_genome_plusUniq.bw
+#{"accession":"ENCFF948GFV","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR942UNX/rep1_1/ENCSR942UNX_rep1_1_star_genome_plusUniq.bw","assembly":"GRCh38","file_format":"bigWig","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"bam-to-bigwig-stranded\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_bam_to_stranded_signals.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"v4\", \"software\": \"bedGraphToBigWig\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-BqfkFfj04fgPX55jQVyJfPK8\", \"dx-createdBy\": {\"job\": \"job-Bqfj0y80J6Z5jp55Yv9YXK08\", \"executable\": \"applet-BpxjJvj0J6Z2yqZF58gxx5zv\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$0.26\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj0y00J6Z5jp55Yv9YXK01\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR942UNX","step_run":"/analysis-step-runs/dnanexus:job-Bqfj0y80J6Z5jp55Yv9YXK08","replicate":"/replicates/57bddb2d-a275-47b0-85e8-c8749ffdb34e/","award":"/awards/U41HG006992/","derived_from":["ENCFF086SXC"],"file_size":84763811,"output_type":"plus strand signal of unique reads"}
+#ENCFF827FIF ENCSR947OIM_rep2_1_star_genome_minusAll.bw
+#{"accession":"ENCFF827FIF","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR947OIM/rep2_1/ENCSR947OIM_rep2_1_star_genome_minusAll.bw","assembly":"GRCh38","file_format":"bigWig","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"bam-to-bigwig-stranded\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_bam_to_stranded_signals.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"v4\", \"software\": \"bedGraphToBigWig\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-BqfpbQQ0ybGBx3QPQ9XqGKz2\", \"dx-createdBy\": {\"job\": \"job-Bqfj0zj0J6Z7KZgKx43FJ4j5\", \"executable\": \"applet-BpxjJvj0J6Z2yqZF58gxx5zv\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$0.33\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj0zQ0J6Z7KZgKx43FJ4gj\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR947OIM","step_run":"/analysis-step-runs/dnanexus:job-Bqfj0zj0J6Z7KZgKx43FJ4j5","replicate":"/replicates/4a178aa5-54f0-4ea7-b1d2-0d84251ab223/","award":"/awards/U41HG006992/","derived_from":["ENCFF512SXV"],"file_size":136861301,"output_type":"minus strand signal of all reads"}
+#ENCFF030LOL ENCSR925RNE_rep2_1_star_genome_plusAll.bw
+#{"accession":"ENCFF030LOL","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR925RNE/rep2_1/ENCSR925RNE_rep2_1_star_genome_plusAll.bw","assembly":"GRCh38","file_format":"bigWig","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"bam-to-bigwig-stranded\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_bam_to_stranded_signals.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"v4\", \"software\": \"bedGraphToBigWig\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-BqfqYq00fpkGvQyBVQY0pJy3\", \"dx-createdBy\": {\"job\": \"job-Bqfj0zj0J6Z1YYzQZVjFVPpb\", \"executable\": \"applet-BpxjJvj0J6Z2yqZF58gxx5zv\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$0.23\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj0zQ0J6Z1YYzQZVjFVPp9\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR925RNE","step_run":"/analysis-step-runs/dnanexus:job-Bqfj0zj0J6Z1YYzQZVjFVPpb","replicate":"/replicates/54549ec0-e825-42ec-835a-1cfdf6d9128d/","award":"/awards/U41HG006992/","derived_from":["ENCFF478ZKI"],"file_size":83074011,"output_type":"plus strand signal of all reads"}
+#ENCFF475UJI ENCSR927JXU_rep1_1_star_genome_minusUniq.bw
+#{"accession":"ENCFF475UJI","status":"upload failed","submitted_file_name":"ENCODE - Production runs:/long-RNA-seq/runs/GRCh38/ENCSR927JXU/rep1_1/ENCSR927JXU_rep1_1_star_genome_minusUniq.bw","assembly":"GRCh38","file_format":"bigWig","genome_annotation":"V24","notes":"{\"software_versions\": [{\"version\": {\"bam-to-bigwig-stranded\": \"2.1.0\"}, \"software\": \"DX applet\"}, {\"version\": \"v1\", \"software\": \"lrna_bam_to_stranded_signals.sh\"}, {\"version\": \"2.5.1b\", \"software\": \"STAR\"}, {\"version\": \"v4\", \"software\": \"bedGraphToBigWig\"}], \"dx_project_name\": \"ENCODE - Production runs\", \"notes_version\": \"5\", \"dx-id\": \"file-Bqfxb4j07Jb0QJKqQZY2fkp8\", \"dx-createdBy\": {\"job\": \"job-Bqfj11Q0J6Z2p2ppQ49x8Gq6\", \"executable\": \"applet-BpxjJvj0J6Z2yqZF58gxx5zv\", \"user\": \"user-tdreszer\"}, \"dx_cost\": \"$0.26\", \"dx_project_id\": \"project-BbF4J2Q0J6Z0q4K79k9V5fv0\", \"dx_analysis_id\": \"analysis-Bqfj1180J6Z2p2ppQ49x8Gq0\"}","lab":"/labs/encode-processing-pipeline/","dataset":"ENCSR927JXU","step_run":"/analysis-step-runs/dnanexus:job-Bqfj11Q0J6Z2p2ppQ49x8Gq6","replicate":"/replicates/f02dd830-3d81-452c-9b96-b99321360902/","award":"/awards/U41HG006992/","derived_from":["ENCFF586QOM"],"file_size":83185259,"output_type":"minus strand signal of unique reads"}
 
 ### Done: GRCh38 backlog: 7th batch needing TopHat: http://redmine.encodedcc.org/issues/3060#note-182
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost

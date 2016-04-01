@@ -55,29 +55,59 @@ class Mission_log(object):
     ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "hg38": "GRCh37", "mm10": "mm10" }
     '''This module supports only these assemblies.'''
 
-    ANNOTATIONS_SUPPORTED = [ 'V19', 'M2', 'M3', 'M4' ]
+    ANNOTATIONS_SUPPORTED = [ 'V24', 'V19', 'M4' ]
     '''This module supports only these annotations.'''
+    
+    FOLDER_DEFAULT = "/"
+    '''Where to start the search for experiment folders in DX.'''
 
+    # Report specs is a dict covering all supported types of reports.
+    # <report_type>: A dict keyed on report_type containing report specific json.
+    #   "sources": a list of one or both of 'encodeD' or 'DX'  Not all reports can use both sources for content.
+    #   <pipeline or assay>: A dictionary keyed on the assay_type that furter describes what to look for.
+    #      "output_types": list of encodeD FILE output_types that are needed to complete the report.
+    #      <out_type>: Dict keyed on either output_type or sub_type further defining the files and metrics to be gathered
+    #         "sub_types": list of sub_types for an output_type if they exist.
+    #         "suffix":    List of one or more file name endings, used to find files in DX or verify files in encodeD
+    #         "metrics":   List of one or more metric keys to the METRICS DEF defined below.   
     REPORT_SPECS = {
          'star-mad': {
-             "long-rna-seq":  { "output_types": [ "transcriptome alignments",        "gene quantifications" ],
-                                "metrics":      { "transcriptome alignments": 'star',"gene quantifications": 'mad' } },
-             "small-rna-seq": { "output_types": [ "alignments",        "gene quantifications" ],
-                                "metrics":      { "alignments": 'star',"gene quantifications": 'mad' } },
-             "rampage":       { "output_types": [ "alignments",        "gene quantifications" ],
-                                "metrics":      { "alignments": 'star',"gene quantifications": 'mad' } }
+             "sources":       ["encodeD","DX"],
+             "long-rna-seq":  { "output_types": [ "transcriptome alignments", "gene quantifications" ],
+                                "transcriptome alignments": { "suffix":  [ "_star_anno.bam" ],
+                                                              "metrics": [ "star" ] }, 
+                                "gene quantifications":     { "suffix":  [ "_rsem.genes.results", "_mad_plot.png" ],
+                                                              "metrics": [ "mad" ] },
+                              },
+             "small-rna-seq": { "output_types": [ "alignments", "gene quantifications" ],
+                                "alignments":           { "suffix":  [ "_srna_star.bam" ],
+                                                          "metrics": [ "star" ] }, 
+                                "gene quantifications": { "suffix":  [ "_srna_star_quant.tsv" ],
+                                                          "metrics": [ "mad" ] },
+                              },
+             "rampage":       { "output_types": [ "alignments", "gene quantifications" ],
+                                "alignments":           { "suffix":  [ "_rampage_peaks_quant.tsv" ],
+                                                          "metrics": [ "star" ] }, 
+                                "gene quantifications": { "suffix":  [ "_srna_star_quant.tsv" ],
+                                                          "metrics": [ "mad" ] },
+                              }
          },
          'tophat_times': {
+             "sources":       ["encodeD","DX"],
              "long-rna-seq":  { "output_types": [ "alignments" ],
-                                "ending":       [ ("alignments", "star", "_star_genome.bam"), 
-                                                  ("alignments", "tophat", "_tophat.bam"   ) ],
-                                "metrics":      { "star": ["star2", "file_cost"], "tophat": "file_cost", } },
+                                "alignments":   { "subtypes": [ "star", "tophat" ] },
+                                "star":         { "suffix":   [ "_star_genome.bam" ],
+                                                  "metrics":  [ "star2", "file_cost"] }, 
+                                "tophat":       { "suffix":   [ "_tophat.bam" ], 
+                                                  "metrics":  [ "file_cost" ] }, 
+                              }
          }
     }
     '''For each report type, these are the mappings for file 'output_types' to 'quality_metric' types.'''
     
     METRIC_DEFS = {
        'star': {"per": "replicate",
+                "dx_key": "STAR_log_final",
                 "columns": [
                             "Number of input reads",
                             "Uniquely mapped reads number",
@@ -89,6 +119,7 @@ class Mission_log(object):
               },
        'star2': {"per": "replicate",
                 "name": "star",
+                "dx_key": "STAR_log_final",
                 "columns": [
                             "Number of input reads",
                             "Uniquely mapped reads %",
@@ -99,6 +130,7 @@ class Mission_log(object):
                                 "% of reads unmapped: too short":"Unmapped %"}
               },
        'mad': { "per": "experiment",
+                "dx_key": "MAD.R",
                 "columns": [
                             "MAD of log ratios",
                             "Pearson correlation",
@@ -126,10 +158,14 @@ class Mission_log(object):
         self.exp = {}  # Will hold the encoded exp json
         self.exp_id = None
         self.exp_type = None  # Will hold the experiment's assay_type, normalized to known tokens.
-        self.genome = None  # TODO: need way to determine genome before any posts occur!
+        self.genome = None
         self.genome_warning = False
-        self.annotation = None  # TODO: if appropriate, need way to determine annotation
         self.report_specs = {} # Unless the proper report specifications are discovered, a report can't be run
+        self.data_mine       = None # Where to get QC metrics and other data from: 'encodeD' or 'DX'
+        self.proj_name       = None # Only needed when qc_source is 'DX'
+        self.project         = None # Only needed when qc_source is 'DX'
+        self.umbrella_folder = None # Only needed when qc_source is 'DX'
+        self.folder          = None # Where the user says to start looking for files
         self.obj_cache = {} # certain things take time to find or create and are needed multiple times
         print >> sys.stderr, " "
 
@@ -152,14 +188,26 @@ class Mission_log(object):
                         required=False)
 
         ap.add_argument('-r','--report-type',
-                        help="The report type to print (default: '" + self.REPORT_DEFAULT + "')",
+                        help="The report type to print (supported: "+str(self.REPORT_SPECS.keys())+") " + \
+                                                      "(default: '" + self.REPORT_DEFAULT + "')",
                         default=self.REPORT_DEFAULT,
                         required=False)
 
         ap.add_argument('-g','--genome',
-                        help="The genome assembly to run on (default: '<project>:" + \
+                        help="The genome assembly to run on (default: '" + \
                                                                   dxencode.GENOME_DEFAULTS['human'] + "')",
                         default=None,
+                        required=False)
+
+        ap.add_argument('-d','--dx',
+                        help="Get content from 'DX' instead of the default 'encodeD'.",
+                        action='store_true',
+                        required=False)
+
+        ap.add_argument('--folder',
+                        help="If getting content from DX, the location to search for experiment folders (default: " + \
+                                                "'<project>:" + self.FOLDER_DEFAULT + "')",
+                        default=self.FOLDER_DEFAULT,
                         required=False)
 
         ap.add_argument('--server',
@@ -280,49 +328,131 @@ class Mission_log(object):
         return replicates
 
 
+    def get_relevant_dx_files(self, exp_id, exp, report_specs, verbose=False):
+        '''Returns list of DX files for selected files available.'''
+        #verbose=True
+        dx_files = []
+        self.obj_cache["exp"]["files"] = {}
+        
+        # Need a project specific place to start looking for files
+        if self.umbrella_folder == None:
+            self.umbrella_folder = dxencode.umbrella_folder(self.folder,self.FOLDER_DEFAULT,self.proj_name,self.exp_type)
+            if self.folder == self.FOLDER_DEFAULT:
+                self.umbrella_folder = self.umbrella_folder.replace("/runs/","/posted/")
+            if self.genome not in self.umbrella_folder:
+                self.umbrella_folder = self.umbrella_folder + self.genome + '/'
+            if verbose:
+                print >> sys.stderr, "Using umbrella folder '%s'" % (self.umbrella_folder)
+            
+        # Find experiment dir
+        if verbose:
+            print >> sys.stderr, "Looking in '%s:%s' for folder for %s." % (self.proj_name, self.umbrella_folder, exp_id)
+        exp_folder = dxencode.find_exp_folder(self.project,exp_id,self.umbrella_folder)
+        if exp_folder == None:
+            print >> sys.stderr, "ERROR: Can't find experiment folder for %s underneath '%s:%s.'" % \
+                                        (exp_id, self.proj_name, self.umbrella_folder)
+            return dx_files
+        elif verbose:
+            print >> sys.stderr, "- Examining %s:%s for '%s' results..." % \
+                                        (self.proj_name, exp_folder, self.exp_type)
+        # Now look for replicate dirs:
+        rep_folders = dxencode.find_replicate_folders(self.project,exp_folder)
+        if len(rep_folders) == 0:
+            print >> sys.stderr, "ERROR: Can't find any replicate folders in %s." % (self.proj_name, exp_folder)
+            return dx_files
+        elif verbose:
+            print >> sys.stderr, "- Found %d replicate folders." % len(rep_folders)
+
+        # Now we can look for DX files:
+        for rep_folder in rep_folders:
+            if verbose:
+                print >> sys.stderr, "- Looking in folder %s." % rep_folder
+            for out_type in report_specs["output_types"]:
+                types_list = [ out_type ] 
+                if "subtypes" in report_specs[out_type]:
+                    types_list = report_specs[out_type]["subtypes"] 
+                for sub_type in types_list:
+                    for suffix in report_specs[sub_type]["suffix"]:
+                        if verbose:
+                            print >> sys.stderr, "- Looking for files for type '%s' with suffix '%s'." % (sub_type,suffix)
+                        fid = dxencode.find_file(exp_folder + rep_folder + '/*' + suffix,self.proj_name, recurse=False)
+                        if fid == None: # Or check in experiment folder
+                            if verbose:
+                                print >> sys.stderr, "- Looking in experiment folder %s for files with suffix '%s'." % \
+                                                                                                            (exp_folder,suffix)
+                            fid = dxencode.find_file(exp_folder + '*' + suffix,self.proj_name, recurse=False)
+                        if fid != None:
+                            if verbose:
+                                print >> sys.stderr, "- Found file '%s'." % fid
+                            file_dx_obj = dxencode.description_from_fid(fid,properties=True)
+                            qc_json = dxencode.dx_file_get_details(fid)
+                            if qc_json and "QC" in qc_json:  # Not likely but QC json could be subsection of details
+                                qc_json = qc_json["QC"]
+                            if not qc_json:
+                                if verbose:
+                                    print >> sys.stderr, "- Found file '%s' has no qc_josn, so skipping it." % \
+                                                                                                    (file_dx_obj['name'])
+                                continue
+                            if verbose:
+                                print >> sys.stderr, "- Found qc blob for %s:" % fid
+                                #print >> sys.stderr, json.dumps(qc_json,indent=4,sort_keys=True)
+                            file_dx_obj["QC"] = qc_json    
+                            self.obj_cache["exp"]["files"][fid] = file_dx_obj
+                            dx_files.append((out_type,sub_type,rep_folder,fid))
+        
+        if verbose:
+            print >> sys.stderr, "DX files: %d" % len(dx_files)
+            for (out_type,sub_type,rep_folder,fid) in dx_files:
+                print >> sys.stderr, "'%s' %s %s %s" % \
+                        (out_type,rep_folder,fid,self.obj_cache["exp"]["files"][fid]['name'])
+        return dx_files
+
+ 
     def find_matching_files(self, files, out_type, rep_tech, sub_type=None, suffix=None):
         '''Returns list of matched files for out_type, replicate and possible ending.'''
         
         matching_files = []
-        for file_obj in files:
-            if file_obj.get('output_type') != out_type:
+        for file_enc_obj in files:
+            if file_enc_obj.get('output_type') != out_type:
                 continue
-            if self.genome != None and file_obj.get('assembly',self.genome) != self.genome:
+            if self.genome != None and file_enc_obj.get('assembly',self.genome) != self.genome:
                 continue
             if suffix != None:
-                file_name = file_obj["submitted_file_name"]
+                file_name = file_enc_obj["submitted_file_name"]
                 if not file_name.endswith(suffix):
                     continue
-            if 'replicate' not in file_obj:
+            if 'replicate' not in file_enc_obj:
                 print >> sys.stderr, "WARNING: %s %s has no 'replicate'" % \
-                                    (file_obj['accession'],file_obj['submitted_file_name']) 
+                                    (file_enc_obj['accession'],file_enc_obj['submitted_file_name']) 
                 continue
-            br = file_obj['replicate']['biological_replicate_number']
-            tr = file_obj['replicate']['technical_replicate_number']
+            br = file_enc_obj['replicate']['biological_replicate_number']
+            tr = file_enc_obj['replicate']['technical_replicate_number']
             file_rep_tech = "rep%d_%d" % (br,tr)
             if file_rep_tech != rep_tech:
                 continue
-            acc = file_obj['accession'] 
+            acc = file_enc_obj['accession'] 
             matching_files.append((out_type,sub_type,rep_tech,acc))
-            self.obj_cache["exp"]["files"][acc] = file_obj
+            self.obj_cache["exp"]["files"][acc] = file_enc_obj
         return matching_files
+        
 
-    def get_relevant_files(self, exp_id, exp, report_specs, reps, verbose=False):
-        '''Returns list of enc file_objects for selected files available on encoded.'''
+    def get_relevant_enc_files(self, exp_id, exp, report_specs, reps, verbose=False):
+        '''Returns list of encodeD file objects for selected files available on encoded.'''
         #verbose=True
+
         enc_files = []
         self.obj_cache["exp"]["files"] = {}
         
         files = dxencode.get_enc_exp_files(exp,report_specs["output_types"],lab="encode-processing-pipeline", \
                                                                                                 key=self.server_key)
-        # FIXME: special case to get around m2,m3
+        # special case to get around m2,m3 files
         new_list = []
         while len(files) > 0:
-            file_obj = files.pop()
-            if self.genome != None and file_obj.get('assembly',self.genome) != self.genome:
+            file_enc_obj = files.pop()
+            if self.genome != None and file_enc_obj.get('assembly',self.genome) != self.genome:
                 continue
-            if "genome_annotation" not in file_obj or file_obj["genome_annotation"] in [u'V24',u'V19',u'M4']: # Note: this is a good 
-               new_list.append(file_obj)
+            if "genome_annotation" not in file_enc_obj or file_enc_obj["genome_annotation"] in self.ANNOTATIONS_SUPPORTED:
+               new_list.append(file_enc_obj)
         files = new_list
         if len(files) == 0:
             if verbose:
@@ -332,17 +462,14 @@ class Mission_log(object):
         # How to place them in order?
         for rep in reps:
             for out_type in report_specs["output_types"]:
-                if "ending" in report_specs:
-                    for sub_out, sub_type, suffix in report_specs["ending"]: 
-                        if sub_out != out_type:
-                            continue
+                types_list = [ out_type ] 
+                if "subtypes" in report_specs[out_type]:
+                    types_list = report_specs[out_type]["subtypes"] 
+                for sub_type in types_list:
+                    for suffix in report_specs[sub_type]["suffix"]:
                         matching_files = self.find_matching_files(files, out_type, rep['rep_tech'], sub_type, suffix)
                         if len(matching_files) > 0:
                             enc_files.extend(matching_files)
-                else:
-                    matching_files = self.find_matching_files(files, out_type, rep['rep_tech'])
-                    if len(matching_files) > 0:
-                        enc_files.extend(matching_files)
     
         if verbose:
             print >> sys.stderr, "Encoded files:"
@@ -352,15 +479,14 @@ class Mission_log(object):
         return enc_files
 
 
-    def duration_from_enc_times(self,beg_time,end_time,second=False):
-        '''Returns a duration string difference two encodeD formatted strings.'''
-        if beg_time == None or end_time == None:
-            return None
-        beg_dt = datetime.strptime(beg_time, '%Y-%m-%dT%H:%M:%SZ')
-        end_dt = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%SZ')
-        duration = (end_dt - beg_dt)
-        return duration.total_seconds()
+    def get_relevant_files(self, exp_id, exp, report_specs, reps, verbose=False):
+        '''Returns list of encodeD or DX file objects for selected files available on encoded.'''
 
+        if self.data_mine == "DX":
+            return self.get_relevant_dx_files(exp_id, exp, report_specs, verbose=verbose)
+        else:
+            return self.get_relevant_enc_files(exp_id, exp, report_specs, reps, verbose=verbose)
+            
 
     def file_size_string(self,size):
         '''Returns a file size string in G, M denomiations or else the number itself.'''
@@ -373,15 +499,119 @@ class Mission_log(object):
         return  size
 
 
-    def get_special_metric(self,metric_id,file_obj,metric_key,metric_def,verbose=False):
-        '''Returns a mocked up 'metric' object from specialized definitions.'''
+    def get_dx_special_metric(self,metric_id,file_dx_obj,metric_key,metric_def,verbose=False):
+        '''Returns a mocked up 'metric' object from specialized definitions in DX.'''
+        #verbose=True
+        if metric_key != "file_cost":
+            return None
+        
+        metric = {}
+        try:
+            job_id = file_dx_obj["createdBy"]["job"]
+            job =  dxpy.api.job_describe(job_id)
+        except:
+            print >> sys.stderr, "ERROR: Could not find job for %s." % file_dx_obj['name']
+            return None
+        #print >> sys.stderr, "file_dx_obj for '"+metric_id+"':"
+        #print >> sys.stderr, json.dumps(file_dx_obj,indent=4)
+        #print >> sys.stderr, "job:"
+        #print >> sys.stderr, json.dumps(job,indent=4)
+        #sys.exit(0)
+            
+        for col in metric_def["columns"]:
+            if col == "Cost":
+                cost = job.get("totalPrice")
+                if cost != None:
+                    metric[col] = "$" + str(round(cost,2))
+            elif col == "Time":
+                beg = job.get("startedRunning") 
+                end = job.get("stoppedRunning") 
+                if beg != None and end != None:
+                    duration =  (end/1000.0 - beg/1000.0)
+                    if duration != None:
+                        metric[col] = duration
+            elif col == "File Size":
+                size = file_dx_obj.get("size")
+                if size != None:
+                    metric[col] = size
+        if verbose:
+            print >> sys.stderr, "Special metric '"+metric_id+"':"
+            print >> sys.stderr, json.dumps(metric,indent=4)
+        return metric
+            
+
+    def get_dx_metrics(self,exp_id,target_files,report_specs,verbose=False):
+        '''Returns a list of tuples of metrics objects from DX for reporting statistics.'''
+        #verbose=True
+
+        metrics = []
+        combo_metrics = []
+        metric_ids = []
+        self.obj_cache["exp"]["metrics"] = {}
+        for (out_type,sub_type,rep_tech,fid) in target_files:
+            file_dx_obj = self.obj_cache["exp"]["files"][fid]
+            
+            if sub_type != None:
+                metric_keys = report_specs[sub_type]["metrics"]
+            else:
+                metric_keys = report_specs[out_type]["metrics"]
+            
+            assert metric_keys != None
+            if not isinstance(metric_keys,list):
+                metric_keys = [ metric_keys ]
+            
+            for metric_key in metric_keys:                
+                metric_defs = self.METRIC_DEFS[metric_key]
+                
+                # Make only one 'combined' metric from 2 reps.
+                if metric_defs["per"] == "experiment":
+                    metric_id = exp_id + '/' + metric_key
+                else: 
+                    metric_id = fid + '/' + metric_key 
+                if metric_id in metric_ids:  
+                    continue
+                metric_ids.append(metric_id)
+                 
+                if "special_metric" in metric_defs and metric_defs["special_metric"]:
+                    if verbose:
+                        print >> sys.stderr, "Getting special metric for %s %s %s" % (exp_id,rep_tech,metric_key)
+                    metric = self.get_dx_special_metric(metric_id,file_dx_obj,metric_key,metric_defs)
+                else:
+                    if verbose:
+                        print >> sys.stderr, "Getting qc metric for %s %s %s" % (exp_id,rep_tech,metric_key)
+                    
+                    metric = file_dx_obj['QC'].get(metric_defs["dx_key"])
+                    # TODO: Add conversion of DX to ENC qc_metric objects if necessary
+                if metric == None:
+                    if verbose:
+                        print >> sys.stderr, "Experiment "+exp_id+" "+file_dx_obj['name']+" has no " + metric_key + \
+                                                                                                "quality_metric objects."
+                    continue
+                if metric_defs["per"] == "experiment":
+                    combo_metrics.append((metric_key,"combined",metric_id))
+                else:
+                    metrics.append((metric_key,rep_tech,metric_id))
+                self.obj_cache["exp"]["metrics"][metric_id] = metric
+
+        if len(combo_metrics) > 0:
+            metrics.extend(combo_metrics)
+
+        if verbose:
+            print >> sys.stderr, "Encoded metrics:"
+            for (metric_key,rep_tech,metric_id) in metrics:
+                print >> sys.stderr, "%s %s %s" % (metric_key,rep_tech,metric_id)
+        return metrics
+
+
+    def get_enc_special_metric(self,metric_id,file_enc_obj,metric_key,metric_def,verbose=False):
+        '''Returns a mocked up 'metric' object from specialized definitions in encodeD.'''
         #verbose=True
         if metric_key != "file_cost":
             return None
         
         metric = {}
         notes = None
-        file_notes = file_obj.get("notes")
+        file_notes = file_enc_obj.get("notes")
         if file_notes != None:
             try:
                 notes = json.loads(file_notes)
@@ -393,7 +623,7 @@ class Mission_log(object):
                 if notes != None:
                     cost = notes.get("dx_cost")
                     if cost == None:
-                        step_notes = file_obj["step_run"].get("notes")
+                        step_notes = file_enc_obj["step_run"].get("notes")
                         if step_notes != None:
                             try:
                                 cost = json.loads(step_notes).get("dx_cost")
@@ -402,36 +632,39 @@ class Mission_log(object):
                     if cost != None:
                         metric[col] = cost
             elif col == "Time":
-                #if notes != None:
-                #    duration = notes.get("duration")
-                step_run = self.enc_lookup_json(file_obj["step_run"])
+                step_run = self.enc_lookup_json(file_enc_obj["step_run"])
                 if step_run != None:
                     step_details = step_run["dx_applet_details"][0]
-                    duration = self.duration_from_enc_times(step_details.get("started_running"),step_details.get("stopped_running"))
-                    if duration != None:
-                        metric[col] = duration
+                    beg_time = step_details.get("started_running")
+                    end_time = step_details.get("stopped_running")
+                    if beg_time != None and end_time != None:
+                        beg_dt = datetime.strptime(beg_time, '%Y-%m-%dT%H:%M:%SZ')
+                        end_dt = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%SZ')
+                        duration = (end_dt - beg_dt)
+                        if duration != None:
+                            metric[col] = duration.total_seconds()
             elif col == "File Size":
-                metric[col] = file_obj["file_size"]
+                metric[col] = file_enc_obj["file_size"]
         if verbose:
             print >> sys.stderr, "Special metric '"+metric_id+"':"
             print >> sys.stderr, json.dumps(metric,indent=4)
         return metric
             
 
-    def get_metrics(self,exp_id,enc_files,report_specs,verbose=False):
-        '''Returns a list of tuples of metrics objects for reporting statistics.'''
+    def get_enc_metrics(self,exp_id,target_files,report_specs,verbose=False):
+        '''Returns a list of tuples of metrics objects from encodeD for reporting statistics.'''
         #verbose=True
-        # TODO: mock up a "metric that is not from a quality_metric object but from file and step_run info!
+        
         metrics = []
         combo_metrics = []
         metric_ids = []
         self.obj_cache["exp"]["metrics"] = {}
-        for (out_type,sub_type,rep_tech,acc) in enc_files:
-            file_obj = self.obj_cache["exp"]["files"][acc]
+        for (out_type,sub_type,rep_tech,acc) in target_files:
+            file_enc_obj = self.obj_cache["exp"]["files"][acc]
             if sub_type != None:
-                metric_keys = report_specs["metrics"].get(sub_type)
+                metric_keys = report_specs[sub_type]["metrics"]
             else:
-                metric_keys = report_specs["metrics"].get(out_type)
+                metric_keys = report_specs[out_type]["metrics"]
             
             assert metric_keys != None
             if not isinstance(metric_keys,list):
@@ -443,9 +676,9 @@ class Mission_log(object):
                     if verbose:
                         print >> sys.stderr, "Getting special metric for %s %s %s" % (exp_id,rep_tech,metric_key)
                     metric_id = acc + '/' + metric_key 
-                    if metric_id not in metric_ids:  # Note that this will automatically give only one combined metric from 2 reps.
+                    if metric_id not in metric_ids:  # Note that this will result in only one combined metric from 2 reps.
                         metric_ids.append(metric_id) 
-                        metric = self.get_special_metric(metric_id,file_obj,metric_key,metric_defs)
+                        metric = self.get_enc_special_metric(metric_id,file_enc_obj,metric_key,metric_defs)
                         if metric != None:
                             if metric_defs["per"] == "experiment":
                                 combo_metrics.append((metric_key,"combined",metric_id))
@@ -455,7 +688,7 @@ class Mission_log(object):
                 else:
                     if verbose:
                         print >> sys.stderr, "Getting qc metric for %s %s %s" % (exp_id,rep_tech,metric_key)
-                    file_qc_metrics = file_obj.get('quality_metrics')
+                    file_qc_metrics = file_enc_obj.get('quality_metrics')
                     if file_qc_metrics == None or len(file_qc_metrics) == 0:
                         if verbose:
                             print >> sys.stderr, "Experiment "+exp_id+" file "+acc+" has no quality_metric objects."
@@ -469,14 +702,15 @@ class Mission_log(object):
                         if "name" in metric_defs:
                             if metric_defs["name"].capitalize()+"QualityMetric" not in metric["@type"]:
                                 if verbose:
-                                    print >> sys.stderr, metric_defs["name"].capitalize()+"QualityMetric not in " + metric["@type"]
+                                    print >> sys.stderr, metric_defs["name"].capitalize()+"QualityMetric not in " + \
+                                                                                                            metric["@type"]
                                 continue
                         elif metric_key.capitalize()+"QualityMetric" not in metric["@type"]:
                             if verbose:
                                 print >> sys.stderr, metric_key.capitalize()+"QualityMetric not in metric['@type']"
                             continue
                         metric_id = metric["@id"]
-                        if metric_id not in metric_ids:  # Note that this will automatically give only one combined metric from 2 reps.
+                        if metric_id not in metric_ids:  # Note that this will result in only one combined metric from 2 reps.
                             if verbose:
                                 print >> sys.stderr, "  adding id %s" % (metric_id)
                             metric_ids.append(metric_id) 
@@ -499,10 +733,18 @@ class Mission_log(object):
         return metrics
 
 
+    def get_metrics(self,exp_id,target_files,report_specs,verbose=False):
+        '''Returns a list of tuples of metrics objects for reporting statistics.'''
+        if self.data_mine == "DX":
+            return self.get_dx_metrics(exp_id,target_files,report_specs,verbose=verbose)
+        else:
+            return self.get_enc_metrics(exp_id,target_files,report_specs,verbose=verbose)
+        
+
     def type_headers(self,section_type,report_specs):
         '''Generates the headers for a type section from report specs.'''
         type_header = ""
-        metric_keys = report_specs["metrics"][section_type]
+        metric_keys = report_specs[section_type]["metrics"]
         if not isinstance(metric_keys,list):
             metric_keys = [ metric_keys ]
         for metric_key in metric_keys:
@@ -539,21 +781,17 @@ class Mission_log(object):
         '''Prints headers from report specs.'''
         Header = "# Experiment\treplicate"
         for out_type in report_specs["output_types"]:
-            sub_type_found = False
-            if "ending" in report_specs:
-                for sub_out, sub_type, suffix in report_specs["ending"]:
-                    if sub_out != out_type:
-                        continue
-                    Header += self.type_headers(sub_type,report_specs)
-                    sub_type_found = True
-            if not sub_type_found:
-                Header += self.type_headers(out_type,report_specs)
+            types_list = [ out_type ]
+            if "subtypes" in report_specs[out_type]:
+                types_list = report_specs[out_type]["subtypes"]
+            for sub_type in types_list:
+                Header += self.type_headers(sub_type,report_specs)
             
         print Header
 
     def init_type_totals(self,section_type,report_specs):
         '''Intitializes totals for a type section from report specs.'''
-        metric_keys = report_specs["metrics"][section_type]
+        metric_keys = report_specs[section_type]["metrics"]
         if not isinstance(metric_keys,list):
             metric_keys = [ metric_keys ]
         for metric_key in metric_keys:
@@ -578,15 +816,11 @@ class Mission_log(object):
         self.exp_starts = -1
         self.not_tabulated_cols = [] # Some columns are not numeric
         for out_type in report_specs["output_types"]:
-            sub_type_found = False
-            if "ending" in report_specs:
-                for sub_out, sub_type, suffix in report_specs["ending"]:
-                    if sub_out != out_type:
-                        continue
-                    self.init_type_totals(sub_type,report_specs)
-                    sub_type_found = True
-            if not sub_type_found:
-                self.init_type_totals(out_type,report_specs)
+            types_list = [ out_type ]
+            if "subtypes" in report_specs[out_type]:
+                types_list = report_specs[out_type]["subtypes"]
+            for sub_type in types_list:
+                self.init_type_totals(sub_type,report_specs)
 
     def format_value(self,val,format_type):
         '''Returns formatted string.'''
@@ -609,7 +843,7 @@ class Mission_log(object):
             return str(val) 
             
             
-    def print_metrics(self,exp_id,enc_files,metrics,report_specs, verbose=False):
+    def print_metrics(self,exp_id,target_files,metrics,report_specs, verbose=False):
         '''Prints the requested metrics.'''
         #verbose=True
         # exp rep1_1:   n n n _ _ _
@@ -781,12 +1015,21 @@ class Mission_log(object):
             
         self.server_key = args.server
         self.authid, self.authpw, self.server = dxencode.processkey(self.server_key)
+        self.data_mine = "encodeD"
+        if args.dx:
+            self.data_mine = "DX"
+            self.proj_name = dxencode.env_get_current_project()
+            self.project = dxencode.get_project(self.proj_name)
+            self.folder = args.folder
+            print >> sys.stderr, "Using %s as data mine" % self.data_mine
         
         # Look up report type
         if args.report_type not in self.REPORTS_SUPPORTED or args.report_type not in self.REPORT_SPECS.keys():
             print >> sys.stderr, "Report type %s is not supported" % (args.report_type)
             sys.exit(1)
-
+        if self.data_mine not in self.REPORT_SPECS[args.report_type]["sources"]:
+            print >> sys.stderr, "ERROR: Source '%s' is not supported for '%s'." % (self.data_mine, args.report_type)
+            sys.exit(1)
 
         if args.genome != None:
             self.genome = args.genome
@@ -831,28 +1074,31 @@ class Mission_log(object):
                                                                                     (args.report_type,self.exp_type)
                     sys.exit(1)
                 self.report_specs = self.REPORT_SPECS[args.report_type][self.exp_type]
-                
+                    
                 # We have enough to begin our report so...
                 self.print_headers(self.report_specs)
                 self.init_totals(self.report_specs)
                 
             # Now for each experiment:
             
-            # Get files from encoded
+            # Get reps from encoded
             self.reps = self.find_replicates(self.exp_id, self.exp)
-            enc_files = self.get_relevant_files(self.exp_id, self.exp, self.report_specs, self.reps,verbose=args.verbose)
-            if enc_files == None or len(enc_files) == 0:
+                
+            # Get files from encoded
+            target_files = self.get_relevant_files(self.exp_id, self.exp, self.report_specs, self.reps,verbose=args.verbose)
+            
+            if target_files == None or len(target_files) == 0:
                 print >> sys.stderr, "WARNING: No files available on encodeD for %s" % self.exp_id
                 continue
             
             # Get metrics per file
-            metrics = self.get_metrics(self.exp_id,enc_files,self.report_specs,verbose=args.verbose)
+            metrics = self.get_metrics(self.exp_id,target_files,self.report_specs,verbose=args.verbose)
             if metrics == None or len(metrics) == 0:
-                print >> sys.stderr, "WARNING: No metrics available on encodeD for %s" % self.exp_id
+                print >> sys.stderr, "WARNING: No metrics available on %s for %s" % (self.data_mine,self.exp_id)
                 continue
             
             # Print metrics
-            self.print_metrics(self.exp_id,enc_files,metrics,self.report_specs)
+            self.print_metrics(self.exp_id,target_files,metrics,self.report_specs)
             
         # print any totals available
         if self.report_specs:     

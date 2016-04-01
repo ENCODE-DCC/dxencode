@@ -1,89 +1,87 @@
-####### TODO: Rampage GRCh38 backlog
-# Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
-ENCSR000AGJ    GRCh38 v24    1,2    -   
-ENCSR000AGK    GRCh38 v24    1,2    -   
-ENCSR000AGL    GRCh38 v24    1,2    -   
-ENCSR000AGM    GRCh38 v24    1,2    -   
-ENCSR000AGN    GRCh38 v24    1,2    -   
-ENCSR000AGO    GRCh38 v24    1,2    -   
-ENCSR000AGP    GRCh38 v24    1,2    -   
-ENCSR000AGQ    GRCh38 v24    1,2    -   
-ENCSR000AGR    GRCh38 v24    1,2    -   
-ENCSR000AGS    GRCh38 v24    1,2    -   
-ENCSR000AGT    GRCh38 v24    1,2    -   
-ENCSR000AGU    GRCh38 v24    1,2    -   
-ENCSR000AGV    GRCh38 v24    1,2    -   
-ENCSR000AGW    GRCh38 v24    1,2    -   
-ENCSR000AGX    GRCh38 v24    1,2    -   
-ENCSR000AGY    GRCh38 v24    1,2    -   
-ENCSR000AGZ    GRCh38 v24    1,2    -   
-ENCSR000AHA    GRCh38 v24    1,2    -   
-ENCSR000AHB    GRCh38 v24    1,2    -   
-ENCSR000AHC    GRCh38 v24    1      -   
-ENCSR002MPN    GRCh38 v24    1      -   
-ENCSR007RIV    GRCh38 v24    1,2    -   
-ENCSR022PAU    GRCh38 v24    1,2    -   
-ENCSR022VBF    GRCh38 v24    1      -   
-ENCSR054RIR    GRCh38 v24    1,2    -   
-ENCSR080XAB    GRCh38 v24    1,2    -   
-ENCSR093UPQ    GRCh38 v24    1,2    -   
-ENCSR100NLN    GRCh38 v24    1,2    -   
-ENCSR104PJD    GRCh38 v24    1,2    -   
-ENCSR108KHH    GRCh38 v24    1,2    -   
-ENCSR166TEB    GRCh38 v24    1,2    -   
-ENCSR171YRA    GRCh38 v24    1,2    -   
-ENCSR177YJM    GRCh38 v24    1,2    -   
-ENCSR187NWZ    GRCh38 v24    1      -   
-ENCSR208AWA    GRCh38 v24    1,2    -   
-
-ENCSR239ZQA    GRCh38 v24    1,2    -   
-ENCSR285LDX    GRCh38 v24    1      -   
-ENCSR290RXI    GRCh38 v24    1,2    -   
-ENCSR295GUQ    GRCh38 v24    1,2    -   
-ENCSR337VPD    GRCh38 v24    1,2    -   
-ENCSR352ANU    GRCh38 v24    1,2    -   
-ENCSR356VOK    GRCh38 v24    1      -   
-ENCSR376IXU    GRCh38 v24    1,2    -   
-ENCSR410OSB    GRCh38 v24    1,2    -   
-ENCSR419VNG    GRCh38 v24    1,2    -   
-ENCSR469ZUS    GRCh38 v24    1,2    -   
-ENCSR479BMI    GRCh38 v24    1,2    -   
-ENCSR506WDZ    GRCh38 v24    1,2    -   
-ENCSR507GYW    GRCh38 v24    1,2    -   
-ENCSR540CRO    GRCh38 v24    1,2    -   
-ENCSR540YVD    GRCh38 v24    1,2    -   
-ENCSR582BUX    GRCh38 v24    1,2    -   
-ENCSR585QYX    GRCh38 v24    1,2    -   
-ENCSR602PHV    GRCh38 v24    1,2    -   
-ENCSR612EAO    GRCh38 v24    1,2    -   
-ENCSR663WYF    GRCh38 v24    1,2    -   
-ENCSR700NMZ    GRCh38 v24    1,2    -   
-ENCSR724SZY    GRCh38 v24    1      -   
-ENCSR765LMM    GRCh38 v24    1,2    -   
-ENCSR786DTS    GRCh38 v24    1,2    -   
-ENCSR824YLV    GRCh38 v24    1,2    -   
-ENCSR836WAX    GRCh38 v24    1,2    -   
-ENCSR850NOP    GRCh38 v24    1      -   
-ENCSR852KOV    GRCh38 v24    1,2    -   
-ENCSR855LXJ    GRCh38 v24    1,2    -   
-ENCSR861MQP    GRCh38 v24    1,2    -   
-ENCSR936TYP    GRCh38 v24    1,2    -   
-ENCSR949PHV    GRCh38 v24    1,2    -   
-ENCSR985XGK    GRCh38 v24    1,2    -   
+####### Working on ???
 
 ####### GRCh38 Full list
 # Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
 ENCSR000AEI    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h04m  $11.38
 ENCSR000AER    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h15m  $11.63
+ENCSR000AGJ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h10m  $12.93
+ENCSR000AGK    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  12h12m  $17.23
+ENCSR000AGL    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h54m  $15.39
+ENCSR000AGM    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h60m   $9.86
+ENCSR000AGN    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h01m  $12.72
+ENCSR000AGO    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   8h60m  $12.70
+ENCSR000AGP    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h46m  $10.95
+ENCSR000AGQ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h34m   $9.26
+ENCSR000AGR    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h15m  $10.23
+ENCSR000AGS    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h06m  $14.25
+ENCSR000AGT    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h42m  $10.87
+ENCSR000AGU    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   8h03m  $11.36
+ENCSR000AGV    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h46m  $13.78
+ENCSR000AGW    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h44m  $15.16
+ENCSR000AGX    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h53m  $11.11
+ENCSR000AGY    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h54m  $11.14
+ENCSR000AGZ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h28m   $9.11
+ENCSR000AHA    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   3h51m   $5.46
+ENCSR000AHB    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h09m  $14.32
+ENCSR000AHC    GRCh38 v24    1      -           2016-03-24  2016-03-25   5h16m   $7.45
+ENCSR002MPN    GRCh38 v24    1      -           2016-03-24  2016-03-25   3h23m   $4.79
+ENCSR007RIV    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h57m  $11.22
+ENCSR022PAU    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h56m  $11.18
+ENCSR022VBF    GRCh38 v24    1      -           2016-03-24  2016-03-25   4h09m   $5.87
+ENCSR054RIR    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  14h53m  $20.98
 ENCSR069LRO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h17m  $11.68
+ENCSR080XAB    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  15h28m  $21.25
+ENCSR093UPQ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  12h57m  $18.28
+ENCSR100NLN    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h23m  $10.42
+ENCSR104PJD    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h02m   $9.92
+ENCSR108KHH    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h45m   $9.51
+ENCSR166TEB    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h21m   $8.94
+ENCSR171YRA    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h08m  $10.06
+ENCSR177YJM    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h56m   $9.78
+ENCSR187NWZ    GRCh38 v24    1      -           2016-03-24  2016-03-25   4h43m   $6.66
+ENCSR208AWA    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h00m  $12.70
+ENCSR239ZQA    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h50m   $9.65
 ENCSR260RBO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   9h49m  $13.86
+ENCSR285LDX    GRCh38 v24    1      -           2016-03-25  2016-02-28   7h01m   $9.93
+ENCSR290RXI    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h58m   $9.81
+ENCSR295GUQ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h21m  $10.37
+ENCSR337VPD    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h01m  $11.32
 ENCSR348DYP    GRCh38 v24    1      2016-01-26  2016-03-21  2016-03-24   6h33m   $9.27
+ENCSR352ANU    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   9h02m  $12.76
+ENCSR356VOK    GRCh38 v24    1      -           2016-03-25  2016-02-28   4h02m   $5.70
+ENCSR376IXU    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h37m  $10.74
+ENCSR410OSB    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  10h29m  $14.80
+ENCSR419VNG    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h27m  $11.93
 ENCSR458JVO    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   6h47m   $9.57
+ENCSR469ZUS    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h26m  $11.91
+ENCSR479BMI    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h18m  $10.30
+ENCSR506WDZ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h57m  $12.63
+ENCSR507GYW    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h22m   $8.98
+ENCSR540CRO    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h04m  $11.37
+ENCSR540YVD    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h28m  $10.53
+ENCSR582BUX    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h26m  $11.90
+ENCSR585QYX    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  12h38m  $17.84
+ENCSR602PHV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h30m   $9.17
+ENCSR612EAO    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  11h48m  $16.67
 ENCSR613JNT    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24  12h24m  $17.51
 ENCSR632GYF    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   5h58m   $8.41
+ENCSR663WYF    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h54m  $11.15
+ENCSR700NMZ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h45m  $10.94
+ENCSR724SZY    GRCh38 v24    1      -           2016-03-25  2016-02-28   7h36m  $10.76
+ENCSR765LMM    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h08m   $8.64
+ENCSR786DTS    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  17h08m  $24.19
+ENCSR824YLV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h07m   $8.62
+ENCSR836WAX    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h32m   $9.20
+ENCSR850NOP    GRCh38 v24    1      -           2016-03-25  2016-02-28   2h56m   $4.14
+ENCSR852KOV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h49m   $9.62
+ENCSR855LXJ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h03m   $9.93
+ENCSR861MQP    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h49m  $11.01
 ENCSR880BIV    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24  10h07m  $14.28
+ENCSR936TYP    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h57m   $9.81
+ENCSR949PHV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h53m   $9.71
 ENCSR970OWZ    GRCh38 v24    1,2    2016-01-26  2016-03-21  2016-03-24   8h19m  $11.73
-
+ENCSR985XGK    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h33m   $9.23
+# Total: 79
 
 ####### Full (completed) list:
 #Experiment        On             Reps    Assembled   Finished    Last Posted  Time  Cost
@@ -161,6 +159,81 @@ ENCSR985XGK  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   3
 count 71
 
 #### History...
+
+####### Done: Second of 2 batches of remap to GRCh38 http://redmine.encodedcc.org/issues/3156#note-36
+# Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
+ENCSR239ZQA    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h50m   $9.65
+ENCSR285LDX    GRCh38 v24    1      -           2016-03-25  2016-02-28   7h01m   $9.93
+ENCSR290RXI    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h58m   $9.81
+ENCSR295GUQ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h21m  $10.37
+ENCSR337VPD    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h01m  $11.32
+ENCSR352ANU    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   9h02m  $12.76
+ENCSR356VOK    GRCh38 v24    1      -           2016-03-25  2016-02-28   4h02m   $5.70
+ENCSR376IXU    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h37m  $10.74
+ENCSR410OSB    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  10h29m  $14.80
+ENCSR419VNG    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h27m  $11.93
+ENCSR469ZUS    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h26m  $11.91
+ENCSR479BMI    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h18m  $10.30
+ENCSR506WDZ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h57m  $12.63
+ENCSR507GYW    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h22m   $8.98
+ENCSR540CRO    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h04m  $11.37
+ENCSR540YVD    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h28m  $10.53
+ENCSR582BUX    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   8h26m  $11.90
+ENCSR585QYX    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  12h38m  $17.84
+ENCSR602PHV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h30m   $9.17
+ENCSR612EAO    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  11h48m  $16.67
+ENCSR663WYF    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h54m  $11.15
+ENCSR700NMZ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h45m  $10.94
+ENCSR724SZY    GRCh38 v24    1      -           2016-03-25  2016-02-28   7h36m  $10.76
+ENCSR765LMM    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h08m   $8.64
+ENCSR786DTS    GRCh38 v24    1,2    -           2016-03-25  2016-02-28  17h08m  $24.19
+ENCSR824YLV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h07m   $8.62
+ENCSR836WAX    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h32m   $9.20
+ENCSR850NOP    GRCh38 v24    1      -           2016-03-25  2016-02-28   2h56m   $4.14
+ENCSR852KOV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h49m   $9.62
+ENCSR855LXJ    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h03m   $9.93
+ENCSR861MQP    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   7h49m  $11.01
+ENCSR936TYP    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h57m   $9.81
+ENCSR949PHV    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h53m   $9.71
+ENCSR985XGK    GRCh38 v24    1,2    -           2016-03-25  2016-02-28   6h33m   $9.23
+
+### Done: First of 2 batches of remap to GRCh38 http://redmine.encodedcc.org/issues/3156#note-35 
+# Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
+ENCSR000AGJ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h10m  $12.93
+ENCSR000AGK    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  12h12m  $17.23
+ENCSR000AGL    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h54m  $15.39
+ENCSR000AGM    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h60m   $9.86
+ENCSR000AGN    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h01m  $12.72
+ENCSR000AGO    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   8h60m  $12.70
+ENCSR000AGP    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h46m  $10.95
+ENCSR000AGQ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h34m   $9.26
+ENCSR000AGR    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h15m  $10.23
+ENCSR000AGS    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h06m  $14.25
+ENCSR000AGT    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h42m  $10.87
+ENCSR000AGU    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   8h03m  $11.36
+ENCSR000AGV    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h46m  $13.78
+ENCSR000AGW    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h44m  $15.16
+ENCSR000AGX    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h53m  $11.11
+ENCSR000AGY    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h54m  $11.14
+ENCSR000AGZ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h28m   $9.11
+ENCSR000AHA    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   3h51m   $5.46
+ENCSR000AHB    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  10h09m  $14.32
+ENCSR000AHC    GRCh38 v24    1      -           2016-03-24  2016-03-25   5h16m   $7.45
+ENCSR002MPN    GRCh38 v24    1      -           2016-03-24  2016-03-25   3h23m   $4.79
+ENCSR007RIV    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h57m  $11.22
+ENCSR022PAU    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h56m  $11.18
+ENCSR022VBF    GRCh38 v24    1      -           2016-03-24  2016-03-25   4h09m   $5.87
+ENCSR054RIR    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  14h53m  $20.98
+ENCSR080XAB    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  15h28m  $21.25
+ENCSR093UPQ    GRCh38 v24    1,2    -           2016-03-24  2016-03-25  12h57m  $18.28
+ENCSR100NLN    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h23m  $10.42
+ENCSR104PJD    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h02m   $9.92
+ENCSR108KHH    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h45m   $9.51
+ENCSR166TEB    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h21m   $8.94
+ENCSR171YRA    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   7h08m  $10.06
+ENCSR177YJM    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   6h56m   $9.78
+ENCSR187NWZ    GRCh38 v24    1      -           2016-03-24  2016-03-25   4h43m   $6.66
+ENCSR208AWA    GRCh38 v24    1,2    -           2016-03-24  2016-03-25   9h00m  $12.70
 
 ### Done: Relaunch because of chrphiX bug infecting beds. http://redmine.encodedcc.org/issues/3156 notes 25, 29 and in the separate ticket #3883
 # Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
@@ -320,7 +393,8 @@ ENCSR724SZY  ENC3  hg19 v19       1       2015-09-16  2015-10-12   4h43m   $6.25
 ENCSR861MQP  ENC3  hg19 v19       1,2     2015-09-16  2015-10-12   3h09m   $8.38   Controls? LRNA:ENCSR118TVR has now been posted 2015-10-09
 
 
-####### Done...
+
+####### Done
 #Experiment        On             Reps    Assembled   Finished    Posted       Time  Cost
 ENCSR000AEI  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   5h56m $16.05
 ENCSR000AER  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   5h16m $13.99
@@ -389,6 +463,5 @@ ENCSR855LXJ  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   2
 ENCSR936TYP  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   3h11m  $8.40
 ENCSR949PHV  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   3h12m  $8.40
 ENCSR985XGK  ENC3  hg19 v19       1,2     2015-05-11  2015-09-16  2015-10-12   3h17m  $8.29
-
 
 

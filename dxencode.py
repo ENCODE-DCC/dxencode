@@ -356,6 +356,28 @@ def find_exp_folder(project,exp_id,results_folder='/',warn=False):
     return target_folder # already normalized
 
 
+def find_replicate_folders(project,exp_folder,verbose=False):
+    '''Returns a sorted list of replicate folders which are sub-folders of an exp folder.'''
+    # normalize
+    try:
+        sub_folders = project.list_folder(exp_folder)['folders']
+    except:
+        if verbose:
+            print >> sys.stderr, "No subfolders found for %s" % exp_folder
+        return []
+
+    rep_folders = []
+    for path in sorted(sub_folders):
+        folder = path.split('/')[-1]
+        if folder.startswith('rep'):
+            if len(folder[3:].split('_')) == 2:
+                rep_folders.append( folder )
+    if verbose:
+        print >> sys.stderr, "Replicate folders:"
+        print >> sys.stderr, json.dumps(rep_folders,indent=4)
+    return rep_folders
+
+
 def description_from_fid(fid,properties=False):
     '''Returns file description object from fid.'''
     try:

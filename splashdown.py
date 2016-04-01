@@ -436,28 +436,6 @@ class Splashdown(object):
             return ap
 
 
-    def find_replicate_folders(self,exp_folder,verbose=False):
-        '''Returns a sorted list of replicate folders which are sub-folders of an exp folder.'''
-        # normalize
-        try:
-            sub_folders = self.project.list_folder(exp_folder)['folders']
-        except:
-            if verbose:
-                print >> sys.stderr, "No subfolders found for %s" % exp_folder
-            return []
-
-        replicates = []
-        for path in sorted(sub_folders):
-            folder = path.split('/')[-1]
-            if folder.startswith('rep'):
-                if len(folder[3:].split('_')) == 2:
-                    replicates.append( folder )
-        if verbose:
-            print >> sys.stderr, "Replicate folders:"
-            print >> sys.stderr, json.dumps(replicates,indent=4)
-        return replicates
-
-
     def pipeline_specification(self,args,exp_type,exp_folder,verbose=False):
         '''Sets the pipeline specification object for this experiment type.'''
 
@@ -2038,7 +2016,7 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dxencode.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:       GRCh38 v24 shRNA  1,2   yes     -          2016-03-18  2016-03-21 %s  $%.2f" % \
+            #print "cost:    GRCh38 v24    1,2    -           2016-03-25  2016-02-28 %s  $%.2f" % \
             #    (duration.rjust(8), total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
@@ -2105,7 +2083,7 @@ class Splashdown(object):
 
             # 3) Given the experiment type, determine the expected results
             self.pipeline   = self.pipeline_specification(args,self.exp_type,self.exp_folder)
-            self.replicates = self.find_replicate_folders(self.exp_folder, verbose=args.verbose)
+            self.replicates = dxencode.find_replicate_folders(self.project,self.exp_folder, verbose=args.verbose)
 
             # 4) Given expected results locate any files (by glob) that should be posted for
             #    a) each single replicate (in replicate sub-folders named as reN_N/
