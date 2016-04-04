@@ -1,16 +1,3 @@
-# Done: WGBS human http://redmine.encodedcc.org/issues/3159#note-5
-# Experiment        Reps  Assembled   Launched    Posted      Time/Cost
-ENCSR328TBS  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-16  24d12h45m  $1634.48  Paired replicate R (pearson):0.9044, on CpG pairs >= 10 reads each:37,977,040
-ENCSR351IPU  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-17  21d02h30m  $1390.24  Paired replicate R (pearson):0.8568, on CpG pairs >= 10 reads each:34,214,743        
-ENCSR440MLE  GRCh38 1,2   2015-11-11  2016-02-16  2016-03-10  21d05h55m  $1108.42  Paired replicate R (pearson):0.8994, on CpG pairs >= 10 reads each:31,792,689
-ENCSR617FKV  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  21d17h40m   $911.86  Paired replicate R (pearson):0.7458, on CpG pairs >= 10 reads each:23,980,997      
-ENCSR656TQD  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-17  20d17h36m  $1363.69  Paired replicate R (pearson):0.8301, on CpG pairs >= 10 reads each:24,577,444     
-ENCSR765JPC  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  18d22h27m  $1236.48  Paired replicate R (pearson):0.9511, on CpG pairs >= 10 reads each:31,966,543      
-ENCSR881XOU  GRCh38 1,2   2016-02-16  2016-02-16  2016-03-10  23d12h20m  $1006.06  Paired replicate R (pearson):0.9341, on CpG pairs >= 10 reads each:30,156,878
-ENCSR890UQO  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  23d12h06m  $1004.76  Paired replicate R (pearson):0.7953, on CpG pairs >= 10 reads each:32,745,730   
-ENCSR959RNH  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-22  25d07h45m  $1691.61  Paired replicate R (pearson):0.8944, on CpG pairs >= 10 reads each:41,370,673
-
-
 # Abandoned?
 #Experiment  What reps              assembled   aligned     extract
 ENCSR000AJI  ENC3 GRCh38 1          2015-10-30  
@@ -28,6 +15,22 @@ ENCSR765JPC  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  18d22h27m  $1236.4
 ENCSR881XOU  GRCh38 1,2   2016-02-16  2016-02-16  2016-03-10  23d12h20m  $1006.06  Paired replicate R (pearson):0.9341, on CpG pairs >= 10 reads each:30,156,878
 ENCSR890UQO  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  23d12h06m  $1004.76  Paired replicate R (pearson):0.7953, on CpG pairs >= 10 reads each:32,745,730   
 ENCSR959RNH  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-22  25d07h45m  $1691.61  Paired replicate R (pearson):0.8944, on CpG pairs >= 10 reads each:41,370,673
+
+### Historical
+# Done: WGBS human http://redmine.encodedcc.org/issues/3159#note-5
+# Experiment        Reps  Assembled   Launched    Posted      Time/Cost
+ENCSR328TBS  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-16  24d12h45m  $1634.48  Paired replicate R (pearson):0.9044, on CpG pairs >= 10 reads each:37,977,040
+ENCSR351IPU  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-17  21d02h30m  $1390.24  Paired replicate R (pearson):0.8568, on CpG pairs >= 10 reads each:34,214,743        
+ENCSR440MLE  GRCh38 1,2   2015-11-11  2016-02-16  2016-03-10  21d05h55m  $1108.42  Paired replicate R (pearson):0.8994, on CpG pairs >= 10 reads each:31,792,689
+ENCSR617FKV  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  21d17h40m   $911.86  Paired replicate R (pearson):0.7458, on CpG pairs >= 10 reads each:23,980,997      
+ENCSR656TQD  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-17  20d17h36m  $1363.69  Paired replicate R (pearson):0.8301, on CpG pairs >= 10 reads each:24,577,444     
+ENCSR765JPC  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  18d22h27m  $1236.48  Paired replicate R (pearson):0.9511, on CpG pairs >= 10 reads each:31,966,543      
+ENCSR881XOU  GRCh38 1,2   2016-02-16  2016-02-16  2016-03-10  23d12h20m  $1006.06  Paired replicate R (pearson):0.9341, on CpG pairs >= 10 reads each:30,156,878
+ENCSR890UQO  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  23d12h06m  $1004.76  Paired replicate R (pearson):0.7953, on CpG pairs >= 10 reads each:32,745,730   
+ENCSR959RNH  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-22  25d07h45m  $1691.61  Paired replicate R (pearson):0.8944, on CpG pairs >= 10 reads each:41,370,673
+
+
+
 
 ENCSR020GGM  aligned  extracted
 ENCSR033PGF  aligned  extracted

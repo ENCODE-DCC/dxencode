@@ -1286,25 +1286,30 @@ def duration_string(total_seconds,include_seconds=True):
     m, s = divmod(secs, 60)
     h, m = divmod(m, 60)
     d, h = divmod(h, 24)
+    y, d = divmod(d, 365)
     
     if include_seconds:
-        if d > 0:
-            return "%dd%0dh%02dm%02s" % (d, h, m, s)
+        if y > 0:
+            return "%dy%03dd%02dh%02dm%02s" % (y, d, h, m, s)
+        elif d > 0:
+            return      "%dd%02dh%02dm%02s" % (d, h, m, s)
         elif h > 0: 
-            return    "%dh%02dm%02ds" % (h, m, s) 
+            return          "%dh%02dm%02ds" % (h, m, s) 
         elif m > 0: 
-            return        "%2dm%02ds" % (m, s)
+            return               "%dm%02ds" % (m, s)
         else: 
-            return             "%2ds" % (s)
+            return                    "%ds" % (s)
     else:
         if s >= 30:
             m +=1
-        if d > 0:
-            return "%dd%0dh%02dm" % (d, h, m)
+        if y > 0:
+            return "%dy%03dd%02dh%02dm" % (y, d, h, m)
+        elif d > 0:
+            return      "%dd%02dh%02dm" % (d, h, m)
         elif h > 0: 
-            return     "%dh%02dm" % (h, m) 
+            return           "%dh%02dm" % (h, m) 
         else: 
-            return        "%2dm" % (m)
+            return                "%dm" % (m)
 
 
 def format_duration(beg_seconds,end_seconds,include_seconds=True):

@@ -28,7 +28,7 @@ import json, urlparse, subprocess, itertools, logging, time
 #import requests, re, shlex, time
 from datetime import datetime
 from base64 import b64encode
-import commands
+import commands, string
 
 import dxpy
 import dxencode
@@ -44,13 +44,11 @@ class Mission_log(object):
     SERVER_DEFAULT = 'www'
     '''This the default server to report from.'''
 
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage'] #, 'rampage','dnase','dna-me','chip-seq' ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dna-me'] #, 'rampage','dnase','dna-me','chip-seq' ]
     '''This module supports only these experiment (pipeline) types.'''
 
     REPORT_DEFAULT = 'star-mad'
     '''This the default report type.'''
-    REPORTS_SUPPORTED = [ 'star-mad', 'tophat_times' ]
-    '''This module supports only these report types.'''
 
     ASSEMBLIES_SUPPORTED = { "hg19": "hg19", "hg38": "GRCh37", "mm10": "mm10" }
     '''This module supports only these assemblies.'''
@@ -61,7 +59,7 @@ class Mission_log(object):
     FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders in DX.'''
 
-    # Report specs is a dict covering all supported types of reports.
+    # REPORT_SPECS is a dict covering all supported types of reports.
     # <report_type>: A dict keyed on report_type containing report specific json.
     #   "sources": a list of one or both of 'encodeD' or 'DX'  Not all reports can use both sources for content.
     #   <pipeline or assay>: A dictionary keyed on the assay_type that furter describes what to look for.
@@ -82,13 +80,13 @@ class Mission_log(object):
              "small-rna-seq": { "output_types": [ "alignments", "gene quantifications" ],
                                 "alignments":           { "suffix":  [ "_srna_star.bam" ],
                                                           "metrics": [ "star" ] }, 
-                                "gene quantifications": { "suffix":  [ "_srna_star_quant.tsv" ],
+                                "gene quantifications": { "suffix":  [ "_srna_star_quant.tsv", "_mad_plot.png" ],
                                                           "metrics": [ "mad" ] },
                               },
              "rampage":       { "output_types": [ "alignments", "gene quantifications" ],
-                                "alignments":           { "suffix":  [ "_rampage_peaks_quant.tsv" ],
+                                "alignments":           { "suffix":  [ "_rampage_star_marked.bam" ],
                                                           "metrics": [ "star" ] }, 
-                                "gene quantifications": { "suffix":  [ "_srna_star_quant.tsv" ],
+                                "gene quantifications": { "suffix":  [ "_rampage_peaks_quant.tsv", "_mad_plot.png" ],
                                                           "metrics": [ "mad" ] },
                               }
          },
@@ -97,14 +95,65 @@ class Mission_log(object):
              "long-rna-seq":  { "output_types": [ "alignments" ],
                                 "alignments":   { "subtypes": [ "star", "tophat" ] },
                                 "star":         { "suffix":   [ "_star_genome.bam" ],
-                                                  "metrics":  [ "star2", "file_cost"] }, 
+                                                  "metrics":  [ "star2", "file_cost" ] }, 
                                 "tophat":       { "suffix":   [ "_tophat.bam" ], 
                                                   "metrics":  [ "file_cost" ] }, 
                               }
-         }
+         },
+         'wgbs': {
+             "sources":       ["encodeD","DX"],
+             "dna-me":        { #"output_types": [ "alignments","methylation state at CpG" ],
+                                #"alignments":   { "suffix":   [ "_techrep_bismark_pe.bam", "_techrep_bismark_se.bam" ],
+                                #                  "metrics":  [ "bismark", "samtools_flagstats" ] },
+                                "output_types": [ "methylation state at CpG" ], 
+                                "methylation state at CpG": { 
+                                                  "suffix":   [ "_biorep_CpG.bed.gz", "_CpG_corr.txt" ], 
+                                                  "metrics":  [ "samtools_flagstats", "bismark", "cpg_correlation" ] }, 
+                              }
+         },
+         'cost': {
+             "sources":       [ "DX" ], # Unfortunately this is only of DX.
+             "long-rna-seq":  { "output_types": [ "gene quantifications", "mad-qc" ],
+                                "gene quantifications": { "suffix":  [ "_rsem.genes.results" ],
+                                                          "metrics": [ "rep_cost" ] },
+                                "mad-qc": { "suffix":  [ "_mad_plot.png" ],
+                                            "metrics": [ "exp_cost" ] }, 
+                              },
+             "small-rna-seq": { "output_types": [ "signal", "mad-qc" ],
+                                "signal": { "suffix":  [ "_minusUniq.bw" ],
+                                            "metrics": [ "rep_cost" ] },
+                                "mad-qc": { "suffix":  [ "_mad_plot.png" ],
+                                            "metrics": [ "exp_cost" ] }, 
+                              },
+             "rampage":       { "output_types": [ "gene quantifications", "idr" ],
+                                "gene quantifications": { "suffix":  [ "_rampage_peaks_quant.tsv", "_mad_plot.png" ],
+                                                          "metrics": [ "rep_cost" ] },
+                                "idr": { "suffix":  [ "_rampage_idr.png" ],
+                                            "metrics": [ "exp_cost" ] }, 
+                              },
+             "dna-me":        { "output_types": [ "methylation state at CpG", "correlation" ], 
+                                "methylation state at CpG": { 
+                                                  "suffix":   [ "_biorep_CpG.bed.gz" ], 
+                                                  "metrics":  [ "rep_cost" ] }, 
+                                "correlation": { 
+                                                  "suffix":   [ "_CpG_corr.txt" ], 
+                                                  "metrics":  [ "exp_cost" ] }, 
+                              }
+         },
     }
     '''For each report type, these are the mappings for file 'output_types' to 'quality_metric' types.'''
     
+    # METRIC_DEFS is a dict describing the metrics that are collected, one or several are needed for each exp/file in a report.
+    # <metric_type>: A dict describing a single metric object.
+    #   "per": contents of a metric object pertain to either a 'replicate' or the whole 'experiment'
+    #   "name": (optional, default: metric_type) used to find the qc_metric in encodeD 
+    #                             (e.g samtools_flagstats will be used to find 'SamtoolsFlagstatsQualityMetric')
+    #   "dx_key": (optional, default: metric_type) Used to find the metric in a DX file's details json blob.
+    #   "columns": An ordered  list of the properties within a quality_metric object to include in the report.
+    #   "headings": (optional, default: columns). A mapping of column properties to column headings.
+    #   "special_metric": (optional, default: False). Create metric from non-quality_metric object info.
+    #   "prepend": (optional) If true, prepend the out_type from REPORT_SPECS to the column headers (e.g. "Star Cost").
+    #   "format": (optional) Special formatting instructions.
     METRIC_DEFS = {
        'star': {"per": "replicate",
                 "dx_key": "STAR_log_final",
@@ -146,6 +195,58 @@ class Mission_log(object):
                       "format": { "File Size": "file_size",
                                   "Time": "duration" },
                       },
+         # TODO: Make a total time/cost metric
+       'rep_cost': {  "per": "replicate",
+                      "special_metric": True,
+                      "columns": [ "CPU Time","Job Time","Total Cost" ],
+                      "format": { "CPU Time": "duration", "Job Time": "duration" },
+                      },
+       'exp_cost': {  "per": "experiment",
+                      "special_metric": True,
+                      "columns": [ "CPU Time","Job Time","Total Cost" ],
+                      "sumable": [ "CPU Time","Job Time","Total Cost" ],
+                      "format": {  "CPU Time": "duration", "Job Time": "duration" },
+                      },
+       'samtools_flagstats': { 
+                "per": "replicate",
+                "columns": [
+                            "mapped",
+                            "mapped_pct" ],
+                "headings": {
+                            "mapped":         "Mapped",
+                            "mapped_pct":     "Mapped %"}
+              },
+       'bismark': { 
+                "per": "replicate",
+                "dx_key": "bismark_map",
+                "columns": [
+                            "C methylated in CpG context",
+                            "C methylated in CHG context",
+                            "C methylated in CHH context",
+                            "lambda C methylated in CpG context",
+                            "lambda C methylated in CHG context",
+                            "lambda C methylated in CHH context",
+                            "Mapping efficiency" ],
+                "headings": {
+                            "C methylated in CpG context":         "Methylated: CpG",
+                            "C methylated in CHG context":         "CHG",
+                            "C methylated in CHH context":         "CHH",
+                            "lambda C methylated in CpG context":  "Lambda Methylated: CpG",
+                            "lambda C methylated in CHG context":  "CHG",
+                            "lambda C methylated in CHH context":  "CHH",
+                            "Mapping efficiency":                  "Efficiency" }
+              },
+       'cpg_correlation': { 
+                "per": "experiment",
+                "dx_key": "bedmethyl_corr",
+                "columns": [
+                            "CpG pairs",
+                            "CpG pairs with atleast 10 reads each",
+                            "Pearson Correlation Coefficient" ],
+                "headings": {
+                            "CpG pairs with atleast 10 reads each":  "with >= 10 reads",
+                            "Pearson Correlation Coefficient":      "Pearson" }
+              },
     }
 
     def __init__(self):
@@ -364,6 +465,7 @@ class Mission_log(object):
             print >> sys.stderr, "- Found %d replicate folders." % len(rep_folders)
 
         # Now we can look for DX files:
+        fids_found = []
         for rep_folder in rep_folders:
             if verbose:
                 print >> sys.stderr, "- Looking in folder %s." % rep_folder
@@ -381,24 +483,36 @@ class Mission_log(object):
                                 print >> sys.stderr, "- Looking in experiment folder %s for files with suffix '%s'." % \
                                                                                                             (exp_folder,suffix)
                             fid = dxencode.find_file(exp_folder + '*' + suffix,self.proj_name, recurse=False)
-                        if fid != None:
-                            if verbose:
-                                print >> sys.stderr, "- Found file '%s'." % fid
-                            file_dx_obj = dxencode.description_from_fid(fid,properties=True)
-                            qc_json = dxencode.dx_file_get_details(fid)
-                            if qc_json and "QC" in qc_json:  # Not likely but QC json could be subsection of details
-                                qc_json = qc_json["QC"]
-                            if not qc_json:
+                        if fid == None:
+                            continue
+                        if fid in fids_found: # Did we already get this file at the experiment level?
+                            continue
+                        fids_found.append(fid)
+                        if verbose:
+                            print >> sys.stderr, "- Found file '%s'." % fid
+                        file_dx_obj = dxencode.description_from_fid(fid,properties=True)
+                        qc_json = dxencode.dx_file_get_details(fid)
+                        if qc_json and "QC" in qc_json:  # Not likely but QC json could be subsection of details
+                            qc_json = qc_json["QC"]
+                        if not qc_json:
+                            # If this report type uses "special metrics" then there may not be any DX qc metric.
+                            special = False
+                            for metric_id in report_specs[sub_type]["metrics"]:
+                                if self.METRIC_DEFS[metric_id].get("special_metric",False):
+                                    special = True
+                                    break
+                            if not special:
                                 if verbose:
                                     print >> sys.stderr, "- Found file '%s' has no qc_josn, so skipping it." % \
-                                                                                                    (file_dx_obj['name'])
+                                                                                                (file_dx_obj['name'])
                                 continue
+                        else:
                             if verbose:
                                 print >> sys.stderr, "- Found qc blob for %s:" % fid
                                 #print >> sys.stderr, json.dumps(qc_json,indent=4,sort_keys=True)
                             file_dx_obj["QC"] = qc_json    
-                            self.obj_cache["exp"]["files"][fid] = file_dx_obj
-                            dx_files.append((out_type,sub_type,rep_folder,fid))
+                        self.obj_cache["exp"]["files"][fid] = file_dx_obj
+                        dx_files.append((out_type,sub_type,rep_folder,fid))
         
         if verbose:
             print >> sys.stderr, "DX files: %d" % len(dx_files)
@@ -408,7 +522,7 @@ class Mission_log(object):
         return dx_files
 
  
-    def find_matching_files(self, files, out_type, rep_tech, sub_type=None, suffix=None):
+    def find_matching_enc_files(self, files, out_type, rep_tech, sub_type=None, suffix=None):
         '''Returns list of matched files for out_type, replicate and possible ending.'''
         
         matching_files = []
@@ -467,7 +581,7 @@ class Mission_log(object):
                     types_list = report_specs[out_type]["subtypes"] 
                 for sub_type in types_list:
                     for suffix in report_specs[sub_type]["suffix"]:
-                        matching_files = self.find_matching_files(files, out_type, rep['rep_tech'], sub_type, suffix)
+                        matching_files = self.find_matching_enc_files(files, out_type, rep['rep_tech'], sub_type, suffix)
                         if len(matching_files) > 0:
                             enc_files.extend(matching_files)
     
@@ -499,16 +613,115 @@ class Mission_log(object):
         return  size
 
 
+    def gather_job_tree(self,job_id,job_cache,exclude_files=[],found_job_ids=[],level=0,verbose=False):
+        '''Returns all parent jobs for the current job_id.  Recursive by default.
+           job_id: the job at which to start the search.
+           job_cache: can contain more jobs than just this search
+           exclude_files: list of file endings to exclude (e.g. [ '_index.tgz' ]). 
+           found_job_ids: cumulative list of all job_ids found in previous levels of a recursive search
+           level: -1 means no recursion, 0 means start recursion at this level.  
+           Returns (updated job_cache, list job_ids found for just one (or all recursive) levels)
+        '''
+        verbose=False # Verbose can be overkill!
+        parent_job_ids = []
+        
+        if job_id in job_cache:
+            job = job_cache[job_id]
+        else:
+            try:
+                job =  dxpy.api.job_describe(job_id)
+                job_cache[job_id] = job
+            except:
+                print >> sys.stderr, "WARNING: Could not find job for %s." % job_id
+                return (job_cache,parent_job_ids)
+                        
+        # Find all expected inputs from the job
+        file_inputs = []
+        for inp in job["input"].values():
+            if type(inp) not in [ dict, list ]:
+                continue # not a file input
+            if type(inp) == dict:
+                file_inputs.append(inp)
+                continue
+            for item in inp:
+                if type(item) == dict:
+                    file_inputs.append(item)
+        if verbose:
+            print >> sys.stderr, "%s- Found %d inputs." % (' ' * level,len(file_inputs))
+
+        # For each file input, verify it is for a file and then look for an accession.
+        for inp in file_inputs:
+            if not type(inp) == dict:
+                if verbose:
+                    print >> sys.stderr, "WARNING: Unexpected input_type: " + str(type(inp))
+                continue # not a file input
+            dxlink = inp.get("$dnanexus_link")
+            if dxlink == None:
+                continue
+            if not type(dxlink) == dict:
+                inp_fid = dxlink
+            else:
+                inp_fid = dxlink.get("id")
+            try:
+                file_dx_obj = dxencode.description_from_fid(inp_fid)
+                job_id = file_dx_obj["createdBy"]["job"]
+            except:
+                # This is not an error... fastqs, fastas and chrom.sizes should have no job_ids!
+                #if verbose:
+                #    print >> sys.stderr, "WARNING: can't find file or job from "+ inp_fid
+                continue
+
+            # Determine jobs that shouldn't be followed: indexing jobs
+            exclude = False
+            for ending in exclude_files:
+                if file_dx_obj["name"].endswith(ending):
+                    exclude = True
+                    break
+            if exclude:
+                continue
+
+            # If recursing then 2 steps can have inputs from the same job, so don't count it twice 
+            if job_id in found_job_ids:  
+                continue
+            # One step can have 2 inputs from the same job, so don't count it twice 
+            if job_id in parent_job_ids:
+                continue
+            parent_job_ids.append(job_id)
+            if verbose: 
+                print >> sys.stderr, "%s* Found: %s" % (' ' * level,job_id)
+        
+        # Now recurse:
+        if level >= 0:
+            this_level_ids = parent_job_ids
+            found_job_ids.extend( parent_job_ids )
+            for job_id in this_level_ids:
+                (job_cache, new_ids) = self.gather_job_tree(job_id,job_cache,exclude_files,found_job_ids,(level+1),verbose=verbose)
+                for new_id in new_ids:
+                    if new_id not in parent_job_ids:
+                        parent_job_ids.append( new_id )
+                    if new_id not in found_job_ids:
+                        found_job_ids.append( new_id )
+                        
+        if verbose: 
+            print >> sys.stderr, "%s- Level: %d, found job tree: %s" % (' ' * level,level,str(found_job_ids) )
+            
+        return (job_cache,parent_job_ids)
+            
+            
     def get_dx_special_metric(self,metric_id,file_dx_obj,metric_key,metric_def,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in DX.'''
-        #verbose=True
-        if metric_key != "file_cost":
-            return None
+        #verbose=False
         
+        if verbose:
+            print >> sys.stderr, "Looking for special metric: %s" % ( metric_id )
+            
         metric = {}
+        if "jobs" not in self.obj_cache["exp"]:
+            self.obj_cache["exp"]["jobs"] = {}
         try:
             job_id = file_dx_obj["createdBy"]["job"]
             job =  dxpy.api.job_describe(job_id)
+            self.obj_cache["exp"]["jobs"][job_id] = job
         except:
             print >> sys.stderr, "ERROR: Could not find job for %s." % file_dx_obj['name']
             return None
@@ -517,19 +730,78 @@ class Mission_log(object):
         #print >> sys.stderr, "job:"
         #print >> sys.stderr, json.dumps(job,indent=4)
         #sys.exit(0)
-            
+          
+        # In case job tree needs to be gathered
+        excude_files = [ '.tgz' ] # All Reference files
+        # All the fastas, fastqs and chrom.sizes should be excluded by having no job that created them
+        # excude = [ '.fastq.gz', '.fq.gz', '.fastq', '.fq', '.chrom.sizes','.fasta.gz','.fa.gz','.fasta','.fa' ]
+        all_jobs_ids = []
+         
         for col in metric_def["columns"]:
+            if verbose:
+                print >> sys.stderr, "- Special metric column: '%s'" % ( col )
             if col == "Cost":
                 cost = job.get("totalPrice")
                 if cost != None:
                     metric[col] = "$" + str(round(cost,2))
+            elif col == "Total Cost":
+                # Plan: (1) get job input files all the way back to first job (excluding indexes), (2) sum all jobs
+                total_cost = 0
+                if len(all_jobs_ids) == 0:
+                    (self.obj_cache["exp"]["jobs"], all_jobs_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
+                                                                                              excude_files,[],verbose=verbose) 
+                    if verbose:
+                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_jobs_ids) )
+                for a_job_id in all_jobs_ids:
+                    a_job = self.obj_cache["exp"]["jobs"][a_job_id]
+                    total_cost += a_job.get("totalPrice",0)
+                if total_cost != 0:
+                    metric[col] = "$" + str(round(total_cost,2))
             elif col == "Time":
                 beg = job.get("startedRunning") 
                 end = job.get("stoppedRunning") 
                 if beg != None and end != None:
-                    duration =  (end/1000.0 - beg/1000.0)
-                    if duration != None:
-                        metric[col] = duration
+                    duration = (end/1000.0 - beg/1000.0)
+                    metric[col] = duration
+            elif col == "Job Time":
+                # Plan: (1) get job input files all the way back to first job (excluding indexes), (2) sum all jobs
+                total_duration = 0
+                if len(all_jobs_ids) == 0:
+                    (self.obj_cache["exp"]["jobs"], all_jobs_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
+                                                                                                excude_files,[],verbose=verbose) 
+                    if verbose:
+                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_jobs_ids) )
+                for a_job_id in all_jobs_ids:
+                    a_job = self.obj_cache["exp"]["jobs"][a_job_id]
+                    beg = a_job.get("startedRunning") 
+                    end = a_job.get("stoppedRunning") 
+                    if beg != None and end != None:
+                        total_duration += (end/1000.0 - beg/1000.0)
+                if total_duration != 0:
+                    metric[col] = total_duration
+            elif col == "CPU Time":
+                # Plan: (1) get job input files all the way back to first job (excluding indexes), (2) sum all jobs
+                total_duration = 0
+                if len(all_jobs_ids) == 0:
+                    (self.obj_cache["exp"]["jobs"], all_jobs_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
+                                                                                                excude_files,[],verbose=verbose) 
+                    if verbose:
+                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_jobs_ids) )
+                for a_job_id in all_jobs_ids:
+                    a_job = self.obj_cache["exp"]["jobs"][a_job_id]
+                    beg = a_job.get("startedRunning") 
+                    end = a_job.get("stoppedRunning") 
+                    if beg != None and end != None:
+                        duration = (end/1000.0 - beg/1000.0)
+                    try:
+                        instance = a_job["instanceType"]
+                        cpus = int(a_job["instanceType"].split('x')[1])
+                    except:
+                        cpus = 1
+                    total_duration = total_duration + (duration * cpus) 
+                if total_duration != 0:
+                    metric[col] = total_duration
+                
             elif col == "File Size":
                 size = file_dx_obj.get("size")
                 if size != None:
@@ -570,26 +842,30 @@ class Mission_log(object):
                     metric_id = fid + '/' + metric_key 
                 if metric_id in metric_ids:  
                     continue
-                metric_ids.append(metric_id)
                  
                 if "special_metric" in metric_defs and metric_defs["special_metric"]:
                     if verbose:
-                        print >> sys.stderr, "Getting special metric for %s %s %s" % (exp_id,rep_tech,metric_key)
-                    metric = self.get_dx_special_metric(metric_id,file_dx_obj,metric_key,metric_defs)
+                        print >> sys.stderr, "- Getting special metric for %s %s %s" % (exp_id,rep_tech,metric_key)
+                    metric = self.get_dx_special_metric(metric_id,file_dx_obj,metric_key,metric_defs,verbose=verbose)
                 else:
                     if verbose:
-                        print >> sys.stderr, "Getting qc metric for %s %s %s" % (exp_id,rep_tech,metric_key)
-                    
-                    metric = file_dx_obj['QC'].get(metric_defs["dx_key"])
+                        print >> sys.stderr, "- Getting qc metric for %s %s %s" % (exp_id,rep_tech,metric_key)
+                    dx_key = metric_defs.get("dx_key",metric_key)
+                    metric = file_dx_obj['QC'].get(dx_key)
                     # TODO: Add conversion of DX to ENC qc_metric objects if necessary
                 if metric == None:
                     if verbose:
-                        print >> sys.stderr, "Experiment "+exp_id+" "+file_dx_obj['name']+" has no " + metric_key + \
-                                                                                                "quality_metric objects."
+                        print >> sys.stderr, "  - Experiment "+exp_id+" "+file_dx_obj['name']+" has no " + metric_key + \
+                                                                                                " quality_metric objects."
                     continue
+                metric_ids.append(metric_id)
                 if metric_defs["per"] == "experiment":
+                    if verbose:
+                        print >> sys.stderr, "  * Experiment "+exp_id+" found 'combined' " + metric_key + " quality_metric."
                     combo_metrics.append((metric_key,"combined",metric_id))
                 else:
+                    if verbose:
+                        print >> sys.stderr, "  * Experiment "+exp_id+" found "+rep_tech+" " + metric_key + " quality_metric."
                     metrics.append((metric_key,rep_tech,metric_id))
                 self.obj_cache["exp"]["metrics"][metric_id] = metric
 
@@ -606,7 +882,8 @@ class Mission_log(object):
     def get_enc_special_metric(self,metric_id,file_enc_obj,metric_key,metric_def,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in encodeD.'''
         #verbose=True
-        if metric_key != "file_cost":
+        
+        if metric_key != "file_cost": # "rep_cost", "exp_cost" not yet supported
             return None
         
         metric = {}
@@ -631,6 +908,8 @@ class Mission_log(object):
                                 cost = None
                     if cost != None:
                         metric[col] = cost
+            elif col == "Total Cost": # TODO:
+                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
             elif col == "Time":
                 step_run = self.enc_lookup_json(file_enc_obj["step_run"])
                 if step_run != None:
@@ -643,6 +922,10 @@ class Mission_log(object):
                         duration = (end_dt - beg_dt)
                         if duration != None:
                             metric[col] = duration.total_seconds()
+            elif col == "Job Time": # TODO:
+                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
+            elif col == "CPU Time": # TODO:
+                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
             elif col == "File Size":
                 metric[col] = file_enc_obj["file_size"]
         if verbose:
@@ -674,11 +957,11 @@ class Mission_log(object):
                 metric_defs = self.METRIC_DEFS[metric_key]
                 if "special_metric" in metric_defs and metric_defs["special_metric"]:
                     if verbose:
-                        print >> sys.stderr, "Getting special metric for %s %s %s" % (exp_id,rep_tech,metric_key)
+                        print >> sys.stderr, "- Getting special metric for %s %s %s" % (exp_id,rep_tech,metric_key)
                     metric_id = acc + '/' + metric_key 
                     if metric_id not in metric_ids:  # Note that this will result in only one combined metric from 2 reps.
                         metric_ids.append(metric_id) 
-                        metric = self.get_enc_special_metric(metric_id,file_enc_obj,metric_key,metric_defs)
+                        metric = self.get_enc_special_metric(metric_id,file_enc_obj,metric_key,metric_defs,verbose=verbose)
                         if metric != None:
                             if metric_defs["per"] == "experiment":
                                 combo_metrics.append((metric_key,"combined",metric_id))
@@ -687,27 +970,22 @@ class Mission_log(object):
                             self.obj_cache["exp"]["metrics"][metric_id] = metric
                 else:
                     if verbose:
-                        print >> sys.stderr, "Getting qc metric for %s %s %s" % (exp_id,rep_tech,metric_key)
+                        print >> sys.stderr, "- Getting qc metric for %s %s %s" % (exp_id,rep_tech,metric_key)
                     file_qc_metrics = file_enc_obj.get('quality_metrics')
                     if file_qc_metrics == None or len(file_qc_metrics) == 0:
                         if verbose:
-                            print >> sys.stderr, "Experiment "+exp_id+" file "+acc+" has no quality_metric objects."
+                            print >> sys.stderr, "  - Experiment "+exp_id+" file "+acc+" has no quality_metric objects."
                         continue
                     #elif verbose:
                     #    print >> sys.stderr, json.dumps(file_qc_metrics,indent=4,sort_keys=True)
+                    qc_type = string.capwords(metric_defs.get("name",metric_key),'_').replace('_','') + "QualityMetric"
                     for metric in file_qc_metrics:
                         #print >> sys.stderr, json.dumps(metric,indent=4)
                         if verbose:
                             print >> sys.stderr, "  examining %s" % (metric["@type"])
-                        if "name" in metric_defs:
-                            if metric_defs["name"].capitalize()+"QualityMetric" not in metric["@type"]:
-                                if verbose:
-                                    print >> sys.stderr, metric_defs["name"].capitalize()+"QualityMetric not in " + \
-                                                                                                            metric["@type"]
-                                continue
-                        elif metric_key.capitalize()+"QualityMetric" not in metric["@type"]:
+                        if qc_type not in metric["@type"]:
                             if verbose:
-                                print >> sys.stderr, metric_key.capitalize()+"QualityMetric not in metric['@type']"
+                                print >> sys.stderr, "  - %s not found in %s." % (qc_type,metric["@type"])
                             continue
                         metric_id = metric["@id"]
                         if metric_id not in metric_ids:  # Note that this will result in only one combined metric from 2 reps.
@@ -803,6 +1081,10 @@ class Mission_log(object):
                 self.max_stats.append(-999999999)
                 self.cum_stats.append(0.0)
                 self.col_counts.append(0)
+                if col in metric_defs.get('sumable',[]):
+                    self.sum_these_cols.append(True)
+                else:
+                    self.sum_these_cols.append(False)
         
     def init_totals(self,report_specs):
         '''Intitializes totals from report specs.'''
@@ -815,6 +1097,7 @@ class Mission_log(object):
         self.exp_count = 0
         self.exp_starts = -1
         self.not_tabulated_cols = [] # Some columns are not numeric
+        self.sum_these_cols = []     # Some columns can be summed
         for out_type in report_specs["output_types"]:
             types_list = [ out_type ]
             if "subtypes" in report_specs[out_type]:
@@ -1004,6 +1287,42 @@ class Mission_log(object):
             cur_col += 1
         print Line
 
+        
+        # Sum:
+        Line = "# \tsum:"
+        cur_col = 0
+        #print >> sys.stderr, "exp_starts: %d" % self.exp_starts
+        print_sums = False
+        for val in self.cum_stats:
+            if not self.sum_these_cols[cur_col] or cur_col in self.not_tabulated_cols or self.col_counts[cur_col] == 0:
+                Line += '\t'
+            else:
+                if self.col_counts[cur_col] > 1:
+                    val = val
+                    print_sums = True
+                #if self.exp_starts == -1 or cur_col < self.exp_starts:
+                #    if self.rep_count > 0:
+                #        val = val / self.rep_count # TODO: make sure it is a float!
+                #else: 
+                #    if self.exp_count > 0:
+                #        val = val / self.exp_count
+                        
+                if cur_col in self.col_formats.keys():
+                    Line += '\t'+self.format_value(val,self.col_formats[cur_col])
+                elif val > 9999:
+                    Line += '\t%.1f' % val
+                elif val > 999:
+                    Line += '\t%.2f' % val
+                elif val > 99:
+                    Line += '\t%.3f' % val
+                elif val > 9:
+                    Line += '\t%.4f' % val
+                else:
+                    Line += '\t%f' % val
+            cur_col += 1
+        if print_sums:
+            print Line
+            
         # counts:
         print "# Experiments:\t" + str(self.exp_count)
         print "# Replicates:\t" + str(self.rep_count)
@@ -1024,7 +1343,7 @@ class Mission_log(object):
             print >> sys.stderr, "Using %s as data mine" % self.data_mine
         
         # Look up report type
-        if args.report_type not in self.REPORTS_SUPPORTED or args.report_type not in self.REPORT_SPECS.keys():
+        if args.report_type not in self.REPORT_SPECS.keys():
             print >> sys.stderr, "Report type %s is not supported" % (args.report_type)
             sys.exit(1)
         if self.data_mine not in self.REPORT_SPECS[args.report_type]["sources"]:
