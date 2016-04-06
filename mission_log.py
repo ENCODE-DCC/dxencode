@@ -878,6 +878,23 @@ class Mission_log(object):
                 print >> sys.stderr, "%s %s %s" % (metric_key,rep_tech,metric_id)
         return metrics
 
+    def total_step_runs(self, file):
+        # this will recursively return a list of step runs
+        derived_from = file.get("derived_from", [])
+        step_runs = []
+        for fi in derived_from:
+            # get the derived from file
+            file_obj = dxencode.encoded_get(fi, AUTHID=self.authid, AUTHPW=self.authpw)
+            if file_obj.get("output_type") == "genome index":
+                continue
+            step_run = file_obj.get("step_run")
+            if step_run is None or step_run in step_runs:
+                # we don't want this one
+                continue
+            # this means that we found a step run that we have not yet found
+            step_runs.append(step_run)
+            step_runs.append(self.total_step_runs(fi))
+        return step_runs
 
     def get_enc_special_metric(self,metric_id,file_enc_obj,metric_key,metric_def,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in encodeD.'''
@@ -908,8 +925,25 @@ class Mission_log(object):
                                 cost = None
                     if cost != None:
                         metric[col] = cost
-            elif col == "Total Cost": # TODO:
-                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
+            elif col == "Total Cost":  # TODO:
+                # first need all the step runs
+                # gather all the step runs
+                total = 0
+                step_runs = self.total_step_runs(file_enc_obj)
+                step_runs = list(set(step_runs))
+                for run in step_runs:
+                    step = dxencode.encoded_get(run, AUTHID=self.authid, AUTHPW=self.authpw)
+                    step_notes = step.get("notes")
+                    if step_notes is not None:
+                        try:
+                            cost = json.loads(step_notes).get("dx_cost")
+                            cost = float(cost.lstrip("$"))
+                        except:
+                            cost = None
+                        if cost is not None:
+                            total += cost
+                metric[col] = total
+                # print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
             elif col == "Time":
                 step_run = self.enc_lookup_json(file_enc_obj["step_run"])
                 if step_run != None:
