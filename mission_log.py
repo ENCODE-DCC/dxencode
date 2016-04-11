@@ -926,7 +926,7 @@ class Mission_log(object):
                                 cost = None
                     if cost != None:
                         metric[col] = cost
-            elif col == "Total Cost":  # TODO:
+            elif col == "Total Cost":
                 # first need all the step runs
                 # gather all the step runs
                 total = 0
@@ -944,7 +944,6 @@ class Mission_log(object):
                         if cost is not None:
                             total += cost
                 metric[col] = total
-                # print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
             elif col == "Time":
                 step_run = self.enc_lookup_json(file_enc_obj["step_run"])
                 if step_run != None:
@@ -957,10 +956,26 @@ class Mission_log(object):
                         duration = (end_dt - beg_dt)
                         if duration != None:
                             metric[col] = duration.total_seconds()
-            elif col == "Job Time": # TODO:
-                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
+            elif col == "Job Time":
+                step_runs = self.total_step_runs(file_enc_obj)
+                step_runs = list(set(step_runs))
+                total = 0
+                for run in step_runs:
+                    step_run = self.enc_lookup_json(file_enc_obj["step_run"])
+                    if step_run != None:
+                        step_details = step_run["dx_applet_details"][0]
+                        beg_time = step_details.get("started_running")
+                        end_time = step_details.get("stopped_running")
+                        if beg_time != None and end_time != None:
+                            beg_dt = datetime.strptime(beg_time, '%Y-%m-%dT%H:%M:%SZ')
+                            end_dt = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%SZ')
+                            duration = (end_dt - beg_dt)
+                            if duration != None:
+                                total += duration.total_seconds()
+                metric[col] = total
             elif col == "CPU Time": # TODO:
-                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
+                pass
+                #print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
             elif col == "File Size":
                 metric[col] = file_enc_obj["file_size"]
         if verbose:
