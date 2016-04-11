@@ -112,7 +112,7 @@ class Mission_log(object):
                               }
          },
          'cost': {
-             "sources":       [ "DX" ], # Unfortunately this is only of DX.
+             "sources":       ["encodeD","DX"], # Unfortunately this is only of DX.
              "long-rna-seq":  { "output_types": [ "gene quantifications", "mad-qc" ],
                                 "gene quantifications": { "suffix":  [ "_rsem.genes.results" ],
                                                           "metrics": [ "rep_cost" ] },
@@ -883,9 +883,13 @@ class Mission_log(object):
         derived_from = file.get("derived_from", [])
         step_runs = []
         for fi in derived_from:
+            if type(fi) is unicode:
+              temp = fi
+            else:
+              temp = fi["@id"]
             # get the derived from file
-            file_obj = dxencode.encoded_get(fi, AUTHID=self.authid, AUTHPW=self.authpw)
-            if file_obj.get("output_type") == "genome index":
+            file_obj = dxencode.enc_lookup_json(temp, key=self.SERVER_DEFAULT)
+            if file_obj.get("output_type", "") == "genome index":
                 continue
             step_run = file_obj.get("step_run")
             if step_run is None or step_run in step_runs:
@@ -893,15 +897,12 @@ class Mission_log(object):
                 continue
             # this means that we found a step run that we have not yet found
             step_runs.append(step_run)
-            step_runs.append(self.total_step_runs(fi))
+            step_runs += self.total_step_runs(fi)
         return step_runs
 
     def get_enc_special_metric(self,metric_id,file_enc_obj,metric_key,metric_def,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in encodeD.'''
         #verbose=True
-        
-        if metric_key != "file_cost": # "rep_cost", "exp_cost" not yet supported
-            return None
         
         metric = {}
         notes = None
@@ -932,7 +933,7 @@ class Mission_log(object):
                 step_runs = self.total_step_runs(file_enc_obj)
                 step_runs = list(set(step_runs))
                 for run in step_runs:
-                    step = dxencode.encoded_get(run, AUTHID=self.authid, AUTHPW=self.authpw)
+                    step = dxencode.enc_lookup_json(run, key=self.SERVER_DEFAULT)
                     step_notes = step.get("notes")
                     if step_notes is not None:
                         try:
