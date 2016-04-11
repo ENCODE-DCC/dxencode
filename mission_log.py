@@ -888,7 +888,7 @@ class Mission_log(object):
             else:
               temp = fi["@id"]
             # get the derived from file
-            file_obj = dxencode.enc_lookup_json(temp, key=self.SERVER_DEFAULT)
+            file_obj = dxencode.enc_lookup_json(temp)
             if file_obj.get("output_type", "") == "genome index":
                 continue
             step_run = file_obj.get("step_run")
@@ -933,7 +933,7 @@ class Mission_log(object):
                 step_runs = self.total_step_runs(file_enc_obj)
                 step_runs = list(set(step_runs))
                 for run in step_runs:
-                    step = dxencode.enc_lookup_json(run, key=self.SERVER_DEFAULT)
+                    step = dxencode.enc_lookup_json(run)
                     step_notes = step.get("notes")
                     if step_notes is not None:
                         try:
