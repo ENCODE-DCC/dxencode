@@ -20,6 +20,30 @@ logger = logging.getLogger('dxencode') # Callers should either use dxencode.logg
 
 SAVED_KEYS = {}
 
+# TODO: make Encd object and replace prime_server_key with self.server_key
+prime_server_key = "default" # ordinarily is set to the first non-default key seen.
+
+def set_server_key(key):
+    '''Explicitly sets prime_server_key, which ordinarily is set to the first non-default key seen.'''
+    prime_server_key = key
+
+def get_server_key():
+    '''Returns the server_key.'''
+    return prime_server_key
+
+def get_server():
+    '''Returns the server.'''
+    (server,authid,authpw) = find_keys()
+    return server
+
+def find_keys(server=None,authid=None,authpw=None):
+    '''returns authentication keys.'''
+    if server == None or authid == None or authpw == None:
+        return processkey( server ) # Assume server is server_key or None to get default
+    return (authid,authpw,server)   # pass through
+
+    
+
 def processkey(key):
     ''' check encodedD access keys; assuming the format:
     {
@@ -31,6 +55,8 @@ def processkey(key):
                 {"server":"https://www.encodeproject.org", "key":"rand_user_name", "secret":"rand_password"}
     }
     '''
+    if key == None:
+        key = prime_server_key
     if key in SAVED_KEYS:
         return SAVED_KEYS[key]
 
@@ -53,11 +79,15 @@ def processkey(key):
         SERVER += "/"
 
     SAVED_KEYS[key] = (AUTHID,AUTHPW,SERVER)
+    # Gets set to first non-default key
+    if prime_server_key == "default":
+        prime_server_key = key
     return (AUTHID,AUTHPW,SERVER)
     ## TODO possibly this should return a dict
     
-def post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
+def post_obj(obj_type,obj_meta, SERVER=None, AUTHID=None, AUTHPW=None):
     ''' Posts a json object of a given type to the encoded database. '''
+    (AUTHID,AUTHPW,SERVER) = find_keys(SERVER, AUTHID, AUTHPW)
     HEADERS = {
         'Content-type': 'application/json',
         'Accept': 'application/json',
@@ -78,16 +108,17 @@ def post_obj(obj_type,obj_meta, SERVER, AUTHID, AUTHPW):
     # TODO: Look for returned["status"] == "success"
     #returned = r.json()
     #if "status" not in returned or returned["status"] != "success":
-    #    print "* WARNING: request to post '%s'..." % obj_type
-    #    print "Posting " + SERVER + obj_type
-    #    print json.dumps(obj_meta, indent=4, sort_keys=True)
-    #    print "Returned:"
-    #    print json.dumps(item, indent=4, sort_keys=True)
-    ##    print json.dumps(r.json(), indent=4, sort_keys=True)
+    #    print >> sys.stderr, "* WARNING: request to post '%s'..." % obj_type
+    #    print >> sys.stderr, "Posting " + SERVER + obj_type
+    #    print >> sys.stderr, json.dumps(obj_meta, indent=4, sort_keys=True)
+    #    print >> sys.stderr, "Returned:"
+    #    print >> sys.stderr, json.dumps(item, indent=4, sort_keys=True)
+    ##    print >> sys.stderr, json.dumps(r.json(), indent=4, sort_keys=True)
     return item
 
-def patch_obj(obj_id, obj_meta, SERVER, AUTHID, AUTHPW):
+def patch_obj(obj_id, obj_meta, SERVER=None, AUTHID=None, AUTHPW=None):
     ''' Patches a json object of a given type to the encoded database. '''
+    (AUTHID,AUTHPW,SERVER) = find_keys(SERVER, AUTHID, AUTHPW)
     #HEADERS = { 'Content-type': 'application/json' }
     HEADERS = {
         'Content-type': 'application/json',
@@ -109,13 +140,14 @@ def patch_obj(obj_id, obj_meta, SERVER, AUTHID, AUTHPW):
         raise
 
     item = r.json()['@graph'][0]
-    #print "* request to patch %s to %s..." % (obj_id,SERVER)
-    #print json.dumps(item, indent=4, sort_keys=True)
+    #print >> sys.stderr, "* request to patch %s to %s..." % (obj_id,SERVER)
+    #print >> sys.stderr, json.dumps(item, indent=4, sort_keys=True)
     return item
            
 
-def post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
+def post_file(filename, file_meta, SERVER=None, AUTHID=None, AUTHPW=None):
     ''' take a file object on local file system, post meta data and cp to AWS '''
+    (AUTHID,AUTHPW,SERVER) = find_keys(SERVER, AUTHID, AUTHPW)
     HEADERS = {
         'Content-type': 'application/json',
         'Accept': 'application/json',
@@ -137,10 +169,10 @@ def post_file(filename, file_meta, SERVER, AUTHID, AUTHPW):
     #returned = r.json()
     #if "status" not in returned or returned["status"] != "success" or \
     if 'upload_credentials' not in item:
-        print "* ERROR: request to post %s to %s..." % (filename,SERVER)
-        print json.dumps(file_meta, indent=4, sort_keys=True)
-        print "* Returned..."
-        print json.dumps(item, indent=4, sort_keys=True)
+        print >> sys.stderr, "* ERROR: request to post %s to %s..." % (filename,SERVER)
+        print >> sys.stderr, json.dumps(file_meta, indent=4, sort_keys=True)
+        print >> sys.stderr, "* Returned..."
+        print >> sys.stderr, json.dumps(item, indent=4, sort_keys=True)
 
     # if cred missing, just let it fail on the next statement
     creds = item['upload_credentials']
@@ -194,11 +226,11 @@ def get_object(url, AUTHID=None, AUTHPW=None):
     return response
 
 
-def lookup_json(path, key='default', frame='object',must_find=False):
+def lookup_json(path, key=None, frame='object',must_find=False):
     '''Commonly used method to get a json object from encodeD.'''
-    (AUTHID,AUTHPW,SERVER) = processkey(key)
+    (AUTHID,AUTHPW,SERVER) = find_keys(key)
     url = SERVER + path + '/?format=json&frame=' + frame
-    #print url
+    #print >> sys.stderr, url
     response = get_object(url, AUTHID, AUTHPW)
     try:
         response.raise_for_status()
@@ -212,9 +244,10 @@ def lookup_json(path, key='default', frame='object',must_find=False):
     return json_obj
 
 
-def get_bucket(SERVER, AUTHID, AUTHPW, f_obj):
+def get_bucket(f_obj, SERVER=None, AUTHID=None, AUTHPW=None):
     ''' returns aws s3 bucket and file name from encodeD file object (f_obj)'''
     #make the URL that will get redirected - get it from the file object's href property
+    (AUTHID,AUTHPW,SERVER) = find_keys(SERVER, AUTHID, AUTHPW)
     encode_url = urlparse.urljoin(SERVER,f_obj.get('href'))
     logger.debug(encode_url)
 
@@ -264,7 +297,8 @@ def files_to_map(exp_obj):
                files.extend([file_obj])
             elif file_in_list(file_obj,files):
                 logger.warning('%s:%s Duplicate file md5sum, ignoring.' %(exp_obj.get('accession'),file_obj.get('accession')))
-                print('WARNING: %s:%s Duplicate filename, ignoring.' %(exp_obj.get('accession'),file_obj.get('accession')))
+                print >> sys.stderr, 'WARNING: %s:%s Duplicate filename, ignoring.' % \
+                                                                        (exp_obj.get('accession'),file_obj.get('accession'))
                 #return []
         return files
 
@@ -289,23 +323,23 @@ def is_paired_ended(experiment):
         elif up and not p:
             reps_paired[rep] = False
         else:
-            print("Mixed mapping for replicate %s/%s" %(experiment['accession'], rep))
-            print("Paired: %s" % ([ f['accession'] for f in p ]))
-            print("Unpaired: %s" % ([ f['accession'] for f in up ]))
+            print >> sys.stderr, "Mixed mapping for replicate %s/%s" %(experiment['accession'], rep)
+            print >> sys.stderr, "Paired: %s" % ([ f['accession'] for f in p ])
+            print >> sys.stderr, "Unpaired: %s" % ([ f['accession'] for f in up ])
             sys.exit(1)
 
     trues = len([ v for v in reps_paired.values() if v ])
     falses = len([ v for v in reps_paired.values() if not v])
     if trues and falses:
-        print("Mixed mapping for replicates in experiment %s" % (experiment['accession']))
-        print reps_paired
+        print >> sys.stderr, "Mixed mapping for replicates in experiment %s" % (experiment['accession'])
+        print >> sys.stderr, reps_paired
     else:
         if trues:
             return True
         elif falses:
             return False
 
-    print "Never get here"
+    print >> sys.stderr, "Never get here"
     sys.exit(1)
 
 def choose_mapping_for_experiment(experiment,warn=True):
@@ -333,11 +367,11 @@ def choose_mapping_for_experiment(experiment,warn=True):
                 sex = rep['library']['biosample'].get('sex', "male")
                 if sex != "male" and sex != "female":
                     if warn:
-                        print "WARN: using male replacement for %s" % sex
+                        print >> sys.stderr, "WARN: using male replacement for %s" % sex
                     sex = "male"
                 organism = rep['library']['biosample']['donor']['organism']['name']
             except KeyError:
-                print "Error, experiment %s replicate %s_%s missing info\n%s" % (exp_id, biorep_n, techrep_n, rep)
+                print >> sys.stderr, "Error, experiment %s replicate %s_%s missing info\n%s" % (exp_id,biorep_n,techrep_n,rep)
                 sys.exit(0)
 
             rep_files = [f for f in files if f.get('replicate').get('biological_replicate_number') == biorep_n and
@@ -374,37 +408,37 @@ def choose_mapping_for_experiment(experiment,warn=True):
         logger.warning('%s: No files to map' % exp_id)
     return mapping
 
-def get_exp(experiment,must_find=True,warn=False,key='default'):
+def get_exp(experiment,must_find=True,warn=False,key=None):
     '''Returns all replicate mappings for an experiment from encoded.'''
 
-    (AUTHID,AUTHPW,SERVER) = processkey(key)
+    (AUTHID,AUTHPW,SERVER) = find_keys(key)
     url = SERVER + 'experiments/%s/?format=json&frame=embedded' % experiment
     try:
         response = get_object(url, AUTHID, AUTHPW)
         exp = response.json()
     except:
         if must_find:
-            print "Experiment %s not found." % experiment
-            print "Auth %s %s may not be valid for %s." % (AUTHID, AUTHPW, url)
-            #print response #.json()
+            print >> sys.stderr, "Experiment %s not found." % experiment
+            print >> sys.stderr, "Auth %s %s may not be valid for %s." % (AUTHID, AUTHPW, url)
+            #print >> sys.stderr, response #.json()
             sys.exit(1)
         return None
     if exp == None or exp["status"] == "error":
         if must_find:
-            print "Experiment %s not found." % experiment
-            print response.json()
+            print >> sys.stderr, "Experiment %s not found." % experiment
+            print >> sys.stderr, response.json()
             sys.exit(1)
         return None
 
     return exp
 
-def get_assay_type(experiment,exp=None,key='default',must_find=True,warn=False):
+def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
     '''Looks up encoded experiment's assay_type, normalized to lower case.'''
     if exp == None:
         exp = get_exp(experiment,key=key,must_find=must_find,warn=warn)
     if "assay_term_name" not in exp:
         if must_find:
-            print "No 'assay_term_name' found for experiment %s." % experiment
+            print >> sys.stderr, "No 'assay_term_name' found for experiment %s." % experiment
             sys.exit(1)
         return None
     if exp["assay_term_name"] == "RNA-seq" \
@@ -441,11 +475,11 @@ def get_exp_type(experiment,exp=None,supported_types=None):
     exp_type = get_assay_type(experiment,exp)
 
     if supported_types != None and exp_type not in supported_types:
-        print "Experiment %s has unsupported assay type of '%s'" % (experiment,exp_type)
+        print >> sys.stderr, "Experiment %s has unsupported assay type of '%s'" % (experiment,exp_type)
         return None
     return exp_type
 
-def get_full_mapping(experiment,exp=None,key='default',must_find=True,warn=False):
+def get_full_mapping(experiment,exp=None,key=None,must_find=True,warn=False):
     '''Returns all replicate mappings for an experiment from encoded.'''
 
     if exp == None:
@@ -453,13 +487,13 @@ def get_full_mapping(experiment,exp=None,key='default',must_find=True,warn=False
 
     if not exp.get('replicates') or len(exp['replicates']) < 1:
         if must_find:
-            print "No replicates found in %s" % experiment
+            print >> sys.stderr, "No replicates found in %s" % experiment
             sys.exit(1)
         return None
 
     return choose_mapping_for_experiment(exp,warn=warn)
 
-def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,key='default', \
+def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,key=None, \
                                                                                     must_find=True):
     '''Returns replicate mappings for an experiment or specific replicate from encoded.'''
     if full_mapping == None:
@@ -469,13 +503,13 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
         return full_mapping[(biorep,techrep)]
     except KeyError:
         if must_find:
-            print "Specified replicate: rep%s_%s could not be found in mapping of %s." % \
-                ( biorep, techrep, experiment )
-            print json.dumps(full_mapping,indent=4)
+            print >> sys.stderr, "Specified replicate: rep%s_%s could not be found in mapping of %s." % \
+                                                                                            ( biorep, techrep, experiment )
+            print >> sys.stderr, json.dumps(full_mapping,indent=4)
             sys.exit(1)
     return None
 
-def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key='default'):
+def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
     '''For a given exp_id (accession) returns a "rep" list as used by assemble, launch, etc.'''
         
     reps = []
@@ -499,9 +533,9 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
                 rep['paired_end'] = False
                 rep['has_reads'] = True
             elif mapping['paired'] and mapping['unpaired']:
-                print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
+                print >> sys.stderr, "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
                     (len(mapping['paired']), len(mapping['unpaired']))
-                print json.dumps(mapping,indent=4)
+                print >> sys.stderr, json.dumps(mapping,indent=4)
                 sys.exit(1)                
                 
             # Load read and control files, only if requested.
@@ -542,10 +576,10 @@ def get_reps_from_enc(exp_id, load_reads=False, exp=None, full_mapping=None, key
 
     return reps
 
-def get_file(file_acc,must_find=False,key='default'):
+def get_file(file_acc,must_find=False,key=None):
     '''Returns file object from encoded, given an accession.'''
 
-    (AUTHID,AUTHPW,SERVER) = processkey(key)
+    (AUTHID,AUTHPW,SERVER) = find_keys(key)
 
     if file_acc.startswith("/files/") and file_acc.endswith('/'):
         url = SERVER + '%s?format=json&frame=embedded' % file_acc
@@ -556,13 +590,13 @@ def get_file(file_acc,must_find=False,key='default'):
         file_obj = response.json()
     except:
         if must_find:
-            print "File %s not found." % file_acc
+            print >> sys.stderr, "File %s not found." % file_acc
             sys.exit(1)
         return None
 
     return file_obj
 
-def get_exp_files(exp_obj,output_types=[],lab=None,key='default'):
+def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
     '''Returns list of file objs associated with an experiment, filtered by zero or more output_types.'''
     if not exp_obj or not exp_obj.get('files'):
         return []
@@ -582,7 +616,7 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key='default'):
             file_obj = get_file(file_acc,key=key)
         if file_obj == None:
             continue
-        #print " * Found: %s [%s] status:%s %s" % \
+        #print >> sys.stderr, " * Found: %s [%s] status:%s %s" % \
         #                  (file_obj['accession'],file_obj['output_type'],file_obj['status'],file_obj['submitted_file_name'])
         out_type = file_obj.get('output_type')
         if len(output_types) > 0 and (out_type == None or out_type not in output_types):
@@ -600,11 +634,11 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key='default'):
            files.extend([file_obj])
     return files
 
-def exp_is_pe(exp,exp_files=None,rep_tech=None,server_key='default'):
+def exp_is_pe(exp,exp_files=None,rep_tech=None,server_key=None):
     '''Determine if this experiment is expected to be 'paired-end' as opposed to 'single-end'.'''
     
     if rep_tech != None:
-        reps = get_reps_from_enc(exp_id=exp.get('accession'), load_reads=False, exp=exp, full_mapping=None, key=server_key)
+        reps = get_reps(exp_id=exp.get('accession'), load_reads=False, exp=exp, full_mapping=None, key=server_key)
         for rep in reps:
             if rep.get('rep_tech') == rep_tech:
                 if rep.get('paired_end') == False:
@@ -632,35 +666,75 @@ def select_alias(aliases, prefix='dnanexus:',must_find=True):
         if alias.startswith(prefix):
             return alias
     if must_find:
-        print "ERROR: Failed to find alias of prefix: '"+prefix+"' in:"
-        print aliases
+        print >> sys.stderr, "ERROR: Failed to find alias of prefix: '"+prefix+"' in:"
+        print >> sys.stderr, aliases
         sys.exit(1)
     
     return None
 
 
-def exp_patch_internal_status(exp_id, internal_status, server, authid=None, authpw=None, test=False):
+def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
+    '''Determine if this technical replicate is has fastqs all marked as UMI or all non-UMI.'''
+    
+    if rep == None:
+        reps = get_reps(exp_id=exp.get('accession'), load_reads=False, exp=exp, full_mapping=None, key=server_key)
+        for one_rep in reps:
+            if one_rep.get('rep_tech') == rep_tech:
+                rep = one_rep
+                break
+
+    if exp_files == None:
+        exp_files = get_exp_files(exp,key=server_key)
+    #print >> sys.stderr, ">  Looking through %d files for rep%d_%d %s" % (len(exp_files),rep.get('br',0),rep.get('tr',0),rep.get('replicate_id'))
+        
+    umi_found_true  = False
+    umi_found_false = False
+    umi = None
+    
+    for f_obj in exp_files:
+        if f_obj.get("file_format") != "fastq":
+            continue
+        if f_obj["replicate"]['@id'] != rep.get('replicate_id'):
+            continue
+        #print >> sys.stderr, ">>  Looking for umi on %s.%s %s with %d flow objects" % \
+        #    (f_obj.get("accession"),f_obj.get("file_format"),f_obj["replicate"]['@id'],len(f_obj.get("flowcell_details",[])))
+        umi_found = False
+        for flow in f_obj.get("flowcell_details",[]):
+            if flow.get('barcode') == "UMI":
+                umi_found = True
+                umi_found_true  = True
+        if not umi_found :
+            umi_found_false = True
+        
+    if umi_found_true and umi_found_false:
+        print >> sys.stderr, "ERROR: mixed UMI setting on the fastqs for replicate %s." % rep.get('replicate_id')
+        sys.exit(1)
+    if not umi_found_true and not umi_found_false:
+        print >> sys.stderr, "WARNING: could not detect UMI for replicate %s." % rep.get('replicate_id')
+    #print >> sys.stderr, "Found: UMI for replicate %s to be %s." % (rep.get('replicate_id'),str(umi_found_true))
+    return umi_found_true 
+
+
+def exp_patch_internal_status(exp_id, internal_status, server=None, authid=None, authpw=None, test=False):
     '''Updates encodeD Experiment with an internal status.'''
     
     allowed = [ 'pipeline ready', 'processing', 'pipeline completed', 'requires lab review' ]
     
     if internal_status not in allowed:
-        print "  * ERROR: Attempting to set internal status of %s to '%s'." % (exp_id,internal_status)
+        print >> sys.stderr, "  * ERROR: Attempting to set internal status of %s to '%s'." % (exp_id,internal_status)
         return False
     if not exp_id.startswith('ENCSR'):
-        print "  * ERROR: Attempting to set internal status on experiment without valid accession %s." % exp_id
+        print >> sys.stderr, "  * ERROR: Attempting to set internal status on experiment without valid accession %s." % exp_id
         return False
         
     payload = { "internal_status": internal_status }
     if not test:
-        if authid == None or authpw == None:
-            key = server
-            (authid,authpw,server) = processkey(key)
+        (authid,authpw,server) = find_keys(key)
         
         ret = patch_obj('experiments/'+exp_id, payload, server, authid, authpw)
-        print "  * Updated encodeD %s with internal_status '%s'." % (exp_id,internal_status)
+        print >> sys.stderr, "  * Updated encodeD %s with internal_status '%s'." % (exp_id,internal_status)
     else:
-        print "  * Would update encodeD %s with internal_status '%s'." % (exp_id,internal_status)
+        print >> sys.stderr, "  * Would update encodeD %s with internal_status '%s'." % (exp_id,internal_status)
     return True
 
 

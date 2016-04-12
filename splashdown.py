@@ -331,7 +331,8 @@ class Splashdown(object):
         and post files in the associated directory.
         '''
         self.args = {} # run time arguments
-        self.server_key = 'test'
+        self.server_key = 'test'  # TODO: replace with self.encd.server_key when Encd class is created
+        self.server     = None    # TODO: replace with self.encd.server() when Encd class is created
         self.acc_prefix = "TSTFF"
         self.proj_name = None
         self.project = None
@@ -569,7 +570,7 @@ class Splashdown(object):
         file_obj = None
         
         file_alias = 'dnanexus:' + dx_fid
-        file_obj = encd.lookup_json( 'files/' + file_alias,self.server_key,must_find=False)
+        file_obj = encd.lookup_json( 'files/' + file_alias,must_find=False)
         return file_obj
        
 
@@ -622,7 +623,7 @@ class Splashdown(object):
         elif fid_alias in update_payload['aliases']:
             update_payload['aliases'].remove(fid_alias)
         if not test:
-            ret = encd.patch_obj(accession, update_payload, self.server, self.authid, self.authpw)
+            ret = encd.patch_obj(accession, update_payload)
             #if ret == accession:
             if not remove:
                 print "  * Updated ENCODEd '"+accession+"' with alias "+fid_alias+"."
@@ -640,7 +641,7 @@ class Splashdown(object):
         '''Returns the tuple list of files already posted to ENCODEd.'''
         #verbose=True
         # get all files associated with the experiment up front, just in case it is needed:
-        self.exp_files = encd.get_exp_files(self.exp,key=self.server_key)
+        self.exp_files = encd.get_exp_files(self.exp)
         if len(self.exp_files) == 0:
             print "* ERROR: found no files associated with experiment: " + self.exp_id
 
@@ -698,7 +699,7 @@ class Splashdown(object):
                     # look by accession
                     if verbose:
                         print >> sys.stderr, "* DEBUG   Not found by alias: dnanexus:" + fid
-                    f_obj = encd.lookup_json( 'files/' + accession,self.server_key,must_find=False)
+                    f_obj = encd.lookup_json( 'files/' + accession,must_find=False)
                     if f_obj != None: # Verifyably posted
                         if f_obj.get('status') == 'revoked':
                             if verbose:
@@ -976,7 +977,7 @@ class Splashdown(object):
                     if verbose:
                         print >> sys.stderr, "Found accession."
                     # Must check if file exists!!
-                    file_obj = encd.lookup_json( 'files/' + accession,self.server_key,must_find=False)
+                    file_obj = encd.lookup_json( 'files/' + accession,must_find=False)
                     if file_obj == None:
                         if verbose:
                             print >> sys.stderr, "Accession found but file not on '"+self.server_key+"'"
@@ -985,7 +986,7 @@ class Splashdown(object):
                         input_accessions.append(accession)                        
                             
                 # may need to look for server specific accession
-                if accession == None and self.server_key != encd.PRODUCTION_SERVER:
+                if accession == None and self.server_key != 'www':
                     acc_key = dx.property_accesion_key(self.server)  # demote to server's accession
                     if verbose:
                         print >> sys.stderr, "Now looking for '"+acc_key+"' on '"+self.server_key+"'" 
@@ -994,7 +995,7 @@ class Splashdown(object):
                         if verbose:
                             print >> sys.stderr, "Found accession for '"+self.server_key+"'."
                         # Must check if file exists!!
-                        file_obj = encd.lookup_json( 'files/' + accession,self.server_key,must_find=False)
+                        file_obj = encd.lookup_json( 'files/' + accession,must_find=False)
                         if file_obj == None:
                             if verbose:
                                 print >> sys.stderr, "Accession found but file not on '"+self.server_key+"'"
@@ -1160,7 +1161,7 @@ class Splashdown(object):
         if collection == None:
             collection = self.qc_metric_schema_type(qc_key)
 
-        qc_metric = encd.lookup_json(qc_alias,self.server_key,must_find=must_find)
+        qc_metric = encd.lookup_json(qc_alias,must_find=must_find)
         if qc_metric != None:
             self.obj_cache["exp"][qc_alias] = qc_metric
         return qc_metric
@@ -1354,7 +1355,7 @@ class Splashdown(object):
                     print "  * Would patch qc_metric: '%s'" % qc_alias
                 else:
                     try:
-                        patched_obj = encd.patch_obj(qc_alias,qc_patch, self.server, self.authid, self.authpw)
+                        patched_obj = encd.patch_obj(qc_alias,qc_patch)
                     except:
                         print "Failed to patch qc_metric: '%s'" % qc_alias
                         sys.exit(1)
@@ -1388,7 +1389,7 @@ class Splashdown(object):
                 #print json.dumps(qc_metric,indent=4,sort_keys=True)
             else:
                 try:
-                    posted_obj = encd.post_obj(collection,qc_metric, self.server, self.authid, self.authpw)
+                    posted_obj = encd.post_obj(collection,qc_metric)
                 except:
                     print "Failed to post qc_metric%s: '%s'" % (blob_msg,qc_alias)
                     sys.exit(1)
@@ -1540,7 +1541,7 @@ class Splashdown(object):
         
         if step_ver_alias in self.obj_cache:
             return self.obj_cache[step_ver_alias]
-        step_ver = encd.lookup_json( 'analysis-step-versions/' + step_ver_alias,self.server_key,must_find=True)
+        step_ver = encd.lookup_json( 'analysis-step-versions/' + step_ver_alias,must_find=True)
         if step_ver:
             self.obj_cache[step_ver_alias] = step_ver
             print "  - Found step_ver: '%s'" % step_ver_alias
@@ -1559,7 +1560,7 @@ class Splashdown(object):
         if "exp" in self.obj_cache and step_alias in self.obj_cache["exp"]:
             step_run = self.obj_cache["exp"][step_alias]
         else:
-            step_run = encd.lookup_json( 'analysis-step-runs/' + step_alias,self.server_key,must_find=False)
+            step_run = encd.lookup_json( 'analysis-step-runs/' + step_alias,must_find=False)
             if step_run:
                 if "exp" not in self.obj_cache:
                      self.obj_cache["exp"] = {}
@@ -1656,7 +1657,7 @@ class Splashdown(object):
             else:
                 try:
                     #step_run["@type"] = ["item", "analysis_step_run"]
-                    posted_step_run = encd.post_obj('analysis_step_run',step_run, self.server, self.authid, self.authpw)
+                    posted_step_run = encd.post_obj('analysis_step_run',step_run)
                 except:
                     print "Failed to post step_run: '%s'" % step_alias
                     sys.exit(1)
@@ -1851,7 +1852,7 @@ class Splashdown(object):
                     if fid not in self.found: 
                         f_obj =  self.enc_file_find_by_dxid(fid) # look by alias first:               
                         if f_obj == None:
-                            f_obj = encd.lookup_json( 'files/' + accession,self.server_key,must_find=False) # look by accession
+                            f_obj = encd.lookup_json( 'files/' + accession,must_find=False) # look by accession
                         if f_obj != None: # Verifyably posted
                             self.found[fid] = f_obj
                         else:
@@ -1910,7 +1911,7 @@ class Splashdown(object):
         del update_payload['output_type']
 
         if not test:
-            ret = encd.patch_obj(accession, update_payload, self.server, self.authid, self.authpw)
+            ret = encd.patch_obj(accession, update_payload)
             print "  * Patched '"+accession+"' with payload."
         else:
             print "  * Would patch '"+accession+"' with payload."
@@ -2016,13 +2017,14 @@ class Splashdown(object):
         if args.ignore_properties:
             print "Ignoring DXFile properties (will post to test server)"
             self.ignore = args.ignore_properties
-            self.server_key = 'test' # mandated because option is dangerous
+            args.server = 'test' # FORCED: mandated because option is dangerous
         if args.way_back_machine:
             print "Using 'way back machine' to find files posted long ago."
             self.way_back_machine = args.way_back_machine
             
         self.server_key = args.server
-        self.authid, self.authpw, self.server = encd.processkey(self.server_key)
+        encd.set_server_key(self.server_key) # TODO: change to self.encd = Encd(self.server_key)
+        self.server = encd.get_server()        
         
         if self.server_key == "www":
             self.acc_prefix = "ENCFF"
@@ -2049,7 +2051,7 @@ class Splashdown(object):
             self.obj_cache["exp"] = {}  # clear exp cache, which will hold exp specific wf_run and step_run objects
             # 1) Lookup experiment type from encoded, based on accession
             print "Working on %s..." % self.exp_id
-            self.exp = encd.get_exp(self.exp_id,must_find=True,key=self.server_key)
+            self.exp = encd.get_exp(self.exp_id,must_find=True)
             if self.exp == None or self.exp["status"] == "error":
                 print "Unable to locate experiment %s in encoded (%s)" % (self.exp_id, self.server_key)
                 continue
@@ -2148,7 +2150,7 @@ class Splashdown(object):
                 total_halted += 1
             elif not partial and not args.test:
                 if 'internal_status' not in self.exp or self.exp['internal_status'] not in encd.INTERNAL_STATUS_BLOCKS:
-                    encd.exp_patch_internal_status(self.exp_id, 'pipeline completed', self.server_key, test=self.test)
+                    encd.exp_patch_internal_status(self.exp_id, 'pipeline completed', test=self.test)
 
             if not args.test:
                 print "- For %s processed %d file(s), posted %d, patched %d, qc %d" % \

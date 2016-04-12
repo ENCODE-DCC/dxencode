@@ -101,7 +101,7 @@ class Assemble(object):
         Assemble expects to be the only class for assembling experiments on for pipeline types.
         '''
         self.args = {} # run time arguments
-        self.server_key = self.SERVER_DEFAULT
+        self.server_key = self.SERVER_DEFAULT  # TODO: replace with self.encd.server_key when Encd class is created
         self.proj_name = None
         self.project = None
         self.proj_id = None
@@ -215,6 +215,7 @@ class Assemble(object):
         self.test = args.test
         self.inputs_only = args.inputs_only
         self.server_key = args.server
+        encd.set_server_key(self.server_key) # TODO: change to self.encd = Encd(self.server_key)
         if self.server_key != "test":
             self.acc_prefix = "ENCFF"
         self.proj_name = dx.env_get_current_project()
@@ -254,8 +255,8 @@ class Assemble(object):
             
         # Must look through exp and find all replicates!
         if exp != self.exp or self.full_mapping == None:
-            self.full_mapping = encd.get_full_mapping(exp_id,exp,key=self.server_key)
-        replicates = encd.get_reps_from_enc(exp_id, exp=exp, full_mapping=self.full_mapping, key=self.server_key)
+            self.full_mapping = encd.get_full_mapping(exp_id,exp)
+        replicates = encd.get_reps(exp_id, exp=exp, full_mapping=self.full_mapping)
         if verbose:
             print "Replicates from encoded:"
             print json.dumps(replicates,indent=4,sort_keys=True)
@@ -313,7 +314,7 @@ class Assemble(object):
 
         # Result file must match their glob!
         if not self.inputs_only:
-            result_files = encd.get_exp_files(exp,key=self.server_key)
+            result_files = encd.get_exp_files(exp)
             for obj_type in exp_files['results'].keys():
                 for f_obj in result_files:
                     if obj_type == f_obj['output_type']:
@@ -388,13 +389,12 @@ class Assemble(object):
     def prepare_files_to_fetch_json(self, needed_files,verbose=False):
         '''Prepares a json string for requesting files to fetch from encoded to dnanexus.'''
         f2f_files = []
-        AUTHID, AUTHPW, SERVER = encd.processkey(self.server_key)
         for f_obj in needed_files:
             f2f_obj = {}     # { "accession": ,"dx_folder": ,"dx_file_name": }
             f2f_obj['accession'] = f_obj['accession']
             f2f_obj['dx_folder'] = f_obj['dx_folder']
             f2f_obj['dx_file_name'] = f_obj['dx_file_name']
-            (enc_file_name, bucket_url) = encd.get_bucket(SERVER, AUTHID, AUTHPW, f_obj)
+            (enc_file_name, bucket_url) = encd.get_bucket(f_obj)
             f2f_obj['enc_file_name'] = enc_file_name
             f2f_obj['bucket_url'] = bucket_url
             f2f_files.append(f2f_obj)
@@ -520,7 +520,7 @@ class Assemble(object):
             exp_count += 1
             # 1) Lookup experiment type from encoded, based on accession
             self.exp_id = exp_id
-            self.exp = encd.get_exp(self.exp_id,must_find=False,key=self.server_key)
+            self.exp = encd.get_exp(self.exp_id,must_find=False)
             if self.exp == None or self.exp["status"] == "error":
                 print "ERROR: Unable to locate experiment %s in encoded" % exp_id
                 skipped += 1
@@ -627,9 +627,9 @@ class Assemble(object):
             launched = 0
             
             if failed == 0:
-                encd.exp_patch_internal_status(self.exp_id, 'pipeline ready', self.server_key, test=self.test)
+                encd.exp_patch_internal_status(self.exp_id, 'pipeline ready', test=self.test)
             #else:
-            #    encd.exp_patch_internal_status(self.exp_id, 'unrunnable', self.server_key, test=self.test)
+            #    encd.exp_patch_internal_status(self.exp_id, 'unrunnable', test=self.test)
                 
             # Ignite a launcher here...
             if args.launch:

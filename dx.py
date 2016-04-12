@@ -124,7 +124,7 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
             return full_query + '/' # normalized
         else:
             full_query = root_folders + target_folder # shoot for it all
-            #print "- shooting [%s]" % full_query
+            #print >> sys.stderr, "- shooting [%s]" % full_query
             if project_has_folder(project, full_query):
                 return full_query + '/' # normalized
 
@@ -141,7 +141,7 @@ def find_exp_folder(project,exp_id,results_folder='/',warn=False):
     target_folder = find_folder(exp_id,project,results_folder)
     if target_folder == None or target_folder == "":
         if warn:
-            print "Unable to locate target folder (%s) for %s in project %s" % \
+            print >> sys.stderr, "Unable to locate target folder (%s) for %s in project %s" % \
                                                                         (results_folder, exp_id, project.describe()['name'])
         return None
     return target_folder # already normalized
@@ -174,7 +174,7 @@ def description_from_fid(fid,properties=False):
     try:
         dxlink = FILES[fid]
     except:
-        #logger.error("File %s not cached, trying id" % fid)
+        #print >> sys.stderr, "File %s not cached, trying id" % fid)
         dxlink = fid
 
     return dxpy.describe(dxlink,incl_properties=properties)
@@ -229,7 +229,7 @@ def find_or_create_folder(project, sub_folder, root_folder='/'):
     if project_has_folder(project, folder):
         return folder
     else:
-        logger.debug("Creating %s" % (folder))
+        print >> sys.stderr, "Creating %s" % (folder)
         return project.new_folder(folder)
 
 def move_files(fids, folder, projectId):
@@ -238,11 +238,11 @@ def move_files(fids, folder, projectId):
         try:
             dxlink = FILES[fid]
         except:
-            logger.error("File %s not in cache, trying id" % fid)
+            #print >> sys.stderr, "File %s not in cache, trying id" % fid
             dxlink = fid
         fileDict = dxpy.describe(dxlink) # FILES contain dxLinks
         if fileDict['project'] != projectId:
-            print "ERROR: Failed to move '" + fileDict['name'] + "' as it is not in '" + \
+            print >> sys.stderr, "ERROR: Failed to move '" + fileDict['name'] + "' as it is not in '" + \
                                                                                 projectId + "'."
             sys.exit(1)
     proj = dxpy.DXProject(projectId)
@@ -417,7 +417,7 @@ def find_file(filePath,project=None,verbose=False,multiple=False, recurse=True):
 def find_reference_file_by_name(reference_name, project_name):
     '''Looks up a reference file by name in the project that holds common tools. From Joe Dale's code.'''
     project = dxpy.find_one_project(name=project_name, name_mode='exact', return_handler=False)
-    cached = '*'
+    cached = '* '
     if (reference_name, project['id']) not in REFERENCE_FILES:
         found = dxpy.find_one_data_object(classname="file", name=reference_name,
                                           project=project['id'],
@@ -426,13 +426,14 @@ def find_reference_file_by_name(reference_name, project_name):
         REFERENCE_FILES[(reference_name, project['id'])] = found
         cached = ''
 
-    logger.debug(cached + "Resolved %s to %s" % (reference_name, REFERENCE_FILES[(reference_name, project['id'])].get_id()))
+    #print >> sys.stderr, cached + "Resolved %s to %s" % \
+    #                                                (reference_name, REFERENCE_FILES[(reference_name, project['id'])].get_id())
     return dxpy.dxlink(REFERENCE_FILES[(reference_name, project['id'])])
 
 
 def find_applet_by_name(applet_name, applets_project_id):
     '''Looks up an applet by name in the project that holds tools.  From Joe Dale's code.'''
-    cached = '*'
+    cached = '* '
     if (applet_name, applets_project_id) not in APPLETS:
         found = dxpy.find_one_data_object(classname="applet", name=applet_name,
                                           project=applets_project_id,
@@ -440,7 +441,7 @@ def find_applet_by_name(applet_name, applets_project_id):
         APPLETS[(applet_name, applets_project_id)] = found
         cached = ''
 
-    logger.debug(cached + "Resolved %s to %s" % (applet_name, APPLETS[(applet_name, applets_project_id)].get_id()))
+    #print >> sys.stderr, cached + "Resolved %s to %s" % (applet_name, APPLETS[(applet_name, applets_project_id)].get_id())
     return APPLETS[(applet_name, applets_project_id)]
 
 SW_CACHE = {}
@@ -449,7 +450,7 @@ def get_sw_from_log(dxfile, regex):
     try:
         job_id = dxfile.describe()['createdBy']['job']
     except:
-        print "Could not get job id"
+        print >> sys.stderr, "Could not get job id"
 
     if not SW_CACHE.get(job_id+regex, {}):
         cmd = ["dx", "watch", job_id]
@@ -508,8 +509,8 @@ def file_get_property(key,fid,dxfile=None,proj_id=None,return_json=False,fail_on
             try:
                 return json.loads("{"+properties[key]+"}")
             except:
-                print "JSON parsing failed:"
-                print properties[key]
+                print >> sys.stderr, "JSON parsing failed:"
+                print >> sys.stderr, properties[key]
                 if fail_on_parse_error:
                     sys.exit(1)
                 return None
@@ -519,7 +520,10 @@ def file_get_property(key,fid,dxfile=None,proj_id=None,return_json=False,fail_on
 def property_accesion_key(server):
     '''Returns the dx file propery key to use for the accession property.  Depends on the server being posted to.'''
     acc_key = "accession"
-    server_key = server[server.find('/')+2:server.find('.')]# beta: "http://v25rc2.demo.encodedcc.org"
+    if server.find('/') == -1:
+        server_key = server
+    else:
+        server_key = server[server.find('/')+2:server.find('.')]# beta: "http://v25rc2.demo.encodedcc.org"
     if server_key != 'www':
         acc_key = server_key + '_accession'
     return acc_key
@@ -540,22 +544,22 @@ def file_set_property(fid,key,value,proj_id=None,add_only=False,test=False,verbo
     if key in properties:
         if properties[key] == value:
             if verbose:
-                print "Note: file %s already has property '%s' set to '%s'" % (path,key,properties[key])
+                print >> sys.stderr, "Note: file %s already has property '%s' set to '%s'" % (path,key,properties[key])
             return properties[key]
         elif add_only:
             if verbose:
-                print "Error: file %s already has property '%s' and is not being updated from '%s'" % (path,key,properties[key])
+                print >> sys.stderr, "Error: file %s already has property '%s' and is not being updated from '%s'" % (path,key,properties[key])
             return properties[key]
         elif verbose:
-                print "Warning: file %s has property '%s' but is being updated to '%s'" % (path,key,value)
+                print >> sys.stderr, "Warning: file %s has property '%s' but is being updated to '%s'" % (path,key,value)
     properties[key] = value
     if test:
         if verbose:
-            print "  - Test set %s with %s='%s'" % (path,key,value)
+            print >> sys.stderr, "  - Test set %s with %s='%s'" % (path,key,value)
     else:
         dxfile.set_properties(properties)
         if verbose:
-            print "  - set %s with %s='%s'" % (path,key,value)
+            print >> sys.stderr, "  - set %s with %s='%s'" % (path,key,value)
     return properties[key]
     
 def umbrella_folder(folder,default,proj_name=None,exp_type=None,genome=None,annotation=None):
