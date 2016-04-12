@@ -9,7 +9,9 @@ import subprocess
 import fnmatch
 
 import dxpy
-import dxencode
+#import dxencode
+import dx
+import encd
 
 ### TODO:
 #   1) Assemble *could* create a workflow_run object that represents a request for launch.
@@ -150,14 +152,14 @@ class Assemble(object):
 
         ap.add_argument('--project',
                         help="Project to run analysis in (default: '" + \
-                                                        dxencode.env_get_current_project() + "')",
+                                                        dx.env_get_current_project() + "')",
                         required=False)
 
         # Don't anticpate dealing with reference file
         #ap.add_argument('--refLoc',
         #                help="The location to find reference files (default: '" + \
-        #                    dxencode.REF_PROJECT_DEFAULT + ":" + dxencode.REF_FOLDER_DEFAULT + "')",
-        #                default=dxencode.REF_FOLDER_DEFAULT,
+        #                    dx.REF_PROJECT_DEFAULT + ":" + dx.REF_FOLDER_DEFAULT + "')",
+        #                default=dx.REF_FOLDER_DEFAULT,
         #                required=False)
 
         ap.add_argument('-g','--genome',
@@ -215,7 +217,7 @@ class Assemble(object):
         self.server_key = args.server
         if self.server_key != "test":
             self.acc_prefix = "ENCFF"
-        self.proj_name = dxencode.env_get_current_project()
+        self.proj_name = dx.env_get_current_project()
         if self.proj_name == None or args.project != None:
             self.proj_name = args.project
         if self.proj_name == None:
@@ -228,7 +230,7 @@ class Assemble(object):
             else:
                 self.statuses_accepted.append(args.sa)
             
-        self.project = dxencode.get_project(self.proj_name)
+        self.project = dx.get_project(self.proj_name)
         self.proj_id = self.project.get_id()
 
         # Resolve exp/replicate parameters
@@ -252,15 +254,15 @@ class Assemble(object):
             
         # Must look through exp and find all replicates!
         if exp != self.exp or self.full_mapping == None:
-            self.full_mapping = dxencode.get_full_mapping(exp_id,exp,key=self.server_key)
-        replicates = dxencode.get_reps_from_enc(exp_id, exp=exp, full_mapping=self.full_mapping, key=self.server_key)
+            self.full_mapping = encd.get_full_mapping(exp_id,exp,key=self.server_key)
+        replicates = encd.get_reps_from_enc(exp_id, exp=exp, full_mapping=self.full_mapping, key=self.server_key)
         if verbose:
             print "Replicates from encoded:"
             print json.dumps(replicates,indent=4,sort_keys=True)
         for rep in replicates:
             if self.genome == None:
-                if rep['organism'] in dxencode.GENOME_DEFAULTS:
-                    self.genome = dxencode.GENOME_DEFAULTS[rep['organism']]
+                if rep['organism'] in dx.GENOME_DEFAULTS:
+                    self.genome = dx.GENOME_DEFAULTS[rep['organism']]
                 else:
                     print "Organism %s not currently supported" % rep['organism']
                     sys.exit(1)
@@ -268,16 +270,16 @@ class Assemble(object):
         #for (br,tr) in self.full_mapping.keys():
         #    replicates.append( { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) } )
         #    
-        #    mapping = dxencode.get_replicate_mapping(exp_id,br,tr,self.full_mapping)
+        #    mapping = encd.get_replicate_mapping(exp_id,br,tr,self.full_mapping)
         #    if self.genome == None:
-        #        if mapping['organism'] in dxencode.GENOME_DEFAULTS:
-        #            self.genome = dxencode.GENOME_DEFAULTS[mapping['organism']]
+        #        if mapping['organism'] in encd.GENOME_DEFAULTS:
+        #            self.genome = dx.GENOME_DEFAULTS[mapping['organism']]
         #        else:
         #            print "Organism %s not currently supported" % mapping['organism']
         #            sys.exit(1)
-        #    elif self.genome != dxencode.GENOME_DEFAULTS[mapping['organism']]:
+        #    elif self.genome != dx.GENOME_DEFAULTS[mapping['organism']]:
         #        print "Mixing genomes in one assembly run not supported %s and %s" % \
-        #                                            (self.genome, dxencode.GENOME_DEFAULTS[mapping['organism']])
+        #                                            (self.genome, dx.GENOME_DEFAULTS[mapping['organism']])
         #        sys.exit(1)
         
             
@@ -294,7 +296,7 @@ class Assemble(object):
         #verbose = True
         
         # Input file should match on format and have format
-        input_files = dxencode.files_to_map(self.exp)
+        input_files = encd.files_to_map(self.exp)
         if verbose or len(self.statuses_accepted) > len(self.FILE_STATUSES_ACCEPTED):
             print "Accepted file statuses:"
             print self.statuses_accepted
@@ -311,7 +313,7 @@ class Assemble(object):
 
         # Result file must match their glob!
         if not self.inputs_only:
-            result_files = dxencode.get_enc_exp_files(exp,key=self.server_key)
+            result_files = encd.get_exp_files(exp,key=self.server_key)
             for obj_type in exp_files['results'].keys():
                 for f_obj in result_files:
                     if obj_type == f_obj['output_type']:
@@ -345,7 +347,7 @@ class Assemble(object):
                 file_path = exp_folder + dx_file_name
                 # Input files may be at exp folder level!
                 # Actually input files can be found anywhere in the project, so use recurse
-                fid = dxencode.find_file(exp_folder + dx_file_name,self.proj_id,recurse=True)
+                fid = dx.find_file(exp_folder + dx_file_name,self.proj_id,recurse=True)
                 if fid == None:
                     f_obj['dx_file_name'] = dx_file_name
                     br = f_obj['replicate']['biological_replicate_number']
@@ -372,7 +374,7 @@ class Assemble(object):
                 dx_folder = exp_folder
                 if rep_tech != None:
                     dx_folder += rep_tech + '/'
-                fid = dxencode.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
+                fid = dx.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
                 if fid == None:
                     f_obj['dx_file_name'] = dx_file_name
                     f_obj['dx_folder']    = dx_folder
@@ -386,13 +388,13 @@ class Assemble(object):
     def prepare_files_to_fetch_json(self, needed_files,verbose=False):
         '''Prepares a json string for requesting files to fetch from encoded to dnanexus.'''
         f2f_files = []
-        AUTHID, AUTHPW, SERVER = dxencode.processkey(self.server_key)
+        AUTHID, AUTHPW, SERVER = encd.processkey(self.server_key)
         for f_obj in needed_files:
             f2f_obj = {}     # { "accession": ,"dx_folder": ,"dx_file_name": }
             f2f_obj['accession'] = f_obj['accession']
             f2f_obj['dx_folder'] = f_obj['dx_folder']
             f2f_obj['dx_file_name'] = f_obj['dx_file_name']
-            (enc_file_name, bucket_url) = dxencode.get_bucket(SERVER, AUTHID, AUTHPW, f_obj)
+            (enc_file_name, bucket_url) = encd.get_bucket(SERVER, AUTHID, AUTHPW, f_obj)
             f2f_obj['enc_file_name'] = enc_file_name
             f2f_obj['bucket_url'] = bucket_url
             f2f_files.append(f2f_obj)
@@ -413,7 +415,7 @@ class Assemble(object):
             print "  - Test fetch %d files from encoded:%s to dnanexus:%s" % (needed_count,exp_id,dx_folder)
             return 0 # Returns the number of files NOT successfully fetched
         else:
-            applet = dxencode.find_applet_by_name('fetch-to-dx', self.proj_id )
+            applet = dx.find_applet_by_name('fetch-to-dx', self.proj_id )
             job = applet.run({
                 "exp_acc": exp_id,
                 "files_to_fetch": files_to_fetch,
@@ -518,19 +520,19 @@ class Assemble(object):
             exp_count += 1
             # 1) Lookup experiment type from encoded, based on accession
             self.exp_id = exp_id
-            self.exp = dxencode.get_exp(self.exp_id,must_find=False,key=self.server_key)
+            self.exp = encd.get_exp(self.exp_id,must_find=False,key=self.server_key)
             if self.exp == None or self.exp["status"] == "error":
                 print "ERROR: Unable to locate experiment %s in encoded" % exp_id
                 skipped += 1
                 continue
-            if 'internal_status' in self.exp and self.exp['internal_status'] in dxencode.INTERNAL_STATUS_BLOCKS:
+            if 'internal_status' in self.exp and self.exp['internal_status'] in encd.INTERNAL_STATUS_BLOCKS:
                 print "ERROR: Experiment %s with internal_status of '%s' cannot be assembled." % \
                                                                         (self.exp_id,self.exp['internal_status']) 
                 skipped += 1
                 continue
             #print json.dumps(self.exp['files'],indent=4)
             #sys.exit(1)
-            self.exp_type = dxencode.get_exp_type(exp_id,self.exp,self.EXPERIMENT_TYPES_SUPPORTED)
+            self.exp_type = encd.get_exp_type(exp_id,self.exp,self.EXPERIMENT_TYPES_SUPPORTED)
             if self.exp_type == None:
                 skipped += 1
                 continue
@@ -575,9 +577,9 @@ class Assemble(object):
             
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation may have been entered as args to help organize folders
-            self.umbrella_folder = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name, \
+            self.umbrella_folder = dx.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name, \
                                                                                     self.exp_type,self.genome,args.annotation)
-            self.exp_folder = dxencode.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
+            self.exp_folder = dx.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
             if self.exp_folder == None:
                 self.exp_folder = self.umbrella_folder + exp_id + '/'
                 # create it!
@@ -590,7 +592,7 @@ class Assemble(object):
                 print "- Will examine folder: %s:%s" % (self.proj_name, self.exp_folder)
             for rep in self.replicates:
                 rep_folder = self.exp_folder + rep['rep_tech'] + '/'
-                if not dxencode.project_has_folder(self.project, rep_folder):
+                if not dx.project_has_folder(self.project, rep_folder):
                     if not self.test:
                         self.project.new_folder(rep_folder)
                         print "  - Have created rep folder:      " + rep_folder
@@ -625,9 +627,9 @@ class Assemble(object):
             launched = 0
             
             if failed == 0:
-                dxencode.enc_exp_patch_internal_status(self.exp_id, 'pipeline ready', self.server_key, test=self.test)
+                encd.exp_patch_internal_status(self.exp_id, 'pipeline ready', self.server_key, test=self.test)
             #else:
-            #    dxencode.enc_exp_patch_internal_status(self.exp_id, 'unrunnable', self.server_key, test=self.test)
+            #    encd.exp_patch_internal_status(self.exp_id, 'unrunnable', self.server_key, test=self.test)
                 
             # Ignite a launcher here...
             if args.launch:
