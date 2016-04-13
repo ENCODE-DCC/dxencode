@@ -112,7 +112,7 @@ class Mission_log(object):
                               }
          },
          'cost': {
-             "sources":       [ "DX" ], # Unfortunately this is only of DX.
+             "sources":       ["encodeD","DX"], # Unfortunately this is only of DX.
              "long-rna-seq":  { "output_types": [ "gene quantifications", "mad-qc" ],
                                 "gene quantifications": { "suffix":  [ "_rsem.genes.results" ],
                                                           "metrics": [ "rep_cost" ] },
@@ -878,13 +878,31 @@ class Mission_log(object):
                 print >> sys.stderr, "%s %s %s" % (metric_key,rep_tech,metric_id)
         return metrics
 
+    def total_step_runs(self, file):
+        # this will recursively return a list of step runs
+        derived_from = file.get("derived_from", [])
+        step_runs = []
+        for fi in derived_from:
+            if type(fi) is unicode:
+              temp = fi
+            else:
+              temp = fi["@id"]
+            # get the derived from file
+            file_obj = dxencode.enc_lookup_json(temp)
+            if file_obj.get("output_type", "") == "genome index":
+                continue
+            step_run = file_obj.get("step_run")
+            if step_run is None or step_run in step_runs:
+                # we don't want this one
+                continue
+            # this means that we found a step run that we have not yet found
+            step_runs.append(step_run)
+            step_runs += self.total_step_runs(fi)
+        return step_runs
 
     def get_enc_special_metric(self,metric_id,file_enc_obj,metric_key,metric_def,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in encodeD.'''
         #verbose=True
-        
-        if metric_key != "file_cost": # "rep_cost", "exp_cost" not yet supported
-            return None
         
         metric = {}
         notes = None
@@ -908,8 +926,24 @@ class Mission_log(object):
                                 cost = None
                     if cost != None:
                         metric[col] = cost
-            elif col == "Total Cost": # TODO:
-                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
+            elif col == "Total Cost":
+                # first need all the step runs
+                # gather all the step runs
+                total = 0
+                step_runs = self.total_step_runs(file_enc_obj)
+                step_runs = list(set(step_runs))
+                for run in step_runs:
+                    step = dxencode.enc_lookup_json(run)
+                    step_notes = step.get("notes")
+                    if step_notes is not None:
+                        try:
+                            cost = json.loads(step_notes).get("dx_cost")
+                            cost = float(cost.lstrip("$"))
+                        except:
+                            cost = None
+                        if cost is not None:
+                            total += cost
+                metric[col] = total
             elif col == "Time":
                 step_run = self.enc_lookup_json(file_enc_obj["step_run"])
                 if step_run != None:
@@ -922,10 +956,26 @@ class Mission_log(object):
                         duration = (end_dt - beg_dt)
                         if duration != None:
                             metric[col] = duration.total_seconds()
-            elif col == "Job Time": # TODO:
-                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
+            elif col == "Job Time":
+                step_runs = self.total_step_runs(file_enc_obj)
+                step_runs = list(set(step_runs))
+                total = 0
+                for run in step_runs:
+                    step_run = self.enc_lookup_json(file_enc_obj["step_run"])
+                    if step_run != None:
+                        step_details = step_run["dx_applet_details"][0]
+                        beg_time = step_details.get("started_running")
+                        end_time = step_details.get("stopped_running")
+                        if beg_time != None and end_time != None:
+                            beg_dt = datetime.strptime(beg_time, '%Y-%m-%dT%H:%M:%SZ')
+                            end_dt = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%SZ')
+                            duration = (end_dt - beg_dt)
+                            if duration != None:
+                                total += duration.total_seconds()
+                metric[col] = total
             elif col == "CPU Time": # TODO:
-                print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
+                pass
+                #print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
             elif col == "File Size":
                 metric[col] = file_enc_obj["file_size"]
         if verbose:
