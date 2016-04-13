@@ -6,12 +6,14 @@ from datetime import datetime
 from collections import deque
 
 import dxpy
-import dxencode
+#import dxencode
+import dx
+import encd
 
 ### TODO:
 # 1) NEED TO MAKE a --template version not relying on ENCODEd at all!
 # - Nice to have option to dx build pipeline applets
-# - Nice to have Template module that mirrors Launch but resides in pipeline repo and does not use dxencode.py
+# - Nice to have Template module that mirrors Launch but resides in pipeline repo and does not use encd.py
 # - Template should override exp, not require read files, not require ref files, not make folders.
 # - Options: SE, PE, single/double replicate.  Example:
 # - ./lrnaLaunch.py --template --rep 1 --se --use_refs --build_apps
@@ -73,7 +75,7 @@ class Launch(object):
     '''
 
     PIPELINE_NAME = "MUST REPLACE IN DREIVED CLASS"
-    ''' This must match the assay type returned by dxencode.get_assay_type({exp_id}).'''
+    ''' This must match the assay type returned by encd.get_assay_type({exp_id}).'''
 
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline " + \
                     "analysis for one replicate or combined replicates. "
@@ -162,7 +164,7 @@ class Launch(object):
         self.template = False
         self.build_apps = False
         self.no_refs = False
-        self.server_key = self.SERVER_DEFAULT
+        self.server_key = self.SERVER_DEFAULT # TODO: replace with self.encd.server_key when Encd class is created
         self.proj_name = None
         self.project = None
         self.proj_id = None
@@ -171,6 +173,7 @@ class Launch(object):
         self.multi_rep = False       # This run includes more than one replicate
         self.combined_reps = False   # This run includes combined replicate workflows
         self.compare_techreps = False# Only for special cases where there is only 1 bio_rep but 2 techreps.
+        self.detect_umi = False      # Only in DNase is there a umi setting buried in the fastq metadata.
         self.link_later = None       # Rare: when 2 sister branches link to each other, it requires a final wf pass.
         self.deprecate = []          # Master list of files to deprecate.  Needed to cross rep boundaries in steps_to_run
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
@@ -221,7 +224,7 @@ class Launch(object):
                         
         ap.add_argument('--project',
                         help="Project to run analysis in (default: '" + \
-                                                        dxencode.env_get_current_project() + "')",
+                                                        dx.env_get_current_project() + "')",
                         required=False)
 
         ap.add_argument('--refLoc',
@@ -348,15 +351,14 @@ class Launch(object):
         
         if self.CONTROL_FILE_GLOB == None or self.template:
             return None
-        (AUTHID,AUTHPW,SERVER) = dxencode.processkey(self.server_key)
         if 'controls' not in rep:
             return None
         for file_key in rep['controls']:
             if isinstance(file_key,list):
                 file_key = file_key[0]
-            file_obj = dxencode.enc_lookup_json(file_key,self.server_key,frame='embedded')
+            file_obj = encd.lookup_json(file_key,frame='embedded')
             rep_id = file_obj["replicate"]['@id']
-            rep_obj = dxencode.enc_lookup_json(rep_id,self.server_key,frame='embedded')
+            rep_obj = encd.lookup_json(rep_id,frame='embedded')
             exp_id = rep_obj['experiment']['@id'].split('/')[2]
             rep_tech = "rep%s_%s" % \
                     (rep_obj['biological_replicate_number'], rep_obj['technical_replicate_number'])
@@ -365,13 +367,13 @@ class Launch(object):
             if self.proj_name == "scratchPad" and self.psv['control_path'] == self.CONTROL_ROOT_FOLDER:
                 control_root = "/lrna"
             path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
-            target_folder = dxencode.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
+            target_folder = dx.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
             #print "Target found [%s]" % target_folder
             if target_folder != None:
                 path_n_glob = target_folder + '/' + self.CONTROL_FILE_GLOB
             fid = self.find_file(path_n_glob,self.proj_id,multiple=False,recurse=False)
             if fid != None:
-                return dxencode.file_path_from_fid(fid)
+                return dx.file_path_from_fid(fid)
                 
         if default != None:
             return default
@@ -394,7 +396,7 @@ class Launch(object):
         for rep in self.psv['reps'].values():
             control = self.find_control_file(rep,default_control)
             if control != None:
-                rep['inputs']['Control'] = dxencode.find_and_copy_read_files(rep['priors'], \
+                rep['inputs']['Control'] = dx.find_and_copy_read_files(rep['priors'], \
                                                     [ control ], self.test, 'control_bam', \
                                                     rep['resultsFolder'], False, self.proj_id)
 
@@ -497,22 +499,22 @@ class Launch(object):
             rep['inputs'].update( inputs )            
     
 
-    ############## WRAPPED DXENCODE METHODS (makes templating without dxencode easier) ############
+    ############## WRAPPED DXENCODE METHODS (makes templating without encd/dx easier) ############
     # Wrap a few global defines to make inheritance easier
-    REF_PROJECT_DEFAULT = dxencode.REF_PROJECT_DEFAULT
-    REF_FOLDER_DEFAULT = dxencode.REF_FOLDER_DEFAULT
-    GENOME_DEFAULTS = dxencode.GENOME_DEFAULTS
+    REF_PROJECT_DEFAULT = dx.REF_PROJECT_DEFAULT
+    REF_FOLDER_DEFAULT = dx.REF_FOLDER_DEFAULT
+    GENOME_DEFAULTS = dx.GENOME_DEFAULTS
 
     def find_file(self,filePath,project=None,verbose=False,multiple=False, recurse=True):
         '''Using a DX style file path, find the file.'''
-        # wrap the dxencode version to make templating easier
-        return dxencode.find_file(filePath,project=project,verbose=verbose,multiple=multiple,recurse=recurse)
+        # wrap the dx version to make templating easier
+        return dx.find_file(filePath,project=project,verbose=verbose,multiple=multiple,recurse=recurse)
         
     def umbrella_folder(self,folder,default,proj_name=None,exp_type=None,genome=None,annotation=None):
         '''Returns a normalized umbrella folder (that holds the experiments of a given type).'''
         if self.no_refs: # (no_refs is only True when templating)
             genome = None # If templating with no refs then this will hide genome and annotation
-        return dxencode.umbrella_folder(folder,default,proj_name,exp_type=exp_type,genome=genome,annotation=annotation)
+        return dx.umbrella_folder(folder,default,proj_name,exp_type=exp_type,genome=genome,annotation=annotation)
                 
     ############## NOT EXPECTED TO OVERIDE THE FOLLOWING METHODS ############
     def common_variables(self,args,fastqs=True):
@@ -520,6 +522,7 @@ class Launch(object):
         # NOT EXPECTED TO OVERRIDE
         
         self.server_key = args.server
+        encd.set_server_key(self.server_key) # TODO: change to self.encd = Encd(self.server_key)
         self.test = args.test
         if args.experiment == None and not args.template:
             print >> sys.stderr, "ERROR: either --experiment or --template is required."
@@ -534,13 +537,13 @@ class Launch(object):
             self.compare_techreps = True
             
         cv = {}
-        self.proj_name = dxencode.env_get_current_project()
+        self.proj_name = dx.env_get_current_project()
         if self.proj_name == None or args.project != None:
             self.proj_name = args.project
         if self.proj_name == None:
             print >> sys.stderr, "ERROR: Please enter a '--project' to run in."
             sys.exit(1)
-        self.project = dxencode.get_project(self.proj_name)
+        self.project = dx.get_project(self.proj_name)
         self.proj_id = self.project.get_id()        
 
         cv['project']    = self.proj_name
@@ -556,13 +559,13 @@ class Launch(object):
         
         if not self.template:
             print "Retrieving experiment specifics..."
-            self.exp = dxencode.get_exp(cv['experiment'],key=self.server_key)
-            cv['exp_type'] = dxencode.get_assay_type(cv['experiment'],self.exp)
+            self.exp = encd.get_exp(cv['experiment'])
+            cv['exp_type'] = encd.get_assay_type(cv['experiment'],self.exp)
             if cv['exp_type'] != self.PIPELINE_NAME:
                 print >> sys.stderr, "ERROR: Experiment %s is not for '%s' but for '%s'" \
                                                % (cv['experiment'],self.PIPELINE_NAME,cv['exp_type'])
                 sys.exit(1)
-            if 'internal_status' in self.exp and self.exp['internal_status'] in dxencode.INTERNAL_STATUS_BLOCKS:
+            if 'internal_status' in self.exp and self.exp['internal_status'] in encd.INTERNAL_STATUS_BLOCKS:
                 print "ERROR: Experiment %s with internal_status of '%s' cannot be launched." % \
                                                                         (cv['experiment'],self.exp['internal_status']) 
                 sys.exit(1)
@@ -696,8 +699,8 @@ class Launch(object):
         #   - Simple reps are processed by the "REP" pipeline branch.
         #   - The one combined rep (aka "SEA") is processed by the "COMBINED_REPS" pipeline branch
         cv_reps = {}
-        full_mapping = dxencode.get_full_mapping(exp_id,exp=exp)
-        reps = dxencode.get_reps_from_enc(exp_id, load_reads=True, exp=exp, full_mapping=full_mapping)
+        full_mapping = encd.get_full_mapping(exp_id,exp=exp)
+        reps = encd.get_reps(exp_id, load_reads=True, exp=exp, full_mapping=full_mapping)
         rep_techs = []
         if 'reps' in args and args.reps != None:
             for rep_tech in args.reps:
@@ -754,6 +757,11 @@ class Launch(object):
             rep['concat_id'] = 'reads'
             if 'paired_end' in rep and rep['paired_end']: 
                 rep['concat_id2'] = 'reads2'
+            if self.detect_umi:
+                if encd.rep_is_umi(exp,rep):
+                    rep['umi'] = 'yes'
+                else:
+                    rep['umi'] = 'no'
                 
         # mult-rep rep_tech: 
         if self.combined_reps:
@@ -767,8 +775,8 @@ class Launch(object):
         else:
             cv['rep_tech'] = cv_reps['a']['rep_tech']
             
-        cv['reps'] = cv_reps 
-
+        cv['reps'] = cv_reps
+        
         # Call override-able function to define replicate combinations.
         self.add_combining_reps(cv)
 
@@ -1029,7 +1037,7 @@ class Launch(object):
                 if rep['branch_id'] != branch_id:
                     continue
                 if not self.test:
-                    if not dxencode.project_has_folder(self.project, rep['resultsFolder']):
+                    if not dx.project_has_folder(self.project, rep['resultsFolder']):
                         self.project.new_folder(rep['resultsFolder'],parents=True)
                 rep['priors'] = self.find_prior_results(rep['path'],rep['steps'],rep['resultsFolder'],globs)
                 
@@ -1046,11 +1054,11 @@ class Launch(object):
                 reads_token = 'reads'
                 if rep['paired_end']:
                     reads_token += '1'
-                rep['inputs']['Reads1'] = dxencode.find_and_copy_read_files(rep['priors'], \
+                rep['inputs']['Reads1'] = dx.find_and_copy_read_files(rep['priors'], \
                                                     rep['fastqs']['1'],  self.test, reads_token, \
                                                     rep['resultsFolder'], False, self.proj_id)
                 # Note: rep['fastqs']['2'] and rep['inputs']['Reads2'] will be empty on single-end
-                rep['inputs']['Reads2'] = dxencode.find_and_copy_read_files(rep['priors'], \
+                rep['inputs']['Reads2'] = dx.find_and_copy_read_files(rep['priors'], \
                                                     rep['fastqs']['2'], self.test, 'reads2', \
                                                     rep['resultsFolder'], False, self.proj_id)
 
@@ -1113,7 +1121,7 @@ class Launch(object):
                         out_value = None
                         # 5) look up the job, then look up the output value matching this one
                         if job == None:
-                            job = dxencode.job_from_fid(fid)
+                            job = dx.job_from_fid(fid)
                         if job:
                             if "output" in job and out_name in job["output"]:
                                 out_value = job["output"][out_name]
@@ -1122,7 +1130,7 @@ class Launch(object):
                                                                                            rep_id+"['params']['"+out_key+"']"
                         # 6) if not found then check in this file
                         if out_value == None:
-                            out_value = dxencode.dx_file_get_property(out_name,fid)
+                            out_value = dx.file_get_property(out_name,fid)
                             if out_value != None:
                                 if verbose:
                                     print >> sys.stderr, "DEBUG: found in file '"+out_name+"' = "+str(out_value)+", saved as "+ \
@@ -1190,7 +1198,7 @@ class Launch(object):
                         deprecate += [ priors[result] ]
                         self.deprecate.append(priors[result]) # needed to ensure tributaries affect river reps.
                         if verbose:
-                            print "  - Will deprecate '"+dxencode.file_path_from_fid(priors[result])+"'\."
+                            print "  - Will deprecate '"+dx.file_path_from_fid(priors[result])+"'\."
                         del priors[result]
                         # if results are in folder, then duplicate files cause a problem!
                         # So add to 'deprecate' to move or remove before launching
@@ -1401,13 +1409,13 @@ class Launch(object):
                 if isinstance(rep['priors'][alt_token], list):
                      if expect_set:
                         for fid in rep['priors'][alt_token]:
-                            file_input.append( dxencode.FILES[fid] )
+                            file_input.append( dx.FILES[fid] )
                      ##else:
                      #   print >> sys.stderr, "ERROR: Not expecting input set and found "+str(len(rep['priors'][alt_token]))+" file(s)."
                      #   print >> sys.stderr, json.dumps(rep['priors'],indent=4,sort_keys=True)
                      #   sys.exit(1)
                 else:
-                    file_input.append( dxencode.FILES[ rep['priors'][alt_token] ] )
+                    file_input.append( dx.FILES[ rep['priors'][alt_token] ] )
                 if verbose:
                     print >> sys.stderr, "DEBUG: Now %d file_inputs after priors, with '%s'" % (len(file_input),file_token)
 
@@ -1448,6 +1456,7 @@ class Launch(object):
         if param_input == None and not self.template:
             print >> sys.stderr, "ERROR: step '"+step_id+"' unable to locate '"+param+ \
                                               "' in pipeline specific variables (psv)."
+            #print >> sys.stderr, json.dumps(rep,indent=4)
             sys.exit(1)
             
         return param_input
@@ -1465,7 +1474,7 @@ class Launch(object):
 
         # Make sure results folder exists first.
         if not self.test:
-            if not dxencode.project_has_folder(self.project, rep['resultsFolder']):
+            if not dx.project_has_folder(self.project, rep['resultsFolder']):
                 self.project.new_folder(rep['resultsFolder'],parents=True)
         self.build_applets_if_necessary()
                 
@@ -1492,7 +1501,7 @@ class Launch(object):
         for step in rep['stepsToDo']:
             step_link_later = False
             app_name = steps[step]['app']
-            app = dxencode.find_applet_by_name(app_name, app_proj_id)
+            app = dx.find_applet_by_name(app_name, app_proj_id)
             inp_defs = app.describe().get('inputSpec') or []
             app_inputs = {}
 
@@ -1622,7 +1631,7 @@ class Launch(object):
                     input_type_msg = input_type
                     if len(rep['inputs'][input_type]) > 0: 
                         for fid in rep['inputs'][input_type]:
-                            print "  - "+rep_tech_msg+' '+input_type_msg+' '+dxencode.file_path_from_fid(fid)
+                            print "  - "+rep_tech_msg+' '+input_type_msg+' '+dx.file_path_from_fid(fid)
                             rep_tech_msg = '      '  # Trick to make output less cluttered
                             input_type_msg = '      '
         else:
@@ -1631,7 +1640,7 @@ class Launch(object):
                 input_type_msg = input_type
                 if len(run['inputs'][input_type]) > 0: 
                     for fid in run['inputs'][input_type]:
-                        print "  - "+rep_tech_msg+' '+input_type_msg+' '+dxencode.file_path_from_fid(fid)
+                        print "  - "+rep_tech_msg+' '+input_type_msg+' '+dx.file_path_from_fid(fid)
                         rep_tech_msg = '      '
                         input_type_msg = '      '
 
@@ -1639,7 +1648,7 @@ class Launch(object):
             print "- Reference files:"
             # Should be enough to show the ref priors from 'a' rep for single-rep, multi or combined
             for token in self.psv['ref_files']:
-                print "  " + dxencode.file_path_from_fid(self.psv['reps']['a']['priors'][token],True)
+                print "  " + dx.file_path_from_fid(self.psv['reps']['a']['priors'][token],True)
         
         print "- Results written to: " + self.psv['project'] + ":" +run['resultsFolder']
         if not self.template:
@@ -1685,7 +1694,7 @@ class Launch(object):
                             deprecated = run['resultsFolder']+"deprecated/"
                         print "Will move "+str(len(rep['deprecate']))+" prior result file(s) to '" + deprecated+"'."
                         for fid in rep['deprecate']:
-                            print "  " + dxencode.file_path_from_fid(fid)
+                            print "  " + dx.file_path_from_fid(fid)
             else:
                 if len(run['deprecate']) > 0:
                     deprecated = run['resultsFolder']+"/deprecated/"
@@ -1693,7 +1702,7 @@ class Launch(object):
                         deprecated = run['resultsFolder']+"deprecated/"
                     print "Will move "+str(len(run['deprecate']))+" prior result file(s) to '" + deprecated+"'."
                     for fid in run['deprecate']:
-                        print "  " + dxencode.file_path_from_fid(fid)
+                        print "  " + dx.file_path_from_fid(fid)
 
 
     def workflow_report_and_build(self,run,proj_id=None,verbose=False):
@@ -1717,13 +1726,13 @@ class Launch(object):
                         deprecated = rep['resultsFolder']+"deprecated/"
                         print "Moving "+str(len(rep['deprecate']))+" "+rep['rep_tech']+" prior result file(s) to '"+ \
                                                                                             deprecated+"'..."
-                        dxencode.move_files(rep['deprecate'],deprecated,proj_id)
+                        dx.move_files(rep['deprecate'],deprecated,proj_id)
             if not self.multi_rep:
                 if len(run['deprecate']) > 0 and not self.test:
                     deprecated = run['resultsFolder']+"deprecated/"
                     print "Moving "+str(len(run['deprecate']))+" "+run['rep_tech']+" prior result file(s) to '"+ \
                                                                                         deprecated+"'..."
-                    dxencode.move_files(run['deprecate'],deprecated,proj_id)
+                    dx.move_files(run['deprecate'],deprecated,proj_id)
         
         # Build the workflow...
         wf = None
@@ -1754,7 +1763,7 @@ class Launch(object):
     def check_run_log(self,results_folder,proj_id,verbose=False):
         '''Checks for currently running jobs and will exit if found.'''
         # NOT EXPECTED TO OVERRIDE
-        run_log_path = results_folder + '/' + dxencode.RUNS_LAUNCHED_FILE
+        run_log_path = results_folder + '/' + dx.RUNS_LAUNCHED_FILE
         log_fids = self.find_file(run_log_path,proj_id,multiple=True,recurse=False)
         if log_fids == None:
             if verbose:
@@ -1791,10 +1800,10 @@ class Launch(object):
         '''Adds a runId to the runsLaunched file in resultsFolder.'''
         # NOT EXPECTED TO OVERRIDE
         # NOTE: DX manual lies?!  Append not possible?!  Then write new/delete old
-        run_log_path = results_folder + '/' + dxencode.RUNS_LAUNCHED_FILE
+        run_log_path = results_folder + '/' + dx.RUNS_LAUNCHED_FILE
         old_fids = self.find_file(run_log_path,self.proj_id,multiple=True,recurse=False)
         new_fh = dxpy.new_dxfile('w',project=self.proj_id,folder=results_folder, \
-                                                                  name=dxencode.RUNS_LAUNCHED_FILE)
+                                                                  name=dx.RUNS_LAUNCHED_FILE)
         new_fh.write(run_id+' started:'+str(datetime.now())+'\n')
         if old_fids is not None:
             for old_fid in old_fids:
@@ -1826,7 +1835,7 @@ class Launch(object):
                 wf_dict = wf_run.describe()
                 self.log_this_run(wf_dict['id'],run['resultsFolder'])
                 print "  Launched " + wf_dict['id']+" as '"+wf.name+"'"
-                dxencode.enc_exp_patch_internal_status(self.psv['experiment'], 'processing', self.server_key)
+                encd.exp_patch_internal_status(self.psv['experiment'], 'processing')
 
         else:
             print "Workflow '" + wf.name + "' has been assembled in "+run['resultsFolder'] + \
