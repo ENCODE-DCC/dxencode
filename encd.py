@@ -25,10 +25,12 @@ prime_server_key = "default" # ordinarily is set to the first non-default key se
 
 def set_server_key(key):
     '''Explicitly sets prime_server_key, which ordinarily is set to the first non-default key seen.'''
+    global prime_server_key
     prime_server_key = key
 
 def get_server_key():
     '''Returns the server_key.'''
+    global prime_server_key
     return prime_server_key
 
 def get_server():
@@ -55,6 +57,7 @@ def processkey(key):
                 {"server":"https://www.encodeproject.org", "key":"rand_user_name", "secret":"rand_password"}
     }
     '''
+    global prime_server_key
     if key == None:
         key = prime_server_key
     if key in SAVED_KEYS:

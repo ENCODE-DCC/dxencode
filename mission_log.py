@@ -31,7 +31,8 @@ from base64 import b64encode
 import commands, string
 
 import dxpy
-import dxencode
+import dx
+import encd
 
 class Mission_log(object):
     '''
@@ -255,7 +256,7 @@ class Mission_log(object):
         uploaded to encodeD.  
         '''
         self.args = {} # run time arguments
-        self.server_key = 'www'
+        self.server_key = 'www'  # TODO: replace with self.encd.server_key when Encd class is created
         self.exp = {}  # Will hold the encoded exp json
         self.exp_id = None
         self.exp_type = None  # Will hold the experiment's assay_type, normalized to known tokens.
@@ -296,7 +297,7 @@ class Mission_log(object):
 
         ap.add_argument('-g','--genome',
                         help="The genome assembly to run on (default: '" + \
-                                                                  dxencode.GENOME_DEFAULTS['human'] + "')",
+                                                                  dx.GENOME_DEFAULTS['human'] + "')",
                         default=None,
                         required=False)
 
@@ -351,23 +352,6 @@ class Mission_log(object):
         return line 
 
 
-    def enc_lookup_json(self, path,frame='object',must_find=False):
-        '''Commonly used method to get a json object from encodeD.'''
-        url = self.server + path + '/?format=json&frame=' + frame
-        #print url
-        response = dxencode.encoded_get(url, self.authid, self.authpw)
-        try:
-            response.raise_for_status()
-            json_obj = response.json()
-        except:
-            if must_find:
-                print "Path to json object '%s' not found." % path
-                print 'Lookup failed: %s %s' % (response.status_code, response.reason)
-                sys.exit(1)
-            return None
-        return json_obj
-
-
     def load_exp_list(self,exp_ids,file_of_ids,verbose=False):
         '''Returns a sorted list of experiment accessions from command-line args.'''
         #verbose=True
@@ -407,20 +391,19 @@ class Mission_log(object):
             
         # Must look through exp and find all replicates!
         if exp != self.exp or "full_mapping" not in self.obj_cache["exp"]:
-            self.obj_cache["exp"]["full_mapping"] = dxencode.get_full_mapping(exp_id,exp,key=self.server_key)
-        replicates = dxencode.get_reps_from_enc(exp_id, exp=exp, full_mapping=self.obj_cache["exp"]["full_mapping"], \
-                                                                                                    key=self.server_key)
+            self.obj_cache["exp"]["full_mapping"] = encd.get_full_mapping(exp_id,exp)
+        replicates = encd.get_reps(exp_id, exp=exp, full_mapping=self.obj_cache["exp"]["full_mapping"])
         for rep in replicates:
             if self.genome == None:
-                if rep['organism'] in dxencode.GENOME_DEFAULTS:
-                    self.genome = dxencode.GENOME_DEFAULTS[rep['organism']]
+                if rep['organism'] in dx.GENOME_DEFAULTS:
+                    self.genome = dx.GENOME_DEFAULTS[rep['organism']]
                 else:
                     print >> sys.stderr, "Organism %s not currently supported" % rep['organism']
                     sys.exit(1)
-            elif self.genome != dxencode.GENOME_DEFAULTS[rep['organism']]:
+            elif self.genome != dx.GENOME_DEFAULTS[rep['organism']]:
                 if self.genome_warning:
                     print >> sys.stderr, "WARNING: Mixing genomes in one report: %s and %s.  Will only report '%s'" % \
-                                                        (self.genome, dxencode.GENOME_DEFAULTS[rep['organism']],self.genome)
+                                                        (self.genome, dx.GENOME_DEFAULTS[rep['organism']],self.genome)
                     self.genome_warning  = False
                 
         if verbose:
@@ -437,7 +420,7 @@ class Mission_log(object):
         
         # Need a project specific place to start looking for files
         if self.umbrella_folder == None:
-            self.umbrella_folder = dxencode.umbrella_folder(self.folder,self.FOLDER_DEFAULT,self.proj_name,self.exp_type)
+            self.umbrella_folder = dx.umbrella_folder(self.folder,self.FOLDER_DEFAULT,self.proj_name,self.exp_type)
             if self.folder == self.FOLDER_DEFAULT:
                 self.umbrella_folder = self.umbrella_folder.replace("/runs/","/posted/")
             if self.genome not in self.umbrella_folder:
@@ -448,7 +431,7 @@ class Mission_log(object):
         # Find experiment dir
         if verbose:
             print >> sys.stderr, "Looking in '%s:%s' for folder for %s." % (self.proj_name, self.umbrella_folder, exp_id)
-        exp_folder = dxencode.find_exp_folder(self.project,exp_id,self.umbrella_folder)
+        exp_folder = dx.find_exp_folder(self.project,exp_id,self.umbrella_folder)
         if exp_folder == None:
             print >> sys.stderr, "ERROR: Can't find experiment folder for %s underneath '%s:%s.'" % \
                                         (exp_id, self.proj_name, self.umbrella_folder)
@@ -457,7 +440,7 @@ class Mission_log(object):
             print >> sys.stderr, "- Examining %s:%s for '%s' results..." % \
                                         (self.proj_name, exp_folder, self.exp_type)
         # Now look for replicate dirs:
-        rep_folders = dxencode.find_replicate_folders(self.project,exp_folder)
+        rep_folders = dx.find_replicate_folders(self.project,exp_folder)
         if len(rep_folders) == 0:
             print >> sys.stderr, "ERROR: Can't find any replicate folders in %s." % (self.proj_name, exp_folder)
             return dx_files
@@ -477,12 +460,12 @@ class Mission_log(object):
                     for suffix in report_specs[sub_type]["suffix"]:
                         if verbose:
                             print >> sys.stderr, "- Looking for files for type '%s' with suffix '%s'." % (sub_type,suffix)
-                        fid = dxencode.find_file(exp_folder + rep_folder + '/*' + suffix,self.proj_name, recurse=False)
+                        fid = dx.find_file(exp_folder + rep_folder + '/*' + suffix,self.proj_name, recurse=False)
                         if fid == None: # Or check in experiment folder
                             if verbose:
                                 print >> sys.stderr, "- Looking in experiment folder %s for files with suffix '%s'." % \
                                                                                                             (exp_folder,suffix)
-                            fid = dxencode.find_file(exp_folder + '*' + suffix,self.proj_name, recurse=False)
+                            fid = dx.find_file(exp_folder + '*' + suffix,self.proj_name, recurse=False)
                         if fid == None:
                             continue
                         if fid in fids_found: # Did we already get this file at the experiment level?
@@ -490,8 +473,8 @@ class Mission_log(object):
                         fids_found.append(fid)
                         if verbose:
                             print >> sys.stderr, "- Found file '%s'." % fid
-                        file_dx_obj = dxencode.description_from_fid(fid,properties=True)
-                        qc_json = dxencode.dx_file_get_details(fid)
+                        file_dx_obj = dx.description_from_fid(fid,properties=True)
+                        qc_json = dx.file_get_details(fid)
                         if qc_json and "QC" in qc_json:  # Not likely but QC json could be subsection of details
                             qc_json = qc_json["QC"]
                         if not qc_json:
@@ -557,8 +540,7 @@ class Mission_log(object):
         enc_files = []
         self.obj_cache["exp"]["files"] = {}
         
-        files = dxencode.get_enc_exp_files(exp,report_specs["output_types"],lab="encode-processing-pipeline", \
-                                                                                                key=self.server_key)
+        files = encd.get_exp_files(exp,report_specs["output_types"],lab="encode-processing-pipeline")
         # special case to get around m2,m3 files
         new_list = []
         while len(files) > 0:
@@ -663,7 +645,7 @@ class Mission_log(object):
             else:
                 inp_fid = dxlink.get("id")
             try:
-                file_dx_obj = dxencode.description_from_fid(inp_fid)
+                file_dx_obj = dx.description_from_fid(inp_fid)
                 job_id = file_dx_obj["createdBy"]["job"]
             except:
                 # This is not an error... fastqs, fastas and chrom.sizes should have no job_ids!
@@ -888,7 +870,7 @@ class Mission_log(object):
             else:
               temp = fi["@id"]
             # get the derived from file
-            file_obj = dxencode.enc_lookup_json(temp)
+            file_obj = encd.lookup_json(temp)
             if file_obj.get("output_type", "") == "genome index":
                 continue
             step_run = file_obj.get("step_run")
@@ -933,7 +915,7 @@ class Mission_log(object):
                 step_runs = self.total_step_runs(file_enc_obj)
                 step_runs = list(set(step_runs))
                 for run in step_runs:
-                    step = dxencode.enc_lookup_json(run)
+                    step = encd.lookup_json(run)
                     step_notes = step.get("notes")
                     if step_notes is not None:
                         try:
@@ -945,7 +927,7 @@ class Mission_log(object):
                             total += cost
                 metric[col] = total
             elif col == "Time":
-                step_run = self.enc_lookup_json(file_enc_obj["step_run"])
+                step_run = encd.lookup_json(file_enc_obj["step_run"])
                 if step_run != None:
                     step_details = step_run["dx_applet_details"][0]
                     beg_time = step_details.get("started_running")
@@ -961,7 +943,7 @@ class Mission_log(object):
                 step_runs = list(set(step_runs))
                 total = 0
                 for run in step_runs:
-                    step_run = self.enc_lookup_json(file_enc_obj["step_run"])
+                    step_run = encd.lookup_json(file_enc_obj["step_run"])
                     if step_run != None:
                         step_details = step_run["dx_applet_details"][0]
                         beg_time = step_details.get("started_running")
@@ -1160,7 +1142,7 @@ class Mission_log(object):
         if format_type == "file_size":
             return self.file_size_string(val)
         elif format_type == "duration":
-            return dxencode.duration_string(val,include_seconds=False)
+            return dx.duration_string(val,include_seconds=False)
         elif format_type == "percent":
             if isinstance(val,int):
                 return str(val)+"%"
@@ -1383,12 +1365,13 @@ class Mission_log(object):
         args = self.get_args()
             
         self.server_key = args.server
-        self.authid, self.authpw, self.server = dxencode.processkey(self.server_key)
+        encd.set_server_key(self.server_key) # TODO: change to self.encd = Encd(self.server_key)
+        #(self.authid, self.authpw, self.server) = encd.find_keys(self.server_key)
         self.data_mine = "encodeD"
         if args.dx:
             self.data_mine = "DX"
-            self.proj_name = dxencode.env_get_current_project()
-            self.project = dxencode.get_project(self.proj_name)
+            self.proj_name = dx.env_get_current_project()
+            self.project = dx.get_project(self.proj_name)
             self.folder = args.folder
             print >> sys.stderr, "Using %s as data mine" % self.data_mine
         
@@ -1421,13 +1404,13 @@ class Mission_log(object):
             self.obj_cache["exp"] = {}  # clear exp cache, which will hold exp specific wf_run and step_run objects
             # Lookup experiment type from encoded, based on accession
             print >> sys.stderr, "Working on %s..." % self.exp_id
-            self.exp = dxencode.get_exp(self.exp_id,must_find=True,key=self.server_key)
+            self.exp = encd.get_exp(self.exp_id,must_find=True)
             if self.exp == None or self.exp["status"] == "error":
                 print >> sys.stderr, "Unable to locate experiment %s in encoded (%s)" % (self.exp_id, self.server_key)
                 continue
                 
             # Type of experiment?
-            exp_type = dxencode.get_assay_type(self.exp_id,self.exp)
+            exp_type = encd.get_assay_type(self.exp_id,self.exp)
             if self.exp_type != None and self.exp_type != exp_type:
                 print >> sys.stderr, "WARNING: Experiment type '%s' does not match previous type(s) '%s'.  Skipping!" % \
                                                                                             (exp_type,self.exp_type)
