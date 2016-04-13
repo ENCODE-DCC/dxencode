@@ -862,6 +862,9 @@ class Mission_log(object):
 
     def total_step_runs(self, file):
         # this will recursively return a list of step runs
+        # rewrite this so that it will gather all step runs for an experiment or for just 1 replicate of an experiment
+        # the set of step runs will be ones that are in files or in the qc metric in the files
+        # notes I'm given a file and I can go from the file into the parent experiment
         derived_from = file.get("derived_from", [])
         step_runs = []
         for fi in derived_from:
