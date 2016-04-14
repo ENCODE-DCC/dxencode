@@ -860,13 +860,31 @@ class Mission_log(object):
                 print >> sys.stderr, "%s %s %s" % (metric_key,rep_tech,metric_id)
         return metrics
 
-    def total_step_runs(self, file):
+    def total_step_runs(self, file, search):
         # this will recursively return a list of step runs
         # rewrite this so that it will gather all step runs for an experiment or for just 1 replicate of an experiment
         # the set of step runs will be ones that are in files or in the qc metric in the files
         # notes I'm given a file and I can go from the file into the parent experiment
         derived_from = file.get("derived_from", [])
+        rep = file.get("replicate")
         step_runs = []
+        if search == "experiment":
+            # gather step runs in experiment
+            exp = file.get("dataset")
+            exp_obj = encd.lookup_json(exp)
+            file_list = exp_obj.get("files")
+            for fi in file_list:
+                file_obj = encd.lookup_json(fi)
+                if file_obj.get("output_type", "") != "genome index":
+                    step_run = file_obj.get("step_run")
+                    if step_run:
+                        step_runs.append(step_run)
+        elif search == "replicate":
+            # gather step runs from replicate
+            pass
+            # there's no files linked to replicate, need to figure this out
+
+
         for fi in derived_from:
             if type(fi) is unicode:
               temp = fi
