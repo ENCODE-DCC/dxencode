@@ -132,14 +132,19 @@ class Mission_log(object):
                                 "idr": { "suffix":  [ "_rampage_idr.png" ],
                                             "metrics": [ "exp_cost" ] }, 
                               },
-             "dna-me":        { "output_types": [ "methylation state at CpG", "correlation" ], 
+             "dna-me":        { "output_types": [ "methylation state at CpG" ], 
                                 "methylation state at CpG": { 
-                                                  "suffix":   [ "_biorep_CpG.bed.gz" ], 
-                                                  "metrics":  [ "rep_cost" ] }, 
-                                "correlation": { 
-                                                  "suffix":   [ "_CpG_corr.txt" ], 
-                                                  "metrics":  [ "exp_cost" ] }, 
+                                                  "suffix":   [ "_biorep_CpG.bed.gz", "_CpG_corr.txt" ], 
+                                                  "metrics":  [ "rep_cost", "exp_cost" ] }, 
                               }
+             #"dna-me":        { "output_types": [ "methylation state at CpG", "correlation" ], 
+             #                   "methylation state at CpG": { 
+             #                                     "suffix":   [ "_biorep_CpG.bb" ], 
+             #                                     "metrics":  [ "rep_cost" ] }, 
+             #                   "correlation": { 
+             #                                     "suffix":   [ "_biorep_CpG.bed.gz", "_CpG_corr.txt" ], 
+             #                                     "metrics":  [ "exp_cost" ] }, 
+             #                 }
          },
     }
     '''For each report type, these are the mappings for file 'output_types' to 'quality_metric' types.'''
@@ -991,6 +996,8 @@ class Mission_log(object):
                     if verbose:
                         print >> sys.stderr, "- Getting special metric for %s %s %s" % (exp_id,rep_tech,metric_key)
                     metric_id = acc + '/' + metric_key 
+                    if metric_defs["per"] == "experiment":
+                        metric_id = 'combined/' + metric_key 
                     if metric_id not in metric_ids:  # Note that this will result in only one combined metric from 2 reps.
                         metric_ids.append(metric_id) 
                         metric = self.get_enc_special_metric(metric_id,file_enc_obj,metric_key,metric_defs,verbose=verbose)
@@ -1242,8 +1249,11 @@ class Mission_log(object):
                         self.not_tabulated_cols.append(cur_col)
                     val = None
                 if val != None:
-                    if  self.min_stats[cur_col] > val or self.min_stats[cur_col] == 999999999:
-                        self.min_stats[cur_col] = val
+                    try:
+                        if  self.min_stats[cur_col] > val or self.min_stats[cur_col] == 999999999:
+                            self.min_stats[cur_col] = val
+                    except:
+                        print "cur_col out of range: %s" % Line
                     if  self.max_stats[cur_col] < val or self.max_stats[cur_col] == -999999999:
                         self.max_stats[cur_col] = val
                     self.cum_stats[cur_col] += val

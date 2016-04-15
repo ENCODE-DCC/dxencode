@@ -1,15 +1,5 @@
 ####### Working on: LRNA GRCh38 backlog
 
-# TODO POSTING: 7 Graveley shRNA with new fastqs (both hg19 and GRCh38): http://redmine.encodedcc.org/issues/3060#note-168
-# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
-ENCSR210RWL       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29     9h34m  $15.18
-ENCSR318OXM       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29  1d04h46m  $15.92
-ENCSR598YQX       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-08-26  2015-08-31    16h04m  $18.44
-ENCSR788HVK       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29  1d08h55m  $13.84
-ENCSR856ZRV       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29  1d00h32m  $18.14
-ENCSR927XBT       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-08-26  2015-08-31    13h43m  $16.24
-ENCSR992JGE       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21                         |  2015-09-29  2015-09-29    20h26m  $25.77
-
 # Special case - "with internal_status of 'requires lab review' cannot be launched."
 ENCSR703QFF       GRCh38 v24 shRNA  1,2   yes     -
 
@@ -1027,7 +1017,7 @@ ENCSR207QGW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d01h21m  $33.
 ENCSR208GPE  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h07m  $20.45
 ENCSR210DML  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h47m  $30.11
 ENCSR210KJB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h59m  $25.16
-ENCSR210RWL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     9h34m  $15.18
+ENCSR210RWL        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    16h60m  $24.74  |  2015-09-29  2015-09-29     9h34m  $15.18
 ENCSR216NEG        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR219DXZ  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17     9h53m  $40.69
 ENCSR220HFQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h19m   $6.03
@@ -1099,7 +1089,7 @@ ENCSR313IUO  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    10h39m  $26.
 ENCSR314LXG  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d07h38m  $79.43           
 ENCSR316RMA  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h20m   $3.56
 ENCSR318HAT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d06h02m  $25.96
-ENCSR318OXM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d04h46m  $15.92
+ENCSR318OXM        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    20h10m  $29.37  |  2015-09-29  2015-09-29  1d04h46m  $15.92
 ENCSR320BRR  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d22h18m $108.02           
 ENCSR320PXZ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h16m   $3.50
 ENCSR322XVS  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    17h08m  $27.82
@@ -1255,7 +1245,7 @@ ENCSR592MSV        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR597IYB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    16h19m  $23.52
 ENCSR597UZW  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h06m  $26.80
 ENCSR597XHH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d11h00m  $28.83
-ENCSR598YQX  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    16h04m  $18.44
+ENCSR598YQX        hg19 v19 shRNA 1,2 yes 2015-08-26  2016-04-14    20h23m  $29.71  |  2015-08-26  2015-08-31    16h04m  $18.44
 ENCSR599UDS  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h40m  $22.63
 ENCSR602AWR  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     5h08m  $24.19
 ENCSR603TCV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d03h31m  $35.46
@@ -1383,6 +1373,7 @@ ENCSR783LUA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d07h02m  $27.
 ENCSR783YSQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    19h52m  $26.72
 ENCSR784FTX  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    12h11m  $27.77
 ENCSR788HVK  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d08h55m  $13.84
+ENCSR788HVK        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    14h39m  $21.32  |  2015-09-29  2015-09-29  1d08h55m  $13.84
 ENCSR788YGG  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    10h09m  $41.12
 ENCSR789RPP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h33m   $6.60
 ENCSR792CBM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    22h58m  $33.84
@@ -1427,7 +1418,7 @@ ENCSR851KEX  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h51m  $22.
 ENCSR853PBF  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    13h56m  $21.68
 ENCSR853ZJS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    21h39m  $37.25
 ENCSR856CJK  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    16h59m  $21.69
-ENCSR856ZRV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d00h32m  $18.14
+ENCSR856ZRV        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    16h14m  $23.63  |  2015-09-29  2015-09-29  1d00h32m  $18.14
 ENCSR861ENA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d07h36m  $33.52
 ENCSR861FGB        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR867YNV        mm10 M4  -     1,2     - older -   2015-08-20
@@ -1474,7 +1465,7 @@ ENCSR927IOO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h47m   $4.
 ENCSR927JXU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h60m  $28.63
 ENCSR927SLP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d02h37m  $29.52
 ENCSR927TSP  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h17m  $20.19
-ENCSR927XBT  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    13h43m  $16.24
+ENCSR927XBT        hg19 v19 shRNA 1,2 yes 2015-08-26  2016-04-14    19h57m  $29.08  |  2015-08-26  2015-08-31    13h43m  $16.24
 ENCSR928OXI        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR932TRU        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR936TED  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d19h55m  $29.35
@@ -1510,7 +1501,7 @@ ENCSR980SWK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h39m  $10.
 ENCSR982MRY  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h11m  $30.98
 ENCSR984CLJ  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    17h24m  $67.32
 ENCSR985KAT  ENC3  hg19 v19 -     1,2     2015-09-29  2015-09-29  2d02h11m  $40.87
-ENCSR992JGE  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    20h26m  $25.77
+ENCSR992JGE        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14  1d05h03m  $42.36  |  2015-09-29  2015-09-29    20h26m  $25.77
 ENCSR992WBR  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    10h04m  $22.22
 ENCSR995JXE  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    23h11m  $80.19
 ENCSR995RPB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d00h10m  $34.50
@@ -1522,6 +1513,16 @@ ENCSR998RZI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h53m  $32.
 
 
 ####### Historical...
+
+# Done: 7 Graveley shRNA with new fastqs (both hg19 and GRCh38): http://redmine.encodedcc.org/issues/3060#note-168
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR210RWL       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21  2016-04-14    16h60m  $24.74  |  2015-09-29  2015-09-29     9h34m  $15.18
+ENCSR318OXM       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21  2016-04-14    20h10m  $29.37  |  2015-09-29  2015-09-29  1d04h46m  $15.92
+ENCSR598YQX       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21  2016-04-14    20h23m  $29.71  |  2015-08-26  2015-08-31    16h04m  $18.44
+ENCSR788HVK       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21  2016-04-14    14h39m  $21.32  |  2015-09-29  2015-09-29  1d08h55m  $13.84
+ENCSR856ZRV       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21  2016-04-14    16h14m  $23.63  |  2015-09-29  2015-09-29  1d00h32m  $18.14
+ENCSR927XBT       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21  2016-04-14    19h57m  $29.08  |  2015-08-26  2015-08-31    13h43m  $16.24
+ENCSR992JGE       hg19 v19   shRNA  1,2   yes    2016-03-10  2016-03-21  2016-04-14  1d05h03m  $42.36  |  2015-09-29  2015-09-29    20h26m  $25.77
 
 ### Done: Missing GRCh38
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost

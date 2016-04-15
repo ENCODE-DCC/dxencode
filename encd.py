@@ -718,7 +718,7 @@ def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
     return umi_found_true 
 
 
-def exp_patch_internal_status(exp_id, internal_status, server=None, authid=None, authpw=None, test=False):
+def exp_patch_internal_status(exp_id, internal_status, key=None, test=False):
     '''Updates encodeD Experiment with an internal status.'''
     
     allowed = [ 'pipeline ready', 'processing', 'pipeline completed', 'requires lab review' ]
