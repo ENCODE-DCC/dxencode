@@ -113,38 +113,24 @@ class Mission_log(object):
                               }
          },
          'cost': {
-             "sources":       ["encodeD","DX"], # Unfortunately this is only of DX.
-             "long-rna-seq":  { "output_types": [ "gene quantifications", "mad-qc" ],
+             "sources":       ["encodeD","DX"], # Unfortinately this is more accurate on encodeD than on DX
+             "long-rna-seq":  { "output_types": [ "gene quantifications" ],
                                 "gene quantifications": { "suffix":  [ "_rsem.genes.results" ],
-                                                          "metrics": [ "rep_cost" ] },
-                                "mad-qc": { "suffix":  [ "_mad_plot.png" ],
-                                            "metrics": [ "exp_cost" ] }, 
+                                                          "metrics": [ "rep_cost", "exp_cost" ] },
                               },
-             "small-rna-seq": { "output_types": [ "signal", "mad-qc" ],
+             "small-rna-seq": { "output_types": [ "signal" ],
                                 "signal": { "suffix":  [ "_minusUniq.bw" ],
-                                            "metrics": [ "rep_cost" ] },
-                                "mad-qc": { "suffix":  [ "_mad_plot.png" ],
-                                            "metrics": [ "exp_cost" ] }, 
+                                            "metrics": [ "rep_cost", "exp_cost" ] }, 
                               },
-             "rampage":       { "output_types": [ "gene quantifications", "idr" ],
+             "rampage":       { "output_types": [ "gene quantifications" ],
                                 "gene quantifications": { "suffix":  [ "_rampage_peaks_quant.tsv", "_mad_plot.png" ],
-                                                          "metrics": [ "rep_cost" ] },
-                                "idr": { "suffix":  [ "_rampage_idr.png" ],
-                                            "metrics": [ "exp_cost" ] }, 
+                                                          "metrics": [ "rep_cost", "exp_cost" ] }, 
                               },
              "dna-me":        { "output_types": [ "methylation state at CpG" ], 
                                 "methylation state at CpG": { 
                                                   "suffix":   [ "_biorep_CpG.bed.gz", "_CpG_corr.txt" ], 
                                                   "metrics":  [ "rep_cost", "exp_cost" ] }, 
                               }
-             #"dna-me":        { "output_types": [ "methylation state at CpG", "correlation" ], 
-             #                   "methylation state at CpG": { 
-             #                                     "suffix":   [ "_biorep_CpG.bb" ], 
-             #                                     "metrics":  [ "rep_cost" ] }, 
-             #                   "correlation": { 
-             #                                     "suffix":   [ "_biorep_CpG.bed.gz", "_CpG_corr.txt" ], 
-             #                                     "metrics":  [ "exp_cost" ] }, 
-             #                 }
          },
     }
     '''For each report type, these are the mappings for file 'output_types' to 'quality_metric' types.'''
@@ -201,7 +187,6 @@ class Mission_log(object):
                       "format": { "File Size": "file_size",
                                   "Time": "duration" },
                       },
-         # TODO: Make a total time/cost metric
        'rep_cost': {  "per": "replicate",
                       "special_metric": True,
                       "columns": [ "CPU Time","Job Time","Total Cost" ],
@@ -437,6 +422,7 @@ class Mission_log(object):
         if verbose:
             print >> sys.stderr, "Looking in '%s:%s' for folder for %s." % (self.proj_name, self.umbrella_folder, exp_id)
         exp_folder = dx.find_exp_folder(self.project,exp_id,self.umbrella_folder)
+        self.obj_cache["exp"]["files"]["exp_folder"] = exp_folder
         if exp_folder == None:
             print >> sys.stderr, "ERROR: Can't find experiment folder for %s underneath '%s:%s.'" % \
                                         (exp_id, self.proj_name, self.umbrella_folder)
@@ -446,6 +432,7 @@ class Mission_log(object):
                                         (self.proj_name, exp_folder, self.exp_type)
         # Now look for replicate dirs:
         rep_folders = dx.find_replicate_folders(self.project,exp_folder)
+        self.obj_cache["exp"]["files"]["rep_folders"] = rep_folders
         if len(rep_folders) == 0:
             print >> sys.stderr, "ERROR: Can't find any replicate folders in %s." % (self.proj_name, exp_folder)
             return dx_files
@@ -600,6 +587,61 @@ class Mission_log(object):
         return  size
 
 
+    def retrieve_dx_obj(self, obj_id, cache=None):
+        '''Lookup json object in cache or from from DX.'''
+        if cache != None and obj_id in cache:
+            return cache[obj_id]
+            
+        try:
+            obj = dxpy.describe(obj_id)
+            if cache != None and obj_id in cache:
+                return cache[obj_id]
+        except:
+            print >> sys.stderr, "WARNING: Could not find obj for %s." % ibj_id
+            obj = None
+        return obj
+
+    def get_all_job_ids(self, br=None, verbose=False):
+        # this will return a list of unique jobs ids, for the experiment or replicate
+        #verbose=True
+        job_ids = []
+        exp_folder = self.obj_cache["exp"]["files"]["exp_folder"]
+        rep_folders = self.obj_cache["exp"]["files"]["rep_folders"]
+        if br == None:
+            if verbose:
+                print >> sys.stderr, "- Looking for jobs in " + exp_folder
+            fids = dx.find_file(exp_folder + '*',self.proj_name,verbose=False,multiple=True, recurse=False)
+            for fid in fids:
+                file_dx_obj = self.retrieve_dx_obj(fid,self.obj_cache["exp"]["files"])
+                if file_dx_obj["name"].endswith('fastq.gz') or file_dx_obj["name"].endswith('fq.gz'):
+                    continue
+                if verbose:
+                    print >> sys.stderr, "  " + file_dx_obj["name"]
+                if "createdBy" in file_dx_obj and "job" in file_dx_obj["createdBy"]:
+                    job_id = file_dx_obj["createdBy"]["job"]
+                    job_ids.append(job_id)
+        for rep_folder in rep_folders:
+            rep_br = rep_folder.split('_')[0][-1] #  rep2_1 or reps2_1.2.3.4
+            if br == None or br == rep_br:
+                if verbose:
+                    print >> sys.stderr, "  - Looking for jobs in " + exp_folder + rep_folder
+                fids = dx.find_file(exp_folder + rep_folder + '/*',self.proj_name,verbose=False,multiple=True, recurse=False)
+                for fid in fids:
+                    file_dx_obj = self.retrieve_dx_obj(fid,self.obj_cache["exp"]["files"])
+                    if file_dx_obj["name"].endswith('fastq.gz') or file_dx_obj["name"].endswith('fq.gz'):
+                        continue
+                    if verbose:
+                        print >> sys.stderr, "    " + file_dx_obj["name"]
+                    if "createdBy" in file_dx_obj and "job" in file_dx_obj["createdBy"]:
+                        job_id = file_dx_obj["createdBy"]["job"]
+                        job_ids.append(job_id)
+        unique_job_ids = list( set(job_ids) )
+        if verbose:
+            print >> sys.stderr, "- Found %d jobs" % len(job_ids)
+            print >> sys.stderr, "- Found %d unique jobs: %s" % (len(unique_job_ids),str(unique_job_ids))
+            
+        return unique_job_ids
+
     def gather_job_tree(self,job_id,job_cache,exclude_files=[],found_job_ids=[],level=0,verbose=False):
         '''Returns all parent jobs for the current job_id.  Recursive by default.
            job_id: the job at which to start the search.
@@ -609,18 +651,10 @@ class Mission_log(object):
            level: -1 means no recursion, 0 means start recursion at this level.  
            Returns (updated job_cache, list job_ids found for just one (or all recursive) levels)
         '''
-        verbose=False # Verbose can be overkill!
+        #verbose=True # Verbose can be overkill!
         parent_job_ids = []
         
-        if job_id in job_cache:
-            job = job_cache[job_id]
-        else:
-            try:
-                job =  dxpy.api.job_describe(job_id)
-                job_cache[job_id] = job
-            except:
-                print >> sys.stderr, "WARNING: Could not find job for %s." % job_id
-                return (job_cache,parent_job_ids)
+        job = self.retrieve_dx_obj(job_id,job_cache)
                         
         # Find all expected inputs from the job
         file_inputs = []
@@ -690,14 +724,14 @@ class Mission_log(object):
                         found_job_ids.append( new_id )
                         
         if verbose: 
-            print >> sys.stderr, "%s- Level: %d, found job tree: %s" % (' ' * level,level,str(found_job_ids) )
+            print >> sys.stderr, "%s- Level: %d, found %d unique jobs: %s" % \
+                                            (' ' * level,level,len(found_job_ids),str(found_job_ids) )
             
         return (job_cache,parent_job_ids)
             
-            
-    def get_dx_special_metric(self,metric_id,file_dx_obj,metric_key,metric_def,verbose=False):
+    def get_dx_special_metric(self,metric_id,file_dx_obj,metric_key,metric_defs,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in DX.'''
-        #verbose=False
+        #verbose=True
         
         if verbose:
             print >> sys.stderr, "Looking for special metric: %s" % ( metric_id )
@@ -707,24 +741,18 @@ class Mission_log(object):
             self.obj_cache["exp"]["jobs"] = {}
         try:
             job_id = file_dx_obj["createdBy"]["job"]
-            job =  dxpy.api.job_describe(job_id)
-            self.obj_cache["exp"]["jobs"][job_id] = job
+            job = self.retrieve_dx_obj(job_id,self.obj_cache["exp"]["jobs"])
         except:
             print >> sys.stderr, "ERROR: Could not find job for %s." % file_dx_obj['name']
             return None
-        #print >> sys.stderr, "file_dx_obj for '"+metric_id+"':"
-        #print >> sys.stderr, json.dumps(file_dx_obj,indent=4)
-        #print >> sys.stderr, "job:"
-        #print >> sys.stderr, json.dumps(job,indent=4)
-        #sys.exit(0)
           
         # In case job tree needs to be gathered
         excude_files = [ '.tgz' ] # All Reference files
         # All the fastas, fastqs and chrom.sizes should be excluded by having no job that created them
         # excude = [ '.fastq.gz', '.fq.gz', '.fastq', '.fq', '.chrom.sizes','.fasta.gz','.fa.gz','.fasta','.fa' ]
-        all_jobs_ids = []
+        all_job_ids = []
          
-        for col in metric_def["columns"]:
+        for col in metric_defs["columns"]:
             if verbose:
                 print >> sys.stderr, "- Special metric column: '%s'" % ( col )
             if col == "Cost":
@@ -734,13 +762,19 @@ class Mission_log(object):
             elif col == "Total Cost":
                 # Plan: (1) get job input files all the way back to first job (excluding indexes), (2) sum all jobs
                 total_cost = 0
-                if len(all_jobs_ids) == 0:
-                    (self.obj_cache["exp"]["jobs"], all_jobs_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
-                                                                                              excude_files,[],verbose=verbose) 
+                if len(all_job_ids) == 0:
+                    #(self.obj_cache["exp"]["jobs"], all_job_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
+                    #                                                                          excude_files,[],verbose=verbose)
+                    if metric_defs["per"] == "experiment":
+                        all_job_ids = self.get_all_job_ids()
+                    else:
+                        rep_folder = file_dx_obj["folder"].split('/')[-1] 
+                        rep_br = rep_folder.split('_')[0][-1] #  rep2_1 or reps2_1.2.3.4
+                        all_job_ids = self.get_all_job_ids(rep_br)
                     if verbose:
-                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_jobs_ids) )
-                for a_job_id in all_jobs_ids:
-                    a_job = self.obj_cache["exp"]["jobs"][a_job_id]
+                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_job_ids) )
+                for a_job_id in all_job_ids:
+                    a_job = self.retrieve_dx_obj(a_job_id,self.obj_cache["exp"]["jobs"])
                     total_cost += a_job.get("totalPrice",0)
                 if total_cost != 0:
                     metric[col] = "$" + str(round(total_cost,2))
@@ -753,13 +787,19 @@ class Mission_log(object):
             elif col == "Job Time":
                 # Plan: (1) get job input files all the way back to first job (excluding indexes), (2) sum all jobs
                 total_duration = 0
-                if len(all_jobs_ids) == 0:
-                    (self.obj_cache["exp"]["jobs"], all_jobs_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
-                                                                                                excude_files,[],verbose=verbose) 
+                if len(all_job_ids) == 0:
+                    #(self.obj_cache["exp"]["jobs"], all_job_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
+                    #                                                                            excude_files,[],verbose=verbose) 
+                    if metric_defs["per"] == "experiment":
+                        all_job_ids = self.get_all_job_ids()
+                    else: 
+                        rep_folder = file_dx_obj["folder"].split('/')[-1] 
+                        rep_br = rep_folder.split('_')[0][-1] #  rep2_1 or reps2_1.2.3.4
+                        all_job_ids = self.get_all_job_ids(rep_br)
                     if verbose:
-                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_jobs_ids) )
-                for a_job_id in all_jobs_ids:
-                    a_job = self.obj_cache["exp"]["jobs"][a_job_id]
+                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_job_ids) )
+                for a_job_id in all_job_ids:
+                    a_job = self.retrieve_dx_obj(a_job_id,self.obj_cache["exp"]["jobs"])
                     beg = a_job.get("startedRunning") 
                     end = a_job.get("stoppedRunning") 
                     if beg != None and end != None:
@@ -769,13 +809,19 @@ class Mission_log(object):
             elif col == "CPU Time":
                 # Plan: (1) get job input files all the way back to first job (excluding indexes), (2) sum all jobs
                 total_duration = 0
-                if len(all_jobs_ids) == 0:
-                    (self.obj_cache["exp"]["jobs"], all_jobs_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
-                                                                                                excude_files,[],verbose=verbose) 
+                if len(all_job_ids) == 0:
+                    #(self.obj_cache["exp"]["jobs"], all_job_ids) = self.gather_job_tree(job_id,self.obj_cache["exp"]["jobs"], \
+                    #                                                                            excude_files,[],verbose=verbose) 
+                    if metric_defs["per"] == "experiment":
+                        all_job_ids = self.get_all_job_ids()
+                    else: 
+                        rep_folder = file_dx_obj["folder"].split('/')[-1] 
+                        rep_br = rep_folder.split('_')[0][-1] #  rep2_1 or reps2_1.2.3.4
+                        all_job_ids = self.get_all_job_ids(rep_br)
                     if verbose:
-                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_jobs_ids) )
-                for a_job_id in all_jobs_ids:
-                    a_job = self.obj_cache["exp"]["jobs"][a_job_id]
+                        print >> sys.stderr, "- '%s' from %d jobs" % ( col, len(all_job_ids) )
+                for a_job_id in all_job_ids:
+                    a_job = self.retrieve_dx_obj(a_job_id,self.obj_cache["exp"]["jobs"])
                     beg = a_job.get("startedRunning") 
                     end = a_job.get("stoppedRunning") 
                     if beg != None and end != None:
@@ -865,7 +911,17 @@ class Mission_log(object):
                 print >> sys.stderr, "%s %s %s" % (metric_key,rep_tech,metric_id)
         return metrics
 
-    def total_step_runs(self, file, search):
+    def retrieve_enc_obj(self, obj_id, cache=None):
+        '''Lookup json object in cache or from from encodeD.'''
+        if cache != None and obj_id in cache:
+            return cache[obj_id]
+            
+        obj = encd.lookup_json(obj_id)
+        if obj != None and cache != None:
+            cache[obj_id] = obj
+        return obj
+            
+    def total_step_runs(self, file, search, verbose=False):
         # this will recursively return a list of step runs
         # rewrite this so that it will gather all step runs for an experiment or for just 1 replicate of an experiment
         # the set of step runs will be ones that are in files or in the qc metric in the files
@@ -878,13 +934,17 @@ class Mission_log(object):
         if search == "experiment":
             # gather step runs in experiment
             for fi in file_list:
-                file_obj = encd.lookup_json(fi)
+                #file_obj = encd.lookup_json(fi)
+                file_obj = self.retrieve_enc_obj(fi,self.obj_cache["exp"]["files"])
+                if file_obj.get('assembly') != self.genome or file_obj.get("lab") != "/labs/encode-processing-pipeline/":
+                    continue
                 if file_obj.get("output_type", "") != "genome index":
                     step_run = file_obj.get("step_run")
                     if step_run:
                         step_runs.append(step_run)
                     for qc in file_obj.get("quality_metrics", []):
-                        qc_obj = encd.lookup_json(qc)
+                        #qc_obj = encd.lookup_json(qc)
+                        qc_obj = self.retrieve_enc_obj(qc,self.obj_cache["exp"]["metrics"])
                         if qc_obj.get("step_run"):
                             step_runs.append(qc_obj["step_run"])
         elif search == "replicate":
@@ -892,17 +952,24 @@ class Mission_log(object):
             rep = file.get("replicate")
             if rep:
                 for fi in file_list:
-                    file_obj = encd.lookup_json(fi)
+                    #file_obj = encd.lookup_json(fi)
+                    file_obj = self.retrieve_enc_obj(fi,self.obj_cache["exp"]["files"])
+                    if file_obj.get('assembly') != self.genome or file_obj.get("lab") != "/labs/encode-processing-pipeline/":
+                        continue
                     if rep.get("@id") == file_obj.get("replicate"):
                         if file_obj.get("output_type", "") != "genome index":
                             step_run = file_obj.get("step_run")
                             if step_run:
                                 step_runs.append(step_run)
                             for qc in file_obj.get("quality_metrics", []):
-                                qc_obj = encd.lookup_json(qc)
+                                #qc_obj = encd.lookup_json(qc)
+                                qc_obj = self.retrieve_enc_obj(qc,self.obj_cache["exp"]["metrics"])
                                 if qc_obj.get("step_run"):
                                     step_runs.append(qc_obj["step_run"])
-        return step_runs
+        if verbose:
+            print >> sys.stderr, "* Found %d step_runs" % len(step_runs)
+            print >> sys.stderr, "* Found %d unique step_runs" % len(list( set(step_runs) ))
+        return list( set(step_runs) )
 
     def get_enc_special_metric(self,metric_id,file_enc_obj,metric_key,metric_def,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in encodeD.'''
@@ -934,9 +1001,9 @@ class Mission_log(object):
                 # gather all the step runs
                 total = 0
                 step_runs = self.total_step_runs(file_enc_obj, metric_def["per"])
-                step_runs = list(set(step_runs))
                 for run in step_runs:
-                    step = encd.lookup_json(run)
+                    #step = encd.lookup_json(run)
+                    step = self.retrieve_enc_obj(run, self.obj_cache["exp"]["step_runs"])
                     step_notes = step.get("notes")
                     if step_notes is not None:
                         try:
@@ -946,9 +1013,10 @@ class Mission_log(object):
                             cost = None
                         if cost is not None:
                             total += cost
-                metric[col] = total
+                metric[col] = "$" + str(total)
             elif col == "Time":
-                step_run = encd.lookup_json(file_enc_obj["step_run"])
+                #step_run = encd.lookup_json(file_enc_obj["step_run"])
+                step_run = self.retrieve_enc_obj(file_enc_obj["step_run"], self.obj_cache["exp"]["step_runs"])
                 if step_run != None:
                     step_details = step_run["dx_applet_details"][0]
                     beg_time = step_details.get("started_running")
@@ -961,10 +1029,10 @@ class Mission_log(object):
                             metric[col] = duration.total_seconds()
             elif col == "Job Time":
                 step_runs = self.total_step_runs(file_enc_obj, metric_def["per"])
-                step_runs = list(set(step_runs))
                 total = 0
                 for run in step_runs:
-                    step_run = encd.lookup_json(file_enc_obj["step_run"])
+                    #step_run = encd.lookup_json(file_enc_obj["step_run"])
+                    step_run = self.retrieve_enc_obj(run, self.obj_cache["exp"]["step_runs"])
                     if step_run != None:
                         step_details = step_run["dx_applet_details"][0]
                         beg_time = step_details.get("started_running")
@@ -976,7 +1044,7 @@ class Mission_log(object):
                             if duration != None:
                                 total += duration.total_seconds()
                 metric[col] = total
-            elif col == "CPU Time": # TODO:
+            elif col == "CPU Time": # Note: not really doable from encodeD
                 pass
                 #print >> sys.stderr, "WARNING: '%s' not yet supported for '%s'" % (col,metric_id)
             elif col == "File Size":
@@ -995,6 +1063,7 @@ class Mission_log(object):
         combo_metrics = []
         metric_ids = []
         self.obj_cache["exp"]["metrics"] = {}
+        self.obj_cache["exp"]["step_runs"] = {}
         for (out_type,sub_type,rep_tech,acc) in target_files:
             file_enc_obj = self.obj_cache["exp"]["files"][acc]
             if sub_type != None:

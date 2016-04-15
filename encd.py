@@ -229,7 +229,7 @@ def get_object(url, AUTHID=None, AUTHPW=None):
     return response
 
 
-def lookup_json(path, key=None, frame='object',must_find=False):
+def lookup_json(path, key=None, frame='object', must_find=False):
     '''Commonly used method to get a json object from encodeD.'''
     (AUTHID,AUTHPW,SERVER) = find_keys(key)
     url = SERVER + path + '/?format=json&frame=' + frame
