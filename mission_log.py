@@ -866,47 +866,42 @@ class Mission_log(object):
         # the set of step runs will be ones that are in files or in the qc metric in the files
         # notes I'm given a file and I can go from the file into the parent experiment
         derived_from = file.get("derived_from", [])
-        rep = file.get("replicate")
         step_runs = []
+        exp = file.get("dataset")
+        exp_obj = encd.lookup_json(exp)
+        file_list = exp_obj.get("files", [])
         if search == "experiment":
             # gather step runs in experiment
-            exp = file.get("dataset")
-            exp_obj = encd.lookup_json(exp)
-            file_list = exp_obj.get("files")
             for fi in file_list:
                 file_obj = encd.lookup_json(fi)
                 if file_obj.get("output_type", "") != "genome index":
                     step_run = file_obj.get("step_run")
                     if step_run:
                         step_runs.append(step_run)
+                    for qc in file_obj.get("quality_metrics", []):
+                        qc_obj = encd.lookup_json(qc)
+                        if qc_obj.get("step_run"):
+                            step_runs.append(qc_obj["step_run"])
         elif search == "replicate":
             # gather step runs from replicate
-            pass
-            # there's no files linked to replicate, need to figure this out
-
-
-        for fi in derived_from:
-            if type(fi) is unicode:
-              temp = fi
-            else:
-              temp = fi["@id"]
-            # get the derived from file
-            file_obj = encd.lookup_json(temp)
-            if file_obj.get("output_type", "") == "genome index":
-                continue
-            step_run = file_obj.get("step_run")
-            if step_run is None or step_run in step_runs:
-                # we don't want this one
-                continue
-            # this means that we found a step run that we have not yet found
-            step_runs.append(step_run)
-            step_runs += self.total_step_runs(fi)
+            rep = file.get("replicate")
+            if rep:
+                for fi in file_list:
+                    file_obj = encd.lookup_json(fi)
+                    if rep.get("@id") == file_obj.get("replicate"):
+                        if file_obj.get("output_type", "") != "genome index":
+                            step_run = file_obj.get("step_run")
+                            if step_run:
+                                step_runs.append(step_run)
+                            for qc in file_obj.get("quality_metrics", []):
+                                qc_obj = encd.lookup_json(qc)
+                                if qc_obj.get("step_run"):
+                                    step_runs.append(qc_obj["step_run"])
         return step_runs
 
     def get_enc_special_metric(self,metric_id,file_enc_obj,metric_key,metric_def,verbose=False):
         '''Returns a mocked up 'metric' object from specialized definitions in encodeD.'''
         #verbose=True
-        
         metric = {}
         notes = None
         file_notes = file_enc_obj.get("notes")
@@ -933,7 +928,7 @@ class Mission_log(object):
                 # first need all the step runs
                 # gather all the step runs
                 total = 0
-                step_runs = self.total_step_runs(file_enc_obj)
+                step_runs = self.total_step_runs(file_enc_obj, metric_def["per"])
                 step_runs = list(set(step_runs))
                 for run in step_runs:
                     step = encd.lookup_json(run)
@@ -960,7 +955,7 @@ class Mission_log(object):
                         if duration != None:
                             metric[col] = duration.total_seconds()
             elif col == "Job Time":
-                step_runs = self.total_step_runs(file_enc_obj)
+                step_runs = self.total_step_runs(file_enc_obj, metric_def["per"])
                 step_runs = list(set(step_runs))
                 total = 0
                 for run in step_runs:
