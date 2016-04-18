@@ -951,11 +951,11 @@ class Mission_log(object):
             # gather step runs from replicate
             rep = file.get("replicate")
             rep_id = rep.get("@id")
-            #print self.reps
+            #print len(self.reps)
             for r in self.reps:
                 if r["replicate_id"] == rep_id:
-                    print "MATCHING THING", rep_id
-
+                    #if verbose:
+                    print >> sys.stderr, "Matching replicate {}, bio_rep {}, tech_rep {}".format(rep_id, r["br"], r["tr"])
             if rep:
                 for fi in file_list:
                     #file_obj = encd.lookup_json(fi)
@@ -1552,7 +1552,7 @@ class Mission_log(object):
             
             # Print metrics
             self.print_metrics(self.exp_id,target_files,metrics,self.report_specs)
-            
+
         # print any totals available
         if self.report_specs:     
             self.print_totals()
