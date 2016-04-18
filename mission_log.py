@@ -950,6 +950,12 @@ class Mission_log(object):
         elif search == "replicate":
             # gather step runs from replicate
             rep = file.get("replicate")
+            rep_id = rep.get("@id")
+            #print self.reps
+            for r in self.reps:
+                if r["replicate_id"] == rep_id:
+                    print "MATCHING THING", rep_id
+
             if rep:
                 for fi in file_list:
                     #file_obj = encd.lookup_json(fi)
@@ -1530,10 +1536,10 @@ class Mission_log(object):
             
             # Get reps from encoded
             self.reps = self.find_replicates(self.exp_id, self.exp)
-                
+
             # Get files from encoded
             target_files = self.get_relevant_files(self.exp_id, self.exp, self.report_specs, self.reps,verbose=args.verbose)
-            
+
             if target_files == None or len(target_files) == 0:
                 print >> sys.stderr, "WARNING: No files available on encodeD for %s" % self.exp_id
                 continue
