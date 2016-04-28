@@ -318,7 +318,7 @@ class Assemble(object):
             for obj_type in exp_files['results'].keys():
                 for f_obj in result_files:
                     if obj_type == f_obj['output_type']:
-                        if f_obj.get('award') != '/awards/U41HG006992/':
+                        if f_obj.get('award') != encd.DEFAULT_DCC_AWARD:
                             if verbose:
                                 print "Skipping file %s as it is not from DCC pipeline." % f_obj.get('accession')
                             continue

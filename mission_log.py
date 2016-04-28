@@ -118,15 +118,18 @@ class Mission_log(object):
                                 "gene quantifications": { "suffix":  [ "_rsem.genes.results" ],
                                                           "metrics": [ "rep_cost", "exp_cost" ] },
                               },
-             "small-rna-seq": { "output_types": [ "signal" ],
-                                "signal": { "suffix":  [ "_minusUniq.bw" ],
-                                            "metrics": [ "rep_cost", "exp_cost" ] }, 
+             "small-rna-seq": { "output_types": [ "gene quantifications" ],
+                                "gene quantifications": { "suffix":  [ "_quant.tsv" ],
+                                                          "metrics": [ "rep_cost", "exp_cost" ] }, 
                               },
              "rampage":       { "output_types": [ "gene quantifications" ],
                                 "gene quantifications": { "suffix":  [ "_rampage_peaks_quant.tsv", "_mad_plot.png" ],
                                                           "metrics": [ "rep_cost", "exp_cost" ] }, 
                               },
-             "dna-me":        { "output_types": [ "methylation state at CpG" ], 
+             "dna-me":        { "output_types": [ "methylation state at CpG" ],# [ "alignments", "methylation state at CpG" ], 
+                                #"alignments": { 
+                                #                  "suffix":   [ ".bam" ], 
+                                #                  "metrics":  [ "rep_cost" ] }, 
                                 "methylation state at CpG": { 
                                                   "suffix":   [ "_biorep_CpG.bed.gz", "_CpG_corr.txt" ], 
                                                   "metrics":  [ "rep_cost", "exp_cost" ] }, 
@@ -532,7 +535,7 @@ class Mission_log(object):
         enc_files = []
         self.obj_cache["exp"]["files"] = {}
         
-        files = encd.get_exp_files(exp,report_specs["output_types"],lab="encode-processing-pipeline")
+        files = encd.get_exp_files(exp,report_specs["output_types"],lab=encd.DCC_PIPELINE_LAB)
         # special case to get around m2,m3 files
         new_list = []
         while len(files) > 0:
@@ -611,15 +614,16 @@ class Mission_log(object):
             if verbose:
                 print >> sys.stderr, "- Looking for jobs in " + exp_folder
             fids = dx.find_file(exp_folder + '*',self.proj_name,verbose=False,multiple=True, recurse=False)
-            for fid in fids:
-                file_dx_obj = self.retrieve_dx_obj(fid,self.obj_cache["exp"]["files"])
-                if file_dx_obj["name"].endswith('fastq.gz') or file_dx_obj["name"].endswith('fq.gz'):
-                    continue
-                if verbose:
-                    print >> sys.stderr, "  " + file_dx_obj["name"]
-                if "createdBy" in file_dx_obj and "job" in file_dx_obj["createdBy"]:
-                    job_id = file_dx_obj["createdBy"]["job"]
-                    job_ids.append(job_id)
+            if fids != None:
+                for fid in fids:
+                    file_dx_obj = self.retrieve_dx_obj(fid,self.obj_cache["exp"]["files"])
+                    if file_dx_obj["name"].endswith('fastq.gz') or file_dx_obj["name"].endswith('fq.gz'):
+                        continue
+                    if verbose:
+                        print >> sys.stderr, "  " + file_dx_obj["name"]
+                    if "createdBy" in file_dx_obj and "job" in file_dx_obj["createdBy"]:
+                        job_id = file_dx_obj["createdBy"]["job"]
+                        job_ids.append(job_id)
         for rep_folder in rep_folders:
             rep_br = rep_folder.split('_')[0][-1] #  rep2_1 or reps2_1.2.3.4
             if br == None or br == rep_br:
@@ -936,7 +940,7 @@ class Mission_log(object):
             for fi in file_list:
                 #file_obj = encd.lookup_json(fi)
                 file_obj = self.retrieve_enc_obj(fi,self.obj_cache["exp"]["files"])
-                if file_obj.get('assembly') != self.genome or file_obj.get("lab") != "/labs/encode-processing-pipeline/":
+                if file_obj.get('assembly') != self.genome or file_obj.get("lab") != encd.DCC_PIPELINE_LAB:
                     continue
                 if file_obj.get("output_type", "") != "genome index":
                     step_run = file_obj.get("step_run")
@@ -954,7 +958,7 @@ class Mission_log(object):
                 for fi in file_list:
                     #file_obj = encd.lookup_json(fi)
                     file_obj = self.retrieve_enc_obj(fi,self.obj_cache["exp"]["files"])
-                    if file_obj.get('assembly') != self.genome or file_obj.get("lab") != "/labs/encode-processing-pipeline/":
+                    if file_obj.get('assembly') != self.genome or file_obj.get("lab") != encd.DCC_PIPELINE_LAB:
                         continue
                     if rep.get("@id") == file_obj.get("replicate"):
                         if file_obj.get("output_type", "") != "genome index":

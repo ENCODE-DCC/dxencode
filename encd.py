@@ -16,6 +16,9 @@ PRODUCTION_SERVER = 'https://www.encodeproject.org'
 DEFAULT_SERVER = PRODUCTION_SERVER
 S3_SERVER='s3://encode-files/'
 
+DCC_PIPELINE_LAB='/labs/encode-processing-pipeline/'
+DEFAULT_DCC_AWARD='/awards/U41HG006992/'
+
 logger = logging.getLogger('dxencode') # Callers should either use dxencode.logger or set dxencode.logger = local.logger()
 
 SAVED_KEYS = {}

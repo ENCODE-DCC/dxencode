@@ -1085,9 +1085,8 @@ class Splashdown(object):
 
     def add_encoded_info(self,obj,rep_tech,fid,verbose=False):
         '''Updates an object with information from encoded database.'''
-        obj['lab'] = '/labs/encode-processing-pipeline/' # self.exp['lab']['@id'] Now hard-coded
-        obj['award'] = '/awards/U41HG006992/'  # self.exp['award']['@id']
-        #obj['submitted_by'] = '/users/8b1f8780-b5d6-4fb7-a5a2-ddcec9054288/' # or 'ENCODE Consortium' or '/labs/encode-consortium/' 
+        obj['lab'] = encd.DCC_PIPELINE_LAB
+        obj['award'] = encd.DEFAULT_DCC_AWARD
 
         # Find replicate info
         #if rep_tech.startswith("rep") and len(rep_tech) == 6:
@@ -1184,6 +1183,11 @@ class Splashdown(object):
                     enc_qc_props[key] = dx_qc_obj[key]
         else:
             enc_qc_props = dx_qc_obj # All props in DX object shall be placed in enc object
+        
+        # TODO: As of R41, qc_metrics now require lab and award properties
+        #enc_qc_props['lab'] = encd.DCC_PIPELINE_LAB
+        #enc_qc_props['award'] = encd.DEFAULT_DCC_AWARD
+
         return enc_qc_props
 
 
