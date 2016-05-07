@@ -27,7 +27,6 @@ from base64 import b64encode
 import commands
 
 import dxpy
-#import dxencode
 import dx
 import encd
 
@@ -1184,9 +1183,9 @@ class Splashdown(object):
         else:
             enc_qc_props = dx_qc_obj # All props in DX object shall be placed in enc object
         
-        # TODO: As of R41, qc_metrics now require lab and award properties
-        #enc_qc_props['lab'] = encd.DCC_PIPELINE_LAB
-        #enc_qc_props['award'] = encd.DEFAULT_DCC_AWARD
+        # As of r41, qc_metrics now require lab and award properties
+        enc_qc_props['lab'] = encd.DCC_PIPELINE_LAB
+        enc_qc_props['award'] = encd.DEFAULT_DCC_AWARD
 
         return enc_qc_props
 
@@ -2006,7 +2005,7 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dx.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:    GRCh38 v24    1,2    -           2016-03-25  2016-02-28 %s  $%.2f" % \
+            #print "cost:       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03 %s  $%.2f" % \
             #    (duration.rjust(8), total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)

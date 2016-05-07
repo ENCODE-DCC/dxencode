@@ -1,3 +1,4 @@
+################# OBSOLETE: replaced with dx.py and encd.py #################
 import os
 import sys
 import dxpy

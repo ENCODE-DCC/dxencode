@@ -1,7 +1,15 @@
 ####### Working on: LRNA GRCh38 backlog
 
-# Special case - "with internal_status of 'requires lab review' cannot be launched."
-ENCSR703QFF       GRCh38 v24 shRNA  1,2   yes     -
+# Working on: One lone shRNA followed by RNA-seq that missed the pipeline. http://redmine.encodedcc.org/issues/3060#note-200
+# was but now fixed - "with internal_status of 'requires lab review' cannot be launched."
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR703QFF       GRCh38 v24 shRNA  1,2   yes     -          2016-05-02  2016-05-04   14h50m  $21.70
+
+# TODO: 2 human for Wold lab http://redmine.encodedcc.org/issues/3060#note-190 ()on hold for replicate accounting)
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR843RJV       GRCh38 v24 -      1,2   no     2016-04-27                                           # On hold until replicates are resolved
+ENCSR889TRN       GRCh38 v24 -      1,2   no     2016-04-27                                           # On hold until replicates are resolved
+
 
 ####### GRCh38 Full list
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
@@ -125,6 +133,7 @@ ENCSR016XPB       GRCh38 v24        1,2   yes     -          2016-02-04  2016-02
 ENCSR017PRS       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    5h39m  $28.74
 ENCSR019MXZ       GRCh38 v24 -      1,2   no     2016-02-17  2016-02-18  2016-02-19    3h13m   $8.87
 ENCSR023HWI       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    3h28m  $16.18
+ENCSR023VVO       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    7h50m  $11.04
 ENCSR023ZXN       GRCh38 v24 -      1_1.2 no     2016-02-19  2016-02-19  2016-02-23    3h41m  $10.57
 ENCSR028ITN       GRCh38 v24        1,2   yes     -          2016-01-22  2016-02-03    8h51m  $25.21
 ENCSR028YAQ       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    3h03m  $14.20
@@ -188,6 +197,8 @@ ENCSR104ABF       GRCh38 v24        1,2   yes     -          2016-02-04  2016-02
 ENCSR104OLN       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    8h42m  $19.29
 ENCSR105NML       GRCh38 v24 CRISPR 1,2   yes    2016-03-11  2016-03-11  2016-03-14    7h08m  $27.66
 ENCSR105OXX       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    3h21m  $17.20
+ENCSR106SZN       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    2h26m  $3.44
+ENCSR108MAU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h27m  $4.89
 ENCSR109IQO       GRCh38 v24 -      1,2   yes     -          2016-02-29  2016-03-02 1d03h36m  $80.94
 ENCSR110BDY       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   10h12m  $28.16
 ENCSR110HAA       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15   10h35m  $26.15
@@ -246,6 +257,7 @@ ENCSR191VWK       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03
 ENCSR192BPV       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15   13h49m  $44.71
 ENCSR192GBD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   18h11m  $39.94
 ENCSR193FFA       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   12h53m  $27.79
+ENCSR194HVU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h20m  $4.71
 ENCSR198TKA       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   21h13m  $28.06
 ENCSR201WFU       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03    6h08m  $26.75
 ENCSR201WVA       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25    6h47m  $17.94
@@ -271,6 +283,7 @@ ENCSR232CPD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03
 ENCSR232XRZ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03    8h55m  $17.78
 ENCSR233IJT       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   11h42m  $32.36
 ENCSR234YMW       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   12h55m  $22.03
+ENCSR236URT       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    8h58m  $12.66
 ENCSR237IWZ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03    4h05m  $18.15
 ENCSR237YZT       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   10h42m  $29.96
 ENCSR239BCO       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03    7h15m  $28.94
@@ -284,6 +297,7 @@ ENCSR253DCB       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03
 ENCSR254JJM       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   11h23m  $29.62
 ENCSR255NYQ       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25    8h35m  $23.07
 ENCSR256PLH       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    8h34m  $24.39
+ENCSR257NIR       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h34m  $5.05
 ENCSR258VGD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    6h26m  $16.67
 ENCSR267RHP       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15    5h37m  $26.04
 ENCSR268JDD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    4h15m  $20.03
@@ -298,6 +312,7 @@ ENCSR281KCL       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03
 ENCSR286OKW       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    8h34m  $23.47
 ENCSR291DJH       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   20h04m  $31.48
 ENCSR292TAP       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25    6h27m  $13.06
+ENCSR294NDO       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02   10h31m  $14.86
 ENCSR295XKC       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    4h48m  $23.16
 ENCSR296ERI       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    8h32m  $26.21
 ENCSR300IEW       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    8h31m  $24.50
@@ -324,6 +339,7 @@ ENCSR320BRR       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02
 ENCSR321PGV       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    5h48m   $8.44
 ENCSR322XVS       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    9h06m  $23.94
 ENCSR325OOM       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    8h50m  $17.61
+ENCSR330UMQ       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h54m  $5.51
 ENCSR330YOU       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    6h20m  $32.36
 ENCSR331DUD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    4h14m  $18.75
 ENCSR332DBS       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   11h03m  $29.57
@@ -398,6 +414,8 @@ ENCSR438MDN       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03
 ENCSR438YPF       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    5h54m   $8.76
 ENCSR444WHQ       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   12h10m  $30.73
 ENCSR447UCG       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08    5h39m  $24.24
+ENCSR450BNZ       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h04m  $4.35
+ENCSR450ENK       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h52m  $5.48
 ENCSR450VQO       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08    4h23m  $19.83
 ENCSR453HKS       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15    6h42m  $27.61
 ENCSR455TNF       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08   21h33m  $64.62
@@ -413,6 +431,7 @@ ENCSR471GIS       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03
 ENCSR474TRG       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    4h59m   $7.34
 ENCSR477TRX       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08    5h59m  $30.10
 ENCSR478FJK       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08    9h12m  $29.26
+ENCSR480SLD       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h27m  $4.88
 ENCSR481AYC       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08    7h20m  $28.33
 ENCSR481YXD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08    9h09m  $24.61
 ENCSR485WBR       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    3h44m   $5.47
@@ -431,6 +450,7 @@ ENCSR504QMK       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02
 ENCSR504VXC       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   12h16m  $32.79
 ENCSR509LIV       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08   11h30m  $28.49
 ENCSR510MIA       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    3h39m   $5.29
+ENCSR510QZW       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    8h43m  $12.30
 ENCSR511BNY       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15    5h20m  $25.70
 ENCSR511SYK       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    9h06m  $26.30
 ENCSR517JDK       GRCh38 v24        1,2   yes     -          2016-02-04  2016-02-05    6h19m  $31.24
@@ -452,6 +472,7 @@ ENCSR538QOG       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03
 ENCSR541TIG       GRCh38 v24 -      1,2   no     2016-02-17  2016-02-18  2016-02-19    3h13m   $8.56
 ENCSR542ESY       GRCh38 v24        1,2   yes     -          2016-02-04  2016-02-05    7h18m  $32.99
 ENCSR543LCG       GRCh38 v24 CRISPR 1,2   yes    2016-03-11  2016-03-11  2016-03-14   10h57m  $31.66
+ENCSR544SAU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h58m  $5.60
 ENCSR545AIK       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08   12h15m  $29.54
 ENCSR545DKY       GRCh38 v24 -      1,2   no     2016-02-17  2016-02-18  2016-02-19    5h16m  $14.42
 ENCSR546MBH       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08    8h23m  $25.64
@@ -588,6 +609,7 @@ ENCSR744YVR       GRCh38 v24 shRNA  1,2   yes     -          2016-03-16  2016-03
 ENCSR745WVZ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-16  2016-03-17   19h26m  $53.95
 ENCSR746EKS       GRCh38 v24 shRNA  1,2   yes     -          2016-03-16  2016-03-17    6h15m  $29.78
 ENCSR746NIM       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15    3h34m  $18.16
+ENCSR748GVH       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    6h34m  $9.28
 ENCSR750ETS       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    4h24m   $6.35
 ENCSR755KOM       GRCh38 v24 shRNA  1,2   yes     -          2016-03-16  2016-03-17    9h14m  $25.72
 ENCSR760EGM       GRCh38 v24        1,2   yes     -          2016-02-04  2016-02-05    6h18m  $30.25
@@ -618,6 +640,7 @@ ENCSR794NUE       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03
 ENCSR796HLX       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    4h39m   $6.82
 ENCSR797BPP       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   16h36m  $28.73
 ENCSR800WIY       GRCh38 v24        2     no     2016-02-16  2016-02-16  2016-02-17    5h22m   $8.09
+ENCSR802HPM       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    2h50m  $4.01
 ENCSR807ODB       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    5h05m  $25.51
 ENCSR810FHY       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    5h48m  $27.50
 ENCSR810JYX       GRCh38 v24 shRNA  1,2   yes     -          2016-03-16  2016-03-17    9h27m  $27.34
@@ -657,9 +680,11 @@ ENCSR856CJK       GRCh38 v24 shRNA  1,2   yes     -          2016-03-16  2016-03
 ENCSR856ZRV       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    8h01m  $21.10
 ENCSR857WJK       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    3h48m   $5.45
 ENCSR858QEL       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    4h20m   $6.37
+ENCSR859HWB       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    9h17m  $13.09
 ENCSR860DWK       GRCh38 v24 -      1,2   no     2016-02-17  2016-02-18  2016-02-19    3h04m   $7.61
 ENCSR861ENA       GRCh38 v24 shRNA  1,2   yes     -          2016-03-16  2016-03-17    9h16m  $30.38
 ENCSR862HPO       GRCh38 v24 -      1,2   no     2016-02-17  2016-02-18  2016-02-19    3h08m   $8.16
+ENCSR862RGX       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h28m  $4.91
 ENCSR866XLI       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15   17h30m  $38.80
 ENCSR871BXO       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-22   14h12m  $20.60
 ENCSR878EUT       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   10h58m  $28.19
@@ -679,6 +704,7 @@ ENCSR897KTO       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02
 ENCSR898NWE       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-22   19h03m  $27.85
 ENCSR898OPN       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15   10h04m  $48.52
 ENCSR900JSG       GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02-26    3h21m   $8.70
+ENCSR900SGE       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h43m  $5.26
 ENCSR902WSK       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15   14h17m  $40.81
 ENCSR904BCZ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-22   14h32m  $21.16
 ENCSR904CJQ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-22   16h01m  $23.32
@@ -744,9 +770,203 @@ ENCSR995ZGJ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03
 ENCSR997FOT       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   14h58m  $21.71
 ENCSR998MZP       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   12h15m  $17.81
 ENCSR998RZI       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   19h39m  $28.56
-# Total: 739
+# Total: 757
 
-####### hg19/mm10 Full list:
+####### mm10 Full list:
+# Experiment       On             Reps    First Post  Last Post   Total Time/Cost
+ENCSR000AJU  ENC2  mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR000AJV  ENC3  mm10 M4  -     1,2     - older -   2014-10-23     6h43m  $29.17
+ENCSR000BYP  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     7h56m  $38.36
+ENCSR000BYQ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h09m  $44.34
+ENCSR000BYR  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    13h52m  $60.37
+ENCSR000BYS  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h57m  $47.57
+ENCSR000BYT  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     8h52m  $39.88
+ENCSR000BYU  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h21m  $47.12
+ENCSR000BYV  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    13h08m  $53.83
+ENCSR000BYW  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h17m  $44.13
+ENCSR000BYX  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h06m  $42.88
+ENCSR000BYY  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h38m  $45.66
+ENCSR000BYZ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h30m  $44.61
+ENCSR000BZA  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h36m  $46.73
+ENCSR000BZB  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h53m  $42.97
+ENCSR000BZC  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     7h33m  $35.20
+ENCSR000BZD  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h50m  $43.64
+ENCSR000BZE  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h46m  $44.71
+ENCSR000BZF  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h14m  $46.55
+ENCSR000BZG  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  2d01h51m $175.95
+ENCSR000BZH  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d11h17m $133.60
+ENCSR000BZI  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d04h29m $103.40
+ENCSR000BZJ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d14h54m $152.80
+ENCSR000BZK  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d23h17m $165.48
+ENCSR000BZL  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d16h27m $155.78
+ENCSR000BZM  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d07h28m $125.43
+ENCSR000BZN  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d11h53m $148.04
+ENCSR000BZO  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d08h37m $147.85
+ENCSR000BZP  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d18h11m $182.57
+ENCSR000BZQ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d02h49m $120.60
+ENCSR000BZR  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d10h03m $136.11
+ENCSR000BZS  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d15h44m $154.23
+ENCSR000CWD  ENC2  mm10 M2,3,M4x2 1,2     - older -   2014-10-23  1d06h23m  $113.61
+ENCSR000OXO        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR004XCU  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h47m  $26.59
+ENCSR017JEG  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h17m  $28.57
+ENCSR020DGG  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    13h40m  $24.98
+ENCSR026ZRP        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR027CXR  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.12
+ENCSR035DLJ        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR039ADS        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR062VTB  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    15h49m  $27.34
+ENCSR068SJG  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     9h59m   $7.94
+ENCSR080EVZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h37m  $19.88
+ENCSR096STK  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    11h28m  $32.65
+ENCSR100KRK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h01m   $4.67
+ENCSR111QQX  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     6h34m  $10.31
+ENCSR115TWD  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h33m  $20.12
+ENCSR138VRG  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h15m   $5.75
+ENCSR145EKP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h06m   $3.43
+ENCSR150CUE        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h18m   $8.88
+ENCSR160IIN        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR167AWS  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.18
+ENCSR173PJN  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    11h56m  $35.35
+ENCSR178GUS  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    16h10m  $43.78
+ENCSR181KQJ        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR185LWM        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR194TNV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h26m   $7.04
+ENCSR195BCE  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h17m   $5.43
+ENCSR198EIH  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h14m   $4.64
+ENCSR216NEG        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR220HFQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h19m   $6.03
+ENCSR236EGS        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR236ZIE        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR255SDF        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR265YFZ        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR267LBO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    15h06m  $12.41
+ENCSR268AXN        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR268IGT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     8h37m  $11.94
+ENCSR282DYQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h42m   $2.95
+ENCSR284AMY        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR284YKY  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    10h58m  $24.27
+ENCSR285WZV  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h09m  $24.96
+ENCSR290RRR        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR292IVH  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     9h34m  $13.05
+ENCSR295UJP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.84
+ENCSR298YHA  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h50m   $5.37
+ENCSR307BCA        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR316RMA  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h20m   $3.56
+ENCSR320PXZ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h16m   $3.50
+ENCSR323FHJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.79
+ENCSR331XCE  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    14h43m  $38.11
+ENCSR337FYI        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR340NCF  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d12h12m $139.20
+ENCSR343YLB        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR347SQR  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h56m  $31.32
+ENCSR351YGY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h37m   $3.80
+ENCSR362AIZ  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     8h30m  $20.48
+ENCSR362OYV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     6h57m   $9.99
+ENCSR367DUL  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.38
+ENCSR367ZPZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h36m  $21.93
+ENCSR370SFB  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h01m  $27.03
+ENCSR390KQJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h01m   $3.21
+ENCSR401BSG  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h53m  $28.38
+ENCSR420QTO        mm10 M4  -     1,2     2016-05-03  2016-05-03     5h52m   $8.26
+ENCSR427FOY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h54m   $3.27
+ENCSR438XCG  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    12h54m  $34.78
+ENCSR448MXQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h29m  $27.70
+ENCSR457RRW  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h07m  $25.23
+ENCSR466KZY  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h24m  $22.77
+ENCSR474NEW  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h44m   $4.08
+ENCSR504GEG        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR508GWZ        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h12m   $8.74
+ENCSR510ADJ        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR521YLY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h12m   $3.35
+ENCSR526SEX  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h24m  $31.31
+ENCSR527DQV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h00m   $3.31
+ENCSR527RFK        mm10 M4  -     1,2     - older -   2015-08-20  
+ENCSR530UXI  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h18m   $8.95
+ENCSR537GNQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     7h43m  $22.21
+ENCSR538WYL  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    13h15m  $23.54
+ENCSR541XZK        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR549QME        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR557RMA  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    15h41m  $26.06
+ENCSR558PXY  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d03h51m $114.12
+ENCSR559QTE  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h27m   $3.69
+ENCSR559TRB        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR577ONT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h48m  $11.13
+ENCSR579FCW  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    13h13m  $34.07
+ENCSR592MSV        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR597UZW  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h06m  $26.80
+ENCSR611PTP  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h09m  $26.27
+ENCSR620HJQ  ENC3  mm10 v19 -     1b12tn7 2015-10-20  2015-10-20     8h13m $113.83
+ENCSR636CWO  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h57m  $25.83
+ENCSR637NLF  ENC3  mm10 v19 -     1b16t   2015-10-20  2015-10-20     3h05m  $62.41
+ENCSR647QBV        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h24m   $9.02
+ENCSR648YEP        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h28m   $9.14
+ENCSR650MMK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h30m   $3.83
+ENCSR659SFM  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h03m   $3.26
+ENCSR661TLW  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23    23h32m  $95.87
+ENCSR662UPQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h57m   $3.07
+ENCSR667TOX  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h35m  $26.25
+ENCSR691OPQ        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR691PPV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h43m   $3.68
+ENCSR708EHJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h53m   $3.07
+ENCSR710QXP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    10h46m   $5.90
+ENCSR719NAJ  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     8h55m  $26.29
+ENCSR723SZV        mm10 M2,M3,M4  1,2     - older -   2015-08-20
+ENCSR726VVO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    14h01m  $11.74
+ENCSR727FHP        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR734SOQ  ENC3  mm10 v19 -     1b15t   2015-10-12  2015-10-12     3h47m  $70.03
+ENCSR739PEB  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    12h51m  $32.78
+ENCSR739YUO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h46m   $4.12
+ENCSR746LUP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h12m   $4.02
+ENCSR749BAG        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR750YSX        mm10 M4  -     1,2     2016-05-03  2016-05-03     5h45m   $8.10
+ENCSR752RGN  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h52m  $26.46
+ENCSR758TAD        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR760TOE        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR767VHR        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR772FQU  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h07m  $26.64
+ENCSR775HGC  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h37m  $10.25
+ENCSR782WIL  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h56m   $4.26
+ENCSR789RPP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h33m   $6.60
+ENCSR792RJV  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h02m  $27.32
+ENCSR796QJD  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h47m  $11.23
+ENCSR803PLZ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h09m   $7.26
+ENCSR805QYO  ENC3  mm10 M4  -     1,2     2015-10-09  2015-10-09    14h37m  $34.54
+ENCSR814JMM        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR822EWO  ENC3  mm10 M4  -     1,2     2015-10-09  2015-10-09    14h40m  $35.21
+ENCSR823VEE        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR826HIQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h28m  $25.93
+ENCSR826IXR        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR830IVQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h18m  $25.20
+ENCSR833HPM        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR833SOQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h26m   $4.87
+ENCSR846FYI  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h49m   $4.24
+ENCSR848GST  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h44m  $24.00
+ENCSR848HOX        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR848LXY  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d14h49m $148.35
+ENCSR851HEC        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h16m   $8.85
+ENCSR861FGB        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR867YNV        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR906YQZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    18h01m  $35.40
+ENCSR907JUN        mm10 M2,M3,M4  1,2     - older -   2015-08-20
+ENCSR908JWT        mm10 M4  -     1,2     2016-05-03  2016-05-03     5h48m   $8.19
+ENCSR909YEQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h08m   $5.58
+ENCSR921PRX  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    17h20m  $27.46
+ENCSR927IOO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h47m   $4.25
+ENCSR928OXI        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR932TRU        mm10 M4  -     1,2     - older -   2015-08-20
+ENCSR940DVT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h41m   $4.75
+ENCSR946HWC  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     9h10m  $27.66
+ENCSR948NDP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h13m   $3.64
+ENCSR950BNG        mm10 M2,M3,M4  1,2     - older -   2015-08-20
+ENCSR953TKB  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.34
+ENCSR970EWM  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    17h01m  $29.50
+ENCSR980SWK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h39m  $10.85
+ENCSR982MRY  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h11m  $30.98
+ENCSR992WBR  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    10h04m  $22.22
+# Total: 190
+
+####### hg19 Full list:
 # Experiment       On             Reps    First Post  Last Post   Total Time/Cost
 ENCSR000AAA  ENC3  hg19 v19 -     1,2     2015-06-25  2015-08-20  3d18h04m $286.49
 ENCSR000AAB  ENC3  hg19 v19 -     1,2     2015-06-24  2015-08-20  4d12h20m $304.67
@@ -814,38 +1034,6 @@ ENCSR000AJE  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     3h19m   $5.
 ENCSR000AJF  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     6h01m  $10.05
 ENCSR000AJG  ENC3  hg19 v19 -     1,2     2015-10-20  2015-10-20    17h14m  $32.76
 ENCSR000AJH  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28    12h32m  $18.19
-ENCSR000AJU  ENC2  mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR000AJV  ENC3  mm10 M4  -     1,2     - older -  2014-10-23      6h43m  $29.17
-ENCSR000BYP  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     7h56m  $38.36
-ENCSR000BYQ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h09m  $44.34
-ENCSR000BYR  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    13h52m  $60.37
-ENCSR000BYS  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h57m  $47.57
-ENCSR000BYT  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     8h52m  $39.88
-ENCSR000BYU  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h21m  $47.12
-ENCSR000BYV  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    13h08m  $53.83
-ENCSR000BYW  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h17m  $44.13
-ENCSR000BYX  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h06m  $42.88
-ENCSR000BYY  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h38m  $45.66
-ENCSR000BYZ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h30m  $44.61
-ENCSR000BZA  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h36m  $46.73
-ENCSR000BZB  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h53m  $42.97
-ENCSR000BZC  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     7h33m  $35.20
-ENCSR000BZD  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h50m  $43.64
-ENCSR000BZE  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h46m  $44.71
-ENCSR000BZF  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h14m  $46.55
-ENCSR000BZG  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  2d01h51m $175.95
-ENCSR000BZH  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d11h17m $133.60
-ENCSR000BZI  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d04h29m $103.40
-ENCSR000BZJ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d14h54m $152.80
-ENCSR000BZK  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d23h17m $165.48
-ENCSR000BZL  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d16h27m $155.78
-ENCSR000BZM  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d07h28m $125.43
-ENCSR000BZN  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d11h53m $148.04
-ENCSR000BZO  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d08h37m $147.85
-ENCSR000BZP  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d18h11m $182.57
-ENCSR000BZQ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d02h49m $120.60
-ENCSR000BZR  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d10h03m $136.11
-ENCSR000BZS  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d15h44m $154.23
 ENCSR000COO  ENC2  hg19 v19 -     1,2     2015-06-24  2015-08-20  2d00h13m  $81.23
 ENCSR000COX  ENC2  hg19 v19 -     1       2015-06-24  2015-08-20    19h56m  $43.29
 ENCSR000COY  ENC2  hg19 v19 -     1,2     2015-06-25  2015-08-20    20h14m  $86.44
@@ -882,15 +1070,12 @@ ENCSR000CUN  ENC2  hg19 v19 -     1       2015-06-24  2015-08-20  2d10m41m  $98.
 ENCSR000CUP  ENC2  hg19 v19 -     1,2     2015-06-24  2015-08-20  5d07h36m $279.12
 ENCSR000CUQ  ENC2  hg19 v19 -     1,2     2015-06-24  2015-08-20  4d08h50m $259.64
 ENCSR000CUR  ENC2  hg19 v19 -     1,2     2015-06-24  2015-08-20  3d15h07m $274.50
-ENCSR000CWD  ENC2  mm10 M2,3,M4x2 1,2     - older -   2014-10-23  1d06h23m  $113.61
 ENCSR000KYM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d02h39m  $26.38
-ENCSR000OXO        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR001HHK  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d09h27m  $83.29           
 ENCSR003EKR  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d03h58m  $21.18
 ENCSR003LSA  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     7h46m  $30.76
 ENCSR004OSI  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     7h34m  $20.66
 ENCSR004RGI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d21h42m  $23.08
-ENCSR004XCU  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h47m  $26.59
 ENCSR007XKL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    17h24m  $25.49
 ENCSR009PPI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     6h51m  $32.01
 ENCSR010ZMZ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    18h56m  $27.67
@@ -899,20 +1084,14 @@ ENCSR012DAF  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h29m  $24.
 ENCSR014VQS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d07h26m  $29.17
 ENCSR016IDR  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    19h44m  $33.82
 ENCSR016XPB  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10    10h52m  $44.39
-ENCSR017JEG  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h17m  $28.57
 ENCSR017PRS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    16h23m  $32.79
-ENCSR020DGG  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    13h40m  $24.98
 ENCSR023HWI  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     6h59m  $18.96
-ENCSR026ZRP        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR027CXR  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.12
 ENCSR028ITN        hg19 v19 -     1,2     - older -   2015-08-20
 ENCSR028YAQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     3h47m  $16.61
 ENCSR029LGJ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    18h03m  $29.82
 ENCSR030ARO  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    18h42m  $34.00
 ENCSR030GZQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     5h17m  $24.41
 ENCSR031RZS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    18h24m  $26.27
-ENCSR035DLJ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR039ADS        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR040FSN  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    12h12m  $47.28
 ENCSR042QTH  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    18h26m  $40.71
 ENCSR047AJA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     6h08m  $25.86
@@ -923,18 +1102,15 @@ ENCSR052IYH  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h49m  $25.
 ENCSR056QEW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d20h50m  $37.39
 ENCSR057GCF  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d15h55m  $28.65
 ENCSR060KRD  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10    10h34m  $41.13
-ENCSR062VTB  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    15h49m  $27.34
 ENCSR064DXG  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    10h29m  $29.34
 ENCSR066VOO  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    11h01m  $29.64
 ENCSR067AUG  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h18m  $19.13
 ENCSR067LLB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d03h03m  $31.40
 ENCSR067UNX  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d06h52m  $91.53           
-ENCSR068SJG  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     9h59m   $7.94
 ENCSR070LJO  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     4h35m  $21.11
 ENCSR074UZM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d05h06m  $28.74
 ENCSR079IPT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d05h49m  $26.36
 ENCSR079LMZ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     7h07m  $20.16
-ENCSR080EVZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h37m  $19.88
 ENCSR081EST  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    14h08m  $27.36
 ENCSR081QQH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d00h14m  $25.48
 ENCSR081XRA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d18h03m  $27.56
@@ -946,9 +1122,7 @@ ENCSR090UMI  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    12h28m  $24.
 ENCSR092WKG  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     9h08m  $38.58
 ENCSR094KBY  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    17h27m  $32.80
 ENCSR096BEN  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d03h23m  $28.36
-ENCSR096STK  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    11h28m  $32.65
 ENCSR098NHI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d07h23m  $23.72
-ENCSR100KRK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h01m   $4.67
 ENCSR101GVL  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     4h22m   $7.16
 ENCSR101OPF  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    10h53m  $44.95
 ENCSR104ABF  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     5h46m  $26.67
@@ -957,11 +1131,9 @@ ENCSR105OXX  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     9h11m  $18.
 ENCSR109IQO  ENC3  hg19 v19 -     1,2     2015-09-29  2015-09-29  1d23h40m  $99.27
 ENCSR110BDY        hg19 v19 -     1,2     2015-05-18  2015-08-20
 ENCSR110ZYD  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     7h48m  $22.22
-ENCSR111QQX  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     6h34m  $10.31
 ENCSR112YTD  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     7h50m  $21.88
 ENCSR113HRG  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    11h54m  $33.13
 ENCSR113PYX  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    13h40m  $48.72
-ENCSR115TWD  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h33m  $20.12
 ENCSR116YMU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     6h08m  $24.66
 ENCSR117WLY  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d09h11m  $27.41
 ENCSR118TVR  ENC3  hg19 v19 -     1,2     2015-10-09  2015-10-09  1d07h06m $122.05
@@ -976,39 +1148,28 @@ ENCSR134JRE  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d11h33m  $30.
 ENCSR136WGP  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  3d10h54m $159.94
 ENCSR137HKS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d00h29m  $25.01
 ENCSR137RHZ  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24     7h17m  $23.53
-ENCSR138VRG  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h15m   $5.75
 ENCSR139BIJ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    23h16m  $23.12
 ENCSR143UET  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d01h18m  $22.93
-ENCSR145EKP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h06m   $3.43
 ENCSR147ZBD  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d13h56m  $48.41
 ENCSR148MQK  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d01h02m  $34.64
 ENCSR149DMY  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h24m  $24.36
 ENCSR152MON  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    23h26m  $44.16
 ENCSR155BMF  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    13h19m  $28.86
 ENCSR157NLF  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    10h28m  $30.48
-ENCSR160IIN        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR164OCT  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  2d16h32m $128.99
 ENCSR164TLB  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     7h17m  $20.02
 ENCSR166QLP  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19    23h56m  $81.47         
-ENCSR167AWS  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.18
 ENCSR167JPY  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d16h30m  $32.40
 ENCSR169QQW  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    13h49m  $56.95
-ENCSR173PJN  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    11h56m  $35.35
-ENCSR178GUS  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    16h10m  $43.78
 ENCSR180XTP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     5h43m  $25.73
-ENCSR181KQJ        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR181RLB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d18h10m  $28.11
 ENCSR182DAW  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h53m  $20.93
 ENCSR184CWK  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28    12h08m  $17.76
 ENCSR185JGT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     8h54m  $26.48
-ENCSR185LWM        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR188IPO  ENC3  hg19 v19 shRNA 1,2     2015-08-19  2015-08-19     6h54m  $22.33           
 ENCSR191VWK  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-18    15h47m  $53.15
 ENCSR192GBD  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    13h51m  $47.51
 ENCSR193FFA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d23h51m  $31.26
-ENCSR194TNV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h26m   $7.04
-ENCSR195BCE  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h17m   $5.43
-ENCSR198EIH  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h14m   $4.64
 ENCSR198TKA        hg19 v19 -     1,2     2015-05-18  2015-08-20
 ENCSR201WFU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    14h20m  $30.84
 ENCSR201WVA  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d03h12m  $68.93           
@@ -1018,9 +1179,7 @@ ENCSR208GPE  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h07m  $20.
 ENCSR210DML  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h47m  $30.11
 ENCSR210KJB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h59m  $25.16
 ENCSR210RWL        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    16h60m  $24.74  |  2015-09-29  2015-09-29     9h34m  $15.18
-ENCSR216NEG        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR219DXZ  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17     9h53m  $40.69
-ENCSR220HFQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h19m   $6.03
 ENCSR220TBR  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    19h17m  $31.05
 ENCSR222CSF  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d03h47m  $21.82
 ENCSR222LRL  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h18m  $20.73
@@ -1033,8 +1192,6 @@ ENCSR232CPD  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     8h29m  $25.
 ENCSR232XRZ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d11h27m  $20.58
 ENCSR233IJT  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d09h39m  $90.08
 ENCSR234YMW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    13h19m  $26.13
-ENCSR236EGS        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR236ZIE        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR237IWZ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d06h18m  $20.60
 ENCSR237YZT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d04h44m  $33.95
 ENCSR239BCO  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d00h02m  $37.24
@@ -1047,36 +1204,22 @@ ENCSR246SOU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d23h30m  $23.
 ENCSR253DCB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h27m  $26.06
 ENCSR254JJM  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  2d22h09m $145.29
 ENCSR255NYQ  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d03h21m  $70.56           
-ENCSR255SDF        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR256PLH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d13h17m  $28.77
 ENCSR258VGD  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    12h00m  $19.74
-ENCSR265YFZ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR267LBO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    15h06m  $12.41
-ENCSR268AXN        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR268IGT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     8h37m  $11.94
 ENCSR268JDD  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     5h24m  $23.42
 ENCSR269HQA  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h47m  $19.72
 ENCSR274KWA  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    13h13m  $26.82
 ENCSR279HMU  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h37m  $23.98
-ENCSR282DYQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h42m   $2.95
-ENCSR284AMY        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR284YKY  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    10h58m  $24.27
-ENCSR285WZV  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h09m  $24.96
 ENCSR286OKW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    21h12m  $27.08
-ENCSR290RRR        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR291DJH  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19    21h38m  $73.73           
-ENCSR292IVH  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     9h34m  $13.05
 ENCSR292TAP  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19    11h52m  $35.97           
-ENCSR295UJP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.84
 ENCSR295XKC  ENC3  hg19 v19 shRNA 1,2     2015-08-19  2015-08-19     6h38m  $23.39           
-ENCSR298YHA  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h50m   $5.37
 ENCSR300IEW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d05h02m  $28.49
 ENCSR300QFQ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     9h29m  $24.30
 ENCSR302JQA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d09h26m  $33.39
 ENCSR305XWT  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h26m  $23.74
 ENCSR306EIU  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h34m  $21.37
 ENCSR306IOF  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h34m  $18.80
-ENCSR307BCA        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR308IKH  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h34m  $23.31
 ENCSR309HXK  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h26m  $26.92
 ENCSR309PPC  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     6h32m  $27.18
@@ -1087,46 +1230,32 @@ ENCSR312SRB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d07h11m  $24.
 ENCSR313CHR  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d02h26m  $34.55
 ENCSR313IUO  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    10h39m  $26.17
 ENCSR314LXG  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d07h38m  $79.43           
-ENCSR316RMA  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h20m   $3.56
 ENCSR318HAT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d06h02m  $25.96
 ENCSR318OXM        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    20h10m  $29.37  |  2015-09-29  2015-09-29  1d04h46m  $15.92
 ENCSR320BRR  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d22h18m $108.02           
-ENCSR320PXZ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h16m   $3.50
 ENCSR322XVS  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    17h08m  $27.82
-ENCSR323FHJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.79
 ENCSR325OOM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    21h14m  $20.61
 ENCSR330YOU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     9h43m  $36.77
 ENCSR331DUD  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d12h35m  $21.47
-ENCSR331XCE  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    14h43m  $38.11
 ENCSR332DBS  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d03h02m  $80.19           
 ENCSR334HNJ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    14h50m  $34.40
 ENCSR336DFS  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h17m  $20.54
-ENCSR337FYI        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR338CON  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d13h21m  $26.82
-ENCSR340NCF  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d12h12m $139.20
 ENCSR342EDG  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d06h48m  $26.50
 ENCSR343DHN  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h05m  $28.17
-ENCSR343YLB        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR344XID  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d13h58m  $30.00
 ENCSR345VVZ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h14m  $22.21
-ENCSR347SQR  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h56m  $31.32
 ENCSR347ZHQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h37m  $33.65
 ENCSR351CNN  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d03h33m  $23.20
-ENCSR351YGY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h37m   $3.80
 ENCSR354XQY  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h40m  $21.79
 ENCSR361LBE  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d05h02m  $27.89
-ENCSR362AIZ  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     8h30m  $20.48
 ENCSR362HMX  ENC3  hg19 v19 -     1,2     2015-10-09  2015-10-09  1d23h45m $164.47
-ENCSR362OYV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     6h57m   $9.99
 ENCSR362XMY  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10    21h19m  $71.63
 ENCSR366FFV  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    13h40m  $27.50
 ENCSR366QZI  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     4h34m   $6.98
-ENCSR367DUL  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.38
-ENCSR367ZPZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h36m  $21.93
 ENCSR368QPC  ENC3  hg19 v19 -     1,2     2015-07-02  2015-08-20  1d17h31m  $76.31  <== most expensive of Wold se TopHat: $67.68  non-tophat: $8.63
 ENCSR368ZRP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d10h38m  $26.73
 ENCSR369RVN  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d02h04m  $76.12           
-ENCSR370SFB  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h01m  $27.03
 ENCSR371VGV        hg19 v19 -     1,2     2015-05-18  2015-08-20
 ENCSR372DZW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d14h36m  $93.60  <== most expensive shRNA
 ENCSR373BDG        hg19 v19 -     1,2     2015-05-27  2015-08-20
@@ -1139,12 +1268,10 @@ ENCSR385KOY  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h14m  $20.
 ENCSR385TMY  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     8h16m  $38.51
 ENCSR386YEV  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     7h52m  $19.12
 ENCSR388ZNJ  ENC3  hg19 v19 -     1,2     2015-10-09  2015-10-09    14h59m  $36.22
-ENCSR390KQJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h01m   $3.21
 ENCSR392HSJ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h15m  $21.65
 ENCSR398GHW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d11h34m  $26.76
 ENCSR398HXV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d08h19m  $25.46
 ENCSR398LZW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d19h32m  $24.77
-ENCSR401BSG  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h53m  $28.38
 ENCSR408SDL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h35m  $28.32
 ENCSR410MIQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    16h60m  $20.85
 ENCSR410UHJ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29     5h55m  $27.00
@@ -1158,23 +1285,17 @@ ENCSR423XRG  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    13h30m  $34.
 ENCSR424JSU  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    19h30m  $29.45
 ENCSR424YSV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    12h58m  $22.83
 ENCSR426UUG  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10    10h36m  $44.90
-ENCSR427FOY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h54m   $3.27
 ENCSR435ROA  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     2h50m   $5.07
-ENCSR438XCG  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    12h54m  $34.78
 ENCSR444WHQ  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  3d13h10m $156.02           
 ENCSR447UCG  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    11h03m  $27.62
-ENCSR448MXQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h29m  $27.70
 ENCSR450VQO  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h51m  $23.39
 ENCSR455TNF  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d08h27m  $82.19
 ENCSR455VZH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d08h00m  $32.47
-ENCSR457RRW  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h07m  $25.23
 ENCSR459EMR  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h06m  $27.88
 ENCSR464ADT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d11h18m  $34.38
-ENCSR466KZY  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h24m  $22.77
 ENCSR468ION  ENC3  hg19 v19 -     1,2     2015-09-29  2015-09-29    12h51m  $46.43
 ENCSR470PRV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d17h24m  $29.22
 ENCSR471GIS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d14h26m  $20.60
-ENCSR474NEW  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h44m   $4.08
 ENCSR477TRX  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d07h11m  $34.37
 ENCSR478FJK  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d02h13m  $32.60
 ENCSR481AYC  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d05h13m  $30.11
@@ -1188,39 +1309,24 @@ ENCSR492UFS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    11h56m  $32.
 ENCSR494VSD  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h47m  $22.78
 ENCSR495YSS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d08h02m  $33.69
 ENCSR500WHE  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d08h11m  $25.22
-ENCSR504GEG        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR504VXC  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  3d03h09m $207.57 
 ENCSR509LIV  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h41m  $33.84
-ENCSR510ADJ        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR517JDK  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     7h31m  $34.80
 ENCSR519KXM  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h53m  $29.69
-ENCSR521YLY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h12m   $3.35
-ENCSR526SEX  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h24m  $31.31
-ENCSR527DQV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h00m   $3.31
 ENCSR527IVX  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d18h58m  $34.40
-ENCSR527RFK        mm10 M4  -     1,2     - older -   2015-08-20  
 ENCSR528ASX  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    12h26m  $21.44
 ENCSR529JNJ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d06h39m  $34.91
 ENCSR529QEZ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d20h53m  $28.37
-ENCSR530UXI  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h18m   $8.95
 ENCSR533HXS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d14h43m  $24.86
 ENCSR535VTR  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d11h46m  $98.69           
-ENCSR537GNQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     7h43m  $22.21
-ENCSR538WYL  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    13h15m  $23.54
-ENCSR541XZK        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR542ESY  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     9h09m  $37.89
 ENCSR545AIK  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d16h05m  $35.28
 ENCSR546MBH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d03h33m  $30.17
 ENCSR547NWD  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d11h38m  $33.32
-ENCSR549QME        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR552NBS  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    10h01m  $43.97
 ENCSR556FNN  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17     9h42m  $43.10
-ENCSR557RMA  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    15h41m  $26.06
 ENCSR558LHB  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     3h20m   $5.59
-ENCSR558PXY  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d03h51m $114.12
 ENCSR558XNA  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    16h03m  $55.59
-ENCSR559QTE  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h27m   $3.69
-ENCSR559TRB        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR560AYQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h55m  $33.58
 ENCSR560RSZ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h51m  $27.72
 ENCSR561CBC  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d19h55m  $33.08
@@ -1232,18 +1338,14 @@ ENCSR572AMC  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d06h58m  $33.
 ENCSR572FFX  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     9h31m  $25.46
 ENCSR573UBF  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d02h45m  $19.89
 ENCSR576GOW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    15h37m  $26.34
-ENCSR577ONT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h48m  $11.13
 ENCSR577OVP  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h52m  $22.66
 ENCSR577XBW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    20h23m  $28.53
-ENCSR579FCW  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    13h13m  $34.07
 ENCSR580GSX  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  1d03h23m  $80.97           
 ENCSR584JRB  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     8h14m  $38.94
 ENCSR584JXD  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  2d00h06m $114.90
 ENCSR584LDM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    16h27m  $20.99
 ENCSR586SEE  ENC3  hg19 v19 -     1       2015-09-29  2015-09-29    14h44m  $33.80
-ENCSR592MSV        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR597IYB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    16h19m  $23.52
-ENCSR597UZW  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h06m  $26.80
 ENCSR597XHH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d11h00m  $28.83
 ENCSR598YQX        hg19 v19 shRNA 1,2 yes 2015-08-26  2016-04-14    20h23m  $29.71  |  2015-08-26  2015-08-31    16h04m  $18.44
 ENCSR599UDS  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     8h40m  $22.63
@@ -1255,10 +1357,8 @@ ENCSR608IAI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d16h31m  $27.
 ENCSR610AEI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d10h51m  $34.59
 ENCSR610BAM  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     3h59m   $6.36
 ENCSR611LQB  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    18h31m  $23.44
-ENCSR611PTP  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h09m  $26.27
 ENCSR611ZAL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d17h13m  $25.44
 ENCSR620HAA  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     8h05m  $37.48
-ENCSR620HJQ  ENC3  mm10 v19 -     1b12tn7 2015-10-20  2015-10-20     8h13m $113.83
 ENCSR620NSN        hg19 v19 -     1,2     2015-05-18  2015-08-20
 ENCSR620OKS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d08h15m  $25.55
 ENCSR620PUP  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    19h11m  $62.10
@@ -1271,29 +1371,22 @@ ENCSR628JYB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d06h45m  $34.
 ENCSR629EWX  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d04h57m  $33.13
 ENCSR634KBO  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h21m  $25.02
 ENCSR635FRH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d09h24m  $31.59
-ENCSR636CWO  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h57m  $25.83
 ENCSR637JLM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d12h09m  $34.52
-ENCSR637NLF  ENC3  mm10 v19 -     1b16t   2015-10-20  2015-10-20     3h05m  $62.41
 ENCSR639LKS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d17h04m  $25.57
 ENCSR643UFV  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    19h17m  $28.10
 ENCSR644AIM  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     7h27m  $35.78
 ENCSR647NYX  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d21h49m  $29.09
 ENCSR648BSC  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    12h54m  $26.57
 ENCSR648QFY  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    18h28m  $36.75
-ENCSR650MMK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h30m   $3.83
 ENCSR653DFZ  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  2d07h43m $124.74
 ENCSR656DQV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d09h22m  $19.77
 ENCSR659QHV  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     3h51m   $6.25
-ENCSR659SFM  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h03m   $3.26
 ENCSR660ETT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d04h46m  $43.38
 ENCSR660MZN  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h30m  $23.03
 ENCSR661HEL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    14h25m  $21.03
-ENCSR661TLW  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23    23h32m  $95.87
-ENCSR662UPQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h57m   $3.07
 ENCSR667JTA  ENC3  hg19 v19 -     1,2     2015-09-29  2015-09-29  1d21h03m  $57.14
 ENCSR667PLJ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h21m  $18.02
 ENCSR667RIA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d08h10m  $26.70
-ENCSR667TOX  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h35m  $26.25
 ENCSR669KQU  ENC3  hg19 v19 -     1,2     2015-08-19  2015-08-19  2d06h59m $124.93
 ENCSR672QFA  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     4h31m   $7.06
 ENCSR673UIY  ENC3  hg19 v19 -     1b9t    2015-10-20  2015-10-20    16h04m $125.46
@@ -1307,8 +1400,6 @@ ENCSR684HTV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d07h17m  $14.
 ENCSR685JXU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d10h06m  $26.42
 ENCSR689PHN  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    21h22m  $16.79
 ENCSR689ZJC  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     7h26m  $32.40
-ENCSR691OPQ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR691PPV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h43m   $3.68
 ENCSR693MZJ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h13m  $24.28
 ENCSR694LKY  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d11h58m  $29.61
 ENCSR695XOD  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    16h59m  $28.31
@@ -1317,50 +1408,33 @@ ENCSR696SMK  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    22h36m  $87.
 ENCSR697GLD  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    11h09m  $29.01
 ENCSR703QFF  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d12h33m  $25.23
 ENCSR706SXN  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    10h36m  $26.40
-ENCSR708EHJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h53m   $3.07
 ENCSR708GKW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d13h29m  $30.04
 ENCSR710NWE  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d11h53m  $27.90
-ENCSR710QXP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    10h46m   $5.90
 ENCSR711ZJQ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    13h29m  $29.20
 ENCSR712CSN  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    13h34m  $22.52
 ENCSR715XZS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d06h16m  $26.34
 ENCSR716WZH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d11h45m  $25.98
 ENCSR717SJA  ENC3  hg19 v19 shRNA 1,2     2015-08-19  2015-08-19     6h33m  $22.50
-ENCSR719NAJ  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     8h55m  $26.29
 ENCSR720BPO  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h58m  $22.49
-ENCSR723SZV        mm10 M2,M3,M4  1,2     - older -   2015-08-20
 ENCSR724XFQ  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     4h34m   $7.09
-ENCSR726VVO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    14h01m  $11.74
-ENCSR727FHP        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR728BOL  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    16h41m  $24.97
 ENCSR729ENB  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     4h30m   $6.94
 ENCSR732ICL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d18h08m  $32.33
 ENCSR732IYM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d09h18m  $24.64
-ENCSR734SOQ  ENC3  mm10 v19 -     1b15t   2015-10-12  2015-10-12     3h47m  $70.03
-ENCSR739PEB  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    12h51m  $32.78
-ENCSR739YUO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h46m   $4.12
 ENCSR741YCA  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     8h15m  $38.63
 ENCSR744YVR  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d04h13m  $29.18
 ENCSR745WVZ  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    16h06m  $63.81
 ENCSR746EKS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d10h44m  $35.08
-ENCSR746LUP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h12m   $4.02
-ENCSR749BAG        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR752RGN  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h52m  $26.46
 ENCSR755KOM  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h47m  $29.31
-ENCSR758TAD        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR760EGM  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     7h57m  $36.12
-ENCSR760TOE        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR762FEO  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    17h37m  $22.71
 ENCSR767LLP  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     9h08m  $39.69
 ENCSR767SOH  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     3h28m   $5.63
-ENCSR767VHR        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR769GES  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    17h09m  $27.20
 ENCSR770OWW  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31     9h18m  $24.63
 ENCSR771QMJ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    18h31m  $22.74
 ENCSR771ZZL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d15h30m  $28.15
-ENCSR772FQU  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h07m  $26.64
 ENCSR774BXV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d20h42m  $24.39
-ENCSR775HGC  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h37m  $10.25
 ENCSR778AJO  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d10h16m  $25.20
 ENCSR778RWJ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    18h26m  $24.80
 ENCSR778SIU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d01h17m  $25.08
@@ -1368,48 +1442,30 @@ ENCSR778WPL  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    10h07m  $44.
 ENCSR780YFF  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    23h37m  $27.84
 ENCSR781YNI  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h05m  $26.75
 ENCSR782MXN  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     7h34m  $36.92
-ENCSR782WIL  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h56m   $4.26
 ENCSR783LUA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d07h02m  $27.89
 ENCSR783YSQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    19h52m  $26.72
 ENCSR784FTX  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    12h11m  $27.77
 ENCSR788HVK  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d08h55m  $13.84
 ENCSR788HVK        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    14h39m  $21.32  |  2015-09-29  2015-09-29  1d08h55m  $13.84
 ENCSR788YGG  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    10h09m  $41.12
-ENCSR789RPP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h33m   $6.60
 ENCSR792CBM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    22h58m  $33.84
-ENCSR792RJV  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h02m  $27.32
 ENCSR792XFP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d19h22m  $33.78
-ENCSR796QJD  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h47m  $11.23
 ENCSR797BPP  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24  1d01h17m  $98.75
-ENCSR803PLZ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h09m   $7.26
-ENCSR805QYO  ENC3  mm10 M4  -     1,2     2015-10-09  2015-10-09    14h37m  $34.54
 ENCSR810JYX  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    15h57m  $30.04
 ENCSR812EIA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d02h46m  $34.91
 ENCSR813NZP  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    10h04m  $19.08
-ENCSR814JMM        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR815CVQ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d17h55m  $25.16
 ENCSR815JDY  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d17h49m  $14.99
 ENCSR815UVL        hg19 v19 -     1,2     2015-05-18  2015-08-20
 ENCSR820ROH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    23h13m  $26.75
-ENCSR822EWO  ENC3  mm10 M4  -     1,2     2015-10-09  2015-10-09    14h40m  $35.21
 ENCSR822SUG  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24  1d01h25m  $91.64
-ENCSR823VEE        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR825QXH  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h17m  $25.43
-ENCSR826HIQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h28m  $25.93
-ENCSR826IXR        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR828FPS  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     6h32m   $9.70
 ENCSR828TEI  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24  2d01h12m $164.29
-ENCSR830IVQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h18m  $25.20
 ENCSR831YGP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d21h26m  $24.50
-ENCSR833HPM        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR833SOQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h26m   $4.87
 ENCSR837QDN  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     8h36m  $40.51
 ENCSR838SMC  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d05h41m  $28.44
 ENCSR840QFR  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d21h51m  $22.35
-ENCSR846FYI  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h49m   $4.24
-ENCSR848GST  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h44m  $24.00
-ENCSR848HOX        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR848LXY  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d14h49m $148.35
 ENCSR849STR  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d03h18m  $33.25
 ENCSR850CKU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d11h36m  $36.78
 ENCSR850FEH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d14h58m  $22.62
@@ -1420,8 +1476,6 @@ ENCSR853ZJS  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    21h39m  $37.
 ENCSR856CJK  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    16h59m  $21.69
 ENCSR856ZRV        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14    16h14m  $23.63  |  2015-09-29  2015-09-29  1d00h32m  $18.14
 ENCSR861ENA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d07h36m  $33.52
-ENCSR861FGB        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR867YNV        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR871BXO  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    16h18m  $23.12
 ENCSR878EUT  ENC3  hg19 v19 -     1,2     2015-10-09  2015-10-09  1d05h23m $103.23
 ENCSR880DEH  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h37m  $28.76
@@ -1442,11 +1496,8 @@ ENCSR905FLM  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     3h43m   $6.
 ENCSR905HID  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    16h05m  $26.97
 ENCSR906RHU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d07h10m  $29.74
 ENCSR906WTM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d10h35m  $27.85
-ENCSR906YQZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    18h01m  $35.40
-ENCSR907JUN        mm10 M2,M3,M4  1,2     - older -   2015-08-20
 ENCSR907UTB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d04h16m  $29.71
 ENCSR908ZAS  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24  1d06h18m $109.06
-ENCSR909YEQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h08m   $5.58
 ENCSR910YNJ  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h03m  $29.32
 ENCSR911DGK  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d02h47m  $20.90
 ENCSR912EHP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d08h31m  $34.76
@@ -1458,32 +1509,23 @@ ENCSR919MZM        hg19 v19 -     1,2     2015-05-18  2015-08-20
 ENCSR919QJT  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    20h46m  $92.76
 ENCSR921DSM  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     5h10m   $8.10
 ENCSR921KDS  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    15h01m  $19.12
-ENCSR921PRX  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    17h20m  $27.46
 ENCSR925RNE  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d16h31m  $21.48
 ENCSR927DHK  ENC3  hg19 v19 scell 1       2015-08-28  2015-08-28     5h37m   $7.89
-ENCSR927IOO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h47m   $4.25
 ENCSR927JXU  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h60m  $28.63
 ENCSR927SLP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d02h37m  $29.52
 ENCSR927TSP  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    11h17m  $20.19
 ENCSR927XBT        hg19 v19 shRNA 1,2 yes 2015-08-26  2016-04-14    19h57m  $29.08  |  2015-08-26  2015-08-31    13h43m  $16.24
-ENCSR928OXI        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR932TRU        mm10 M4  -     1,2     - older -   2015-08-20
 ENCSR936TED  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d19h55m  $29.35
 ENCSR936VPP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    19h14m  $50.61
 ENCSR938LSP  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24  1d05h52m $110.07
 ENCSR939ZRA  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d12h29m  $34.95
-ENCSR940DVT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h41m   $4.75
 ENCSR942MBU  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    14h17m  $28.59
 ENCSR942UNX  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d14h39m  $23.65
 ENCSR945UYL  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d15h16m  $37.05
 ENCSR945XKW  ENC3  hg19 v19 shRNA 1,2     2015-08-26  2015-08-31    18h05m  $30.02
-ENCSR946HWC  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     9h10m  $27.66
 ENCSR946OFN  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    21h42m  $16.54
 ENCSR947OIM  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d08h60m  $37.15
-ENCSR948NDP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h13m   $3.64
-ENCSR950BNG        mm10 M2,M3,M4  1,2     - older -   2015-08-20
 ENCSR952RRH  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    19h50m  $34.33
-ENCSR953TKB  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.34
 ENCSR954HAY  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    11h49m  $50.61
 ENCSR957EEG  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d06h24m  $35.70
 ENCSR958KSY  ENC3  hg19 V19       1,2     2016-02-01  2016-02-10     7h54m  $35.35
@@ -1493,26 +1535,57 @@ ENCSR961YAG  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29    23h41m  $27.
 ENCSR963RLK  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17     9h53m  $37.43
 ENCSR964YTW  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d04h21m  $33.64
 ENCSR968WKR  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    18h55m  $71.60
-ENCSR970EWM  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    17h01m  $29.50
 ENCSR971GPJ  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24  1d17h53m $141.51
 ENCSR971KNW  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24  1d04h03m  $84.60
 ENCSR973QSV  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d11h04m  $26.75
-ENCSR980SWK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h39m  $10.85
-ENCSR982MRY  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h11m  $30.98
 ENCSR984CLJ  ENC3  hg19 v19 shRNA 1,2     2015-12-17  2015-12-17    17h24m  $67.32
 ENCSR985KAT  ENC3  hg19 v19 -     1,2     2015-09-29  2015-09-29  2d02h11m  $40.87
 ENCSR992JGE        hg19 v19 shRNA 1,2 yes 2015-09-29  2016-04-14  1d05h03m  $42.36  |  2015-09-29  2015-09-29    20h26m  $25.77
-ENCSR992WBR  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    10h04m  $22.22
 ENCSR995JXE  ENC3  hg19 v19 -     1,2     2015-08-24  2015-08-24    23h11m  $80.19
 ENCSR995RPB  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d00h10m  $34.50
 ENCSR995ZGJ  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d08h06m  $25.83
 ENCSR997FOT  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  2d08h35m  $24.62
 ENCSR998MZP  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d13h58m  $20.85
 ENCSR998RZI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h53m  $32.65
-# Total 757
+# Total 579
 
 
 ####### Historical...
+
+# Done: mm10, Barbara Wold, Caltech.  Cricket: "getting some pressure on them."
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR150CUE       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    6h18m  $8.88
+ENCSR420QTO       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    5h52m  $8.26
+ENCSR508GWZ       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    6h12m  $8.74
+ENCSR647QBV       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    6h24m  $9.02
+ENCSR648YEP       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    6h28m  $9.14
+ENCSR750YSX       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    5h45m  $8.10
+ENCSR851HEC       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    6h16m  $8.85
+ENCSR908JWT       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03    5h48m  $8.19
+
+# Done: 6 of 8 human for Wold lab http://redmine.encodedcc.org/issues/3060#note-190
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR023VVO       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    7h50m  $11.04
+ENCSR236URT       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    8h58m  $12.66
+ENCSR294NDO       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02   10h31m  $14.86
+ENCSR510QZW       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    8h43m  $12.30
+ENCSR748GVH       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    6h34m  $9.28
+ENCSR859HWB       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    9h17m  $13.09
+
+# Done: 12 LRNA for Gingeras (Requested by Kathrine on gitter)
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR106SZN       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    2h26m  $3.44
+ENCSR108MAU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h27m  $4.89
+ENCSR194HVU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h20m  $4.71
+ENCSR257NIR       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h34m  $5.05
+ENCSR330UMQ       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h54m  $5.51
+ENCSR450BNZ       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h04m  $4.35
+ENCSR450ENK       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h52m  $5.48
+ENCSR480SLD       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h27m  $4.88
+ENCSR544SAU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h58m  $5.60
+ENCSR802HPM       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    2h50m  $4.01
+ENCSR862RGX       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h28m  $4.91
+ENCSR900SGE       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h43m  $5.26
 
 # Done: 7 Graveley shRNA with new fastqs (both hg19 and GRCh38): http://redmine.encodedcc.org/issues/3060#note-168
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
