@@ -1,5 +1,5 @@
 #!/usr/bin/env python2.7
-# mission_log.py 0.1.0
+# mission_log.py 1.1.0
 #
 # Mission_log is meant to report on experiments that have been posted to encoded.
 # It expects a list of experiment accessions to report on.
@@ -106,10 +106,13 @@ class Mission_log(object):
              "dna-me":        { #"output_types": [ "alignments","methylation state at CpG" ],
                                 #"alignments":   { "suffix":   [ "_techrep_bismark_pe.bam", "_techrep_bismark_se.bam" ],
                                 #                  "metrics":  [ "bismark", "samtools_flagstats" ] },
-                                "output_types": [ "methylation state at CpG" ], 
+                                "output_types": [ "alignments", "methylation state at CpG" ], 
+                                "alignments": { 
+                                                  "suffix":   [ "_bismark_pe.bam", "_bismark_se.bam" ], 
+                                                  "metrics":  [ "samtools_stats" ] }, 
                                 "methylation state at CpG": { 
                                                   "suffix":   [ "_biorep_CpG.bed.gz", "_CpG_corr.txt" ], 
-                                                  "metrics":  [ "samtools_flagstats", "bismark", "cpg_correlation" ] }, 
+                                                  "metrics":  [ "bismark", "cpg_correlation" ] }, 
                               }
          },
          'cost': {
@@ -149,6 +152,10 @@ class Mission_log(object):
     #   "special_metric": (optional, default: False). Create metric from non-quality_metric object info.
     #   "prepend": (optional) If true, prepend the out_type from REPORT_SPECS to the column headers (e.g. "Star Cost").
     #   "format": (optional) Special formatting instructions.
+    #   "calcs": (optional) If a column starts with "calc.", the instructions on how to calculate it are here.
+    #            calcs are a list of [ col, operator, col/number,... ]. (e.g {"calc.1": ["length", "*", "reads","/",3000000000]})
+    #            calc col can be <metric_key>.<col> in order to have cross metric calcs (e.g. "samtools_flagstats.mapped').
+    #            By default cross metric calcs stay within  the same rep_tech.
     METRIC_DEFS = {
        'star': {"per": "replicate",
                 "dx_key": "STAR_log_final",
@@ -209,6 +216,27 @@ class Mission_log(object):
                 "headings": {
                             "mapped":         "Mapped",
                             "mapped_pct":     "Mapped %"}
+              },
+       'samtools_stats': { 
+                "per": "replicate",
+                "columns":  [
+                            "average length",
+                            "raw total sequences",
+                            "reads mapped",
+                            "reads unmapped",
+                            "bases mapped",
+                            "calc.1",
+                            ],
+                "headings": {
+                            "average length":      "Read Length (avg)",
+                            "raw total sequences": "Count",
+                            "reads mapped":        "Mapped",
+                            "reads unmapped":      "Unmapped",
+                            "bases mapped":        "Bases Mapped",
+                            "calc.1":              "Coverage",
+                            },
+                "calcs":    {"calc.1": ["average length", "*", "samtools_stats.reads mapped", "/", 3000000000.0 ]},
+                "format":   {"calc.1": "decimals.1"}
               },
        'bismark': { 
                 "per": "replicate",
@@ -535,7 +563,9 @@ class Mission_log(object):
         enc_files = []
         self.obj_cache["exp"]["files"] = {}
         
-        files = encd.get_exp_files(exp,report_specs["output_types"],lab=encd.DCC_PIPELINE_LAB)
+        files = encd.get_exp_files(exp,report_specs["output_types"],lab=encd.DCC_PIPELINE_LAB_NAME)
+        if verbose:
+            print >> sys.stderr, "Found %d prospecive encoded files" % len(files) 
         # special case to get around m2,m3 files
         new_list = []
         while len(files) > 0:
@@ -1138,13 +1168,73 @@ class Mission_log(object):
                 print >> sys.stderr, "%s %s %s" % (metric_key,rep_tech,metric_id)
         return metrics
 
-
+    def cross_metric_calcs(self,metrics,verbose=False):
+        '''Performs any cross column or cross metric calculations.'''
+        # In metric_defs["calcs"]["calc.1"] expect ["<metric_key>.<col>","*",100,"*","<col>"]
+        #verbose=True
+        
+        for (metric_key,rep_tech,metric_id) in metrics:
+            metric_def = self.METRIC_DEFS[metric_key]
+            for col in metric_def["columns"]:
+                if not col.startswith("calc."):
+                    continue
+                    
+                metric = self.obj_cache["exp"]["metrics"][metric_id]
+                tally = 0
+                op = None
+            
+                for element in metric_def["calcs"][col]: # "calc.1": ["average length", "*", "reads mapped", "/", 3000000000.0]
+                    if element in ["+","-","*","/"]:
+                        op = element
+                        continue
+                    elif isinstance(element,int) or isinstance(element,float):
+                        val = element
+                    else:
+                        parts = element.split('.')
+                        if len(parts) == 1:
+                            val = metric[element]
+                        else:
+                            val = None
+                            for (other_key,other_rep,other_id) in metrics:
+                                if other_rep == rep_tech and other_key == parts[0]: # First look to match rep_tech
+                                    other_metric = self.obj_cache["exp"]["metrics"][other_id]
+                                    val = other_metric[parts[1]]
+                                    break
+                            if val == None:# Not found matching rep_tech, then look for first matching.
+                                for (other_key,other_rep,other_id) in metrics:
+                                    if other_rep != rep_tech and other_key == parts[0]: 
+                                        other_metric = self.obj_cache["exp"]["metrics"][other_id]
+                                        val = other_metric[parts[1]]
+                                        break # TODO: sum? vals from 2 rep_techs?
+                            if val == None:# Not found at all: error
+                                print >> sys.stderr, "- ERROR in calc: "+ metric_key + "." + col + " can't find " + element
+                                val = 0
+                                
+                    if op == None:
+                        tally = val
+                    else:
+                        prev_tally = tally
+                        if op == "+":
+                            tally = prev_tally + val
+                        elif op == "-":
+                            tally = prev_tally - val
+                        elif op == "*":
+                            tally = prev_tally * val
+                        elif op == "/":
+                            tally = prev_tally / val
+                        if verbose:
+                            print >> sys.stderr, "- " + metric_key + "." + col + " " + str(prev_tally) + " " + op \
+                                                      + " " + str(val) + " = " + str(tally)
+                metric[col] = tally
+                        
     def get_metrics(self,exp_id,target_files,report_specs,verbose=False):
         '''Returns a list of tuples of metrics objects for reporting statistics.'''
         if self.data_mine == "DX":
-            return self.get_dx_metrics(exp_id,target_files,report_specs,verbose=verbose)
+            metrics = self.get_dx_metrics(exp_id,target_files,report_specs,verbose=verbose)
         else:
-            return self.get_enc_metrics(exp_id,target_files,report_specs,verbose=verbose)
+            metrics = self.get_enc_metrics(exp_id,target_files,report_specs,verbose=verbose)
+        self.cross_metric_calcs(metrics,verbose=verbose)
+        return metrics
         
 
     def type_headers(self,section_type,report_specs):
@@ -1249,6 +1339,16 @@ class Mission_log(object):
                 return "$"+str(val)
             else:
                 return "$"+ "%.2f" % val
+        elif format_type.startswith("decimals."):
+            if isinstance(val,int):
+                return str(val)
+            else:
+                if format_type.endswith(".1"):
+                    return "%.1f" % val
+                elif format_type.endswith(".2"):
+                    return "%.2f" % val
+                elif format_type.endswith(".3"):
+                    return "%.3f" % val
         else:
             print >> sys.stderr, "Unknown format type: '%s'" % (format_type)
             return str(val) 

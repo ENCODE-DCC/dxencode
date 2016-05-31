@@ -16,7 +16,8 @@ PRODUCTION_SERVER = 'https://www.encodeproject.org'
 DEFAULT_SERVER = PRODUCTION_SERVER
 S3_SERVER='s3://encode-files/'
 
-DCC_PIPELINE_LAB='/labs/encode-processing-pipeline/'
+DCC_PIPELINE_LAB_NAME='encode-processing-pipeline'
+DCC_PIPELINE_LAB='/labs/'+DCC_PIPELINE_LAB_NAME+'/'
 DEFAULT_DCC_AWARD='/awards/U41HG006992/'
 
 logger = logging.getLogger('encd') # Callers should either use dxencode.logger or set dxencode.logger = local.logger()
@@ -608,6 +609,7 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
         return []
     files = []
     accessions = []
+    #print >> sys.stderr, "DEBUG: Found %d original_files" % len(exp_obj['original_files']) 
     for file_acc in exp_obj['original_files']:
         file_obj = None
         acc = file_acc[7:18]
@@ -625,6 +627,7 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
         #print >> sys.stderr, " * Found: %s [%s] status:%s %s" % \
         #                  (file_obj['accession'],file_obj['output_type'],file_obj['status'],file_obj['submitted_file_name'])
         out_type = file_obj.get('output_type')
+        #print >> sys.stderr, "DEBUG: File %s is of out_type '%s'" % (acc,out_type) 
         if len(output_types) > 0 and (out_type == None or out_type not in output_types):
             continue
         if lab != None:
@@ -633,6 +636,7 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
                 if (isinstance(file_lab,unicode) or isinstance(file_lab,str)) and file_lab != "/labs/"+lab+"/":
                     continue
                 elif "name" in file_lab and file_lab["name"] != lab:
+                    #print >> sys.stderr, "DEBUG: File %s is of out_type '%s' and lab '%s' not '%s'" % (acc,out_type,file_lab["name"],lab) 
                     continue
         if file_obj.get('status') not in ["released","uploaded","uploading","in progress"]: # further restricted by caller.
             continue

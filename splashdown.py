@@ -1395,6 +1395,7 @@ class Splashdown(object):
                     posted_obj = encd.post_obj(collection,qc_metric)
                 except:
                     print "Failed to post qc_metric%s: '%s'" % (blob_msg,qc_alias)
+                    #print json.dumps(qc_metric,indent=4,sort_keys=True)
                     sys.exit(1)
                 print "  * Posted qc_metric%s: '%s'" % (blob_msg,qc_alias)
                 #self.qc_metric_created += 1
@@ -1806,6 +1807,11 @@ class Splashdown(object):
 
         #print "  - Adding encoded information."
         payload = self.add_encoded_info(payload,rep_tech,fid)
+        
+        # Alternate accession?
+        alt_acc = dx.file_get_property("alternate_accession",fid)
+        if alt_acc != None:
+            payload["alternate_accessions"] = [ alt_acc ]
         
         # Find or create step_run object
         step_run = self.enc_step_run_find_or_create(job,dxFile,rep_tech,test=self.test,verbose=verbose)
