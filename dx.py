@@ -562,28 +562,32 @@ def file_set_property(fid,key,value,proj_id=None,add_only=False,test=False,verbo
             print >> sys.stderr, "  - set %s with %s='%s'" % (path,key,value)
     return properties[key]
     
-def umbrella_folder(folder,default,proj_name=None,exp_type=None,genome=None,annotation=None):
+def umbrella_folder(folder,default,proj_name=None,exp_type=None,sub_folder=None,genome=None,annotation=None):
     '''Returns a normalized umbrella folder (that holds the experiments of a given type).'''
     if folder != default:
         return folder_normalize(folder)
+    if sub_folder != None:
+        sub_folder = folder_normalize(sub_folder,starting=False)
             
     # No change to default, so build from parts if available
     if exp_type == None:
         return folder_normalize(folder)
 
     if proj_name == PRODUCTION_PROJECT:
+        if sub_folder == None:
+            sub_folder = "runs/" 
         if exp_type == "long-rna-seq":
-            folder = "/long-RNA-seq/runs/"
+            folder = "/long-RNA-seq/"
         elif exp_type == "small-rna-seq":
-            folder = "/small-RNA-seq/runs/"
+            folder = "/small-RNA-seq/"
         elif exp_type == "dnase-seq":
             folder = "/DNAse-seq/runs/"
         elif exp_type == "dna-me":
-            folder = "/WG Bisulfite (Methylation)/runs/"
+            folder = "/WG Bisulfite (Methylation)/"
         elif exp_type == "chip-seq":
-            folder = "/ChIP-seq/runs/"
+            folder = "/ChIP-seq/"
         else:
-            folder = "/" + exp_type + '/runs/'
+            folder = "/" + exp_type + '/'
     else:
         if exp_type == "long-rna-seq":
             folder = "/lrna/"
@@ -595,6 +599,9 @@ def umbrella_folder(folder,default,proj_name=None,exp_type=None,genome=None,anno
             folder = "/dme/"
         else:
             folder = "/" + exp_type + '/'
+
+    if sub_folder != None:
+        folder += sub_folder
 
     if genome != None:
         folder +=  genome + '/'
