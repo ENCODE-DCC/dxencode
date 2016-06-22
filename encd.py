@@ -468,6 +468,8 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
     elif exp["assay_term_name"] == "whole-genome shotgun bisulfite sequencing" \
       or exp["assay_term_name"] == "shotgun bisulfite-seq assay":
         return "dna-me"
+    elif exp["assay_term_name"] == "CAGE":
+        return "rampage"
     #elif exp["assay_term_name"] == "RAMPAGE":
     #    return "rampage"
     #elif exp["assay_term_name"] == "ChIP-seq":
@@ -572,6 +574,8 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                                 run_type = f["run_type"]
                     if 'controlled_by' in mapping['unpaired']:
                         rep['controls'].append( mapping['unpaired']['controlled_by'] )
+                    elif 'controlled_by' in mapping['unpaired'][0]:
+                        rep['controls'].append( mapping['unpaired'][0]['controlled_by'] )
                 if len(rep['controls']) == 0:
                     rep['controls'] = None
             

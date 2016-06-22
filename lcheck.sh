@@ -19,14 +19,17 @@ if [ $# -ge 1 ]; then
             type="launch"
         elif [[ $path == *"splash"* ]]; then 
             type="splash"
+        elif [[ $path == *"scrub"* ]]; then 
+            type="scrub"
         fi
     fi
 fi
     
 if [ "$type" != "assem" ]  && [ "$type" != "a" ] \
 && [ "$type" != "launch" ] && [ "$type" != "l" ] \
-&& [ "$type" != "splash" ] && [ "$type" != "s" ]; then
-    echo "Usage: lcheck.sh <path> [assem|launch|splash]"
+&& [ "$type" != "splash" ] && [ "$type" != "s" ] \
+&& [ "$type" != "scrub" ]; then
+    echo "Usage: lcheck.sh <path> [assem|launch|splash|scrub]"
     echo "       log check for assemble.py, launch.py and splashdown.py logs." 
     exit 1
 fi
@@ -37,7 +40,7 @@ path=${path%/*}
 
 exps=`ls -1 $path/*.log | wc -l`
 echo "Exps:      " $exps
-echo "ERRORS:    " `grep -i ERROR $path/*.log | grep -v Gateway | wc -l` "---" `grep -i ERROR $path/*.log | grep -v Gateway`
+echo "ERRORS:    " `grep -i ERROR $path/*.log | grep -v Gateway | grep -v "500 Internal" | wc -l` "---" `grep -i ERROR $path/*.log | grep -v Gateway` | grep -v "500 Internal"
 echo "WARNINGS:  " `grep -i WARN $path/*.log | grep -v retry | grep -v "Waiting 60" | wc -l` `grep -i WARN $path/*.log | grep -v retry` | grep -v "Waiting 60" 
 
 if [ "$type" == "assem" ] || [ "$type" == "a" ]; then
@@ -84,6 +87,17 @@ elif [ "$type" == "splash" ] || [ "$type" == "s" ]; then
     grep Processed $path/*.log | sed s/^.*\\/// | sed s/\.log//
     #grep 'pipeline completed' $path/*.log | sed s/^.*\\/// | sed s/\.log//
     echo "COMPLETED: " `grep 'pipeline completed' $path/*.log | uniq | wc -l`
+
+elif [ "$type" == "scrub" ]; then
+
+    expected=`grep scrubbing $path/*.log | grep -v b\.log | awk '{ sum += $3 } END { print sum }'`
+    exps=`grep processed $path/*.log | wc -l`
+    files=`grep processed $path/*.log | awk '{ sum += $8 } END { print sum }'` 
+    files_per_10x=`expr $files \* 10 / $exps`
+    files_per=`expr $files / $exps`
+    files_per_frac=`expr $files_per_10x - $files_per \* 10`
+    echo "Experiments:" $exps "of" $expected
+    echo "Files:      " $files "per exp:  ${files_per}.${files_per_frac}"
 
 fi  
 

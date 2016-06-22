@@ -204,7 +204,7 @@ class Scrub(object):
         ### PIPELINE SPECIFIC
 
         ap.add_argument('-e', '--experiments',
-                        help='One or more ENCODED experiment accessions',
+                        help='One or more ENCODED experiment accessions, or file containing list',
                         nargs='+',
                         required=True)
 
@@ -278,6 +278,74 @@ class Scrub(object):
             print >> sys.stderr, "Pipeline specification:"
             print >> sys.stderr, json.dumps(pipeline_specs,indent=4)
         return pipeline_specs
+
+
+    def strip_comments(self,line,ws_too=False):
+        """Strips comments from a line (and opptionally leading/trailing whitespace)."""
+        bam = -1
+        ix = 0
+        while True:
+            bam = line[ix:].find('#',bam + 1)
+            if bam == -1:
+                break
+            bam = ix + bam
+            if bam == 0:
+                return ''
+            if line[ bam - 1 ] != '\\':
+                line = line[ 0:bam ]
+                break  
+            else: #if line[ bam - 1 ] == '\\': # ignore '#' and keep looking
+                ix = bam + 1
+                #line = line[ 0:bam - 1 ] + line[ bam: ]
+                
+        if ws_too:
+            line = line.strip()
+        return line 
+
+
+    def load_exp_list(self,exp_ids,verbose=False):
+        '''Returns a sorted list of experiment accessions from command-line args.'''
+        #verbose=True
+        id_list = []
+        file_of_ids = None
+        
+        # If only one, it could be a file
+        if len(exp_ids) == 1:
+            candidate = exp_ids[0]
+            if candidate.startswith("ENCSR") and len(candidate) == 11:
+                id_list.append(candidate)
+                return id_list
+            else:
+                file_of_ids = candidate
+                if file_of_ids != None:
+                    with open(file_of_ids, 'r') as fh:
+                        #line = fh.readline()
+                        for line in fh:
+                            line = self.strip_comments(line,True)
+                            if line == '':
+                                continue
+                            candidate = line.split()[0]
+                            if candidate.startswith("ENCSR") and len(candidate) == 11:
+                                id_list.append(candidate)
+                            elif verbose:
+                                print >> sys.stderr, "Value is not experiment id: '"+candidate+"'"
+                    
+        elif len(exp_ids) > 0:
+            for candidate in exp_ids:
+                if candidate.startswith("ENCSR") and len(candidate) == 11:
+                    id_list.append(candidate)
+                elif verbose:
+                    print >> sys.stderr, "Value is not experiment id: '"+candidate+"'"
+        
+        if len(id_list) > 0:
+            sorted_exp_ids = sorted(id_list)
+            if verbose:
+                print >> sys.stderr, "Experiment ids: "
+                print >> sys.stderr, json.dumps(sorted_exp_ids)
+            print "Requested scrubbing %d experiments" % len(sorted_exp_ids)
+            return sorted_exp_ids
+            
+        return []
 
 
     def file_format(self,file_name):
@@ -425,12 +493,18 @@ class Scrub(object):
         print "== Running in project [%s] and expect files already posted to the [%s] server ==" % \
                                                         (self.proj_name,self.server_key)
 
+        self.exp_ids = self.load_exp_list(args.experiments,verbose=args.verbose)
+        if len(self.exp_ids) == 0:
+            print >> sys.stderr, "No experiment id's requested."
+            self.ap.print_help()
+            sys.exit(1)       
+
         exp_count = 0
         exp_removed = 0
         exp_kept = 0
         deprecates_removed = 0
         total_removed = 0
-        for exp_id in args.experiments:
+        for exp_id in self.exp_ids:
             sys.stdout.flush() # Slow running job should flush to piped log
             self.exp_id = exp_id
             # 1) Lookup experiment type from encoded, based on accession

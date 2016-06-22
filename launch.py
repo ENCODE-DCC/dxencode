@@ -144,9 +144,9 @@ class Launch(object):
     STANDARD_LABELS = {
         'long-rna-seq':  { 'long': 'Long-RNA-seq',  'short': 'lrna',  'se_and_pe': True  }, 
         'small-rna-seq': { 'long': 'Small-RNA-seq', 'short': 'srna',  'se_and_pe': False }, 
-        'rampage':       { 'long': 'Rampage',       'short': 'ramp',  'se_and_pe': False }, 
+        'rampage':       { 'long': 'Rampage',       'short': 'ramp',  'se_and_pe': True }, 
         'dnase-seq':     { 'long': 'DNase-seq',     'short': 'dnase', 'se_and_pe': True  },
-        'dna-me':        { 'long': 'DNA-methlyation','short': 'dme',   'se_and_pe': True  },
+        'dna-me':        { 'long': 'DNA-methlyation','short': 'dme',  'se_and_pe': True  },
     }
     '''Standard labelling requires exp_type specific labels.  This can be overridden in descendent classes.'''
     
@@ -1405,6 +1405,8 @@ class Launch(object):
                     alt_token = "reads"  # Sometimes sets are just reads.
                 if alt_token not in rep['priors'] and alt_token == "reads" and expect_set:
                     alt_token = "reads_set"  # Sometimes reads are reads_sets. # FIXME: should really drop "_set" logic
+            if alt_token == "reads" and file_token == "reads2" and not self.psv['paired_end']:
+                return None # This special case can come when applet is built for PE and SE reads with optional reads2 param
             if alt_token in rep['priors']:
                 if isinstance(rep['priors'][alt_token], list):
                      if expect_set:
