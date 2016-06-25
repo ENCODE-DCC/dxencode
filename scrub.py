@@ -250,13 +250,14 @@ class Scrub(object):
                         action='store_true',
                         required=False)
 
-        ap.add_argument('--verbose',
-                        help='More debugging output.',
+        ap.add_argument('--force',
+                        help='Remove files regardless of whether they have been posted or not.',
                         action='store_true',
                         required=False)
 
-        ap.add_argument('--force',
-                        help='Remove files regardless of whether they have been posted or not.',
+        ap.add_argument('--verbose',
+                        help='More debugging output.',
+                        action='store_true',
                         required=False)
 
         if parse:
@@ -505,6 +506,7 @@ class Scrub(object):
         deprecates_removed = 0
         total_removed = 0
         for exp_id in self.exp_ids:
+            dx.clear_cache()
             sys.stdout.flush() # Slow running job should flush to piped log
             self.exp_id = exp_id
             # 1) Lookup experiment type from encoded, based on accession
@@ -520,6 +522,9 @@ class Scrub(object):
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation are not known for this exp yet, so the umbrella folder is just based on exp_type
             self.umbrella_folder = dx.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,self.exp_type,"posted",self.genome)
+            if args.test:
+                print "- Umbrella folder: " + self.umbrella_folder
+                
             self.exp_folder = dx.find_exp_folder(self.project,exp_id,self.umbrella_folder,warn=True)
             if self.exp_folder == None:
                 continue

@@ -27,6 +27,15 @@ FILES = {} ## Dict to cache files
 APPLETS = {} ## Dict to cache known applets
 
 RUNS_LAUNCHED_FILE = "launchedRuns.txt"
+    
+def clear_cache():
+    '''Empties all cache'''
+    global REFERENCE_FILES
+    global FILES
+    global APPLETS
+    REFERENCE_FILES = {} ## Dict to cache known Reference Files
+    FILES = {} ## Dict to cache files
+    APPLETS = {} ## Dict to cache known applets
 
 def calc_md5(path):
     ''' Calculate md5 sum from file as specified by valid path name'''
@@ -77,7 +86,7 @@ def find_folder(target_folder,project,root_folders='/',exclude_folders=["depreca
     Returns full path to folder or None.
     '''
     assert len(target_folder) > 0
-
+    
     # full path is easy.
     if target_folder.startswith('/') and project_has_folder(project, target_folder):
         return target_folder
@@ -111,7 +120,7 @@ def rfind_folder(target_folder,project=None,root_folders='/',exclude_folders=[])
         if root_folders.find(exclude_folder) != -1:
             return None
     try:
-        query_folders = project.list_folder(root_folders)['folders']
+        query_folders = project.list_folder(root_folders,only='folders')['folders']
     except:
         return None
 
@@ -151,7 +160,7 @@ def find_replicate_folders(project,exp_folder,verbose=False):
     '''Returns a sorted list of replicate folders which are sub-folders of an exp folder.'''
     # normalize
     try:
-        sub_folders = project.list_folder(exp_folder)['folders']
+        sub_folders = project.list_folder(exp_folder,only='folders')['folders']
     except:
         if verbose:
             print >> sys.stderr, "No subfolders found for %s" % exp_folder

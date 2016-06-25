@@ -714,7 +714,7 @@ def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
         #    (f_obj.get("accession"),f_obj.get("file_format"),f_obj["replicate"]['@id'],len(f_obj.get("flowcell_details",[])))
         umi_found = False
         for flow in f_obj.get("flowcell_details",[]):
-            if flow.get('barcode') == "UMI":
+            if flow.get('barcode') == "UMI" or flow.get('barcode',"none").startswith("SSLIB"):
                 umi_found = True
                 umi_found_true  = True
         if not umi_found :
