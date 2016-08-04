@@ -368,9 +368,10 @@ class Launch(object):
                 control_root = "/lrna"
             path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
             target_folder = dx.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
-            #print "Target found [%s]" % target_folder
+            #print >> sys.stderr, "=== Target found [%s]" % target_folder
             if target_folder != None:
-                path_n_glob = target_folder + '/' + self.CONTROL_FILE_GLOB
+                path_n_glob = target_folder + self.CONTROL_FILE_GLOB
+            #print >> sys.stderr, "=== path_n_glob [%s] Project:[%s]" % (path_n_glob,self.proj_id)
             fid = self.find_file(path_n_glob,self.proj_id,multiple=False,recurse=False)
             if fid != None:
                 return dx.file_path_from_fid(fid)
@@ -514,7 +515,7 @@ class Launch(object):
         '''Returns a normalized umbrella folder (that holds the experiments of a given type).'''
         if self.no_refs: # (no_refs is only True when templating)
             genome = None # If templating with no refs then this will hide genome and annotation
-        return dx.umbrella_folder(folder,default,proj_name,exp_type=exp_type,genome=genome,annotation=annotation)
+        return dx.umbrella_folder(folder,default,proj_name,exp_type=exp_type,sub_folder="runs/",genome=genome,annotation=annotation)
                 
     ############## NOT EXPECTED TO OVERIDE THE FOLLOWING METHODS ############
     def common_variables(self,args,fastqs=True):
@@ -1368,7 +1369,7 @@ class Launch(object):
         '''When buidling a workflow, finds a dx defined step file input (which may be for a set) 
            from prior step results, tributary results, or prior files found.'''
         # NOT EXPECTED TO OVERRIDE
-        #verbose=(file_token.startswith('bam_biorep'))
+        #verbose=True
         
         # Now try to find prior results or existing files to fill in this input
         file_input = []
@@ -1407,6 +1408,7 @@ class Launch(object):
                     alt_token = "reads_set"  # Sometimes reads are reads_sets. # FIXME: should really drop "_set" logic
             if alt_token == "reads" and file_token == "reads2" and not self.psv['paired_end']:
                 return None # This special case can come when applet is built for PE and SE reads with optional reads2 param
+            #print >> sys.stderr, "DEBUG: alt_token '%s' file_token '%s'" % (alt_token,file_token) 
             if alt_token in rep['priors']:
                 if isinstance(rep['priors'][alt_token], list):
                      if expect_set:
@@ -1510,6 +1512,8 @@ class Launch(object):
             # file inputs
             for file_token in steps[step]['inputs'].keys():
                 app_inp = steps[step]['inputs'][file_token]
+                if app_inp == "reads2" and not self.psv['paired_end']:
+                    continue
                 # Need inp_def to see if set is expected
                 for inp_def in inp_defs:
                     if inp_def["name"] == app_inp:

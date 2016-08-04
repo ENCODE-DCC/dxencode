@@ -53,7 +53,8 @@ class Scrub(object):
             "step-order": [ "align-tophat","signals-top-se","signals-top-pe",
                             "align-star","signals-star-se","signals-star-pe","quant-rsem","mad-qc"],
             "replicate":  {
-                "align-tophat":    { "alignments":                                "*_tophat.bam"                 },
+                "align-tophat":    { "alignments":                                "*_tophat.bam"                 ,
+                                     "QC_only":                                   "*_flagstat.txt"               },
                 "signals-top-se":  { "signal of all reads":                       "*_tophat_all.bw",
                                      "signal of unique reads":                    "*_tophat_uniq.bw"             },
                 "signals-top-pe":  { "minus strand signal of all reads":          "*_tophat_minusAll.bw",
@@ -89,18 +90,19 @@ class Scrub(object):
         "rampage": {
             "step-order": [ "align","signals","peaks","idr","mad_qc"],
             "replicate":  {
-                "align":           { "alignments":                                "*_rampage_star_marked.bam" },
-                "signals":         { "plus strand signal of all reads":           "*_rampage_5p_plusAll.bw",
-                                     "minus strand signal of all reads":          "*_rampage_5p_minusAll.bw",
-                                     "plus strand signal of unique reads":        "*_rampage_5p_plusUniq.bw",
-                                     "minus strand signal of unique reads":       "*_rampage_5p_minusUniq.bw" },
-                "peaks":           { "transcription start sites|gff|gff3":        "*_rampage_peaks.gff.gz",
-                                     "transcription start sites|bed|tss_peak":    "*_rampage_peaks.bed.gz",
-                                     "transcription start sites|bigBed|tss_peak": "*_rampage_peaks.bb",
-                                     "gene quantifications":                      "*_rampage_peaks_quant.tsv" } },
+                "align":           { "alignments":                                "*_star_marked.bam",
+                                     "QC_only":                                   "*_flagstat.txt"   },
+                "signals":         { "plus strand signal of all reads":           "*_5p_plusAll.bw",
+                                     "minus strand signal of all reads":          "*_5p_minusAll.bw",
+                                     "plus strand signal of unique reads":        "*_5p_plusUniq.bw",
+                                     "minus strand signal of unique reads":       "*_5p_minusUniq.bw" },
+                "peaks":           { "transcription start sites|gff|gff3":        "*_peaks.gff.gz",
+                                     "transcription start sites|bed|tss_peak":    "*_peaks.bed.gz",
+                                     "transcription start sites|bigBed|tss_peak": "*_peaks.bb",
+                                     "gene quantifications":                      "*_peaks_quant.tsv" } },
             "combined":   {
-                "idr":             { "transcription start sites|bed|idr_peak":    "*_rampage_idr.bed.gz",
-                                     "transcription start sites|bigBed|idr_peak": "*_rampage_idr.bb" },
+                "idr":             { "transcription start sites|bed|idr_peak":    "*_idr.bed.gz",
+                                     "transcription start sites|bigBed|idr_peak": "*_idr.bb" },
                 "mad_qc":          { "QC_only":                                   "*_mad_plot.png" }  },
         },
         "dna-me": {
@@ -137,7 +139,7 @@ class Scrub(object):
     '''These assays require an annotation.'''
 
     FORMATS_SUPPORTED = ["bam","bed","bigBed","bigWig","fasta","fastq","gff","gtf","hdf5","idat","rcc","CEL",
-                         "tsv","csv","sam","tar","wig"]
+                         "tsv","csv","sam","tar","wig","txt"]
     EXTENSION_TO_FORMAT = { 
         "2bit":       "2bit",
         "cel.gz":     "CEL",
@@ -374,10 +376,13 @@ class Scrub(object):
                             sys.exit(1)
                     if verbose:
                         print >> sys.stderr, "-- Looking for %s" % (result_folder + file_glob)
-                    fid = dx.find_file(result_folder + file_glob,self.proj_id, recurse=False)
-                    if fid != None:
+                    fids = dx.find_file(result_folder + file_glob,self.proj_id, verbose=verbose, multiple=True, recurse=False)
+                    if fids != None:
+                        if not isinstance(fids, list):
+                            fids = [ fids ]
                         QC_only = (token == "QC_only") # Use new qc_object posting methods  
-                        step_files.append( (token,rep_tech,fid,QC_only) )
+                        for fid in fids:
+                            step_files.append( (token,rep_tech,fid,QC_only) )
                         break # Only looking for the first hit               
             else:
                 if token != "QC_only": 
@@ -386,12 +391,17 @@ class Scrub(object):
                         sys.exit(1)
                 if verbose:
                     print >> sys.stderr, "-- Looking for %s" % (result_folder + file_globs[token])
-                fid = dx.find_file(result_folder + file_globs[token],self.proj_id, recurse=False)
-                if fid != None:
+                fids = dx.find_file(result_folder + file_globs[token],self.proj_id, verbose=verbose, multiple=True, recurse=False)
+                if fids != None:
+                    if not isinstance(fids, list):
+                        fids = [ fids ]
+                    #if verbose:
+                    #    print >> sys.stderr, "-- Found %d files for %s" % (len(fids),result_folder + file_globs[token])
                     QC_only = (token == "QC_only") # Use new qc_object posting methods  
-                    step_files.append( (token,rep_tech,fid,QC_only) )
-                else:
-                    return []      # Only include files from completed steps!
+                    for fid in fids:
+                        step_files.append( (token,rep_tech,fid,QC_only) )
+                #else:
+                #    return []      # Only include files from completed steps!
         return step_files
 
     def find_expected_files(self,exp_folder,replicates,verbose=False):
@@ -404,6 +414,8 @@ class Scrub(object):
             for rep_tech in replicates:
                 step_files = self.find_step_files(self.pipeline["replicate"][step], \
                                                     exp_folder + rep_tech + '/',rep_tech,verbose)
+                if verbose:
+                    print >> sys.stderr, "-- Found %d files for %s" % (len(step_files),step)
                 if len(step_files) > 0:
                      expected.extend(step_files) # keep them in order!
 

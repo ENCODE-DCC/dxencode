@@ -1,10 +1,32 @@
-# Working on: 5 Gingeras small-RNA-seq for GRCh38:  http://redmine.encodedcc.org/issues/3060#note-221
+
+##### DONE: reversed: lrna_221/small-rna> ./build_applets small-rna-align/ small-rna-signals/ small-rna-mad-qc/
+
+# TODO: Cricket SRNA: https://www.encodeproject.org/search/?type=Experiment&award.rfa=ENCODE3&assay_title=small+RNA-seq&status=submitted&internal_status=pipeline+ready
 # Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
-ENCSR000CQX  ENC2  GRCh38 v24     3,4   2016-06-13  2016-06-13
-ENCSR000CQY  ENC2  GRCh38 v24     1,2   2016-06-13  2016-06-13
-ENCSR000CQZ  ENC2  GRCh38 v24     3,4   2016-06-13  2016-06-13
-ENCSR000CRA  ENC2  GRCh38 v24     3,4   2016-06-13  2016-06-13
-ENCSR000CRB  ENC2  GRCh38 v24     1,2   2016-06-13  2016-06-13
+ENCSR091JNF        GRCh38 v24     1     2016-08-04  2016-08-04
+ENCSR539RDF        GRCh38 v24     1     2016-08-04  2016-08-04
+ENCSR603XUX        GRCh38 v24     1     2016-08-04  2016-08-04
+ENCSR634VLA        GRCh38 v24     1     2016-08-04  2016-08-04
+ENCSR718AXQ        GRCh38 v24     1     2016-08-04  2016-08-04
+ENCSR737NPO        GRCh38 v24     1     2016-08-04  2016-08-04
+ENCSR961FIG        GRCh38 v24     1     2016-08-04  2016-08-04
+ENCSR996VHB        GRCh38 v24     1     2016-08-04  2016-08-04
+
+# Done: hg19 5 Gingeras small-RNA-seq:  http://redmine.encodedcc.org/issues/3060#note-221
+# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
+ENCSR000CQX  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h35m  $2.22
+ENCSR000CQY  ENC2  hg19 v19       1,2   2016-06-13  2016-06-30  2016-07-11    1h18m  $1.81
+ENCSR000CQZ  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h17m  $1.78
+ENCSR000CRA  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h18m  $1.82
+ENCSR000CRB  ENC2  hg19 v19       1,2   2016-06-13  2016-06-30  2016-07-11    1h31m  $2.13
+
+# Done: GRCh38 5 Gingeras small-RNA-seq:  http://redmine.encodedcc.org/issues/3060#note-221
+# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
+ENCSR000CQX  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h24m  $1.96
+ENCSR000CQY  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11    1h11m  $1.65
+ENCSR000CQZ  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h11m  $1.65
+ENCSR000CRA  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h18m  $1.82
+ENCSR000CRB  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11    1h17m  $1.79
 
 ####### GRCh38 Full list
 # Experiment       On             Reps  Assembled   Launched    (Re)Posted Duration Cost
@@ -27,6 +49,11 @@ ENCSR000AGD        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h6
 ENCSR000AGE        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   2h19m  $5.09
 ENCSR000AGF        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h56m  $4.68
 ENCSR000AGH        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   2h04m  $5.02
+ENCSR000CQX  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11   1h24m  $1.96
+ENCSR000CQY  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11   1h11m  $1.65
+ENCSR000CQZ  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11   1h11m  $1.65
+ENCSR000CRA  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11   1h18m  $1.82
+ENCSR000CRB  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11   1h17m  $1.79
 ENCSR003SZJ        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h05m  $1.53
 ENCSR020VES        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h13m  $1.71
 ENCSR024CRN        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     48m  $1.14
@@ -86,7 +113,7 @@ ENCSR964EPR        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h2
 ENCSR968DMR        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     56m  $1.33
 ENCSR968YZV        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   2h23m  $5.35
 ENCSR998CRC        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     55m  $1.30
-# Total: 78
+# Total: 83
 
 # Full list:
 Experiment         On        As/Launch   Reps  Posted      Duration/Cost
@@ -109,6 +136,11 @@ ENCSR000AGD  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  2h05m $4.73
 ENCSR000AGE  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h56m $4.19
 ENCSR000AGF  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h47m $4.38
 ENCSR000AGH  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h34m $4.03
+ENCSR000CQX  ENC2  hg19 v19  2016-06-30  3,4   2016-07-11  1h35m $2.22
+ENCSR000CQY  ENC2  hg19 v19  2016-06-30  1,2   2016-07-11  1h18m $1.81
+ENCSR000CQZ  ENC2  hg19 v19  2016-06-30  3,4   2016-07-11  1h17m $1.78
+ENCSR000CRA  ENC2  hg19 v19  2016-06-30  3,4   2016-07-11  1h18m $1.82
+ENCSR000CRB  ENC2  hg19 v19  2016-06-30  1,2   2016-07-11  1h31m $2.13
 ENCSR211PJW  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h20m $3.34
 ENCSR250STJ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  2h18m $5.48
 ENCSR376XXO  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h03m $2.55
@@ -127,7 +159,7 @@ ENCSR905KHW  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h19m $3.30
 ENCSR964EPR  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h41m $4.19
 ENCSR968YZV  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h31m $3.87
 
-##3 Historical:
+### Historical:
 
 # Done: 42 SRNA for Gingeras (Requested by Kathrine on gitter)
 # Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost

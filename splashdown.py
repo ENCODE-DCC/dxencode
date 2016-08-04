@@ -98,18 +98,18 @@ class Splashdown(object):
         "rampage": {
             "step-order": [ "align","signals","peaks","idr","mad_qc"],
             "replicate":  {
-                "align":           { "alignments":                                "*_rampage_star_marked.bam" },
-                "signals":         { "plus strand signal of all reads":           "*_rampage_5p_plusAll.bw",
-                                     "minus strand signal of all reads":          "*_rampage_5p_minusAll.bw",
-                                     "plus strand signal of unique reads":        "*_rampage_5p_plusUniq.bw",
-                                     "minus strand signal of unique reads":       "*_rampage_5p_minusUniq.bw" },
-                "peaks":           { "transcription start sites|gff|gff3":        "*_rampage_peaks.gff.gz",
-                                     "transcription start sites|bed|tss_peak":    "*_rampage_peaks.bed.gz",
-                                     "transcription start sites|bigBed|tss_peak": "*_rampage_peaks.bb",
-                                     "gene quantifications":                      "*_rampage_peaks_quant.tsv" } },
+                "align":           { "alignments":                                "*_star_marked.bam" },
+                "signals":         { "plus strand signal of all reads":           "*_5p_plusAll.bw",
+                                     "minus strand signal of all reads":          "*_5p_minusAll.bw",
+                                     "plus strand signal of unique reads":        "*_5p_plusUniq.bw",
+                                     "minus strand signal of unique reads":       "*_5p_minusUniq.bw" },
+                "peaks":           { "transcription start sites|gff|gff3":        "*_peaks.gff.gz",
+                                     "transcription start sites|bed|tss_peak":    "*_peaks.bed.gz",
+                                     "transcription start sites|bigBed|tss_peak": "*_peaks.bb",
+                                     "gene quantifications":                      "*_peaks_quant.tsv" } },
             "combined":   {
-                "idr":             { "transcription start sites|bed|idr_peak":    "*_rampage_idr.bed.gz",
-                                     "transcription start sites|bigBed|idr_peak": "*_rampage_idr.bb" },
+                "idr":             { "transcription start sites|bed|idr_peak":    "*_idr.bed.gz",
+                                     "transcription start sites|bigBed|idr_peak": "*_idr.bb" },
                 "mad_qc":          { "QC_only":                                   "*_mad_plot.png" }  },
         },
         "dna-me": {
@@ -234,9 +234,9 @@ class Splashdown(object):
                                 },
         "star_rampage_flagstat": { 
                                     "type":"samtools_flagstats",
-                                    "only_for": "_rampage_star_marked.bam",
+                                    "only_for": [ "_rampage_star_marked.bam", "_cage_star_marked.bam" ],
                                     "files": {"results": "detail"}, 
-                                    "blob": { "pattern": "/*_rampage_star_marked_flagstat.txt" }, 
+                                    "blob": { "pattern": "/*_star_marked_flagstat.txt" }, 
                                 },
         "bismark_techrep_flagstats":   { 
                                     "type":"samtools_flagstats",
@@ -951,11 +951,18 @@ class Splashdown(object):
             if self.input_exception(inp_fid):  # Look for exceptions
                 continue
             input_file_count += 1
+            if inp_fid not in dx.FILES:
+                dx.FILES[inp_fid] = dxpy.dxlink(inp_fid,self.REFERERNCE_PROJECT_ID) # Ensure ref files have all properties
             try:
                 inp_obj = dx.description_from_fid(inp_fid,properties=True)
             except:
-                print "WARNING: can't find "+ fid # may try to append derived_from below.
-                continue
+                dx.FILES[inp_fid] = dxpy.dxlink(inp_fid,self.proj_id)
+                try:
+                    inp_obj = dx.description_from_fid(inp_fid,properties=True)
+                except:
+                    del dx.FILES[inp_fid] 
+                    print "WARNING: can't find "+ fid # may try to append derived_from below.
+                    continue
             if verbose: 
                 print >> sys.stderr, "* derived from: " + inp_fid + " " + inp_obj["project"] + ":" + \
                                                                         dx.file_path_from_fid(inp_fid)
@@ -1877,6 +1884,8 @@ class Splashdown(object):
 
     def file_mark_accession(self,fid,accession,test=True):
         '''Adds/replaces accession to a file's properties.'''
+        if self.server_key == "www": # Already flagged with accession and suffereing a lot of 500 errors on this.
+            return
         acc_key = dx.property_accesion_key(self.server)
         path = dx.file_path_from_fid(fid)
         acc = dx.file_set_property(fid,acc_key,accession,add_only=True,test=test)
@@ -2011,7 +2020,7 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dx.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:       mm10 M4    -      1,2   no     2016-05-02  2016-05-02  2016-05-03 %s  $%.2f" % \
+            #print "cost: E2 GRCh38 V24 C  1,2    2016-07-05  2016-08-01  2016-08-04 %s  $%.2f" % \
             #    (duration.rjust(8), total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
@@ -2070,7 +2079,7 @@ class Splashdown(object):
 
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation are not known for this exp yet, so the umbrella folder is just based on exp_type
-            self.umbrella_folder = dx.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,self.exp_type)
+            self.umbrella_folder = dx.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,self.exp_type,sub_folder="runs/",genome=self.genome)
             self.exp_folder = dx.find_exp_folder(self.project,exp_id,self.umbrella_folder,warn=True)
             if self.exp_folder == None:
                 continue

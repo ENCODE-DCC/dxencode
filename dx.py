@@ -412,6 +412,9 @@ def find_file(filePath,project=None,verbose=False,multiple=False, recurse=True):
             if verbose:
                 print "ERROR: Found "+str(len(fileDicts))+" files when expecting 1 '" + proj + ":" + filePath + "'."
             return None
+        else:
+            if verbose:
+                print " Found "+str(len(fileDicts))+" files for '" + proj + ":" + filePath + "'."
         fids = []
         for fileDict in fileDicts:
             FILES[fileDict['id']] = dxpy.dxlink(fileDict)

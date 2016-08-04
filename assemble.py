@@ -63,7 +63,7 @@ class Assemble(object):
                          "unique minus signal":        [ "*_star_genome_minusUniq.bw","*_tophat_minusUniq.bw" ],
                          "unique plus signal":         [ "*_star_genome_plusUniq.bw", "*_tophat_plusUniq.bw"  ],
                          "transcriptome alignments":   [ "*_star_anno.bam"          ],
-                         "genome quantifications":     [ "*_rsem.genes.results"     ],
+                         "gene quantifications":       [ "*_rsem.genes.results"     ],
                          "transcript quantifications": [ "*_rsem.isoforms.results"  ] }
         },
         "small-rna-seq": {
@@ -577,8 +577,10 @@ class Assemble(object):
             
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation may have been entered as args to help organize folders
+            if self.genome == "mm10" and args.annotation is None:
+                args.annotation = "M4"
             self.umbrella_folder = dx.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name, \
-                                                                                    self.exp_type,self.genome,args.annotation)
+                                                                            self.exp_type,"runs/",self.genome,args.annotation)
             self.exp_folder = dx.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
             if self.exp_folder == None:
                 self.exp_folder = self.umbrella_folder + exp_id + '/'
@@ -612,6 +614,7 @@ class Assemble(object):
             print "- Need to copy %d files to dx for %s" % (len(needed_files),self.exp_id)
             
             # Now for each needed report it
+            already_processed_files = False
             for f_obj in needed_files:
                 sys.stdout.flush() # Slow running job should flush to piped log
                 if not self.test: 
@@ -620,13 +623,15 @@ class Assemble(object):
                 else:
                     print "  - Would try to copy %s to dx %s:%s%s" % \
                             (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
+                if not f_obj['dx_file_name'].endswith('.fastq.gz') and not f_obj['dx_file_name'].endswith('.fq.gz'):
+                    already_processed_files = True
 
             failed = 0
             failed = self.fetch_to_dx(self.exp_id,self.exp_folder,needed_files,test=self.test)
             copied = len(needed_files) - failed
             launched = 0
             
-            if failed == 0:
+            if failed == 0 and not already_processed_files:
                 encd.exp_patch_internal_status(self.exp_id, 'pipeline ready', test=self.test)
             #else:
             #    encd.exp_patch_internal_status(self.exp_id, 'unrunnable', test=self.test)
