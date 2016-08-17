@@ -75,12 +75,15 @@ elif [ "$type" == "splash" ] || [ "$type" == "s" ]; then
 
     echo "RETRIES:   " `grep -i WARN $logpath/*.log | grep -E 'retry|Waiting' | wc -l`
     echo "HALTS:     " `grep -i HALTING $logpath/*.log | wc -l` `grep -i HALTING $logpath/*.log`
-    files=`grep Flagged $logpath/*.log | wc -l`
+    files=`grep -w Post $logpath/*.log | wc -l`
     files_per_10x=`expr $files \* 10 / $exps`
     files_per=`expr $files / $exps`
     files_per_frac=`expr $files_per_10x - $files_per \* 10`
     echo "Files:     " $files "per exp:  ${files_per}.${files_per_frac}"
-    qcs=`grep "Posted qc_metric" $logpath/*.log | wc -l`
+    qcs=`grep "qc object" $logpath/*.log | awk '{print $13}' | paste -sd+ | bc`
+    if [ $qcs -eq 0 ]; then
+        qcs=`grep "qc object" $logpath/*.log | awk '{print $12}' | paste -sd+ | bc`
+    fi
     qcs_per_10x=`expr $qcs \* 10 / $exps`
     qcs_per=`expr $qcs / $exps`
     qcs_per_frac=`expr $qcs_per_10x - $qcs_per \* 10`

@@ -457,12 +457,24 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
         # Now more: "150-400","149-512","151-499","153-499","157-497"        
         size_range = exp["replicates"][0]["library"]["size_range"]
         if size_range.startswith('>'):
-            size_range = size_range[1:]
-        try:
-            min_size = int(size_range.split('-')[0])
-        except:
-            min_size = 0
-        if min_size >= 149:
+            try:
+                min_size = int(size_range[1:])
+            except:
+                min_size = 0
+            max_size = min_size
+        else:
+            try:
+                sizes = size_range.split('-')
+                min_size = int(sizes[0])
+                max_size = int(sizes[1])
+            except:
+                min_size = 0
+                max_size = 0
+        if max_size <= 200 and max_size != min_size:
+            return "small-rna-seq"
+        elif min_size >= 150:
+            return "long-rna-seq"
+        elif (min_size + max_size)/2 >= 235: # This is some wicked voodoo (SRNA:108-347=227; LRNA:155-315=235)        
             return "long-rna-seq"
         else:
             return "small-rna-seq"

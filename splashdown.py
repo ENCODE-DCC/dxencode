@@ -2020,7 +2020,7 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dx.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost: E2 GRCh38 V24 C  1,2    2016-07-05  2016-08-01  2016-08-04 %s  $%.2f" % \
+            #print "cost:       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12 %s  $%.2f" % \
             #    (duration.rjust(8), total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
@@ -2161,8 +2161,8 @@ class Splashdown(object):
                 qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)
                 if qc_count > 0:
                     print "  - handled %d qc_metric objects for file." % qc_count
-                    qc_obj_count += 1
-                    total_qc_objs += 1                                
+                    qc_obj_count += qc_count
+                    total_qc_objs += qc_count                                
 
             if halted:
                 total_halted += 1
