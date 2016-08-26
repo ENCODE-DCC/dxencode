@@ -1,235 +1,131 @@
 
-##### DONE: reversed: lrna_221> ./build_applets align-star-pef/ align-star-se/ align-tophat-pe/ align-tophat-se/ bam-to-bigwig-stranded/ bam-to-bigwig-unstranded/ quant-rsem/ mad-qc/
+##### TODO: reverse: lrna_221> ./build_applets align-star-pe/ align-star-se/ align-tophat-pe/ align-tophat-se/ bam-to-bigwig-stranded/ bam-to-bigwig-unstranded/ quant-rsem/ mad-qc/
 
-# TODO: Cricket LRNA mm10 redo: https://www.encodeproject.org/search/?type=Experiment&assay_slims=Transcription&award.rfa=ENCODE3&assembly=mm10-minimal&assembly%21=mm10&replicates.library.biosample.donor.organism.scientific_name=Mus+musculus&limit=all
-ENCSR000AJU       mm10 M4 -         1,2   no
-ENCSR000AJV       mm10 M4 -         1,2   no
-ENCSR000OXO       mm10 M4 - SE      1,2   no
-ENCSR004XCU       mm10 M4 - SE      1,2   no
-ENCSR017JEG       mm10 M4 - SE      1,2   no
-ENCSR020DGG       mm10 M4 - SE      1,2   no
-ENCSR026ZRP       mm10 M4 - SE      1,2   no
-ENCSR027CXR       mm10 M4 - SE      1,2   no
-ENCSR035DLJ       mm10 M4 -         1,2   no
-ENCSR039ADS       mm10 M4 - SE      1,2   no
-ENCSR062VTB       mm10 M4 - SE      1,2   no
-ENCSR068SJG       mm10 M4 - SE      1,2   no
-ENCSR080EVZ       mm10 M4 - SE      1,2   no
-ENCSR096STK       mm10 M4 - SE      1,2   no
-ENCSR100KRK       mm10 M4 - SE      1,2   no
-ENCSR111QQX       mm10 M4 - SE      1,2   no
-ENCSR115TWD       mm10 M4 - SE      1,2   no
-ENCSR138VRG       mm10 M4 - SE      1,2   no
-ENCSR145EKP       mm10 M4 - SE      1,2   no
-ENCSR150CUE       mm10 M4 - SE      1,2   no
-ENCSR160IIN       mm10 M4 - SE      1,2   no
-ENCSR167AWS       mm10 M4 - SE      1,2   no
-ENCSR173PJN       mm10 M4 - SE      1,2   no
-ENCSR178GUS       mm10 M4 - SE      1,2   no
-ENCSR181KQJ       mm10 M4 -         1,2   no
-ENCSR185LWM       mm10 M4 - SE      1,2   no
-ENCSR194TNV       mm10 M4 - SE      1,2   no
-ENCSR195BCE       mm10 M4 - SE      1,2   no
-ENCSR198EIH       mm10 M4 - SE      1,2   no
-ENCSR216NEG       mm10 M4 - SE      1,2   no
-ENCSR220HFQ       mm10 M4 - SE      1,2   no
-ENCSR236EGS       mm10 M4 - SE      1,2   no
-ENCSR236ZIE       mm10 M4 -         1,2   no
-ENCSR255SDF       mm10 M4 -         1,2   no
-ENCSR265YFZ       mm10 M4 - SE      1,2   no
-ENCSR267LBO       mm10 M4 - SE      1,2   no
-ENCSR268AXN       mm10 M4 - SE      1,2   no
-ENCSR268IGT       mm10 M4 - SE      1,2   no
-ENCSR282DYQ       mm10 M4 - SE      1,2   no
-ENCSR284AMY       mm10 M4 - SE      1,2   no
-ENCSR284YKY       mm10 M4 - SE      1,2   no
-ENCSR285WZV       mm10 M4 - SE      1,2   no
-ENCSR290RRR       mm10 M4 - SE      1,2   no
-ENCSR292IVH       mm10 M4 - SE      1,2   no
-ENCSR295UJP       mm10 M4 - SE      1,2   no
-ENCSR298YHA       mm10 M4 - SE      1,2   no
-ENCSR307BCA       mm10 M4 - SE      1,2   no
-ENCSR316RMA       mm10 M4 - SE      1,2   no
-ENCSR320PXZ       mm10 M4 - SE      1,2   no
-ENCSR323FHJ       mm10 M4 - SE      1,2   no
-ENCSR331XCE       mm10 M4 - SE      1,2   no
-ENCSR337FYI       mm10 M4 - SE      1,2   no
-ENCSR340NCF       mm10 M4 -         1,2   no
-ENCSR343YLB       mm10 M4 - SE      1,2   no
-ENCSR347SQR       mm10 M4 - SE      1,2   no
-ENCSR351YGY       mm10 M4 - SE      1,2   no
-ENCSR362AIZ       mm10 M4 - SE      1,2   no
-ENCSR362OYV       mm10 M4 - SE      1,2   no
-ENCSR367DUL       mm10 M4 - SE      1,2   no
-ENCSR367ZPZ       mm10 M4 - SE      1,2   no
-ENCSR370SFB       mm10 M4 - SE      1,2   no
-ENCSR390KQJ       mm10 M4 - SE      1,2   no
-ENCSR401BSG       mm10 M4 - SE      1,2   no
-ENCSR420QTO       mm10 M4 - SE      1,2   no
-ENCSR427FOY       mm10 M4 - SE      1,2   no
-ENCSR438XCG       mm10 M4 - SE      1,2   no
-ENCSR448MXQ       mm10 M4 - SE      1,2   no
-ENCSR457RRW       mm10 M4 - SE      1,2   no
-ENCSR466KZY       mm10 M4 - SE      1,2   no
-ENCSR474NEW       mm10 M4 - SE      1,2   no
-ENCSR504GEG       mm10 M4 - SE      1,2   no
-ENCSR508GWZ       mm10 M4 - SE      1,2   no
-ENCSR510ADJ       mm10 M4 - SE      1,2   no
-ENCSR521YLY       mm10 M4 - SE      1,2   no
-ENCSR526SEX       mm10 M4 - SE      1,2   no
-ENCSR527DQV       mm10 M4 - SE      1,2   no
-ENCSR527RFK       mm10 M4 - SE      1,2   no
-ENCSR530UXI       mm10 M4 - SE      1,2   no
-ENCSR537GNQ       mm10 M4 - SE      1,2   no
-ENCSR538WYL       mm10 M4 - SE      1,2   no
-ENCSR541XZK       mm10 M4 - SE      1,2   no
-ENCSR549QME       mm10 M4 -         1,2   no
-ENCSR557RMA       mm10 M4 - SE      1,2   no
-ENCSR558PXY       mm10 M4 -         1,2   no
-ENCSR559QTE       mm10 M4 - SE      1,2   no
-ENCSR559TRB       mm10 M4 - SE      1,2   no
-ENCSR577ONT       mm10 M4 - SE      1,2   no
-ENCSR579FCW       mm10 M4 - SE      1,2   no
-ENCSR592MSV       mm10 M4 - SE      1,2   no
-ENCSR597UZW       mm10 M4 - SE      1,2   no
-ENCSR611PTP       mm10 M4 - SE      1,2   no
-ENCSR620HJQ       mm10 M4 - SE      1,2   no
-ENCSR636CWO       mm10 M4 - SE      1,2   no
-ENCSR637NLF       mm10 M4 - SE      1,2   no
-ENCSR647QBV       mm10 M4 - SE      1,2   no
-ENCSR648YEP       mm10 M4 - SE      1,2   no
-ENCSR650MMK       mm10 M4 - SE      1,2   no
-ENCSR659SFM       mm10 M4 - SE      1,2   no
-ENCSR661TLW       mm10 M4 -         1,2   no
-ENCSR662UPQ       mm10 M4 - SE      1,2   no
-ENCSR667TOX       mm10 M4 - SE      1,2   no
-ENCSR691OPQ       mm10 M4 - SE      1,2   no
-ENCSR691PPV       mm10 M4 - SE      1,2   no
-ENCSR708EHJ       mm10 M4 - SE      1,2   no
-ENCSR710QXP       mm10 M4 - SE      1,2   no
-ENCSR719NAJ       mm10 M4 - SE      1,2   no
-ENCSR723SZV       mm10 M4 -         1,2   no
-ENCSR726VVO       mm10 M4 - SE      1,2   no
-ENCSR727FHP       mm10 M4 - SE      1,2   no
-ENCSR734SOQ       mm10 M4 - SE      1,2   no
-ENCSR739PEB       mm10 M4 - SE      1,2   no
-ENCSR739YUO       mm10 M4 - SE      1,2   no
-ENCSR746LUP       mm10 M4 - SE      1,2   no
-ENCSR749BAG       mm10 M4 -         1,2   no
-ENCSR750YSX       mm10 M4 - SE      1,2   no
-ENCSR752RGN       mm10 M4 - SE      1,2   no
-ENCSR758TAD       mm10 M4 - SE      1,2   no
-ENCSR760TOE       mm10 M4 - SE      1,2   no
-ENCSR767VHR       mm10 M4 -         1,2   no
-ENCSR772FQU       mm10 M4 - SE      1,2   no
-ENCSR775HGC       mm10 M4 - SE      1,2   no
-ENCSR782WIL       mm10 M4 - SE      1,2   no
-ENCSR789RPP       mm10 M4 - SE      1,2   no
-ENCSR792RJV       mm10 M4 - SE      1,2   no
-ENCSR796QJD       mm10 M4 - SE      1,2   no
-ENCSR803PLZ       mm10 M4 - SE      1,2   no
-ENCSR805QYO       mm10 M4 - SE      1,2   no
-ENCSR814JMM       mm10 M4 - SE      1,2   no
-ENCSR822EWO       mm10 M4 - SE      1,2   no
-ENCSR823VEE       mm10 M4 - SE      1,2   no
-ENCSR826HIQ       mm10 M4 - SE      1,2   no
-ENCSR826IXR       mm10 M4 -         1,2   no
-ENCSR830IVQ       mm10 M4 - SE      1,2   no
-ENCSR833HPM       mm10 M4 -         1,2   no
-ENCSR833SOQ       mm10 M4 - SE      1,2   no
-ENCSR846FYI       mm10 M4 - SE      1,2   no
-ENCSR848GST       mm10 M4 - SE      1,2   no
-ENCSR848HOX       mm10 M4 - SE      1,2   no
-ENCSR848LXY       mm10 M4 -         1,2   no
-ENCSR851HEC       mm10 M4 - SE      1,2   no
-ENCSR861FGB       mm10 M4 - SE      1,2   no
-ENCSR867YNV       mm10 M4 - SE      1,2   no
-ENCSR906YQZ       mm10 M4 - SE      1,2   no
-ENCSR907JUN       mm10 M4 - SE      1,2   no
-ENCSR908JWT       mm10 M4 - SE      1,2   no
-ENCSR909YEQ       mm10 M4 - SE      1,2   no
-ENCSR921PRX       mm10 M4 - SE      1,2   no
-ENCSR927IOO       mm10 M4 - SE      1,2   no
-ENCSR928OXI       mm10 M4 - SE      1,2   no
-ENCSR932TRU       mm10 M4 - SE      1,2   no
-ENCSR940DVT       mm10 M4 - SE      1,2   no
-ENCSR946HWC       mm10 M4 - SE      1,2   no
-ENCSR948NDP       mm10 M4 - SE      1,2   no
-ENCSR950BNG       mm10 M4 - SE      1,2   no
-ENCSR953TKB       mm10 M4 - SE      1,2   no
-ENCSR970EWM       mm10 M4 - SE      1,2   no
-ENCSR980SWK       mm10 M4 - SE      1,2   no
-ENCSR982MRY       mm10 M4 - SE      1,2   no
-ENCSR992WBR       mm10 M4 - SE      1,2   no
-
-# TODO: Cricket LRNA Gingeras mm10: https://www.encodeproject.org/search/?type=Experiment&assay_title=RNA-seq&award.rfa=ENCODE2&assay_title=polyA+mRNA+RNA-seq&assay_title=polyA+depleted+RNA-seq&assembly%21=GRCh38&lab.title=Thomas+Gingeras%2C+CSHL&internal_status=pipeline+ready&limit=all
-# Experiment       On             Reps    First Post  Last Post   Total Time/Cost
+# TODO: 120 for hg19 http://redmine.encodedcc.org/issues/3060#note-263
+### Experiment       On             Reps    First Post  Last Post   Total Time/Cost
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
-ENCSR000BYP       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYQ       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYR       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYS       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYT       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYU       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYV       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYW       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYX       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYY       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BYZ       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZA       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZB       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZC       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZD       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZE       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZF       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZG       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZH       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZI       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZJ       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZK       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZL       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZM       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZN       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZO       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZP       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZQ       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZR       mm10 M4 -         1,2   no      -          2016-08-04
-ENCSR000BZS       mm10 M4 -         1,2   no      -          2016-08-04
-
-# TODO: Cricket LRNA Gingeras GRCh38: https://www.encodeproject.org/search/?type=Experiment&assay_title=RNA-seq&award.rfa=ENCODE2&assay_title=polyA+mRNA+RNA-seq&assay_title=polyA+depleted+RNA-seq&assembly%21=GRCh38&lab.title=Thomas+Gingeras%2C+CSHL&internal_status=pipeline+ready&limit=all
-# Experiment       On             Reps    First Post  Last Post   Total Time/Cost
+ENCSR023ZXN       hg19 v19 -        1_1.2 no      -          2016-08-26      ### needed for ENCSR069LRO rampage/hg19
+ENCSR276MMH       hg19 v19 -        1_1.2 no      -          2016-08-26      ### needed for ENCSR880BIV rampage/hg19
+ENCSR429EWK       hg19 v19 -        1_1.2 no      -          2016-08-26      ### needed for ENCSR632GYF rampage/hg19
+ENCSR532LJV       hg19 v19 -        1_1.2 no      -          2016-08-26      ### needed for ENCSR260RBO rampage/hg19
+ENCSR853BNH       hg19 v19 -        1_1.2 no      -          2016-08-26
+ENCSR954PZB       hg19 v19 -        1_1.2 no      -          2016-08-26
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
-ENCSR000COS       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000COT       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CPD       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CPG       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQB       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQC       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQD       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQI       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQJ       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQP       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQQ       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CQR       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CTK       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-ENCSR000CUT       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04
-
-# Working on: six from the Wold SE http://redmine.encodedcc.org/issues/3060#note-232
+ENCSR000BYO       hg19 v19 -        1,2   no     2016-08-26  2016-08-26
+ENCSR019MXZ       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR023VVO       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR038WEK       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR040YBR       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR058OSL       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR061SFU       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR181ZGR       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR236URT       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR294NDO       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR384ZXD       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR510QZW       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR530NHO       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR541TIG       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR545DKY       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR561FEE       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR594NJP       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR596ACL       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR696YIB       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR748GVH       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR813BDU       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR843RJV       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR859HWB       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR860DWK       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR862HPO       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR885DVH       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR887ZSY       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR889TRN       hg19 v19 -        1,2   no      -          2016-08-26
+ENCSR931WGT       hg19 v19 -        1,2   no      -          2016-08-26
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
-ENCSR049UJU       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h26m  $10.48
-ENCSR304RDL       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h11m  $10.14
-ENCSR764OPZ       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    8h10m  $11.52
-ENCSR809VYL       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h19m  $10.32
-ENCSR943LKA       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    6h45m  $9.54
-ENCSR968QHO       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h48m  $11.02
-
-# Working on: two more from the Hardison lab SE http://redmine.encodedcc.org/issues/3060#note-233
-# Working on: Cricket LRNA 2 more Hardison mm10: http://redmine.encodedcc.org/issues/3060#note-239
-# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
-ENCSR085AJX       mm10 M4 -         1,2   no     2016-08-02  2016-08-03  2016-08-04   10h01m  $14.15
-ENCSR121HYR       mm10 M4 -         1,2   no     2016-08-03  2016-08-03  2016-08-04   13h53m  $19.61  
-ENCSR133SAI       mm10 M4 -         1,2   no     2016-08-02  2016-08-03  2016-08-04   18h18m  $25.85
-ENCSR277DPB       mm10 M4 -         1,2   no     2016-08-03  2016-08-03  2016-08-04   12h51m  $18.15
+ENCSR029KNZ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR035SKV       hg19 v19 -        1     no      -          2016-08-26
+ENCSR042GYH       hg19 v19 -        1     no      -          2016-08-26
+ENCSR071ZLM       hg19 v19 -        1     no      -          2016-08-26
+ENCSR080HPT       hg19 v19 -        1     no      -          2016-08-26
+ENCSR094GVZ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR094VRQ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR098BUF       hg19 v19 -        1     no      -          2016-08-26
+ENCSR106SZN       hg19 v19 -        1     no      -          2016-08-26
+ENCSR108MAU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR113HQM       hg19 v19 -        1     no      -          2016-08-26
+ENCSR146LBD       hg19 v19 -        1     no      -          2016-08-26
+ENCSR150QJY       hg19 v19 -        1     no      -          2016-08-26
+ENCSR158KFO       hg19 v19 -        1     no      -          2016-08-26
+ENCSR182CBU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR194HVU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR226KML       hg19 v19 -        1     no      -          2016-08-26
+ENCSR238ZZD       hg19 v19 -        1     no      -          2016-08-26
+ENCSR257NIR       hg19 v19 -        1     no      -          2016-08-26
+ENCSR272UNO       hg19 v19 -        1     no      -          2016-08-26
+ENCSR296PMS       hg19 v19 -        1     no      -          2016-08-26
+ENCSR313COD       hg19 v19 -        1     no      -          2016-08-26
+ENCSR321PGV       hg19 v19 -        1     no      -          2016-08-26
+ENCSR330UMQ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR344MQK       hg19 v19 -        1     no      -          2016-08-26
+ENCSR351OTL       hg19 v19 -        1     no      -          2016-08-26
+ENCSR354QPN       hg19 v19 -        1     no      -          2016-08-26
+ENCSR391VGU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR403SZN       hg19 v19 -        1     no      -          2016-08-26
+ENCSR406SAW       hg19 v19 -        1     no      -          2016-08-26
+ENCSR425RGZ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR434TEU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR436QDU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR438YPF       hg19 v19 -        1     no      -          2016-08-26
+ENCSR450BNZ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR450ENK       hg19 v19 -        1     no      -          2016-08-26
+ENCSR457ENP       hg19 v19 -        1     no      -          2016-08-26
+ENCSR460YCS       hg19 v19 -        1     no      -          2016-08-26
+ENCSR471RUK       hg19 v19 -        1     no      -          2016-08-26
+ENCSR474TRG       hg19 v19 -        1     no      -          2016-08-26
+ENCSR480SLD       hg19 v19 -        1     no      -          2016-08-26
+ENCSR485WBR       hg19 v19 -        1     no      -          2016-08-26
+ENCSR495HDM       hg19 v19 -        1     no      -          2016-08-26
+ENCSR504NIU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR504QMK       hg19 v19 -        1     no      -          2016-08-26
+ENCSR510MIA       hg19 v19 -        1     no      -          2016-08-26
+ENCSR528ZKN       hg19 v19 -        1     no      -          2016-08-26
+ENCSR544SAU       hg19 v19 -        1     no      -          2016-08-26
+ENCSR551NII       hg19 v19 -        1     no      -          2016-08-26
+ENCSR571RXE       hg19 v19 -        1     no      -          2016-08-26
+ENCSR586SYA       hg19 v19 -        1     no      -          2016-08-26
+ENCSR609NZM       hg19 v19 -        1     no      -          2016-08-26
+ENCSR620LQN       hg19 v19 -        1     no      -          2016-08-26
+ENCSR630VJN       hg19 v19 -        1     no      -          2016-08-26
+ENCSR645TCG       hg19 v19 -        1     no      -          2016-08-26
+ENCSR648OSR       hg19 v19 -        1     no      -          2016-08-26
+ENCSR653ZJF       hg19 v19 -        1     no      -          2016-08-26
+ENCSR671IYC       hg19 v19 -        1     no      -          2016-08-26
+ENCSR671WMH       hg19 v19 -        1     no      -          2016-08-26
+ENCSR678TMV       hg19 v19 -        1     no      -          2016-08-26
+ENCSR687HJY       hg19 v19 -        1     no      -          2016-08-26
+ENCSR701TST       hg19 v19 -        1     no      -          2016-08-26
+ENCSR708VVE       hg19 v19 -        1     no      -          2016-08-26
+ENCSR719PXC       hg19 v19 -        1     no      -          2016-08-26
+ENCSR729CAZ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR740YMS       hg19 v19 -        1     no      -          2016-08-26
+ENCSR750ETS       hg19 v19 -        1     no      -          2016-08-26
+ENCSR752UNJ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR754WLW       hg19 v19 -        1     no      -          2016-08-26
+ENCSR796HLX       hg19 v19 -        1     no      -          2016-08-26
+ENCSR800WIY       hg19 v19 -        1     no      -          2016-08-26
+ENCSR801MKV       hg19 v19 -        1     no      -          2016-08-26
+ENCSR802HPM       hg19 v19 -        1     no      -          2016-08-26
+ENCSR812AKX       hg19 v19 -        1     no      -          2016-08-26
+ENCSR827IXS       hg19 v19 -        1     no      -          2016-08-26
+ENCSR837ZLY       hg19 v19 -        1     no      -          2016-08-26
+ENCSR839ZDH       hg19 v19 -        1     no      -          2016-08-26
+ENCSR841ADZ       hg19 v19 -        1     no      -          2016-08-26
+ENCSR853WOM       hg19 v19 -        1     no      -          2016-08-26
+ENCSR857WJK       hg19 v19 -        1     no      -          2016-08-26
+ENCSR858QEL       hg19 v19 -        1     no      -          2016-08-26
+ENCSR862RGX       hg19 v19 -        1     no      -          2016-08-26
+ENCSR900SGE       hg19 v19 -        1     no      -          2016-08-26
+ENCSR967JPI       hg19 v19 -        1     no      -          2016-08-26
+ENCSR991HIR       hg19 v19 -        1     no      -          2016-08-26
 
 ####### GRCh38 Full list
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
@@ -305,6 +201,8 @@ ENCSR000COO  ENC2 GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02
 ENCSR000COP  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   22h38m  $31.98
 ENCSR000COQ  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   23h44m  $33.54
 ENCSR000COR  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   22h44m  $32.12
+ENCSR000COS       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h06m  $19.92
+ENCSR000COT       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   15h18m  $21.61
 ENCSR000COU  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   23h24m  $33.06
 ENCSR000COV  ENC2 GRCh38 v24 -      2     no     2016-07-05  2016-07-05  2016-07-07   10h03m  $14.20
 ENCSR000COW  ENC2 GRCh38 v24 -      2     no     2016-07-05  2016-07-05  2016-07-07    9h13m  $13.02
@@ -314,8 +212,10 @@ ENCSR000COZ  ENC2 GRCh38 v24 -      3,4   no      -          2016-02-26  2016-02
 ENCSR000CPA  ENC2 GRCh38 v24 -      3,4   no      -          2016-02-26  2016-02-29   11h45m  $33.71
 ENCSR000CPB  ENC2 GRCh38 v24 -      3,4   no      -          2016-02-26  2016-02-29    9h27m  $25.65
 ENCSR000CPC  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   15h58m  $22.56
+ENCSR000CPD       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   15h35m  $22.01
 ENCSR000CPE  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07 1d01h16m  $35.72
 ENCSR000CPF  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07 1d01h09m  $35.54
+ENCSR000CPG       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h38m  $20.67
 ENCSR000CPH  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   22h48m  $32.22
 ENCSR000CPI  ENC2 GRCh38 v24 -      1,2,5 no      -          2016-02-26  2016-02-29    9h12m  $32.71
 ENCSR000CPJ  ENC2 GRCh38 v24 -      3,4   no      -          2016-02-26  2016-02-29   11h07m  $29.80
@@ -336,18 +236,27 @@ ENCSR000CPX  ENC2 GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02
 ENCSR000CPY  ENC2 GRCh38 v24 -      3,4   no     2016-06-13  2016-07-02  2016-07-07   13h49m  $19.52
 ENCSR000CPZ  ENC2 GRCh38 v24 -      3,4   no     2016-06-13  2016-07-02  2016-07-07   14h28m  $20.43
 ENCSR000CQA  ENC2 GRCh38 v24 -      3,4   no     2016-06-13  2016-07-02  2016-07-07   13h56m  $19.69
+ENCSR000CQB       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   18h55m  $26.72
+ENCSR000CQC       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   12h47m  $18.07
+ENCSR000CQD       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h55m  $21.07
 ENCSR000CQE  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   16h28m  $23.27
 ENCSR000CQF  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   12h01m  $16.98
 ENCSR000CQG  ENC2 GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02-29    7h04m  $19.55
 ENCSR000CQH  ENC2 GRCh38 v24 -      3,4   no      -          2016-02-26  2016-02-29    5h34m  $16.73
+ENCSR000CQI       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   11h46m  $16.62
+ENCSR000CQJ       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h03m  $19.84
 ENCSR000CQK  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   14h26m  $20.37
 ENCSR000CQL  ENC2 GRCh38 v24 -      1,2   no     2016-06-13  2016-07-02  2016-07-07   14h53m  $21.03
 ENCSR000CQM  ENC2 GRCh38 v24 -      1,2   no     2016-06-13  2016-07-02  2016-07-07   12h30m  $17.65
 ENCSR000CQN  ENC2 GRCh38 v24 -      3     no      -          2016-02-26  2016-02-29    4h13m   $6.63
 ENCSR000CQO  ENC2 GRCh38 v24 -      3,4   no      -          2016-02-26  2016-02-29    6h30m  $17.75
+ENCSR000CQP       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   15h29m  $21.87
+ENCSR000CQQ       GRCh38 v24 -      2     no     2016-08-04  2016-08-04  2016-08-05    4h49m   $6.81
+ENCSR000CQR       GRCh38 v24 -      2     no     2016-08-04  2016-08-04  2016-08-05    5h34m   $7.88
 ENCSR000CQS  ENC2 GRCh38 v24 -      3     no      -          2016-02-26  2016-02-29    5h45m   $8.81
 ENCSR000CQT  ENC2 GRCh38 v24 -      2     no     2016-07-05  2016-07-05  2016-07-07    5h53m   $8.33
 ENCSR000CQU  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07   19h17m  $27.24
+ENCSR000CTK       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05 1d00h00m  $33.91
 ENCSR000CTL  ENC2 GRCh38 v24 -      3,4   no     2016-07-05  2016-07-05  2016-07-07 1d13h32m  $53.04
 ENCSR000CTM  ENC2 GRCh38 v24 -      3,4   no     2016-07-05  2016-07-05  2016-07-07 1d06h57m  $43.73
 ENCSR000CTN  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07-07 1d09h41m  $47.59
@@ -379,6 +288,7 @@ ENCSR000CUO  ENC2 GRCh38 v24 -      1,2   no     2016-07-05  2016-07-05  2016-07
 ENCSR000CUP  ENC2 GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02-29   15h40m  $40.98
 ENCSR000CUQ  ENC2 GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02-29   12h02m  $34.60
 ENCSR000CUR  ENC2 GRCh38 v24 -      1,2   no      -          2016-02-26  2016-02-29   12h20m  $32.01
+ENCSR000CUT       GRCh38 v24 -      1     no     2016-08-04  2016-08-04  2016-08-05   14h16m  $20.16
 ENCSR000CVT  ENC2 GRCh38 v24 -      3,4   no     2016-07-05  2016-07-05  2016-07-07   18h58m  $26.79
 ENCSR000KYM       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    7h40m  $22.65
 ENCSR000SKS       GRCh38 v24 CRISPR 1,2   yes    2016-03-11  2016-03-11  2016-03-14    5h06m  $24.74
@@ -477,8 +387,8 @@ ENCSR104ABF       GRCh38 v24        1,2   yes     -          2016-02-04  2016-02
 ENCSR104OLN       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    8h42m  $19.29
 ENCSR105NML       GRCh38 v24 CRISPR 1,2   yes    2016-03-11  2016-03-11  2016-03-14    7h08m  $27.66
 ENCSR105OXX       GRCh38 v24 shRNA  1,2   yes     -          2016-02-29  2016-03-02    3h21m  $17.20
-ENCSR106SZN       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    2h26m  $3.44
-ENCSR108MAU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h27m  $4.89
+ENCSR106SZN       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    2h26m   $3.44
+ENCSR108MAU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h27m   $4.89
 ENCSR109IQO       GRCh38 v24 -      1,2   yes     -          2016-02-29  2016-03-02 1d03h36m  $80.94
 ENCSR109YDL       GRCh38 v24 siRNA  1     no     2016-08-02  2016-08-02  2016-08-03    3h03m   $4.32
 ENCSR110BDY       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   10h12m  $28.16
@@ -553,7 +463,7 @@ ENCSR191VWK       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03
 ENCSR192BPV       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15   13h49m  $44.71
 ENCSR192GBD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   18h11m  $39.94
 ENCSR193FFA       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03   12h53m  $27.79
-ENCSR194HVU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h20m  $4.71
+ENCSR194HVU       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h20m   $4.71
 ENCSR198TKA       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   21h13m  $28.06
 ENCSR201WFU       GRCh38 v24 shRNA  1,2   yes     -          2016-03-02  2016-03-03    6h08m  $26.75
 ENCSR201WVA       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25    6h47m  $17.94
@@ -596,8 +506,9 @@ ENCSR246SOU       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03
 ENCSR253DCB       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    4h52m  $22.35
 ENCSR254JJM       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   11h23m  $29.62
 ENCSR255NYQ       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25    8h35m  $23.07
+ENCSR256NQT       GRCh38 v24 siRNA  1     no     2016-02-23  2016-02-23  2016-08-24    3h10m   $4.47
 ENCSR256PLH       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    8h34m  $24.39
-ENCSR257NIR       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h34m  $5.05
+ENCSR257NIR       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h34m   $5.05
 ENCSR258VGD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    6h26m  $16.67
 ENCSR261IHP       GRCh38 v24 siRNA  1,2   no     2016-08-02  2016-08-02  2016-08-03   22h60m  $32.49
 ENCSR267RHP       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15    5h37m  $26.04
@@ -631,6 +542,7 @@ ENCSR309HXK       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03
 ENCSR309PPC       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04   11h07m  $24.95
 ENCSR310FIS       GRCh38 v24 -      1,2   yes     -          2016-03-11  2016-03-14   10h26m  $51.26
 ENCSR310VND       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    7h17m  $22.19
+ENCSR312FIT       GRCh38 v24 siRNA  1,2   no     2016-02-23  2016-02-23  2016-08-24    6h11m   $8.72
 ENCSR312HJY       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    6h17m  $25.60
 ENCSR312SFA       GRCh38 v24 shRNA  1,2   yes    2016-03-10  2016-03-11  2016-03-14    4h32m  $22.11
 ENCSR312SRB       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    4h48m  $21.56
@@ -644,7 +556,7 @@ ENCSR320BRR       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02
 ENCSR321PGV       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    5h48m   $8.44
 ENCSR322XVS       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    9h06m  $23.94
 ENCSR325OOM       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    8h50m  $17.61
-ENCSR330UMQ       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h54m  $5.51
+ENCSR330UMQ       GRCh38 v24 -      1     no     2016-04-27  2016-04-27  2016-05-02    3h54m   $5.51
 ENCSR330YOU       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    6h20m  $32.36
 ENCSR331DUD       GRCh38 v24 shRNA  1,2   yes     -          2016-03-03  2016-03-04    4h14m  $18.75
 ENCSR332DBS       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   11h03m  $29.57
@@ -769,6 +681,7 @@ ENCSR504NIU       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02
 ENCSR504QMK       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    5h20m   $7.69
 ENCSR504VXC       GRCh38 v24 -      1,2   no      -          2016-02-24  2016-02-25   12h16m  $32.79
 ENCSR509LIV       GRCh38 v24 shRNA  1,2   yes     -          2016-03-07  2016-03-08   11h30m  $28.49
+ENCSR509YMP       GRCh38 v24 siRNA  1,2   no     2016-02-23  2016-02-23  2016-08-24    5h42m   $8.04
 ENCSR510MIA       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    3h39m   $5.29
 ENCSR510QZW       GRCh38 v24 -      1,2   no     2016-04-27  2016-04-28  2016-05-02    8h43m  $12.30
 ENCSR511BNY       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15    5h20m  $25.70
@@ -908,6 +821,7 @@ ENCSR674KDQ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-10  2013-03
 ENCSR674KEK       GRCh38 v24 shRNA  1,2   yes     -          2016-03-10  2013-03-11    4h47m  $20.36
 ENCSR675BVS       GRCh38 v24 siRNA  1     no     2016-08-02  2016-08-02  2016-08-03      43m   $1.02
 ENCSR675KPR       GRCh38 v24 shRNA  1,2   yes     -          2016-03-10  2013-03-11   15h21m  $37.42
+ENCSR675SDG       GRCh38 v24 siRNA  1,2   no     2016-02-23  2016-02-23  2016-08-24    9h45m  $13.77
 ENCSR678MVE       GRCh38 v24 shRNA  1,2   yes     -          2016-03-10  2013-03-11    7h44m  $22.98
 ENCSR678TMV       GRCh38 v24        1     no     2016-02-16  2016-02-16  2016-02-17    7h25m  $10.66
 ENCSR678WOA       GRCh38 v24 shRNA  1,2   yes    2016-03-14  2016-03-14  2016-03-15    8h47m  $41.93
@@ -1143,201 +1057,427 @@ ENCSR995ZGJ       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03
 ENCSR997FOT       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   14h58m  $21.71
 ENCSR998MZP       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   12h15m  $17.81
 ENCSR998RZI       GRCh38 v24 shRNA  1,2   yes     -          2016-03-19  2016-03-23   19h39m  $28.56
-# Total: 910 GRCh38
+# Total: 928 GRCh38
 
-####### mm10 Full list:
+####### mm10 (no-alt) Full list
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000AJU       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   18h07m  $25.59
+ENCSR000AJV       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10    6h59m   $9.84
+ENCSR000BYP       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   11h06m  $15.61
+ENCSR000BYQ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   13h07m  $18.54
+ENCSR000BYR       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   17h51m  $25.23
+ENCSR000BYS       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   13h12m  $18.64
+ENCSR000BYT       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   11h17m  $15.92
+ENCSR000BYU       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h54m  $18.23
+ENCSR000BYV       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   14h36m  $20.63
+ENCSR000BYW       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h43m  $17.96
+ENCSR000BYX       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h08m  $17.14
+ENCSR000BYY       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h32m  $17.70
+ENCSR000BYZ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h07m  $17.11
+ENCSR000BZA       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h43m  $17.96
+ENCSR000BZB       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h42m  $17.94
+ENCSR000BZC       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05    9h11m  $12.97
+ENCSR000BZD       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   10h58m  $15.48
+ENCSR000BZE       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h27m  $17.58
+ENCSR000BZF       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   13h42m  $19.36
+ENCSR000BZG       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d08h28m  $45.88
+ENCSR000BZH       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d07h60m  $45.22
+ENCSR000BZI       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   22h56m  $32.41
+ENCSR000BZJ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d03h35m  $38.98
+ENCSR000BZK       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d10h29m  $48.74
+ENCSR000BZL       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d08h04m  $45.32
+ENCSR000BZM       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   23h47m  $33.61
+ENCSR000BZN       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d04h52m  $40.79
+ENCSR000BZO       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d14h08m  $53.90
+ENCSR000BZP       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d20h14m  $62.53
+ENCSR000BZQ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d03h36m  $39.01
+ENCSR000BZR       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d02h28m  $37.40
+ENCSR000BZS       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d04h25m  $40.16
+ENCSR000CHS       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   17h51m  $25.21
+ENCSR000CHT       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   13h04m  $18.45
+ENCSR000CHU       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   14h36m  $20.63
+ENCSR000CHV       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   23h30m  $33.20
+ENCSR000CHW       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   19h53m  $28.10
+ENCSR000CHX       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   20h47m  $29.36
+ENCSR000CHY       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   22h20m  $31.57
+ENCSR000CHZ       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   17h56m  $25.35
+ENCSR000CIA       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   20h23m  $28.79
+ENCSR000CIB       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   22h53m  $32.32
+ENCSR000CIC       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   16h39m  $23.53
+ENCSR000CIF       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   21h21m  $30.16
+ENCSR000CIG       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18    8h14m  $11.62
+ENCSR000CWC       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   19h32m  $27.61
+ENCSR000CWD       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   20h60m  $29.67
+ENCSR000CWE       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   19h05m  $26.96
+ENCSR000CWF       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18 1d04h34m  $40.36
+ENCSR000OXO       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h52m   $8.27
+ENCSR004XCU       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h55m   $9.75
+ENCSR017JEG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h36m   $9.32
+ENCSR020DGG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h08m  $10.07
+ENCSR025JRA       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   10h21m  $14.61
+ENCSR026ZRP       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h40m   $7.99
+ENCSR027CXR       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h01m   $1.43
+ENCSR027FCH       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   12h19m  $17.39
+ENCSR035DLJ       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   16h05m  $22.73
+ENCSR039ADS       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h51m   $9.67
+ENCSR049UJU       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h26m  $10.48
+ENCSR062VTB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h12m  $10.15
+ENCSR068SJG       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h54m   $2.69
+ENCSR080EVZ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h46m   $8.12
+ENCSR085AJX       mm10 M4 -         1,2   no     2016-08-02  2016-08-03  2016-08-04   10h01m  $14.15
+ENCSR096STK       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h57m   $9.81
+ENCSR100KRK       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      57m   $1.33
+ENCSR111QQX       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h35m   $3.66
+ENCSR115TWD       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h32m   $7.81
+ENCSR121HYR       mm10 M4 -         1,2   no     2016-08-03  2016-08-03  2016-08-04   13h53m  $19.61  
+ENCSR133SAI       mm10 M4 -         1,2   no     2016-08-02  2016-08-03  2016-08-04   18h18m  $25.85
+ENCSR138VRG       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      58m   $1.36
+ENCSR145EKP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.21
+ENCSR150CUE       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h59m   $8.44
+ENCSR160IIN       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h35m   $7.87
+ENCSR167AWS       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      50m   $1.17
+ENCSR173PJN       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h60m  $11.29
+ENCSR178GUS       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    8h39m  $12.21
+ENCSR181KQJ       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   15h36m  $22.05
+ENCSR185LWM       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h29m   $9.13
+ENCSR194TNV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h45m   $2.47
+ENCSR195BCE       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.22
+ENCSR198EIH       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      55m   $1.31
+ENCSR216NEG       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h21m   $8.95
+ENCSR220HFQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h07m   $1.58
+ENCSR236EGS       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h21m   $7.54
+ENCSR236ZIE       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   13h23m  $18.90
+ENCSR247IMK       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   12h18m  $17.37
+ENCSR255SDF       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   14h37m  $20.66
+ENCSR265YFZ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h25m   $9.06
+ENCSR267LBO       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h33m   $3.60
+ENCSR268AXN       mm10 M4 - SE      1,2   no     2016-08-24  2016-08-25  2016-08-25    5h25m   $7.64
+ENCSR268IGT       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h10m   $3.07
+ENCSR277DPB       mm10 M4 -         1,2   no     2016-08-03  2016-08-03  2016-08-04   12h51m  $18.15
+ENCSR282DYQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR284AMY       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h59m   $8.43
+ENCSR284YKY       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h55m   $9.75
+ENCSR285WZV       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h13m  $10.17
+ENCSR290RRR       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h45m   $8.11
+ENCSR292IVH       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h24m   $3.40
+ENCSR295UJP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h01m   $1.43
+ENCSR298YHA       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h04m   $1.50
+ENCSR304RDL       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h11m  $10.14
+ENCSR307BCA       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    8h04m  $11.39
+ENCSR316RMA       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      54m   $1.27
+ENCSR320PXZ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.21
+ENCSR323FHJ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h02m   $1.45
+ENCSR331XCE       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h55m   $9.77
+ENCSR337FYI       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h48m   $8.17
+ENCSR340NCF       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10   23h06m  $32.65
+ENCSR343YLB       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h04m   $8.56
+ENCSR347SQR       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h48m   $9.59
+ENCSR351YGY       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR362AIZ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h53m   $9.72
+ENCSR362OYV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h07m   $3.00
+ENCSR367DUL       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.23
+ENCSR367ZPZ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h07m   $8.63
+ENCSR370SFB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h56m   $9.78
+ENCSR390KQJ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      53m   $1.24
+ENCSR401BSG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h32m  $10.64
+ENCSR420QTO       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h36m   $7.89
+ENCSR427FOY       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      53m   $1.24
+ENCSR438XCG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h17m  $10.29
+ENCSR448MXQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.40
+ENCSR457RRW       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h41m   $9.44
+ENCSR466KZY       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h08m   $8.64
+ENCSR474NEW       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      54m   $1.28
+ENCSR475TDY       mm10 M4 -         1,2   no     2016-08-24  2016-08-25  2016-08-25   13h51m  $19.57
+ENCSR504GEG       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h47m   $8.16
+ENCSR508GWZ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h05m   $8.58
+ENCSR510ADJ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h35m   $9.29
+ENCSR521YLY       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      48m   $1.14
+ENCSR526SEX       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h31m  $10.62
+ENCSR527DQV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR527RFK       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h54m   $9.73
+ENCSR530UXI       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h30m   $3.53
+ENCSR537GNQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h45m   $9.53
+ENCSR538CVD       mm10 M4 -         1,2   no     2016-08-24  2016-08-25  2016-08-25   11h24m  $16.10
+ENCSR538WYL       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h46m   $8.13
+ENCSR541XZK       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    7h02m   $9.91
+ENCSR549QME       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   13h09m  $18.58
+ENCSR557RMA       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h33m  $10.65
+ENCSR558PXY       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10 1d01h07m  $35.49
+ENCSR559QTE       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      50m   $1.17
+ENCSR559TRB       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h18m   $8.89
+ENCSR577ONT       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h17m   $3.22
+ENCSR579FCW       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h04m   $8.57
+ENCSR592MSV       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h49m   $9.61
+ENCSR597UZW       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h06m  $10.01
+ENCSR611PTP       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h13m  $10.20
+ENCSR620HJQ       mm10 M4 - SE     1_1-13 no     2016-08-05  2016-08-05  2016-08-10 1d02h19m  $37.21  Posted 72 files
+ENCSR636CWO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h02m   $9.92
+ENCSR637NLF       mm10 M4 - SE     1_1-16 no     2016-08-05  2016-08-05  2016-08-10   13h49m  $19.54  Posted 96 files 
+ENCSR647QBV       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h16m   $8.84
+ENCSR648YEP       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h07m   $8.64
+ENCSR650MMK       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR659SFM       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.24
+ENCSR661TLW       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10   20h16m  $28.65
+ENCSR662UPQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      58m   $1.37
+ENCSR667TOX       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h03m   $8.53
+ENCSR691OPQ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h04m   $8.57
+ENCSR691PPV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.21
+ENCSR708EHJ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.23
+ENCSR710QXP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h04m   $1.51
+ENCSR719NAJ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.42
+ENCSR723SZV       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   15h09m  $21.41
+ENCSR726VVO       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h17m   $3.22
+ENCSR727FHP       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h40m   $7.99
+ENCSR734SOQ       mm10 M4 - SE     1_1-15 no     2016-08-05  2016-08-05  2016-08-10   14h48m  $20.93  Posted 90 files
+ENCSR739PEB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h41m  $10.84
+ENCSR739YUO       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      57m   $1.34
+ENCSR746LUP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.19
+ENCSR749BAG       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   15h48m  $22.32
+ENCSR750YSX       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h31m   $7.78
+ENCSR752RGN       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h48m   $9.60
+ENCSR758TAD       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    4h57m   $6.98
+ENCSR760TOE       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    7h39m  $10.81
+ENCSR764OPZ       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    8h10m  $11.52
+ENCSR767VHR       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   10h57m  $15.47
+ENCSR772FQU       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h35m   $9.28
+ENCSR775HGC       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h50m   $2.59
+ENCSR782WIL       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    1h10m   $1.66
+ENCSR789RPP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h31m   $2.14
+ENCSR792RJV       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h35m   $9.28
+ENCSR796QJD       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h27m   $3.46
+ENCSR803PLZ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h35m   $2.24
+ENCSR805QYO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h46m   $8.13
+ENCSR809VYL       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h19m  $10.32
+ENCSR814JMM       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    4h26m   $6.24
+ENCSR822EWO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    4h52m   $6.87
+ENCSR823VEE       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h27m   $9.10
+ENCSR826HIQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h34m  $10.68
+ENCSR826IXR       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   18h20m  $25.90
+ENCSR830IVQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h59m   $9.86
+ENCSR833HPM       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   11h57m  $16.87
+ENCSR833SOQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      58m   $1.37
+ENCSR846FYI       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      56m   $1.32
+ENCSR847AMQ       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   15h17m  $21.59
+ENCSR848GST       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h08m  $10.08
+ENCSR848HOX       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h52m   $8.29
+ENCSR848LXY       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10 1d02h01m  $36.77
+ENCSR851HEC       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h59m   $8.45
+ENCSR861FGB       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h06m   $8.60
+ENCSR867YNV       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h31m   $9.21
+ENCSR906YQZ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    8h52m  $12.53
+ENCSR907JUN       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h14m   $8.80
+ENCSR908JWT       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h56m   $8.36
+ENCSR909YEQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10      58m   $1.36
+ENCSR921PRX       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.41
+ENCSR927IOO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10      58m   $1.37
+ENCSR928OXI       mm10 M4 - SE      1     no     2016-08-05  2016-08-05  2016-08-10    5h25m   $7.65
+ENCSR932TRU       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h17m   $8.88
+ENCSR940DVT       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      56m   $1.31
+ENCSR943LKA       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    6h45m  $9.54
+ENCSR946HWC       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.42
+ENCSR948NDP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR950BNG       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    8h28m  $11.96
+ENCSR953TKB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10      48m   $1.12
+ENCSR968QHO       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h48m  $11.02
+ENCSR970EWM       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h10m  $10.11
+ENCSR980SWK       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h01m   $2.84
+ENCSR982MRY       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h58m   $9.84
+ENCSR992WBR       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h35m   $9.29
+# Total: 222 mm10 (no-alt)
+
+####### mm10-minimum Full list:
 # Experiment       On             Reps    First Post  Last Post   Total Time/Cost
-ENCSR000AJU  ENC2  mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR000AJV  ENC3  mm10 M4  -     1,2     - older -   2014-10-23     6h43m  $29.17
-ENCSR000BYP  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     7h56m  $38.36
-ENCSR000BYQ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h09m  $44.34
-ENCSR000BYR  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    13h52m  $60.37
-ENCSR000BYS  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h57m  $47.57
-ENCSR000BYT  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     8h52m  $39.88
-ENCSR000BYU  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h21m  $47.12
-ENCSR000BYV  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    13h08m  $53.83
-ENCSR000BYW  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h17m  $44.13
-ENCSR000BYX  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h06m  $42.88
-ENCSR000BYY  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h38m  $45.66
-ENCSR000BYZ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h30m  $44.61
-ENCSR000BZA  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h36m  $46.73
-ENCSR000BZB  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06    10h53m  $42.97
-ENCSR000BZC  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     7h33m  $35.20
-ENCSR000BZD  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h50m  $43.64
-ENCSR000BZE  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h46m  $44.71
-ENCSR000BZF  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06     9h14m  $46.55
-ENCSR000BZG  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  2d01h51m $175.95
-ENCSR000BZH  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d11h17m $133.60
-ENCSR000BZI  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d04h29m $103.40
-ENCSR000BZJ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d14h54m $152.80
-ENCSR000BZK  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d23h17m $165.48
-ENCSR000BZL  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d16h27m $155.78
-ENCSR000BZM  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d07h28m $125.43
-ENCSR000BZN  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d11h53m $148.04
-ENCSR000BZO  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d08h37m $147.85
-ENCSR000BZP  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d18h11m $182.57
-ENCSR000BZQ  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d02h49m $120.60
-ENCSR000BZR  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d10h03m $136.11
-ENCSR000BZS  ENC2  mm10 M4  PE    1,2     2016-01-06  2016-01-06  1d15h44m $154.23
-ENCSR000CWD  ENC2  mm10 M2,3,M4x2 1,2     - older -   2014-10-23  1d06h23m  $113.61
-ENCSR000OXO        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR004XCU  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h47m  $26.59
-ENCSR017JEG  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h17m  $28.57
-ENCSR020DGG  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    13h40m  $24.98
-ENCSR026ZRP        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR027CXR  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.12
-ENCSR035DLJ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR039ADS        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR062VTB  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    15h49m  $27.34
-ENCSR068SJG  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     9h59m   $7.94
-ENCSR080EVZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h37m  $19.88
-ENCSR096STK  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    11h28m  $32.65
-ENCSR100KRK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h01m   $4.67
-ENCSR111QQX  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     6h34m  $10.31
-ENCSR115TWD  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h33m  $20.12
-ENCSR138VRG  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h15m   $5.75
-ENCSR145EKP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h06m   $3.43
-ENCSR150CUE        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h18m   $8.88
-ENCSR160IIN        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR167AWS  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.18
-ENCSR173PJN  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    11h56m  $35.35
-ENCSR178GUS  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    16h10m  $43.78
-ENCSR181KQJ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR185LWM        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR194TNV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h26m   $7.04
-ENCSR195BCE  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h17m   $5.43
-ENCSR198EIH  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h14m   $4.64
-ENCSR216NEG        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR220HFQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h19m   $6.03
-ENCSR236EGS        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR236ZIE        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR255SDF        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR265YFZ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR267LBO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    15h06m  $12.41
-ENCSR268AXN        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR268IGT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     8h37m  $11.94
-ENCSR282DYQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h42m   $2.95
-ENCSR284AMY        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR284YKY  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    10h58m  $24.27
-ENCSR285WZV  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h09m  $24.96
-ENCSR290RRR        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR292IVH  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     9h34m  $13.05
-ENCSR295UJP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.84
-ENCSR298YHA  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h50m   $5.37
-ENCSR307BCA        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR316RMA  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h20m   $3.56
-ENCSR320PXZ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h16m   $3.50
-ENCSR323FHJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.79
-ENCSR331XCE  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    14h43m  $38.11
-ENCSR337FYI        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR340NCF  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d12h12m $139.20
-ENCSR343YLB        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR347SQR  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h56m  $31.32
-ENCSR351YGY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h37m   $3.80
-ENCSR362AIZ  ENC3  mm10 M4  -     1,2     2015-07-02  2016-05-17    23h24m  $26.58  
-ENCSR362OYV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     6h57m   $9.99
-ENCSR367DUL  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.38
-ENCSR367ZPZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h36m  $21.93
-ENCSR370SFB  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h01m  $27.03
-ENCSR390KQJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h01m   $3.21
-ENCSR401BSG  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h53m  $28.38
-ENCSR420QTO        mm10 M4  -     1,2     2016-05-03  2016-05-03     5h52m   $8.26
-ENCSR427FOY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h54m   $3.27
-ENCSR438XCG  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    12h54m  $34.78
-ENCSR448MXQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    14h29m  $27.70
-ENCSR457RRW  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h07m  $25.23
-ENCSR466KZY  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h24m  $22.77
-ENCSR474NEW  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h44m   $4.08
-ENCSR504GEG        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR508GWZ        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h12m   $8.74
-ENCSR510ADJ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR521YLY  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h12m   $3.35
-ENCSR526SEX  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h24m  $31.31
-ENCSR527DQV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h00m   $3.31
-ENCSR527RFK        mm10 M4  -     1,2     - older -   2015-08-20  
-ENCSR530UXI  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h18m   $8.95
-ENCSR537GNQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     7h43m  $22.21
-ENCSR538WYL  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    13h15m  $23.54
-ENCSR541XZK        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR549QME        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR557RMA  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    15h41m  $26.06
-ENCSR558PXY  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d03h51m $114.12
-ENCSR559QTE  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h27m   $3.69
-ENCSR559TRB        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR577ONT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h48m  $11.13
-ENCSR579FCW  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    13h13m  $34.07
-ENCSR592MSV        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR597UZW  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h06m  $26.80
-ENCSR611PTP  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h09m  $26.27
-ENCSR620HJQ  ENC3  mm10 v19 -     1b12tn7 2015-10-20  2015-10-20     8h13m $113.83
-ENCSR636CWO  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h57m  $25.83
-ENCSR637NLF  ENC3  mm10 v19 -     1b16t   2015-10-20  2015-10-20     3h05m  $62.41
-ENCSR647QBV        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h24m   $9.02
-ENCSR648YEP        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h28m   $9.14
-ENCSR650MMK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h30m   $3.83
-ENCSR659SFM  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h03m   $3.26
-ENCSR661TLW  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23    23h32m  $95.87
-ENCSR662UPQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h57m   $3.07
-ENCSR667TOX  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h35m  $26.25
-ENCSR691OPQ        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR691PPV  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h43m   $3.68
-ENCSR708EHJ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     1h53m   $3.07
-ENCSR710QXP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    10h46m   $5.90
-ENCSR719NAJ  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     8h55m  $26.29
-ENCSR723SZV        mm10 M2,M3,M4  1,2     - older -   2015-08-20
-ENCSR726VVO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02    14h01m  $11.74
-ENCSR727FHP        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR734SOQ  ENC3  mm10 v19 -     1b15t   2015-10-12  2015-10-12     3h47m  $70.03
-ENCSR739PEB  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    12h51m  $32.78
-ENCSR739YUO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h46m   $4.12
-ENCSR746LUP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h12m   $4.02
-ENCSR749BAG        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR750YSX        mm10 M4  -     1,2     2016-05-03  2016-05-03     5h45m   $8.10
-ENCSR752RGN  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h52m  $26.46
-ENCSR758TAD        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR760TOE        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR767VHR        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR772FQU  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h07m  $26.64
-ENCSR775HGC  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h37m  $10.25
-ENCSR782WIL  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h56m   $4.26
-ENCSR789RPP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h33m   $6.60
-ENCSR792RJV  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    12h02m  $27.32
-ENCSR796QJD  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h47m  $11.23
-ENCSR803PLZ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h09m   $7.26
-ENCSR805QYO  ENC3  mm10 M4  -     1,2     2015-10-09  2015-10-09    14h37m  $34.54
-ENCSR814JMM        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR822EWO  ENC3  mm10 M4  -     1,2     2015-10-09  2015-10-09    14h40m  $35.21
-ENCSR823VEE        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR826HIQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     9h28m  $25.93
-ENCSR826IXR        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR830IVQ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    11h18m  $25.20
-ENCSR833HPM        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR833SOQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     3h26m   $4.87
-ENCSR846FYI  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h49m   $4.24
-ENCSR848GST  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02     8h44m  $24.00
-ENCSR848HOX        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR848LXY  ENC3  mm10 v19 -     1,2     2015-08-23  2014-10-23  1d14h49m $148.35
-ENCSR851HEC        mm10 M4  -     1,2     2016-05-03  2016-05-03     6h16m   $8.85
-ENCSR861FGB        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR867YNV        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR906YQZ  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    18h01m  $35.40
-ENCSR907JUN        mm10 M2,M3,M4  1,2     - older -   2015-08-20
-ENCSR908JWT        mm10 M4  -     1,2     2016-05-03  2016-05-03     5h48m   $8.19
-ENCSR909YEQ  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     4h08m   $5.58
-ENCSR921PRX  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    17h20m  $27.46
-ENCSR927IOO  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h47m   $4.25
-ENCSR928OXI        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR932TRU        mm10 M4  -     1,2     - older -   2015-08-20
-ENCSR940DVT  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     5h41m   $4.75
-ENCSR946HWC  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20     9h10m  $27.66
-ENCSR948NDP  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h13m   $3.64
-ENCSR950BNG        mm10 M2,M3,M4  1,2     - older -   2015-08-20
-ENCSR953TKB  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.34
-ENCSR970EWM  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    17h01m  $29.50
-ENCSR980SWK  ENC3  mm10 M4  scell 1       2015-10-02  2015-10-02     7h39m  $10.85
-ENCSR982MRY  ENC3  mm10 M4  -     1,2     2015-07-02  2015-08-20    10h11m  $30.98
-ENCSR992WBR  ENC3  mm10 M4  -     1,2     2015-10-02  2015-10-02    10h04m  $22.22
-# Total: 190 mm10
+ENCSR000AJU  ENC2 mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR000AJV  ENC3 mm10m M4  -     1,2     - older -   2014-10-23     6h43m  $29.17
+ENCSR000BYP  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     7h56m  $38.36
+ENCSR000BYQ  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h09m  $44.34
+ENCSR000BYR  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06    13h52m  $60.37
+ENCSR000BYS  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h57m  $47.57
+ENCSR000BYT  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     8h52m  $39.88
+ENCSR000BYU  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06    10h21m  $47.12
+ENCSR000BYV  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06    13h08m  $53.83
+ENCSR000BYW  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h17m  $44.13
+ENCSR000BYX  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h06m  $42.88
+ENCSR000BYY  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h38m  $45.66
+ENCSR000BYZ  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h30m  $44.61
+ENCSR000BZA  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06    10h36m  $46.73
+ENCSR000BZB  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06    10h53m  $42.97
+ENCSR000BZC  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     7h33m  $35.20
+ENCSR000BZD  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h50m  $43.64
+ENCSR000BZE  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h46m  $44.71
+ENCSR000BZF  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06     9h14m  $46.55
+ENCSR000BZG  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  2d01h51m $175.95
+ENCSR000BZH  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d11h17m $133.60
+ENCSR000BZI  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d04h29m $103.40
+ENCSR000BZJ  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d14h54m $152.80
+ENCSR000BZK  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d23h17m $165.48
+ENCSR000BZL  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d16h27m $155.78
+ENCSR000BZM  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d07h28m $125.43
+ENCSR000BZN  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d11h53m $148.04
+ENCSR000BZO  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d08h37m $147.85
+ENCSR000BZP  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d18h11m $182.57
+ENCSR000BZQ  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d02h49m $120.60
+ENCSR000BZR  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d10h03m $136.11
+ENCSR000BZS  ENC2 mm10m M4  PE    1,2     2016-01-06  2016-01-06  1d15h44m $154.23
+ENCSR000CWD  ENC2 mm10m M2,3,M4x2 1,2     - older -   2014-10-23  1d06h23m  $113.61
+ENCSR000OXO       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR004XCU  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    12h47m  $26.59
+ENCSR017JEG  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    10h17m  $28.57
+ENCSR020DGG  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    13h40m  $24.98
+ENCSR026ZRP       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR027CXR  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.12
+ENCSR035DLJ       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR039ADS       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR062VTB  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    15h49m  $27.34
+ENCSR068SJG  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     9h59m   $7.94
+ENCSR080EVZ  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     9h37m  $19.88
+ENCSR096STK  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    11h28m  $32.65
+ENCSR100KRK  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h01m   $4.67
+ENCSR111QQX  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     6h34m  $10.31
+ENCSR115TWD  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    14h33m  $20.12
+ENCSR138VRG  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     4h15m   $5.75
+ENCSR145EKP  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h06m   $3.43
+ENCSR150CUE       mm10m M4  -     1,2     2016-05-03  2016-05-03     6h18m   $8.88
+ENCSR160IIN       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR167AWS  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     1h59m   $3.18
+ENCSR173PJN  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    11h56m  $35.35
+ENCSR178GUS  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    16h10m  $43.78
+ENCSR181KQJ       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR185LWM       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR194TNV  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     7h26m   $7.04
+ENCSR195BCE  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     4h17m   $5.43
+ENCSR198EIH  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h14m   $4.64
+ENCSR216NEG       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR220HFQ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     4h19m   $6.03
+ENCSR236EGS       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR236ZIE       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR255SDF       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR265YFZ       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR267LBO  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02    15h06m  $12.41
+ENCSR268AXN       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR268IGT  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     8h37m  $11.94
+ENCSR282DYQ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     7h42m   $2.95
+ENCSR284AMY       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR284YKY  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    10h58m  $24.27
+ENCSR285WZV  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    11h09m  $24.96
+ENCSR290RRR       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR292IVH  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     9h34m  $13.05
+ENCSR295UJP  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.84
+ENCSR298YHA  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h50m   $5.37
+ENCSR307BCA       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR316RMA  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h20m   $3.56
+ENCSR320PXZ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h16m   $3.50
+ENCSR323FHJ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h18m   $4.79
+ENCSR331XCE  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    14h43m  $38.11
+ENCSR337FYI       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR340NCF  ENC3 mm10m v19 -     1,2     2015-08-23  2014-10-23  1d12h12m $139.20
+ENCSR343YLB       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR347SQR  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    14h56m  $31.32
+ENCSR351YGY  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h37m   $3.80
+ENCSR362AIZ  ENC3 mm10m M4  -     1,2     2015-07-02  2016-05-17    23h24m  $26.58  
+ENCSR362OYV  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     6h57m   $9.99
+ENCSR367DUL  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.38
+ENCSR367ZPZ  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     8h36m  $21.93
+ENCSR370SFB  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    12h01m  $27.03
+ENCSR390KQJ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h01m   $3.21
+ENCSR401BSG  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     9h53m  $28.38
+ENCSR420QTO       mm10m M4  -     1,2     2016-05-03  2016-05-03     5h52m   $8.26
+ENCSR427FOY  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h54m   $3.27
+ENCSR438XCG  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    12h54m  $34.78
+ENCSR448MXQ  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    14h29m  $27.70
+ENCSR457RRW  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    12h07m  $25.23
+ENCSR466KZY  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    11h24m  $22.77
+ENCSR474NEW  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h44m   $4.08
+ENCSR504GEG       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR508GWZ       mm10m M4  -     1,2     2016-05-03  2016-05-03     6h12m   $8.74
+ENCSR510ADJ       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR521YLY  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h12m   $3.35
+ENCSR526SEX  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    10h24m  $31.31
+ENCSR527DQV  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h00m   $3.31
+ENCSR527RFK       mm10m M4  -     1,2     - older -   2015-08-20  
+ENCSR530UXI  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     5h18m   $8.95
+ENCSR537GNQ  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     7h43m  $22.21
+ENCSR538WYL  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    13h15m  $23.54
+ENCSR541XZK       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR549QME       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR557RMA  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    15h41m  $26.06
+ENCSR558PXY  ENC3 mm10m v19 -     1,2     2015-08-23  2014-10-23  1d03h51m $114.12
+ENCSR559QTE  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h27m   $3.69
+ENCSR559TRB       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR577ONT  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     7h48m  $11.13
+ENCSR579FCW  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    13h13m  $34.07
+ENCSR592MSV       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR597UZW  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    12h06m  $26.80
+ENCSR611PTP  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    11h09m  $26.27
+ENCSR620HJQ  ENC3 mm10m v19 -     1b12tn7 2015-10-20  2015-10-20     8h13m $113.83
+ENCSR636CWO  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     8h57m  $25.83
+ENCSR637NLF  ENC3 mm10m v19 -     1b16t   2015-10-20  2015-10-20     3h05m  $62.41
+ENCSR647QBV       mm10m M4  -     1,2     2016-05-03  2016-05-03     6h24m   $9.02
+ENCSR648YEP       mm10m M4  -     1,2     2016-05-03  2016-05-03     6h28m   $9.14
+ENCSR650MMK  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h30m   $3.83
+ENCSR659SFM  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h03m   $3.26
+ENCSR661TLW  ENC3 mm10m v19 -     1,2     2015-08-23  2014-10-23    23h32m  $95.87
+ENCSR662UPQ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     1h57m   $3.07
+ENCSR667TOX  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    10h35m  $26.25
+ENCSR691OPQ       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR691PPV  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h43m   $3.68
+ENCSR708EHJ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     1h53m   $3.07
+ENCSR710QXP  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02    10h46m   $5.90
+ENCSR719NAJ  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20     8h55m  $26.29
+ENCSR723SZV       mm10m M2,M3,M4  1,2     - older -   2015-08-20
+ENCSR726VVO  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02    14h01m  $11.74
+ENCSR727FHP       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR734SOQ  ENC3 mm10m v19 -     1b15t   2015-10-12  2015-10-12     3h47m  $70.03
+ENCSR739PEB  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    12h51m  $32.78
+ENCSR739YUO  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h46m   $4.12
+ENCSR746LUP  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     4h12m   $4.02
+ENCSR749BAG       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR750YSX       mm10m M4  -     1,2     2016-05-03  2016-05-03     5h45m   $8.10
+ENCSR752RGN  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     8h52m  $26.46
+ENCSR758TAD       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR760TOE       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR767VHR       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR772FQU  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    10h07m  $26.64
+ENCSR775HGC  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     7h37m  $10.25
+ENCSR782WIL  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h56m   $4.26
+ENCSR789RPP  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     4h33m   $6.60
+ENCSR792RJV  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    12h02m  $27.32
+ENCSR796QJD  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     7h47m  $11.23
+ENCSR803PLZ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     5h09m   $7.26
+ENCSR805QYO  ENC3 mm10m M4  -     1,2     2015-10-09  2015-10-09    14h37m  $34.54
+ENCSR814JMM       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR822EWO  ENC3 mm10m M4  -     1,2     2015-10-09  2015-10-09    14h40m  $35.21
+ENCSR823VEE       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR826HIQ  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     9h28m  $25.93
+ENCSR826IXR       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR830IVQ  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    11h18m  $25.20
+ENCSR833HPM       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR833SOQ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     3h26m   $4.87
+ENCSR846FYI  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h49m   $4.24
+ENCSR848GST  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02     8h44m  $24.00
+ENCSR848HOX       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR848LXY  ENC3 mm10m v19 -     1,2     2015-08-23  2014-10-23  1d14h49m $148.35
+ENCSR851HEC       mm10m M4  -     1,2     2016-05-03  2016-05-03     6h16m   $8.85
+ENCSR861FGB       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR867YNV       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR906YQZ  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    18h01m  $35.40
+ENCSR907JUN       mm10m M2,M3,M4  1,2     - older -   2015-08-20
+ENCSR908JWT       mm10m M4  -     1,2     2016-05-03  2016-05-03     5h48m   $8.19
+ENCSR909YEQ  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     4h08m   $5.58
+ENCSR921PRX  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    17h20m  $27.46
+ENCSR927IOO  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h47m   $4.25
+ENCSR928OXI       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR932TRU       mm10m M4  -     1,2     - older -   2015-08-20
+ENCSR940DVT  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     5h41m   $4.75
+ENCSR946HWC  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20     9h10m  $27.66
+ENCSR948NDP  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h13m   $3.64
+ENCSR950BNG       mm10m M2,M3,M4  1,2     - older -   2015-08-20
+ENCSR953TKB  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     2h10m   $3.34
+ENCSR970EWM  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    17h01m  $29.50
+ENCSR980SWK  ENC3 mm10m M4  scell 1       2015-10-02  2015-10-02     7h39m  $10.85
+ENCSR982MRY  ENC3 mm10m M4  -     1,2     2015-07-02  2015-08-20    10h11m  $30.98
+ENCSR992WBR  ENC3 mm10m M4  -     1,2     2015-10-02  2015-10-02    10h04m  $22.22
+# Total: 190 mm10-minimal
 
 ####### hg19 Full list:
 # Experiment       On             Reps    First Post  Last Post   Total Time/Cost
@@ -2045,6 +2185,275 @@ ENCSR998RZI  ENC3  hg19 v19 shRNA 1,2     2015-09-29  2015-09-29  1d22h53m  $32.
 
 
 ####### Historical...
+
+# Done: 2 from Hardison, 1 from Wold http://redmine.encodedcc.org/issues/3060#note-260
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR268AXN       mm10 M4 - SE      1,2   no     2016-08-24  2016-08-25  2016-08-25    5h25m   $7.64
+ENCSR475TDY       mm10 M4 -         1,2   no     2016-08-24  2016-08-25  2016-08-25   13h51m  $19.57
+ENCSR538CVD       mm10 M4 -         1,2   no     2016-08-24  2016-08-25  2016-08-25   11h24m  $16.10
+
+# Done: 4 Snyder siRNA http://redmine.encodedcc.org/issues/3060#note-257
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR256NQT       GRCh38 v24 siRNA  1     no     2016-02-23  2016-02-23  2016-08-24    3h10m  $4.47
+ENCSR312FIT       GRCh38 v24 siRNA  1,2   no     2016-02-23  2016-02-23  2016-08-24    6h11m  $8.72
+ENCSR509YMP       GRCh38 v24 siRNA  1,2   no     2016-02-23  2016-02-23  2016-08-24    5h42m  $8.04
+ENCSR675SDG       GRCh38 v24 siRNA  1,2   no     2016-02-23  2016-02-23  2016-08-24    9h45m  $13.77
+
+# Done: reprocess mm10/M4 http://redmine.encodedcc.org/issues/3060#note-254, 255 
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000CHS       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   17h51m  $25.21
+ENCSR000CHT       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   13h04m  $18.45
+ENCSR000CHU       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   14h36m  $20.63
+ENCSR000CHV       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   23h30m  $33.20
+ENCSR000CHW       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   19h53m  $28.10
+ENCSR000CHX       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   20h47m  $29.36
+ENCSR000CHY       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   22h20m  $31.57
+ENCSR000CHZ       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   17h56m  $25.35
+ENCSR000CIA       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   20h23m  $28.79
+ENCSR000CIB       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   22h53m  $32.32
+ENCSR000CIC       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   16h39m  $23.53
+ENCSR000CIF       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   21h21m  $30.16
+ENCSR000CIG       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18    8h14m  $11.62
+ENCSR000CWC       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   19h32m  $27.61
+ENCSR000CWD       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   20h60m  $29.67
+ENCSR000CWE       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18   19h05m  $26.96
+ENCSR000CWF       mm10 M4 -         1,2   no     2016-08-16  2016-08-16  2016-08-18 1d04h34m  $40.36
+
+# Done: 4 from Hardison lab http://redmine.encodedcc.org/issues/3060#note-250
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR025JRA       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   10h21m  $14.61
+ENCSR027FCH       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   12h19m  $17.39
+ENCSR247IMK       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   12h18m  $17.37
+ENCSR847AMQ       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12   15h17m  $21.59
+
+# Done: Cricket LRNA mm10 redo: https://www.encodeproject.org/search/?type=Experiment&assay_slims=Transcription&award.rfa=ENCODE3&assembly=mm10-minimal&assembly%21=mm10&replicates.library.biosample.donor.organism.scientific_name=Mus+musculus&limit=all
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000AJU       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   18h07m  $25.59
+ENCSR000AJV       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10    6h59m   $9.84
+ENCSR000OXO       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h52m   $8.27
+ENCSR004XCU       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h55m   $9.75
+ENCSR017JEG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h36m   $9.32
+ENCSR020DGG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h08m  $10.07
+ENCSR026ZRP       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h40m   $7.99
+ENCSR027CXR       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h01m   $1.43
+ENCSR035DLJ       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   16h05m  $22.73
+ENCSR039ADS       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h51m   $9.67
+ENCSR062VTB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h12m  $10.15
+ENCSR068SJG       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h54m   $2.69
+ENCSR080EVZ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h46m   $8.12
+ENCSR096STK       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h57m   $9.81
+ENCSR100KRK       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      57m   $1.33
+ENCSR111QQX       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h35m   $3.66
+ENCSR115TWD       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h32m   $7.81
+ENCSR138VRG       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      58m   $1.36
+ENCSR145EKP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.21
+ENCSR150CUE       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h59m   $8.44
+ENCSR160IIN       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h35m   $7.87
+ENCSR167AWS       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      50m   $1.17
+ENCSR173PJN       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h60m  $11.29
+ENCSR178GUS       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    8h39m  $12.21
+ENCSR181KQJ       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   15h36m  $22.05
+ENCSR185LWM       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h29m   $9.13
+ENCSR194TNV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h45m   $2.47
+ENCSR195BCE       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.22
+ENCSR198EIH       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      55m   $1.31
+ENCSR216NEG       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h21m   $8.95
+ENCSR220HFQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h07m   $1.58
+ENCSR236EGS       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h21m   $7.54
+ENCSR236ZIE       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   13h23m  $18.90
+ENCSR255SDF       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   14h37m  $20.66
+ENCSR265YFZ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h25m   $9.06
+ENCSR267LBO       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h33m   $3.60
+ENCSR268AXN       mm10 M4 - SE      1,2   no     2016-08-05              ### Requires lab review
+ENCSR268IGT       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h10m   $3.07
+ENCSR282DYQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR284AMY       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h59m   $8.43
+ENCSR284YKY       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h55m   $9.75
+ENCSR285WZV       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h13m  $10.17
+ENCSR290RRR       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h45m   $8.11
+ENCSR292IVH       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h24m   $3.40
+ENCSR295UJP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h01m   $1.43
+ENCSR298YHA       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h04m   $1.50
+ENCSR307BCA       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    8h04m  $11.39
+ENCSR316RMA       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      54m   $1.27
+ENCSR320PXZ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.21
+ENCSR323FHJ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h02m   $1.45
+ENCSR331XCE       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h55m   $9.77
+ENCSR337FYI       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h48m   $8.17
+ENCSR340NCF       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10   23h06m  $32.65
+ENCSR343YLB       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h04m   $8.56
+ENCSR347SQR       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h48m   $9.59
+ENCSR351YGY       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR362AIZ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h53m   $9.72
+ENCSR362OYV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h07m   $3.00
+ENCSR367DUL       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.23
+ENCSR367ZPZ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h07m   $8.63
+ENCSR370SFB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h56m   $9.78
+ENCSR390KQJ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      53m   $1.24
+ENCSR401BSG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h32m  $10.64
+ENCSR420QTO       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h36m   $7.89
+ENCSR427FOY       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      53m   $1.24
+ENCSR438XCG       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h17m  $10.29
+ENCSR448MXQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.40
+ENCSR457RRW       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h41m   $9.44
+ENCSR466KZY       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h08m   $8.64
+ENCSR474NEW       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      54m   $1.28
+ENCSR504GEG       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h47m   $8.16
+ENCSR508GWZ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h05m   $8.58
+ENCSR510ADJ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h35m   $9.29
+ENCSR521YLY       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      48m   $1.14
+ENCSR526SEX       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h31m  $10.62
+ENCSR527DQV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR527RFK       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h54m   $9.73
+ENCSR530UXI       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h30m   $3.53
+ENCSR537GNQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h45m   $9.53
+ENCSR538WYL       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h46m   $8.13
+ENCSR541XZK       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    7h02m   $9.91
+ENCSR549QME       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   13h09m  $18.58
+ENCSR557RMA       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h33m  $10.65
+ENCSR558PXY       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10 1d01h07m  $35.49
+ENCSR559QTE       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      50m   $1.17
+ENCSR559TRB       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h18m   $8.89
+ENCSR577ONT       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h17m   $3.22
+ENCSR579FCW       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h04m   $8.57
+ENCSR592MSV       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h49m   $9.61
+ENCSR597UZW       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h06m  $10.01
+ENCSR611PTP       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h13m  $10.20
+ENCSR620HJQ       mm10 M4 - SE     1_1-13 no     2016-08-05  2016-08-05  2016-08-10 1d02h19m  $37.21  Posted 72 files
+ENCSR636CWO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h02m   $9.92
+ENCSR637NLF       mm10 M4 - SE     1_1-16 no     2016-08-05  2016-08-05  2016-08-10   13h49m  $19.54  Posted 96 files 
+ENCSR647QBV       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h16m   $8.84
+ENCSR648YEP       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h07m   $8.64
+ENCSR650MMK       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR659SFM       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.24
+ENCSR661TLW       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10   20h16m  $28.65
+ENCSR662UPQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      58m   $1.37
+ENCSR667TOX       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h03m   $8.53
+ENCSR691OPQ       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h04m   $8.57
+ENCSR691PPV       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.21
+ENCSR708EHJ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      52m   $1.23
+ENCSR710QXP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h04m   $1.51
+ENCSR719NAJ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.42
+ENCSR723SZV       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   15h09m  $21.41
+ENCSR726VVO       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h17m   $3.22
+ENCSR727FHP       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h40m   $7.99
+ENCSR734SOQ       mm10 M4 - SE     1_1-15 no     2016-08-05  2016-08-05  2016-08-10   14h48m  $20.93  Posted 90 files
+ENCSR739PEB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h41m  $10.84
+ENCSR739YUO       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      57m   $1.34
+ENCSR746LUP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.19
+ENCSR749BAG       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   15h48m  $22.32
+ENCSR750YSX       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h31m   $7.78
+ENCSR752RGN       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h48m   $9.60
+ENCSR758TAD       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    4h57m   $6.98
+ENCSR760TOE       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    7h39m  $10.81
+ENCSR767VHR       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   10h57m  $15.47
+ENCSR772FQU       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h35m   $9.28
+ENCSR775HGC       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h50m   $2.59
+ENCSR782WIL       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    1h10m   $1.66
+ENCSR789RPP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h31m   $2.14
+ENCSR792RJV       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h35m   $9.28
+ENCSR796QJD       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h27m   $3.46
+ENCSR803PLZ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    1h35m   $2.24
+ENCSR805QYO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    5h46m   $8.13
+ENCSR814JMM       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    4h26m   $6.24
+ENCSR822EWO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    4h52m   $6.87
+ENCSR823VEE       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h27m   $9.10
+ENCSR826HIQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h34m  $10.68
+ENCSR826IXR       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   18h20m  $25.90
+ENCSR830IVQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h59m   $9.86
+ENCSR833HPM       mm10 M4 -         1,2   no     2016-08-05  2016-08-05  2016-08-10   11h57m  $16.87
+ENCSR833SOQ       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      58m   $1.37
+ENCSR846FYI       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      56m   $1.32
+ENCSR848GST       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h08m  $10.08
+ENCSR848HOX       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h52m   $8.29
+ENCSR848LXY       mm10 M4 -         1,2   no      -          2016-08-05  2016-08-10 1d02h01m  $36.77
+ENCSR851HEC       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h59m   $8.45
+ENCSR861FGB       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h06m   $8.60
+ENCSR867YNV       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h31m   $9.21
+ENCSR906YQZ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    8h52m  $12.53
+ENCSR907JUN       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h14m   $8.80
+ENCSR908JWT       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    5h56m   $8.36
+ENCSR909YEQ       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10      58m   $1.36
+ENCSR921PRX       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.41
+ENCSR927IOO       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10      58m   $1.37
+ENCSR928OXI       mm10 M4 - SE      1     no     2016-08-05  2016-08-05  2016-08-10    5h25m   $7.65
+ENCSR932TRU       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    6h17m   $8.88
+ENCSR940DVT       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      56m   $1.31
+ENCSR946HWC       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h40m   $9.42
+ENCSR948NDP       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10      51m   $1.20
+ENCSR950BNG       mm10 M4 - SE      1,2   no     2016-08-05  2016-08-05  2016-08-10    8h28m  $11.96
+ENCSR953TKB       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10      48m   $1.12
+ENCSR970EWM       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    7h10m  $10.11
+ENCSR980SWK       mm10 M4 - SE      1     no      -          2016-08-05  2016-08-10    2h01m   $2.84
+ENCSR982MRY       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h58m   $9.84
+ENCSR992WBR       mm10 M4 - SE      1,2   no      -          2016-08-05  2016-08-10    6h35m   $9.29
+
+# Done: Cricket LRNA Gingeras mm10: https://www.encodeproject.org/search/?type=Experiment&assay_title=RNA-seq&award.rfa=ENCODE2&assay_title=polyA+mRNA+RNA-seq&assay_title=polyA+depleted+RNA-seq&assembly%21=GRCh38&lab.title=Thomas+Gingeras%2C+CSHL&internal_status=pipeline+ready&limit=all
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000BYP       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   11h06m  $15.61
+ENCSR000BYQ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   13h07m  $18.54
+ENCSR000BYR       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   17h51m  $25.23
+ENCSR000BYS       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   13h12m  $18.64
+ENCSR000BYT       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   11h17m  $15.92
+ENCSR000BYU       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h54m  $18.23
+ENCSR000BYV       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   14h36m  $20.63
+ENCSR000BYW       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h43m  $17.96
+ENCSR000BYX       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h08m  $17.14
+ENCSR000BYY       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h32m  $17.70
+ENCSR000BYZ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h07m  $17.11
+ENCSR000BZA       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h43m  $17.96
+ENCSR000BZB       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h42m  $17.94
+ENCSR000BZC       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05    9h11m  $12.97
+ENCSR000BZD       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   10h58m  $15.48
+ENCSR000BZE       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   12h27m  $17.58
+ENCSR000BZF       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   13h42m  $19.36
+ENCSR000BZG       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d08h28m  $45.88
+ENCSR000BZH       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d07h60m  $45.22
+ENCSR000BZI       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   22h56m  $32.41
+ENCSR000BZJ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d03h35m  $38.98
+ENCSR000BZK       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d10h29m  $48.74
+ENCSR000BZL       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d08h04m  $45.32
+ENCSR000BZM       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05   23h47m  $33.61
+ENCSR000BZN       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d04h52m  $40.79
+ENCSR000BZO       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d14h08m  $53.90
+ENCSR000BZP       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d20h14m  $62.53
+ENCSR000BZQ       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d03h36m  $39.01
+ENCSR000BZR       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d02h28m  $37.40
+ENCSR000BZS       mm10 M4 -         1,2   no      -          2016-08-04  2016-08-05 1d04h25m  $40.16
+
+# Done: Cricket LRNA Gingeras GRCh38: https://www.encodeproject.org/search/?type=Experiment&assay_title=RNA-seq&award.rfa=ENCODE2&assay_title=polyA+mRNA+RNA-seq&assay_title=polyA+depleted+RNA-seq&assembly%21=GRCh38&lab.title=Thomas+Gingeras%2C+CSHL&internal_status=pipeline+ready&limit=all
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000COS       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h06m  $19.92
+ENCSR000COT       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   15h18m  $21.61
+ENCSR000CPD       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   15h35m  $22.01
+ENCSR000CPG       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h38m  $20.67
+ENCSR000CQB       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   18h55m  $26.72
+ENCSR000CQC       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   12h47m  $18.07
+ENCSR000CQD       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h55m  $21.07
+ENCSR000CQI       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   11h46m  $16.62
+ENCSR000CQJ       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   14h03m  $19.84
+ENCSR000CQP       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05   15h29m  $21.87
+ENCSR000CQQ       GRCh38 v24 -      2     no     2016-08-04  2016-08-04  2016-08-05    4h49m   $6.81
+ENCSR000CQR       GRCh38 v24 -      2     no     2016-08-04  2016-08-04  2016-08-05    5h34m   $7.88
+ENCSR000CTK       GRCh38 v24 -      1,2   no     2016-08-04  2016-08-04  2016-08-05 1d00h00m  $33.91
+ENCSR000CUT       GRCh38 v24 -      1     no     2016-08-04  2016-08-04  2016-08-05   14h16m  $20.16
+
+# Done: six from the Wold SE http://redmine.encodedcc.org/issues/3060#note-232
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR049UJU       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h26m  $10.48
+ENCSR304RDL       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h11m  $10.14
+ENCSR764OPZ       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    8h10m  $11.52
+ENCSR809VYL       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h19m  $10.32
+ENCSR943LKA       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    6h45m  $9.54
+ENCSR968QHO       mm10 M4 - SE      1,2   no     2016-08-02  2016-08-03  2016-08-04    7h48m  $11.02
+
+# Done: two more from the Hardison lab SE http://redmine.encodedcc.org/issues/3060#note-233
+# Done: Cricket LRNA 2 more Hardison mm10: http://redmine.encodedcc.org/issues/3060#note-239
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR085AJX       mm10 M4 -         1,2   no     2016-08-02  2016-08-03  2016-08-04   10h01m  $14.15
+ENCSR121HYR       mm10 M4 -         1,2   no     2016-08-03  2016-08-03  2016-08-04   13h53m  $19.61  
+ENCSR133SAI       mm10 M4 -         1,2   no     2016-08-02  2016-08-03  2016-08-04   18h18m  $25.85
+ENCSR277DPB       mm10 M4 -         1,2   no     2016-08-03  2016-08-03  2016-08-04   12h51m  $18.15
 
 # Done: 50 siRNA knockdown and 3 shRNA http://redmine.encodedcc.org/issues/3060#note-234 & 235
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost

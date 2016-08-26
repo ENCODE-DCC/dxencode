@@ -1,32 +1,16 @@
 
 ##### DONE: reversed: lrna_221/small-rna> ./build_applets small-rna-align/ small-rna-signals/ small-rna-mad-qc/
 
-# TODO: Cricket SRNA: https://www.encodeproject.org/search/?type=Experiment&award.rfa=ENCODE3&assay_title=small+RNA-seq&status=submitted&internal_status=pipeline+ready
+# Done: Cricket SRNA: https://www.encodeproject.org/search/?type=Experiment&award.rfa=ENCODE3&assay_title=small+RNA-seq&status=submitted&internal_status=pipeline+ready
 # Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
-ENCSR091JNF        GRCh38 v24     1     2016-08-04  2016-08-04
-ENCSR539RDF        GRCh38 v24     1     2016-08-04  2016-08-04
-ENCSR603XUX        GRCh38 v24     1     2016-08-04  2016-08-04
-ENCSR634VLA        GRCh38 v24     1     2016-08-04  2016-08-04
-ENCSR718AXQ        GRCh38 v24     1     2016-08-04  2016-08-04
-ENCSR737NPO        GRCh38 v24     1     2016-08-04  2016-08-04
-ENCSR961FIG        GRCh38 v24     1     2016-08-04  2016-08-04
-ENCSR996VHB        GRCh38 v24     1     2016-08-04  2016-08-04
-
-# Done: hg19 5 Gingeras small-RNA-seq:  http://redmine.encodedcc.org/issues/3060#note-221
-# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
-ENCSR000CQX  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h35m  $2.22
-ENCSR000CQY  ENC2  hg19 v19       1,2   2016-06-13  2016-06-30  2016-07-11    1h18m  $1.81
-ENCSR000CQZ  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h17m  $1.78
-ENCSR000CRA  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h18m  $1.82
-ENCSR000CRB  ENC2  hg19 v19       1,2   2016-06-13  2016-06-30  2016-07-11    1h31m  $2.13
-
-# Done: GRCh38 5 Gingeras small-RNA-seq:  http://redmine.encodedcc.org/issues/3060#note-221
-# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
-ENCSR000CQX  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h24m  $1.96
-ENCSR000CQY  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11    1h11m  $1.65
-ENCSR000CQZ  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h11m  $1.65
-ENCSR000CRA  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h18m  $1.82
-ENCSR000CRB  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11    1h17m  $1.79
+ENCSR091JNF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h12m  $1.69
+ENCSR539RDF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h00m  $1.41
+ENCSR603XUX        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h05m  $1.54
+ENCSR634VLA        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h05m  $1.53
+ENCSR718AXQ        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05      58m  $1.38
+ENCSR737NPO        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05      52m  $1.21
+ENCSR961FIG        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h03m  $1.48
+ENCSR996VHB        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h09m  $1.63
 
 ####### GRCh38 Full list
 # Experiment       On             Reps  Assembled   Launched    (Re)Posted Duration Cost
@@ -58,6 +42,7 @@ ENCSR003SZJ        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h0
 ENCSR020VES        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h13m  $1.71
 ENCSR024CRN        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     48m  $1.14
 ENCSR033TKS        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h12m  $1.71
+ENCSR091JNF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05   1h12m  $1.69
 ENCSR099ACU        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   2h46m  $3.91
 ENCSR133GQJ        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     57m  $1.34
 ENCSR168XPO        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h10m  $1.66
@@ -83,20 +68,25 @@ ENCSR383PLJ        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   2h2
 ENCSR418FVT        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h03m  $1.47
 ENCSR489KNQ        GRCh38 v24     1,2    -          2016-02-23  2016-03-07     57m  $2.22
 ENCSR525WFB        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     56m  $1.33
+ENCSR539RDF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05   1h00m  $1.41
 ENCSR571FTT        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   2h09m  $5.53
 ENCSR573RGL        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     58m  $1.36
 ENCSR587CPE        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     51m  $1.20
 ENCSR593MVW        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     60m  $1.41
 ENCSR603RPC        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h44m  $3.97
+ENCSR603XUX        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05   1h05m  $1.54
 ENCSR610CDO        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h58m  $4.62
 ENCSR610GDH        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h30m  $2.13
 ENCSR612WDT        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h08m  $1.61
 ENCSR626GVP        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     44m  $1.03
 ENCSR626WAX        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h39m  $3.82
+ENCSR634VLA        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05   1h05m  $1.53
 ENCSR635SLB        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     53m  $1.25
 ENCSR646HQQ        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h07m  $1.57
 ENCSR673PND        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   2h02m  $5.01
+ENCSR718AXQ        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05     58m  $1.38
 ENCSR722POQ        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   2h03m  $4.37
+ENCSR737NPO        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05     52m  $1.21
 ENCSR740DKM        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h22m  $3.10
 ENCSR779BVZ        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02   1h02m  $1.45
 ENCSR807KQN        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h09m  $2.89
@@ -109,20 +99,22 @@ ENCSR882DFF        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     5
 ENCSR887HNW        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     48m  $1.13
 ENCSR905KHW        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h31m  $3.83
 ENCSR917CQJ        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     48m  $1.14
+ENCSR961FIG        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05   1h03m  $1.48
 ENCSR964EPR        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   1h25m  $3.68
 ENCSR968DMR        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     56m  $1.33
 ENCSR968YZV        GRCh38 v24     1,2    -          2016-02-23  2016-03-07   2h23m  $5.35
+ENCSR996VHB        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05   1h09m  $1.63
 ENCSR998CRC        GRCh38 v24     1     2016-04-27  2016-04-27  2016-05-02     55m  $1.30
-# Total: 83
+# Total: 91
 
-# Full list:
+# hg19 Full list:
 Experiment         On        As/Launch   Reps  Posted      Duration/Cost
 ENCSR000AEJ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h51m $4.76
 ENCSR000AES  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  2h01m $5.03
 ENCSR000AFP  ENC3  hg19,v19  2015/07/08  1     2015/08/18  1h17m $1.72                  
 ENCSR000AFQ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h38m $4.12
 ENCSR000AFR  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h19m $3.26
-ENCSR000AFS  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  h21m $3.50
+ENCSR000AFS  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h21m $3.50
 ENCSR000AFT  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h37m $4.15
 ENCSR000AFU  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h29m $3.74
 ENCSR000AFV  ENC3  hg19,v19  2015/07/08  1     2015/08/18  1h20m $1.78
@@ -141,25 +133,129 @@ ENCSR000CQY  ENC2  hg19 v19  2016-06-30  1,2   2016-07-11  1h18m $1.81
 ENCSR000CQZ  ENC2  hg19 v19  2016-06-30  3,4   2016-07-11  1h17m $1.78
 ENCSR000CRA  ENC2  hg19 v19  2016-06-30  3,4   2016-07-11  1h18m $1.82
 ENCSR000CRB  ENC2  hg19 v19  2016-06-30  1,2   2016-07-11  1h31m $2.13
+ENCSR003SZJ        hg19,v19  2016-08-25  1     2016-08-25    57m $1.35
+ENCSR020VES        hg19,v19  2016-08-25  1     2016-08-25  1h05m $1.54
+ENCSR024CRN        hg19,v19  2016-08-25  1     2016-08-25    44m $1.03
+ENCSR033TKS        hg19,v19  2016-08-25  1     2016-08-25  1h07m $1.57
+ENCSR099ACU        hg19,v19  2016-08-25  1     2016-08-25    40m $0.94
+ENCSR133GQJ        hg19,v19  2016-08-25  1     2016-08-25    50m $1.17
+ENCSR168XPO        hg19,v19  2016-08-25  1     2016-08-25  1h07m $1.57
+ENCSR183YQY        hg19,v19  2016-08-25  1     2016-08-25  1h05m $1.54
+ENCSR203DPX        hg19,v19  2016-08-25  1     2016-08-25    39m $0.91
 ENCSR211PJW  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h20m $3.34
+ENCSR227FNZ        hg19,v19  2016-08-25  1     2016-08-25    59m $1.39
+ENCSR229WIW        hg19,v19  2016-08-25  1     2016-08-25    43m $1.00
+ENCSR233DGJ        hg19,v19  2016-08-25  1     2016-08-25    46m $1.08
 ENCSR250STJ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  2h18m $5.48
+ENCSR262TBN        hg19,v19  2016-08-25  1     2016-08-25    60m $1.40
+ENCSR264COY        hg19,v19  2016-08-25  1     2016-08-25    54m $1.28
+ENCSR269YSX        hg19,v19  2016-08-25  1     2016-08-25    48m $1.13
+ENCSR289GGY        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
+ENCSR295NAK        hg19,v19  2016-08-25  1     2016-08-25    51m $1.20
+ENCSR307FBN        hg19,v19  2016-08-25  1     2016-08-25    48m $1.13
+ENCSR316SXP        hg19,v19  2016-08-25  1     2016-08-25    52m $1.22
+ENCSR332RHR        hg19,v19  2016-08-25  1     2016-08-25    51m $1.20
+ENCSR359CVC        hg19,v19  2016-08-25  1     2016-08-25    42m $0.98
 ENCSR376XXO  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h03m $2.55
+ENCSR379GPS        hg19,v19  2016-08-25  1     2016-08-25    56m $1.33
+ENCSR383PLJ        hg19,v19  2016-08-25  1     2016-08-25    55m $1.31
+ENCSR418FVT        hg19,v19  2016-08-25  1     2016-08-25    48m $1.14
 ENCSR489KNQ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  0h51m $2.05
+ENCSR525WFB        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
 ENCSR571FTT  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h46m $4.59
+ENCSR573RGL        hg19,v19  2016-08-25  1     2016-08-25    52m $1.23
+ENCSR587CPE        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
+ENCSR593MVW        hg19,v19  2016-08-25  1     2016-08-25    49m $1.16
 ENCSR603RPC  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h18m $2.90
 ENCSR610CDO  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h15m $3.01
+ENCSR610GDH        hg19,v19  2016-08-25  1     2016-08-25  1h18m $1.84
+ENCSR612WDT        hg19,v19  2016-08-25  1     2016-08-25    52m $1.22
+ENCSR626GVP        hg19,v19  2016-08-25  1     2016-08-25    41m $0.97
 ENCSR626WAX  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h18m $3.28
+ENCSR635SLB        hg19,v19  2016-08-25  1     2016-08-25    48m $1.12
+ENCSR646HQQ        hg19,v19  2016-08-25  1     2016-08-25    59m $1.38
 ENCSR673PND  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h42m $4.21
 ENCSR722POQ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h40m $3.60
 ENCSR740DKM  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  0h53m $2.23                
+ENCSR779BVZ        hg19,v19  2016-08-25  1     2016-08-25  1h00m $1.42
 ENCSR807KQN  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  0h51m $2.13
+ENCSR812JEU        hg19,v19  2016-08-25  1     2016-08-25    52m $1.22
 ENCSR828LSC  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h31m $3.86
 ENCSR855CYO  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h25m $3.55
+ENCSR866ZSG        hg19,v19  2016-08-25  1     2016-08-25  1h08m $1.60
+ENCSR880LXP        hg19,v19  2016-08-25  1     2016-08-25    44m $1.04
+ENCSR882DFF        hg19,v19  2016-08-25  1     2016-08-25    58m $1.36
+ENCSR887HNW        hg19,v19  2016-08-25  1     2016-08-25    36m $0.85
 ENCSR905KHW  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h19m $3.30
+ENCSR917CQJ        hg19,v19  2016-08-25  1     2016-08-25    54m $1.27
 ENCSR964EPR  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h41m $4.19
+ENCSR968DMR        hg19,v19  2016-08-25  1     2016-08-25  1h03m $1.49
 ENCSR968YZV  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h31m $3.87
+ENCSR998CRC        hg19,v19  2016-08-25  1     2016-08-25    51m $1.20
+# Total: 83
 
 ### Historical:
+
+# DONE: SRNA to run on hg19 http://redmine.encodedcc.org/issues/2634#note-34
+Experiment         On        As/Launch   Reps  Posted      Duration/Cost
+ENCSR003SZJ        hg19,v19  2016-08-25  1     2016-08-25    57m $1.35
+ENCSR020VES        hg19,v19  2016-08-25  1     2016-08-25  1h05m $1.54
+ENCSR024CRN        hg19,v19  2016-08-25  1     2016-08-25    44m $1.03
+ENCSR033TKS        hg19,v19  2016-08-25  1     2016-08-25  1h07m $1.57
+ENCSR099ACU        hg19,v19  2016-08-25  1     2016-08-25    40m $0.94
+ENCSR133GQJ        hg19,v19  2016-08-25  1     2016-08-25    50m $1.17
+ENCSR168XPO        hg19,v19  2016-08-25  1     2016-08-25  1h07m $1.57
+ENCSR183YQY        hg19,v19  2016-08-25  1     2016-08-25  1h05m $1.54
+ENCSR203DPX        hg19,v19  2016-08-25  1     2016-08-25    39m $0.91
+ENCSR227FNZ        hg19,v19  2016-08-25  1     2016-08-25    59m $1.39
+ENCSR229WIW        hg19,v19  2016-08-25  1     2016-08-25    43m $1.00
+ENCSR233DGJ        hg19,v19  2016-08-25  1     2016-08-25    46m $1.08
+ENCSR262TBN        hg19,v19  2016-08-25  1     2016-08-25    60m $1.40
+ENCSR264COY        hg19,v19  2016-08-25  1     2016-08-25    54m $1.28
+ENCSR269YSX        hg19,v19  2016-08-25  1     2016-08-25    48m $1.13
+ENCSR289GGY        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
+ENCSR295NAK        hg19,v19  2016-08-25  1     2016-08-25    51m $1.20
+ENCSR307FBN        hg19,v19  2016-08-25  1     2016-08-25    48m $1.13
+ENCSR316SXP        hg19,v19  2016-08-25  1     2016-08-25    52m $1.22
+ENCSR332RHR        hg19,v19  2016-08-25  1     2016-08-25    51m $1.20
+ENCSR359CVC        hg19,v19  2016-08-25  1     2016-08-25    42m $0.98
+ENCSR379GPS        hg19,v19  2016-08-25  1     2016-08-25    56m $1.33
+ENCSR383PLJ        hg19,v19  2016-08-25  1     2016-08-25    55m $1.31
+ENCSR418FVT        hg19,v19  2016-08-25  1     2016-08-25    48m $1.14
+ENCSR525WFB        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
+ENCSR573RGL        hg19,v19  2016-08-25  1     2016-08-25    52m $1.23
+ENCSR587CPE        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
+ENCSR593MVW        hg19,v19  2016-08-25  1     2016-08-25    49m $1.16
+ENCSR610GDH        hg19,v19  2016-08-25  1     2016-08-25  1h18m $1.84
+ENCSR612WDT        hg19,v19  2016-08-25  1     2016-08-25    52m $1.22
+ENCSR626GVP        hg19,v19  2016-08-25  1     2016-08-25    41m $0.97
+ENCSR635SLB        hg19,v19  2016-08-25  1     2016-08-25    48m $1.12
+ENCSR646HQQ        hg19,v19  2016-08-25  1     2016-08-25    59m $1.38
+ENCSR779BVZ        hg19,v19  2016-08-25  1     2016-08-25  1h00m $1.42
+ENCSR812JEU        hg19,v19  2016-08-25  1     2016-08-25    52m $1.22
+ENCSR866ZSG        hg19,v19  2016-08-25  1     2016-08-25  1h08m $1.60
+ENCSR880LXP        hg19,v19  2016-08-25  1     2016-08-25    44m $1.04
+ENCSR882DFF        hg19,v19  2016-08-25  1     2016-08-25    58m $1.36
+ENCSR887HNW        hg19,v19  2016-08-25  1     2016-08-25    36m $0.85
+ENCSR917CQJ        hg19,v19  2016-08-25  1     2016-08-25    54m $1.27
+ENCSR968DMR        hg19,v19  2016-08-25  1     2016-08-25  1h03m $1.49
+ENCSR998CRC        hg19,v19  2016-08-25  1     2016-08-25    51m $1.20
+
+# Done: hg19 5 Gingeras small-RNA-seq:  http://redmine.encodedcc.org/issues/3060#note-221
+# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
+ENCSR000CQX  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h35m  $2.22
+ENCSR000CQY  ENC2  hg19 v19       1,2   2016-06-13  2016-06-30  2016-07-11    1h18m  $1.81
+ENCSR000CQZ  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h17m  $1.78
+ENCSR000CRA  ENC2  hg19 v19       3,4   2016-06-13  2016-06-30  2016-07-11    1h18m  $1.82
+ENCSR000CRB  ENC2  hg19 v19       1,2   2016-06-13  2016-06-30  2016-07-11    1h31m  $2.13
+
+# Done: GRCh38 5 Gingeras small-RNA-seq:  http://redmine.encodedcc.org/issues/3060#note-221
+# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
+ENCSR000CQX  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h24m  $1.96
+ENCSR000CQY  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11    1h11m  $1.65
+ENCSR000CQZ  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h11m  $1.65
+ENCSR000CRA  ENC2  GRCh38 v24     3,4   2016-06-13  2016-07-02  2016-07-11    1h18m  $1.82
+ENCSR000CRB  ENC2  GRCh38 v24     1,2   2016-06-13  2016-07-02  2016-07-11    1h17m  $1.79
 
 # Done: 42 SRNA for Gingeras (Requested by Kathrine on gitter)
 # Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
