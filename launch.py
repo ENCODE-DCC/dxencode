@@ -213,7 +213,7 @@ class Launch(object):
         if self.CONTROL_FILE_GLOB != None:
             # Include this argument for pipelines with controls
             ap.add_argument('-c', '--control',
-                            help='The control file for this experiment.',
+                            help='The control file for this experiment (may comma delimit rep1,rep2).',
                             default=None,
                             required=False)
 
@@ -391,11 +391,17 @@ class Launch(object):
         if self.CONTROL_FILE_GLOB == None or self.template:
             return
         print "Checking for control files..."
-        default_control = None
-        if 'control' in self.psv:
-            default_control = self.psv['control'] # akward but only rep1 may be run
+        def_controls = []
+        if 'control' in self.psv and isinstance(self.psv['control'],str):
+            def_controls = self.psv['control'].split(',')
+        ix = 0
         for rep in self.psv['reps'].values():
-            control = self.find_control_file(rep,default_control)
+            control = None
+            if len(def_controls) > ix:
+                control = self.find_control_file(rep,def_controls[ix])
+            else:
+                control = self.find_control_file(rep,None)
+            ix += 1
             if control != None:
                 rep['inputs']['Control'] = dx.find_and_copy_read_files(rep['priors'], \
                                                     [ control ], self.test, 'control_bam', \
