@@ -317,6 +317,11 @@ class Assemble(object):
             result_files = encd.get_exp_files(exp)
             for obj_type in exp_files['results'].keys():
                 for f_obj in result_files:
+                    if self.genome is not None and 'assembly' in f_obj:
+                        if self.genome != f_obj['assembly']:
+                            if verbose:
+                                print "Skipping file %s as its %s != %s." % (f_obj.get('accession'),f_obj['assembly'],self.genome)
+                            continue
                     if obj_type == f_obj['output_type']:
                         if f_obj.get('award') != encd.DEFAULT_DCC_AWARD:
                             if verbose:
