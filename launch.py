@@ -765,10 +765,13 @@ class Launch(object):
             if 'paired_end' in rep and rep['paired_end']: 
                 rep['concat_id2'] = 'reads2'
             if self.detect_umi:
-                if encd.rep_is_umi(exp,rep):
+                (umi_found_true, barcodes) = encd.rep_is_umi(exp,rep)
+                if umi_found_true:
                     rep['umi'] = 'yes'
                 else:
                     rep['umi'] = 'no'
+                if len(barcodes) > 0:
+                    rep['barcode'] = barcodes[0]    
                 
         # mult-rep rep_tech: 
         if self.combined_reps:
@@ -1003,7 +1006,7 @@ class Launch(object):
                 continue
             if type(pipe_path) == dict:
                 assert 'se' in pipe_path and 'pe' in pipe_path
-                if rep['paired_end']:
+                if rep.get('paired_end',False):
                     rep['path'] = pipe_path['pe']
                 else:
                     rep['path'] = pipe_path['se']
@@ -1213,7 +1216,7 @@ class Launch(object):
         # Now make sure the steps can be found, and error out if not.
         self.build_applets_if_necessary()
         for step in steps_to_run:
-            app = steps[step]['app']
+            app = steps[step].get('app',step)
             dxApp = dxpy.find_data_objects(classname='file', name=app, name_mode='exact',
                                                         project=self.proj_id, return_handler=False)
             if dxApp == None:
@@ -1510,7 +1513,7 @@ class Launch(object):
         steps = rep['steps']
         for step in rep['stepsToDo']:
             step_link_later = False
-            app_name = steps[step]['app']
+            app_name = steps[step].get('app',step)
             app = dx.find_applet_by_name(app_name, app_proj_id)
             inp_defs = app.describe().get('inputSpec') or []
             app_inputs = {}
@@ -1668,7 +1671,10 @@ class Launch(object):
                 for rep_id in sorted( self.psv['reps'].keys() ):
                     if rep_id != self.SEA_ID:
                         rep = self.psv['reps'][rep_id]
-                        print "                      " + self.psv['project'] + ":" +rep['resultsFolder']
+                        if rep['branch_id'] not in ["REP","TECH_REP"]:
+                            print "                      " + self.psv['project'] + ":" +rep['resultsFolder'] + " (combining)"
+                        else:
+                            print "                      " + self.psv['project'] + ":" +rep['resultsFolder']
 
         print "- Steps to run:"
         to_run_count = 0
@@ -1677,19 +1683,19 @@ class Launch(object):
                 rep = self.psv['reps'][ltr]
                 for step in rep['path']:
                     if step in rep['stepsToDo']:
-                        print "  * "+rep['rep_tech'] +': '+ rep['steps'][step]['app']+" will be run"
+                        print "  * "+rep['rep_tech'] +': '+ rep['steps'][step].get('app',step)+" will be run"
                     else:
                         if not step.find('concat') == 0:
-                            print "    "+rep['rep_tech'] +': '+ rep['steps'][step]['app']+" has already been run"
+                            print "    "+rep['rep_tech'] +': '+ rep['steps'][step].get('app',step)+" has already been run"
                 to_run_count += len(rep['stepsToDo'])
         else:
             to_run_count += len(run['stepsToDo'])
             for step in run['path']:
                 if step in run['stepsToDo']:
-                    print "  * "+run['steps'][step]['app']+" will be run"
+                    print "  * "+run['steps'][step].get('app',step)+" will be run"
                 else:
                     if not step.find('concat') == 0:
-                        print "    "+run['steps'][step]['app']+" has already been run"
+                        print "    "+run['steps'][step].get('app',step)+" has already been run"
         if to_run_count == 0:
             print "* All expected results are in the results folder, so there is nothing to do."
             print "  If this experiment/replicate needs to be rerun, then use the --force flag to "
@@ -1751,11 +1757,14 @@ class Launch(object):
         if self.multi_rep:
             for rep_id in sorted( self.psv['reps'].keys() ):
                 rep = self.psv['reps'][rep_id]
+                dotdotdot = "..."
+                if rep['branch_id'] not in ["REP","TECH_REP"]:
+                    dotdotdot = " (combining)..."
                 if len(rep['stepsToDo']) > 0: # Going to get noisy with multiple reps
                     if self.test:
-                        print "Testing workflow assembly for "+rep['rep_tech']+"..."
+                        print "Testing workflow assembly for "+rep['rep_tech']+dotdotdot
                     else:
-                        print "Assembling workflow for "+rep['rep_tech']+"..."
+                        print "Assembling workflow for "+rep['rep_tech']+dotdotdot
                     wf = self.create_or_extend_workflow(rep, rep_id, wf=wf)
         if not self.multi_rep:
             if len(run['stepsToDo']) > 0:

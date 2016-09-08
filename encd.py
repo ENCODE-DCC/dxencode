@@ -555,10 +555,12 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                 rep['paired_end'] = False
                 rep['has_reads'] = True
             elif mapping['paired'] and mapping['unpaired']:
-                print >> sys.stderr, "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % \
-                    (len(mapping['paired']), len(mapping['unpaired']))
-                print >> sys.stderr, json.dumps(mapping,indent=4)
-                sys.exit(1)                
+                print >> sys.stderr, "WARNING: Replicate %d_%d has both paired(%s) and unpaired(%s) reads, demoting to unpaired." % \
+                    (br,tr,len(mapping['paired']), len(mapping['unpaired']))
+                #print >> sys.stderr, json.dumps(mapping,indent=4)
+                #sys.exit(1)                
+                rep['paired_end'] = False
+                rep['has_reads'] = True
                 
             # Load read and control files, only if requested.
             run_type = None  # The files should be consistent as all single-end or paired-end, but some mapping got it wrong
@@ -718,6 +720,7 @@ def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
     umi_found_false = False
     umi = None
     
+    barcodes = []
     for f_obj in exp_files:
         if f_obj.get("file_format") != "fastq":
             continue
@@ -727,7 +730,11 @@ def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
         #    (f_obj.get("accession"),f_obj.get("file_format"),f_obj["replicate"]['@id'],len(f_obj.get("flowcell_details",[])))
         umi_found = False
         for flow in f_obj.get("flowcell_details",[]):
-            if flow.get('barcode') == "UMI" or flow.get('barcode',"none").startswith("SSLIB"):
+            barcode = flow.get('barcode')
+            if barcode == None:
+                continue
+            barcodes.append(barcode)
+            if barcode == "UMI" or barcode.startswith("SSLIB"):
                 umi_found = True
                 umi_found_true  = True
         if not umi_found :
@@ -739,7 +746,7 @@ def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
     if not umi_found_true and not umi_found_false:
         print >> sys.stderr, "WARNING: could not detect UMI for replicate %s." % rep.get('replicate_id')
     #print >> sys.stderr, "Found: UMI for replicate %s to be %s." % (rep.get('replicate_id'),str(umi_found_true))
-    return umi_found_true 
+    return (umi_found_true, barcodes) 
 
 
 def exp_patch_internal_status(exp_id, internal_status, key=None, test=False):

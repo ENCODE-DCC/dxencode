@@ -80,6 +80,13 @@ elif [ "$type" == "splash" ] || [ "$type" == "s" ]; then
     files_per=`expr $files / $exps`
     files_per_frac=`expr $files_per_10x - $files_per \* 10`
     echo "Files:     " $files "per exp:  ${files_per}.${files_per_frac}"
+    replacing=`grep -w "accession to replace" $logpath/*.log | wc -l`
+    if [ $replacing -gt 0 ]; then # May be no requested replacement
+        replacing_per_10x=`expr $replacing \* 10 / $exps`
+        replacing_per=`expr $replacing / $exps`
+        replacing_per_frac=`expr $replacing_per_10x - $replacing_per \* 10`
+        echo "Replacing: " $replacing "per exp:  ${replacing_per}.${replacing_per_frac}"
+    fi
     qcs=`grep "qc object" $logpath/*.log | awk '{print $13}' | paste -sd+ | bc` 2> /dev/null
     if [ "$qcs" == "" ] || [ $qcs -eq 0 ]; then
         qcs=`grep "qc object" $logpath/*.log | awk '{print $12}' | paste -sd+ | bc`
