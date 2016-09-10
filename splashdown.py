@@ -46,7 +46,7 @@ class Splashdown(object):
     FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dna-me' ] #, 'dnase' ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dna-me', 'dnase-seq' ]
     '''This module supports only these experiment (pipeline) types.'''
 
     SKIP_VALIDATE = {"transcription start sites":'bed'}
@@ -126,6 +126,20 @@ class Splashdown(object):
             "combined":   {
                 "corr":            { "QC_only":                                   "*_CpG_corr.txt" }  }, # Not yet defined in encodeD
         },
+         "dnase-seq": {
+            "step-order": [ "dnase-align-bwa","dnase-filter","dnase-eval-bam","dnase-call-hotspots","dnase-rep-corr"],
+            "replicate":  {
+                "dnase-align-bwa":     { "unfiltered alignments":                 "*_bwa_techrep.bam"         },
+                "dnase-filter":        { "alignments":                            "*_bwa_biorep_filtered.bam" },
+                "dnase-eval-bam":      { "QC_only":                               "*_sample_qc.txt"           },
+                "dnase-call-hotspots": { "hotspots|bed|broadPeak":                "*_hotspots.bed.gz",
+                                         "hotspots|bigBed|broadPeak":             "*_hotspots.bb",
+                                         "peaks|bed|narrowPeak":                  "*_peaks.bed.gz",
+                                         "peaks|bigBed|narrowPeak":               "*_peaks.bb",
+                                         "signal of unique reads":                "*_density.bw"              } },
+            "combined":   {
+                "dnase-rep-corr":      { "QC_only":                               "*_density_corr.txt"        }  },
+        },
     }
     
     # Step children are steps that should be combined with their parent step rather than be treated as a separate job 
@@ -177,15 +191,18 @@ class Splashdown(object):
     # The key should match a key found in a file details json
     # type: (optional) the collection of quality_metric objects in encodeD. Collection will be type+'_quality_metric'. 
     #       Default: lower(key) 
-    # files: (optional) object containing "inputs" and/or "results". 
+    # files: (optional) Which file to attach the qc object to?  "inputs" and/or "results". 
     #        "results" is the usual case where the qc_obj is in the dx file 'details'. 
-    #        "inputs" points to a list of named inputs to the job. 
-    # blob: (optional) The 'pattern' to match and (optional) 'mime_ext' of a file to determine mime_type.
-    # singleton: (optional) There is only one value in dx detail json.  It will be named as such.
-    # include: (optional) A list of the only props in dx json to be placed in enc object. Default: include all
-    # exclude: (optional) A list of props in dx json but not to be placed in enc object.  Default: exclude none
-    # props: (optional) Select and redefine the names of any properties in dx details object that should be in enc object.
-    #        Default: include all from dx details json and use the same property names
+    #        "inputs" points to a list of named inputs to the job that should have the qc obj attached. 
+    # blob: (optional) What is in the 'attachment of the object?  The 'pattern' to match and (optional) 'mime_ext' of a file 
+    #       to determine mime_type.
+    # Ways of limiting or altering the properties that get into the qc object:
+    #   singleton: (optional) There is only one value in dx detail json.  It will be named as such.
+    #   include: (optional) A list of the only props in dx json to be placed in enc object. Default: include all
+    #   exclude: (optional) A list of props in dx json but not to be placed in enc object.  Default: exclude none
+    #   props: (optional) Select only these and redefine the property names { <dx_prop>: <enc_prop>,... }
+    #          Default: include all from dx details json and use the same property names
+    #   literal: (optional) add a literal (e.g. comment distingusihing lrna vs. dnase methods) as { <enc_prop>: <literal>,...}
     QC_SUPPORTED = {
         "STAR_log_final":       { 
                                     "type":"star", 
@@ -253,12 +270,30 @@ class Splashdown(object):
                                     "files": {"results": "detail"}, 
                                     "blob": { "pattern": "/*_bismark_biorep_qc.txt" } 
                                 },
+        "dnase_techrep_flagstats":   { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": [ "_bwa_techrep.bam" ],
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_bwa_techrep_qc.txt" } 
+                                },
+        "dnase_biorep_flagstats":   { 
+                                    "type":"samtools_flagstats",
+                                    "only_for": [ "_bwa_biorep_filtered.bam" ],
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } 
+                                },
         "samtools_stats":       { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "bismark_techrep_samstats":   { 
                                     "type":"samtools_stats",
                                     "only_for": [ "_techrep_bismark_pe.bam", "_bismark.bam" ],
                                     "files": {"results": "detail"}, 
                                     "blob": { "pattern": "/*_techrep_bismark*_qc.txt" } 
+                                },
+        "dnase_biorep_samstats":   { 
+                                    "type":"samtools_stats",
+                                    "only_for": [ "_bwa_biorep_filtered.bam" ],
+                                    "files": {"results": "detail"}, 
+                                    "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } 
                                 },
         "bismark_map":          { 
                                     "type":"bismark",
@@ -282,21 +317,34 @@ class Splashdown(object):
                                     "files": {"inputs": ["CpG_A", "CpG_B"]}, 
                                     "blob": { "pattern": "/*_CpG_corr.txt"},
                                 },
-        "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspot_qc.txt"  } },
+        "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspots_qc.txt"  } },
         "edwBamStats":          { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
-        "edwComparePeaks":      { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          },"exclude": [ "aFileName","bFileName"] },
-        "bigWigCorrelate":      { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          }, "singleton":"Pearson's correlation" },
-        "pbc":                  { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
-        "peak_counts":          { 
-                                    "type":"dnase_peaks", 
-                                    "files": {"results": "detail"},        
-                                    "blob": { "pattern": "/*_qc.txt"          } 
-                                },
-        "phantompeaktools_spp": { 
+        "dnase_techrep_bamstats":   { 
+                                    "type":"edwBamStats",
+                                    "only_for": [ "_bwa_techrep.bam" ],
                                     "files": {"results": "detail"}, 
-                                    "blob": { "pattern": "/*_qc.txt" }, 
+                                    "blob": { "pattern": "/*_bwa_techrep_qc.txt" } 
                                 },
-        # How to deal with *_qc.txt? file name stripped of ending add "_qc.txt" and see if it is found.
+        # How to NOT post edwBamStats that are a metric of the sample?  Won't most because sample isn't file to be posted!
+        "trim_illumina":        { "type":"trimming","files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_techrep_qc.txt" } },
+        "dup_stats":            { "type":"duplicates", "files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } },
+        "filtering":            { "files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } },
+        "pbc_spp":              { "type":"complexity_xcorr", "files": { "inputs": "bam_filtered" }, "blob": { "pattern": "/*_sample_qc.txt" } },
+        #"correlation":          { "files": { "inputs": ["density_a", "density_b"] }, 
+        #                          "blob": { "pattern": "/*_density_corr.txt" }, 
+        #                          "props": { "correlation": "Pearson correlation", "file 1 items": "Items" },
+        #                          "literal": {"Details": "What is this a correlation of?"} },
+        "rep_corr":             { "type":"correlation",
+                                  "files": { "inputs": ["density_a", "density_b"] }, 
+                                  "blob": { "pattern": "/*_density_corr.txt" }, 
+                                  "props": { "correlation": "Pearson correlation", "file 1 items": "Items" },
+                                  "literal": {"Details": "Correlation of 2 replicate signal results, with 1 item for every 20bp of mappable region in the genome."} },
+       # TODO: replace mad_quality_metric with 
+        #"MAD.R":          { "type":"correlation", 
+        #                          "files": { "inputs": ["quants_a", "quants_b"] } }, 
+        #                          "blob": { "pattern": "/*_mad_plot.png" }, 
+        #                          "props": { "MAD of log ratios", "Replicate log-ratio SD" "SD of log ratios": "Standard deviation", "Pearson correlation": "Pearson correlation", "Spearman correlation": "Spearman correlation" },
+        #                          "literal": {"Details": "Correlations of 2 replicate quanitfications. Standard deviation is of log ratios: log2(X1_i/X2_i).  Replicate log-ratio SD = 1.4826 * median | log2(X1_i/X2_i) |  to calculation standard deviationssignal results, with 1 item for every 20bp of mappable region in the genome."} },
     }
     
     # blob attachments have mime_types recognizable by file extension
@@ -349,6 +397,7 @@ class Splashdown(object):
         self.step_runs_created = 0
         self.way_back_machine = False # Don't support methods/expectations used on very old runs.  Only modern methods!      
         self.exp_files = None # Currently only used by 'recovery' and the way_back_machine
+        self.alt_accessions = False # Support looking up alternate accessions?
         self.found = {} # stores file objects from encode to avoid repeated lookups # TODO: place in obj_cache?
         logging.basicConfig(format='%(asctime)s  %(levelname)s: %(message)s')
         encd.logger = logging.getLogger(__name__ + '.dxe') # I need this to avoid some errors
@@ -415,6 +464,11 @@ class Splashdown(object):
 
         ap.add_argument('--qc_from_file',
                         help="If available, generate qc from file instead of dx details.",
+                        action='store_true',
+                        required=False)
+
+        ap.add_argument('--replacing',
+                        help='Look for files in ENCSR000NNN/deprecated/ that are being replaced.',
                         action='store_true',
                         required=False)
 
@@ -1175,25 +1229,28 @@ class Splashdown(object):
     def qc_props_fill(self,dx_qc_obj,qc_faq):
         '''Fills in the qc properties from a dx_qc_obj, taking into account any inclues, excludes, etc.'''
         enc_qc_props = {}
-        if "singleton" in qc_faq:
+        if "singleton" in qc_faq: # dx_qc_obj is not json, but a single value
             enc_qc_props[qc_faq["singleton"]] = dx_qc_obj
-        elif "props" in qc_faq:
+        elif "props" in qc_faq: # Only selected properties and some oh them may be renamed
             for key in qc_faq['props'].keys():
                 enc_qc_props[qc_faq['props'][key]] = dx_qc_obj[key]
-        elif "include" in qc_faq:
+        elif "include" in qc_faq: # only selected properties, none of them are renamed
             for key in qc_faq['include']:
                 enc_qc_props[key] = dx_qc_obj[key]
-        elif "exclude" in qc_faq:
+        elif "exclude" in qc_faq: # all except excluded properties, and no renaming
             for key in dx_qc_obj.keys():
                 if key not in qc_faq['exclude']:
                     enc_qc_props[key] = dx_qc_obj[key]
         else:
             enc_qc_props = dx_qc_obj # All props in DX object shall be placed in enc object
-        
+            
+        if "literal" in qc_faq: # Add some literals like comments
+            enc_qc_props.update(qc_faq['literal'])
+
         # As of r41, qc_metrics now require lab and award properties
         enc_qc_props['lab'] = encd.DCC_PIPELINE_LAB
         enc_qc_props['award'] = encd.DEFAULT_DCC_AWARD
-
+        
         return enc_qc_props
 
 
@@ -1270,7 +1327,7 @@ class Splashdown(object):
         '''Returns the schema type (collection) a qc_metric belongs to'''
         qc_suffix = "_quality_metric"
         if qc_key in self.QC_SUPPORTED and "type" in self.QC_SUPPORTED[qc_key]:
-            return self.QC_SUPPORTED[qc_key]["type"] + qc_suffix
+            return self.QC_SUPPORTED[qc_key]["type"].lower() + qc_suffix
         else: 
             return qc_key.lower() + qc_suffix
 
@@ -1362,14 +1419,14 @@ class Splashdown(object):
                     
                 self.obj_cache["exp"][qc_alias] = qc_metric
                 if test:
-                    print "  * Would patch qc_metric: '%s'" % qc_alias
+                    print "  * Would patch qc_metric: '%s' as '%s'" % (collection,qc_alias)
                 else:
                     try:
                         patched_obj = encd.patch_obj(qc_alias,qc_patch)
                     except:
-                        print "Failed to patch qc_metric: '%s'" % qc_alias
+                        print "Failed to patch qc_metric: '%s' as '%s'" % (collection,qc_alias)
                         sys.exit(1)
-                    print "  * Patched qc_metric: '%s'" % qc_alias
+                    print "  * Patched qc_metric: '%s' as '%s'" % (collection,qc_alias)
                     #self.qc_metric_created += 1
                 
         # No found metric so create
@@ -1395,16 +1452,16 @@ class Splashdown(object):
                 
             self.obj_cache["exp"][qc_alias] = qc_metric
             if test:
-                print "  * Would post qc_metric%s: '%s'" % (blob_msg,qc_alias)
+                print "  * Would post qc_metric%s: '%s' as '%s'" % (blob_msg,collection,qc_alias)
                 #print json.dumps(qc_metric,indent=4,sort_keys=True)
             else:
                 try:
                     posted_obj = encd.post_obj(collection,qc_metric)
                 except:
-                    print "Failed to post qc_metric%s: '%s'" % (blob_msg,qc_alias)
+                    print "Failed to post qc_metric%s: '%s' as '%s'" % (blob_msg,collection,qc_alias)
                     #print json.dumps(qc_metric,indent=4,sort_keys=True)
                     sys.exit(1)
-                print "  * Posted qc_metric%s: '%s'" % (blob_msg,qc_alias)
+                print "  * Posted qc_metric%s: '%s' as '%s'" % (blob_msg,collection,qc_alias)
                 #self.qc_metric_created += 1
                 
         return qc_metric
@@ -1505,6 +1562,8 @@ class Splashdown(object):
             if qc_key not in self.QC_SUPPORTED:
                 continue
             qc_faq = self.QC_SUPPORTED[qc_key]
+            if payload['output_type'] == "QC_only" and qc_faq['files'].get('inputs') == None:
+                continue # example edwbamstats is attached to sample bam which is not posted AND the stats refer to it.
             qc_json_full = self.qc_json_extend(qc_faq,key,qc_json,verbose=verbose)
             qc_metric = self.enc_qc_metric_find_or_create(qc_key,qc_json_full,qc_faq,fid,job_id,step_run_id, \
                                                                                             test=test,verbose=verbose)
@@ -1755,6 +1814,42 @@ class Splashdown(object):
             print >> sys.stderr, json.dumps(parent_job,indent=4)
         return parent_job
         
+    def get_alternate_accession(self,fid):
+        '''There may be an alternate accession due to replacing deprecated files!'''
+        alt_acc = dx.file_get_property("alternate_accession",fid)
+        if alt_acc != None:
+            print "  - detected %s as accession to replace." % alt_acc
+            return alt_acc
+        if not self.alt_accessions:
+            return None
+        path = dx.file_path_from_fid(fid)
+        path, file_name = path.rsplit('/', 1)
+        path_parts = path.split('/') 
+        exp_path = ""
+        for folder in path_parts:
+            if folder.startswith('rep'):
+                break
+            elif folder.startswith('ENCSR'):
+                exp_folder = folder
+            exp_path = exp_path + folder + '/'
+        assert(exp_path.endswith(exp_folder + '/'))
+        deprecated_path = exp_path + 'deprecated/'
+        #print "  - Looking in %s for accession to replace." % (deprecated_path + file_name)
+        old_fid = dx.find_file(deprecated_path + file_name,self.proj_id,recurse=False)
+        if old_fid == None:
+            return None
+        #print "  - Found %s for accession to replace." % (deprecated_path + file_name)
+        alt_acc = dx.file_get_property('accession',old_fid)
+        if alt_acc != None:
+            f_old_obj = encd.lookup_json( 'files/' + alt_acc,must_find=False)
+            if f_old_obj != None: # Not found is okay as replaced will not be found
+                status = f_old_obj.get('status','released')
+                if status != 'replaced':
+                    alt_acc = None
+        if alt_acc != None:
+            print "  - found %s as accession to replace." % alt_acc
+        return alt_acc
+        
     def make_payload_obj(self,out_type,rep_tech,fid,verbose=False):
         '''Returns an object for submitting a file to encode, with all dx info filled in.'''
         payload = {}
@@ -1816,7 +1911,7 @@ class Splashdown(object):
         payload = self.add_encoded_info(payload,rep_tech,fid)
         
         # Alternate accession?
-        alt_acc = dx.file_get_property("alternate_accession",fid)
+        alt_acc = self.get_alternate_accession(fid)
         if alt_acc != None:
             payload["alternate_accessions"] = [ alt_acc ]
         
@@ -1882,19 +1977,33 @@ class Splashdown(object):
         return accession
 
 
-    def file_mark_accession(self,fid,accession,test=True):
+    def file_mark_accession(self,fid,accession,alt_accessions=[],test=True):
         '''Adds/replaces accession to a file's properties.'''
-        if self.server_key == "www": # Already flagged with accession and suffereing a lot of 500 errors on this.
-            return
-        acc_key = dx.property_accesion_key(self.server)
-        path = dx.file_path_from_fid(fid)
-        acc = dx.file_set_property(fid,acc_key,accession,add_only=True,test=test)
-        if acc == None or acc != accession and not accession.endswith('FAKE'):
-            print "Error: failed to update %s for file %s to '%s'" % (path,acc_key,accession)
-        elif test:
-            print "  - Test flag %s with %s='%s'" % (path,acc_key,accession)
-        else:
-            print "  - Flagged   %s with %s='%s'" % (path,acc_key,accession)
+        path = None
+        if self.server_key != "www": # Already flagged with accession and suffereing a lot of 500 errors on this.
+            acc_key = dx.property_accesion_key(self.server)
+            path = dx.file_path_from_fid(fid)
+            acc = dx.file_set_property(fid,acc_key,accession,add_only=True,test=test)
+            if acc == None or acc != accession and not accession.endswith('FAKE'):
+                print "Error: failed to update %s for file %s to '%s'" % (path,acc_key,accession)
+            elif test:
+                print "  - Test flag %s with %s='%s'" % (path,acc_key,accession)
+            else:
+                print "  - Flagged   %s with %s='%s'" % (path,acc_key,accession)
+        if alt_accessions:
+            assert(len(alt_accessions) == 1)  # We should never be setting this with more than 1
+            alt_acc = alt_accessions[0]
+            acc = dx.file_get_property("alternate_accession",fid)
+            if acc == None or acc != alt_acc:
+                acc = dx.file_set_property(fid,"alternate_accession",alt_acc,add_only=True,test=test)
+                if path == None:
+                    path = dx.file_path_from_fid(fid)
+                if acc == None or acc != accession and not accession.endswith('FAKE'):
+                    print "Error: failed to update %s for file alternate_accession to '%s'" % (path,alt_acc)
+                elif test:
+                    print "  - Test flag %s with alternate_accession='%s'" % (path,alt_acc)
+                else:
+                    print "  - Flagged   %s with alternate_accession='%s'" % (path,alt_acc)
 
 
     def can_skip_validation(self,exp_type,payload,test=True):
@@ -2020,7 +2129,7 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dx.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:       mm10 M4 -         1,2   no     2016-08-11  2016-08-11  2016-08-12 %s  $%.2f" % \
+            #print "cost:    hg19 v19      1      -           2016-08-25  2016-08-30 %s  $%.2f" % \
             #    (duration.rjust(8), total_cost)
             print "%s %d %s  cost: %s  $%.2f" % \
                 (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
@@ -2039,6 +2148,9 @@ class Splashdown(object):
         if args.way_back_machine:
             print "Using 'way back machine' to find files posted long ago."
             self.way_back_machine = args.way_back_machine
+        if args.replacing:
+            print "Looking for files in deprecated folder that are being replaced."
+            self.alt_accessions = True
             
         self.server_key = args.server
         encd.set_server_key(self.server_key) # TODO: change to self.encd = Encd(self.server_key)
@@ -2155,7 +2267,7 @@ class Splashdown(object):
 
                         # d) Update dnanexus file with file accession tag.
                         post_count += 1                        
-                        self.file_mark_accession(fid,accession,args.test)  # This should have already been set by validate_post
+                        self.file_mark_accession(fid,accession,payload.get("alternate_accessions",[]),args.test)  # This should have already been set by validate_post
                 
                 # e) After the file is posted, post or patch qc_metric objects.
                 qc_count = self.handle_qc_metrics(fid,payload,test=self.test,verbose=args.verbose)

@@ -39,7 +39,7 @@ def get_server_key():
 
 def get_server():
     '''Returns the server.'''
-    (server,authid,authpw) = find_keys()
+    (authid,authpw,server) = find_keys()
     return server
 
 def find_keys(server=None,authid=None,authpw=None):
