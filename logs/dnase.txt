@@ -1,0 +1,307 @@
+### Starting production?!
+
+# Working on: 1st test: DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
+#Experiment     On    Reps        Assembled   Launched    Posted
+ENCSR749BWV  E3 hg19  1,2         2016-08-30  2016-09-01          10 files rep1_1:7GB, rep2_1:7GB <=== PE 1_1.2,2_1.2.3 *****
+
+# Working on: 2nd batch: DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
+#Experiment     On    Reps        Assembled   Launched    Posted
+ENCSR017OZH  E3 hg19  1,2         2016-08-30  2016-09-07        16 files, rep1_1:9GB, rep2_1:8GB
+ENCSR149XIL  E3 hg19  1,2         2016-08-30  2016-09-07        10 files, rep1_1:5GB, rep2_1:28GB
+ENCSR191FOV  E3 hg19  1           2016-08-30  2016-09-07         4 files, rep1_1:5GB
+ENCSR785BDQ  E3 hg19  1,2         2016-08-30  2016-09-07        12 files, rep1_1:13GB, rep2_1:3GB
+ENCSR818YUC  E3 hg19  1           2016-08-30  2016-09-07         4 files, rep1_1:5GB
+ENCSR845CFB  E3 hg19  1,2         2016-08-30  2016-09-07        10 files, rep1_1:6GB, rep2_1:20GB
+ENCSR848XIY  E3 hg19  1           2016-08-30  2016-09-07         4 files, rep1_1:7GB
+ENCSR932KWJ  E3 hg19  1,2         2016-08-30  2016-09-07        14 files, rep1_1:7GB, rep2_1:13GB
+ENCSR943SYS  E3 hg19  1,2         2016-08-30  2016-09-07        12 files, rep1_1:9GB, rep2_1:12GB 
+ENCSR959ZXU  E3 hg19  1,2         2016-08-30  2016-09-07         8 files, rep1_1:16GB, rep2_1:4.5GB
+
+# Working on: DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
+#Experiment     On    Reps        Assembled   Launched    Posted
+ENCSR019JDO  E3 hg19  1,2         2016-08-30  2016-09-12   10 files rep1_1:29GB, rep2_1:14GB
+ENCSR037PGI  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR048BUO  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR052AWE  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR064EFK  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR066WZJ  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR087QUG  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR121ZSL  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR137EEM  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR148VUP  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR158VAT  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR171ETY  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR174TIP  E3 hg19  1           2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error/rev step
+ENCSR207TUX  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR215FCQ  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR217SET  E3 hg19  1,2         2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error/rev step
+ENCSR228IKB  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR229PFU  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR237WJY  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR240TPI  E3 hg19  1,2         2016-08-30  2016-09-12   10 files rep1_1:27GB, rep2_1:3GB
+ENCSR265TEK  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR274JIR  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR314EZY  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR318PRQ  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR364MFN  E3 hg19  1,2         2016-08-30  2016-09-12   8 files rep1_1:14GB, rep2_1:140MB
+ENCSR373BIX  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR382JUJ  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR405TXU  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR420NOA  E3 hg19  1,2         2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error
+ENCSR423UEH  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR429RHR  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR435NHO  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR456SOX  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR458LIB  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR475SYH  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR485CIR  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR493IAY  E3 hg19  1           2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error
+ENCSR499IFY  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR501FWC  E3 hg19  1,2         2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error/rev step
+ENCSR503BEM  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR512CWR  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR514EOB  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR522WLH  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR527IGO  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR532CRI  E3 hg19  1,2         2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error/rev step
+ENCSR559WMK  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR560CCF  E3 hg19  1,2         2016-08-30  2016-09-12    6 files rep1_1:5.5GB rep2_1:9.5GB <=== PE 1_1.2,2_1 # Restarted 2016-09-15: trim-adapters-illumina silent failure
+ENCSR564JUY  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR575VMI  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR577TXK  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR579BNV  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR584LUZ  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR592DQC  E3 hg19  1           2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error/rev step
+ENCSR593LTJ  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR620QNS  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR632CQZ  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR699ZLY  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR705CNJ  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR724SCF  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR746ZPP  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR754LIN  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR759UNY  E3 hg19  1,2         2016-08-30  2016-09-12   10 files rep1_1:14GB, rep2_1:4GB
+ENCSR790FIS  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR804RSI  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR809LCE  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR813CKU  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR814KRX  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR815JAA  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR818JGZ  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR820ICX  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR820WLP  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR826CTO  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR855DJV  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR859CZM  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR863XNX  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR865ICK  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR873PLF  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR901BRM  E3 hg19  1           2016-08-30  2016-09-12                                           # filter_reads.py exception
+ENCSR902XFY  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR907VOR  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR910OQF  E3 hg19  1,2         2016-08-30  2016-09-12  
+ENCSR940NLN  E3 hg19  1,2         2016-08-30  2016-09-12   10 files rep1_1:8GB, rep2_1:23GB
+ENCSR945ENZ  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR964MZQ  E3 hg19  1,2         2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error/rev step
+ENCSR964WHY  E3 hg19  1,2         2016-08-30  2016-09-12    # Restarted 2016-09-16: oom error
+ENCSR967DXR  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR982JMP  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR986YWZ  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR997TXZ  E3 hg19  1           2016-08-30  2016-09-12  
+
+# Working on: (both paired and unpaired) DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
+#Experiment     On    Reps        Assembled   Launched    Posted
+ENCSR015BGH  E3 hg19  1_1.2       2016-09-14
+ENCSR083STA  E3 hg19  1_1.2,2_1.2 2016-09-14  2016-09-16   # First SE test
+ENCSR097BWW  E3 hg19  1_1.2,2     2016-09-14
+ENCSR127PWK  E3 hg19  1_1.2       2016-09-14
+ENCSR257BGZ  E3 hg19  1,2_1.2     2016-09-14
+ENCSR269SIA  E3 hg19  1_1.2,2     2016-09-14
+ENCSR346IHH  E3 hg19  1_1.2,2_1.2 2016-09-14
+ENCSR346JWH  E3 hg19  1,2         2016-09-14
+ENCSR426IEA  E3 hg19  1,2_1.2     2016-08-30                                   # mixed PE and SE techreps
+ENCSR475VQD  E3 hg19  1,2_1.2     2016-09-14
+ENCSR493VDS  E3 hg19  1_1.2       2016-09-14
+ENCSR503HIB  E3 hg19  1_1.2,2     2016-09-14
+ENCSR515EWI  E3 hg19  1_1.2,2_1.2 2016-09-14
+ENCSR548MMD  E3 hg19  1,2_1.2     2016-08-30                                   # mixed PE and SE techreps
+ENCSR594NOE  E3 hg19  1,2_1.2     2016-09-14
+ENCSR595CSH  E3 hg19  1,2_1.2     2016-09-14
+ENCSR620WAR  E3 hg19  1_1.2,2_1.2 2016-09-14
+ENCSR627NIF  E3 hg19  1,2_1.2     2016-09-14
+ENCSR700ILE  E3 hg19  1_1.3       2016-09-14
+ENCSR706IDL  E3 hg19  1_1.2,2     2016-09-14
+ENCSR768OLL  E3 hg19  1_1.2       2016-09-14
+ENCSR771DAX  E3 hg19  1_1.2,2_1.2 2016-09-14
+ENCSR782XFY  E3 hg19  1,2_1.2     2016-09-14
+ENCSR829MXU  E3 hg19  1_1.2       2016-09-14
+ENCSR855FOP  E3 hg19  1,2_1.2     2016-09-14
+ENCSR937UWI  E3 hg19  1,2_1.2     2016-09-14
+
+# TODO: (HOLD, issues) DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
+#Experiment     On    Reps        Assembled   Launched    Posted
+ENCSR209TXI  E3 hg19  1           2016-08-30                                   # no barcode
+ENCSR474GZQ  E3 hg19  1_1.2,2_1.2 2016-09-14                                   # no barcode
+ENCSR504WYA  E3 hg19  1           2016-08-30                                   # no barcode
+ENCSR621ENC  E3 hg19  1,2_1.2     2016-09-14                                   # no barcode
+ENCSR657DFR  E3 hg19  1,2         2016-08-30                                   # no barcode
+ENCSR662HMO  E3 hg19  1_1.2,2_1.2 2016-09-14                                   # no barcode
+ENCSR979ZJS  E3 hg19  1           2016-08-30           6 files, rep1_1:17GB    # no barcode
+
+# TODO: (HOLD: requires lab review) DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
+ENCSR000FDI
+ENCSR000FFJ
+ENCSR004SUL
+ENCSR098PTC
+ENCSR101TGA
+ENCSR141VJJ
+ENCSR154AVE
+ENCSR167DFU
+ENCSR217TAW
+ENCSR224IYD
+ENCSR362JSZ
+ENCSR374YBC
+ENCSR489NAM
+ENCSR622RJN
+ENCSR626RVD
+ENCSR627GNV
+ENCSR636VCX
+ENCSR691MQJ
+ENCSR744QGM
+ENCSR809CEA
+ENCSR946MVP
+ENCSR963ALV
+
+### TODO
+# UW request awaiting verification
+ENCSR551FTE  hg19XYme 1_1.2.3.4                       2015-09-18                     restarted MIXED PE&SE
+ENCSR771DAX  hg19XYme 1_1.2.3                         2015-09-18                     restarted MIXED PE&SE
+
+####### Working on
+# TOBE posted
+#Experiment  On       Reps                            Assembled   Launched    Finished
+ENCSR172RHR  mm10XYPE 1_1.2.3.4,2_1.2.3               2015-09-18  2015-09-30  2015-10-02  $150.14
+ENCSR179PIH  mm10XYPE 1_1.2.3,2_1.2.3.4.5             2015-09-18  2015-09-30  2015-10-02  $154.54
+ENCSR196VDE  mm10XYPE 1_1.2.3.4,2_1.2.3.4.5           2015-09-18  2015-09-30  2015-10-02  $165.92
+ENCSR312QVY  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4.5         2015-09-18  2015-09-30  2015-10-02  $128.44
+ENCSR337EDG  mm10XYPE 1_1.2.3.4.5.6.7,2_1,2_2         2015-09-18  2015-09-30  2015-10-01  $109.63
+ENCSR358ESL  mm10XYPE 1_1.2.3.4.5.6,2_1.2.3.4.5       2015-09-18  2015-09-30  2015-10-01  $161.87
+ENCSR367FCW  mm10XYPE 1_1.2.3.4,2_1.2.3.4.5.6.7.8     2015-09-18  2015-09-30  2015-10-01  $140.76
+ENCSR469VGZ  mm10XYPE 1_1.2.3.4.5.6,2_1.2.3           2015-09-18  2015-09-30  2015-10-02  $164.23
+ENCSR488VEQ  mm10XYPE 1_1.2.3,2_1.2.3.4.5             2015-09-18  2015-09-30  2015-10-02  $154.19
+ENCSR636NXY  mm10XYPE 1_1.2.3.4.5.6.7.8,2_1.2.3.4.5.6 2015-09-18  2015-09-30  2015-10-02  $181.35
+ENCSR661HDP  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4           2015-09-18  2015-09-30  2015-10-01  $145.85
+ENCSR767AJS  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4.5.6.7.8   2015-09-18  2015-09-30  2015-10-01  $128.82
+ENCSR774TQO  mm10XYPE 1_1.2,2_1.2.3.4.5               2015-09-18  2015-09-30  2015-10-02  $112.35
+ENCSR935RRY  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4.5.6.7.8   2015-09-18  2015-09-30  2015-10-02  $193.97
+ENCSR959HKR  mm10XYPE 1_1.2.3,2_1.2.3                 2015-09-18  2015-09-30  2015-10-01  $106.20
+
+
+# TOBE posted
+#Experiment  On       Reps                Assembled   Launched    Finished
+ENCSR019JDO  hg19XXPE 1_1.2.3,2_1.2       2015-05-07  2015-09-18  2015-09-20
+ENCSR052AWE  hg19XYPE 1_1.2.3,2_1.2.3     2015-09-10  2015-09-18  2015-09-30  failed eval, restarted 
+ENCSR148VUP  hg19XYPE 1_1.2.3,2_1.2.3     2015-09-10  2015-09-18  2015-09-20
+ENCSR346JWH  hg19XXPE 1_1.2.3,2_1.2       2015-05-07  2015-09-18  -           failed eval, restarted 
+ENCSR362JSZ  hg19XYPE 1_1.2.3,2_1.2.3     2015-09-10  2015-09-18  -           failed eval, restarted 
+ENCSR364MFN  hg19XXPE 1_1.2.3,2_1.2.3     2015-09-10  2015-09-18  2015-09-30  failed eval, restarted 
+ENCSR458LIB  hg19XXPE 1_1.2.3,2_1.2.3     2015-05-07  2015-09-18  2015-09-19
+ENCSR564JUY  hg19XYPE 1_1.2.3,2_1.2.3     2015-09-10  2015-09-18  2015-09-30  failed eval, restarted 
+ENCSR937UWI  hg19XYme 1_1.2.3,2_1.2.3     2015-09-10  2015-09-18  2015-09-30  failed filter/merge (my fault), restarted MIXED PE&SE
+
+####### Full list:
+#Experiment  On       Reps                            Assembled   Launched    Total Time/Cost   Posted
+
+ENCSR000FDI  batch0  mixed pe/se errors               2015-05-07
+ENCSR000FFJ
+ENCSR004SUL
+ENCSR019JDO  hg19XXPE 1_1.2.3,2_1.2                   2015-05-07  2015-09-18
+ENCSR052AWE  hg19XYPE 1_1.2.3,2_1.2.3                 2015-09-10  2015-09-18
+ENCSR083STA
+ENCSR097BWW
+ENCSR098PTC
+ENCSR101TGA
+ENCSR115TQJ
+ENCSR127PWK
+ENCSR141VJJ
+ENCSR148VUP  hg19XYPE 1_1.2.3,2_1.2.3                 2015-09-10  2015-09-18
+ENCSR149XIL
+ENCSR154AVE
+ENCSR167DFU
+ENCSR172RHR  mm10XYPE 1_1.2.3.4,2_1.2.3               2015-09-18  2015-09-30  2015-10-02  $150.14
+ENCSR179PIH  mm10XYPE 1_1.2.3,2_1.2.3.4.5             2015-09-18  2015-09-30  2015-10-02  $154.54
+ENCSR196VDE  mm10XYPE 1_1.2.3.4,2_1.2.3.4.5           2015-09-18  2015-09-30  2015-10-02  $165.92
+ENCSR217TAW
+ENCSR224IYD
+ENCSR226TUE
+ENCSR257BGZ
+ENCSR265TEK
+ENCSR269SIA
+ENCSR303CLM
+ENCSR312QVY  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4.5         2015-09-18  2015-09-30  2015-10-02  $128.44
+ENCSR318PRQ
+ENCSR337EDG  mm10XYPE 1_1.2.3.4.5.6.7,2_1,2_2         2015-09-18  2015-09-30  2015-10-01  $109.63
+ENCSR346IHH
+ENCSR346JWH  hg19XXPE 1_1.2.3,2_1.2                   2015-05-07  2015-09-18
+ENCSR358ESL  mm10XYPE 1_1.2.3.4.5.6,2_1.2.3.4.5       2015-09-18  2015-09-30  2015-10-01  $161.87
+ENCSR362JSZ  hg19XYPE 1_1.2.3,2_1.2.3                 2015-09-10  2015-09-18
+ENCSR364MFN  hg19XXPE 1_1.2.3,2_1.2.3                 2015-09-10  2015-09-18
+ENCSR367FCW  mm10XYPE 1_1.2.3.4,2_1.2.3.4.5.6.7.8     2015-09-18  2015-09-30  2015-10-01  $140.76
+ENCSR369NDR
+ENCSR372WYN
+ENCSR374YBC
+ENCSR405TXU
+ENCSR420NOA
+ENCSR424WVH
+ENCSR426IEA
+ENCSR452SPC
+ENCSR458LIB  hg19XXPE 1_1.2.3,2_1.2.3                 2015-05-07  2015-09-18
+ENCSR469VGZ  mm10XYPE 1_1.2.3.4.5.6,2_1.2.3           2015-09-18  2015-09-30  2015-10-02  $164.23
+ENCSR475VQD
+ENCSR488VEQ  mm10XYPE 1_1.2.3,2_1.2.3.4.5             2015-09-18  2015-09-30  2015-10-02  $154.19
+ENCSR489NAM
+ENCSR503HIB
+ENCSR508MPY
+ENCSR512CWR
+ENCSR515EWI
+ENCSR541CFI
+ENCSR548MMD
+ENCSR551FTE  request 1 biorep                         2015-09-18
+ENCSR559WMK
+ENCSR564JUY  hg19XYPE 1_1.2.3,2_1.2.3                 2015-09-10  2015-09-18
+ENCSR594NOE
+ENCSR595CSH
+ENCSR620WAR
+ENCSR622RJN
+ENCSR627GNV
+ENCSR627NIF
+ENCSR636NXY  mm10XYPE 1_1.2.3.4.5.6.7.8,2_1.2.3.4.5.6 2015-09-18  2015-09-30  2015-10-02  $181.35
+ENCSR636VCX
+ENCSR661HDP  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4           2015-09-18  2015-09-30  2015-10-01  $145.85
+ENCSR662HMO
+ENCSR666HFH
+ENCSR705CNJ
+ENCSR706IDL
+ENCSR717JVC
+ENCSR744QGM
+ENCSR751YPU
+ENCSR759UNY
+ENCSR767AJS  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4.5.6.7.8   2015-09-18  2015-09-30  2015-10-01  $128.82
+ENCSR771DAX  request 1 biorep                         2015-09-18
+ENCSR774TQO  mm10XYPE 1_1.2,2_1.2.3.4.5               2015-09-18  2015-09-30  2015-10-02  $112.35
+ENCSR782XFY
+ENCSR793WUR
+ENCSR809CEA
+ENCSR813CKU
+ENCSR845CFB
+ENCSR855FOP
+ENCSR910OQF
+ENCSR924BBB
+ENCSR932KWJ
+ENCSR935RRY  mm10XYPE 1_1.2.3.4.5,2_1.2.3.4.5.6.7.8   2015-09-18  2015-09-30  2015-10-02  $193.97
+ENCSR937UWI  hg19XYPE 1_1.2.3,2_1.2.3                 2015-09-10  2015-09-18 mixed pe/se
+ENCSR940NLN
+ENCSR946MVP
+ENCSR959HKR  mm10XYPE 1_1.2.3,2_1.2.3                 2015-09-18  2015-09-30  2015-10-01  $106.20
+ENCSR959ZXU
+ENCSR963ALV

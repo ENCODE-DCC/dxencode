@@ -1,17 +1,6 @@
 
 ##### DONE: reversed: lrna_221/small-rna> ./build_applets small-rna-align/ small-rna-signals/ small-rna-mad-qc/
 
-# Done: Cricket SRNA: https://www.encodeproject.org/search/?type=Experiment&award.rfa=ENCODE3&assay_title=small+RNA-seq&status=submitted&internal_status=pipeline+ready
-# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
-ENCSR091JNF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h12m  $1.69
-ENCSR539RDF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h00m  $1.41
-ENCSR603XUX        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h05m  $1.54
-ENCSR634VLA        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h05m  $1.53
-ENCSR718AXQ        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05      58m  $1.38
-ENCSR737NPO        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05      52m  $1.21
-ENCSR961FIG        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h03m  $1.48
-ENCSR996VHB        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h09m  $1.63
-
 ####### GRCh38 Full list
 # Experiment       On             Reps  Assembled   Launched    (Re)Posted Duration Cost
 ENCSR000AEJ  ENC3  GRCh38 v24     1,2    -          2016-01-22  2016-03-07   2h20m  $5.37
@@ -137,6 +126,7 @@ ENCSR003SZJ        hg19,v19  2016-08-25  1     2016-08-25    57m $1.35
 ENCSR020VES        hg19,v19  2016-08-25  1     2016-08-25  1h05m $1.54
 ENCSR024CRN        hg19,v19  2016-08-25  1     2016-08-25    44m $1.03
 ENCSR033TKS        hg19,v19  2016-08-25  1     2016-08-25  1h07m $1.57
+ENCSR091JNF        hg19 v19  2016-09-16  1     2016-09-16    54m $1.27   
 ENCSR099ACU        hg19,v19  2016-08-25  1     2016-08-25    40m $0.94
 ENCSR133GQJ        hg19,v19  2016-08-25  1     2016-08-25    50m $1.17
 ENCSR168XPO        hg19,v19  2016-08-25  1     2016-08-25  1h07m $1.57
@@ -162,20 +152,25 @@ ENCSR383PLJ        hg19,v19  2016-08-25  1     2016-08-25    55m $1.31
 ENCSR418FVT        hg19,v19  2016-08-25  1     2016-08-25    48m $1.14
 ENCSR489KNQ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  0h51m $2.05
 ENCSR525WFB        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
+ENCSR539RDF        hg19 v19  2016-09-16  1     2016-09-16    60m $1.40
 ENCSR571FTT  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h46m $4.59
 ENCSR573RGL        hg19,v19  2016-08-25  1     2016-08-25    52m $1.23
 ENCSR587CPE        hg19,v19  2016-08-25  1     2016-08-25    55m $1.29
 ENCSR593MVW        hg19,v19  2016-08-25  1     2016-08-25    49m $1.16
 ENCSR603RPC  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h18m $2.90
+ENCSR603XUX        hg19 v19  2016-09-16  1     2016-09-16    53m $1.24
 ENCSR610CDO  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h15m $3.01
 ENCSR610GDH        hg19,v19  2016-08-25  1     2016-08-25  1h18m $1.84
 ENCSR612WDT        hg19,v19  2016-08-25  1     2016-08-25    52m $1.22
 ENCSR626GVP        hg19,v19  2016-08-25  1     2016-08-25    41m $0.97
 ENCSR626WAX  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h18m $3.28
+ENCSR634VLA        hg19 v19  2016-09-16  1     2016-09-16    51m $1.20
 ENCSR635SLB        hg19,v19  2016-08-25  1     2016-08-25    48m $1.12
 ENCSR646HQQ        hg19,v19  2016-08-25  1     2016-08-25    59m $1.38
 ENCSR673PND  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h42m $4.21
+ENCSR718AXQ        hg19 v19  2016-09-16  1     2016-09-16  1h04m $1.51
 ENCSR722POQ  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h40m $3.60
+ENCSR737NPO        hg19 v19  2016-09-16  1     2016-09-16    42m $0.99
 ENCSR740DKM  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  0h53m $2.23                
 ENCSR779BVZ        hg19,v19  2016-08-25  1     2016-08-25  1h00m $1.42
 ENCSR807KQN  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  0h51m $2.13
@@ -188,13 +183,37 @@ ENCSR882DFF        hg19,v19  2016-08-25  1     2016-08-25    58m $1.36
 ENCSR887HNW        hg19,v19  2016-08-25  1     2016-08-25    36m $0.85
 ENCSR905KHW  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h19m $3.30
 ENCSR917CQJ        hg19,v19  2016-08-25  1     2016-08-25    54m $1.27
+ENCSR961FIG        hg19 v19  2016-09-16  1     2016-09-16    51m $1.21
 ENCSR964EPR  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h41m $4.19
 ENCSR968DMR        hg19,v19  2016-08-25  1     2016-08-25  1h03m $1.49
 ENCSR968YZV  ENC3  hg19,v19  2015/07/08  1,2   2015/08/18  1h31m $3.87
+ENCSR996VHB        hg19 v19  2016-09-16  1     2016-09-16  1h02m $1.45
 ENCSR998CRC        hg19,v19  2016-08-25  1     2016-08-25    51m $1.20
-# Total: 83
+# Total: 91
 
 ### Historical:
+
+# Done: hg19 SRNA: http://redmine.encodedcc.org/issues/2634#note-40
+# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
+ENCSR091JNF        hg19 v19       1      -          2016-09-16  2016-09-16      54m  $1.27   
+ENCSR539RDF        hg19 v19       1      -          2016-09-16  2016-09-16      60m  $1.40
+ENCSR603XUX        hg19 v19       1      -          2016-09-16  2016-09-16      53m  $1.24
+ENCSR634VLA        hg19 v19       1      -          2016-09-16  2016-09-16      51m  $1.20
+ENCSR718AXQ        hg19 v19       1      -          2016-09-16  2016-09-16    1h04m  $1.51
+ENCSR737NPO        hg19 v19       1      -          2016-09-16  2016-09-16      42m  $0.99
+ENCSR961FIG        hg19 v19       1      -          2016-09-16  2016-09-16      51m  $1.21
+ENCSR996VHB        hg19 v19       1      -          2016-09-16  2016-09-16    1h02m  $1.45
+
+# Done: Cricket SRNA: https://www.encodeproject.org/search/?type=Experiment&award.rfa=ENCODE3&assay_title=small+RNA-seq&status=submitted&internal_status=pipeline+ready
+# Experiment       On             Reps  Assembled   Launched    Posted     Duration Cost
+ENCSR091JNF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h12m  $1.69
+ENCSR539RDF        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h00m  $1.41
+ENCSR603XUX        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h05m  $1.54
+ENCSR634VLA        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h05m  $1.53
+ENCSR718AXQ        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05      58m  $1.38
+ENCSR737NPO        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05      52m  $1.21
+ENCSR961FIG        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h03m  $1.48
+ENCSR996VHB        GRCh38 v24     1     2016-08-04  2016-08-04  2016-08-05    1h09m  $1.63
 
 # DONE: SRNA to run on hg19 http://redmine.encodedcc.org/issues/2634#note-34
 Experiment         On        As/Launch   Reps  Posted      Duration/Cost

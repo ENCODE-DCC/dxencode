@@ -1,5 +1,23 @@
 ##### DONE: reversed: lrna_221/rampage> ./build_applets rampage-align-pe/ rampage-idr/ rampage-mad-qc/ rampage-peaks/ rampage-signals/
 
+
+# Working on: 14 for GRCh38 http://redmine.encodedcc.org/issues/3156#note-51
+# Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
+ENCSR000CIL    GRCh38 v24C   1,2    2016-09-16  2016-09-16
+ENCSR000CIN    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CIO    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CIR    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CIS    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CIV    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CIW    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CIY    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CJA    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CJR E2 GRCh38 V24 C  3,4*   2016-07-05  2016-09-16
+ENCSR000CJY E2 GRCh38 V24 C  1,2*   2016-07-05  2016-09-16
+ENCSR000CKH E2 GRCh38 V24 C  1,2    2016-07-05  2016-09-16
+ENCSR000CKO    GRCh38 v24    1      2016-09-16  2016-09-16  
+ENCSR000CLH    GRCh38 v24    1      2016-09-16  2016-09-16  
+
 # TODO: Holdouts of CAGE http://redmine.encodedcc.org/issues/4187#change-31361
 # Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
 ENCSR000CJR E2 GRCh38 V24 C  3,4*   2016-07-05  2016-08-01    *3,4_1.2  NOT READY for pipeline yet

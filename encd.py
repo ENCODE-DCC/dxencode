@@ -555,10 +555,10 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                 rep['paired_end'] = False
                 rep['has_reads'] = True
             elif mapping['paired'] and mapping['unpaired']:
-                print >> sys.stderr, "WARNING: Replicate %d_%d has both paired(%s) and unpaired(%s) reads, demoting to unpaired." % \
+                print >> sys.stderr, "ERROR: Replicate %d_%d has both paired(%s) and unpaired(%s) reads." % \
                     (br,tr,len(mapping['paired']), len(mapping['unpaired']))
                 #print >> sys.stderr, json.dumps(mapping,indent=4)
-                #sys.exit(1)                
+                sys.exit(1)                
                 rep['paired_end'] = False
                 rep['has_reads'] = True
                 
@@ -569,6 +569,8 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                 rep['controls'] = []
                 if rep['paired_end']:
                     for (p1, p2) in mapping['paired']:
+                        if p1['status'] != 'released':
+                            continue
                         rep['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
                         if "run_type" in p1:
                             if run_type == None or run_type == "single-ended":
@@ -583,6 +585,8 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                             rep['controls'].append( p2['controlled_by'] )
                 else: # not rep['paired_end']:
                     for f in mapping['unpaired']:
+                        if f['status'] != 'released':
+                            continue
                         rep['fastqs']['1'].append( f['accession']+".fastq.gz" )
                         if "run_type" in f:
                             if run_type == None or run_type == "single-ended":

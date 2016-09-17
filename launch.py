@@ -625,9 +625,14 @@ class Launch(object):
                         if paired:
                             cv['paired_end'] = paired
                     elif paired != tributary['paired_end']:
-                        print >> sys.stderr, "- WARNING: Combining replicates '"+first_rep_tech+"' and '"+tributary['rep_tech']+"' " + \
-                                        "are expected to be all paired-end or single-end!"
-                        river['paired_end'] = False  # Mixes will be treated as single end!
+                        if cv['exp_type'] == 'dnase-seq':
+                            print >> sys.stderr, "- Combining replicates '"+first_rep_tech+"' and '"+tributary['rep_tech']+"' " + \
+                                            "are paired-end and single-end.  Demoting bio_rep to SE!"
+                            river['paired_end'] = False  # Mixes will be treated as single end!
+                        else:
+                            print >> sys.stderr, "- ERROR: Combining replicates '"+first_rep_tech+"' and '"+tributary['rep_tech']+"' " + \
+                                            "are expected to be all paired-end or single-end!"
+                            sys.exit(1)
         else:  # for independent simple replicates, top level doesn't really matter.
             cv['paired_end'] = cv['reps']['a']['paired_end']
 
@@ -1415,7 +1420,7 @@ class Launch(object):
                     alt_token = "reads"  # Sometimes sets are just reads.
                 if alt_token not in rep['priors'] and alt_token == "reads" and expect_set:
                     alt_token = "reads_set"  # Sometimes reads are reads_sets. # FIXME: should really drop "_set" logic
-            if alt_token == "reads" and file_token == "reads2" and not self.psv['paired_end']:
+            if alt_token == "reads" and file_token == "reads2" and not rep['paired_end']:
                 return None # This special case can come when applet is built for PE and SE reads with optional reads2 param
             #print >> sys.stderr, "DEBUG: alt_token '%s' file_token '%s'" % (alt_token,file_token) 
             if alt_token in rep['priors']:
@@ -1521,7 +1526,7 @@ class Launch(object):
             # file inputs
             for file_token in steps[step]['inputs'].keys():
                 app_inp = steps[step]['inputs'][file_token]
-                if app_inp == "reads2" and not self.psv['paired_end']:
+                if app_inp == "reads2" and not rep['paired_end']:
                     continue
                 # Need inp_def to see if set is expected
                 for inp_def in inp_defs:

@@ -329,7 +329,7 @@ class Splashdown(object):
         "trim_illumina":        { "type":"trimming","files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_techrep_qc.txt" } },
         "dup_stats":            { "type":"duplicates", "files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } },
         "filtering":            { "files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } },
-        "pbc_spp":              { "type":"complexity_xcorr", "files": { "inputs": "bam_filtered" }, "blob": { "pattern": "/*_sample_qc.txt" } },
+        "pbc_spp":              { "type":"complexity_xcorr", "files": { "inputs": [ "bam_filtered" ] }, "blob": { "pattern": "/*_sample_qc.txt" } },
         #"correlation":          { "files": { "inputs": ["density_a", "density_b"] }, 
         #                          "blob": { "pattern": "/*_density_corr.txt" }, 
         #                          "props": { "correlation": "Pearson correlation", "file 1 items": "Items" },
@@ -1148,20 +1148,20 @@ class Splashdown(object):
         obj['lab'] = encd.DCC_PIPELINE_LAB
         obj['award'] = encd.DEFAULT_DCC_AWARD
 
-        # Find replicate info
-        #if rep_tech.startswith("rep") and len(rep_tech) == 6:
-        (br,tr) = (None,None)
-        if rep_tech.startswith("reps"):
-            br_tr = rep_tech[4:]
-            (br,tr) = br_tr.split('_')
-            tr = tr.split('.')[-1]       # TODO: Get buy in for bio_rep files being associated with the last tech_rep.
-        elif rep_tech.startswith("rep"):
-            br_tr = rep_tech[3:]
-            (br,tr) = br_tr.split('_')
-        if br != None and tr != None:
-            full_mapping = encd.get_full_mapping(self.exp_id,self.exp)
-            mapping = encd.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
-            obj['replicate'] = mapping['replicate_id']
+        ### # Find replicate info
+        ### #if rep_tech.startswith("rep") and len(rep_tech) == 6:
+        ### (br,tr) = (None,None)
+        ### if rep_tech.startswith("reps"):
+        ###     br_tr = rep_tech[4:]
+        ###     (br,tr) = br_tr.split('_')
+        ###     tr = tr.split('.')[-1]       # TODO: Get buy in for bio_rep files being associated with the last tech_rep.
+        ### elif rep_tech.startswith("rep"):
+        ###     br_tr = rep_tech[3:]
+        ###     (br,tr) = br_tr.split('_')
+        ### if br != None and tr != None:
+        ###     full_mapping = encd.get_full_mapping(self.exp_id,self.exp)
+        ###     mapping = encd.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
+        ###     obj['replicate'] = mapping['replicate_id']
 
         if verbose:
             print >> sys.stderr, "After adding encoded info:"
@@ -1343,7 +1343,12 @@ class Splashdown(object):
             inp_names = qc_faq["files"]["inputs"]
             job = self.dx_job_find(None,fid)
             job_inputs = job.get('input')
+            if verbose:
+                print >> sys.stderr, "job_inputs:"
+                print >> sys.stderr, json.dumps(job_inputs,indent=4,sort_keys=True)
             for name in inp_names:
+                if verbose:
+                    print >> sys.stderr, "Looking for: %s" % name
                 if name in job_inputs:
                     dx_inp = job_inputs[name]
                     if verbose:
@@ -1357,8 +1362,11 @@ class Splashdown(object):
         qc_accs = []
         for qc_fid in qc_fids:
             acc = self.file_get_accession(qc_fid,fake_if_needed=self.test)
-            if acc != None:
+            if acc != None and acc != '':
                 qc_accs.append('/files/'+acc+'/')
+            elif self.test:
+                qc_accs.append('/files/ENCFF00FAKE/')
+                
         if verbose:
             print >> sys.stderr, "Expect qc_metric['quality_metric_of'] fids:"
             print >> sys.stderr, json.dumps(qc_fids,indent=4,sort_keys=True)
@@ -1379,7 +1387,7 @@ class Splashdown(object):
             return None
 
         collection = self.qc_metric_schema_type(qc_key)
-        qc_files = self.qc_metric_files(qc_faq,fid)
+        qc_files = self.qc_metric_files(qc_faq,fid,verbose=verbose)
         qc_alias = self.qc_metric_make_alias(fid,qc_key,job_id)        
         
         qc_metric = self.enc_qc_metric_find(fid,qc_key,job_id,collection)
@@ -1409,7 +1417,7 @@ class Splashdown(object):
                 for qc_file in qc_files:
                     if qc_file not in qc_metric['quality_metric_of']:
                         qc_metric['quality_metric_of'].append(qc_file)
-                        qc_patch['quality_metric_of'] = qc_metric['quality_metric_of']                        
+                        qc_patch['quality_metric_of'] = qc_metric['quality_metric_of'] 
             
             # Now patch if necessary        
             if qc_patch:
@@ -1435,6 +1443,9 @@ class Splashdown(object):
                 
             if len(qc_files) > 0:
                 qc_metric['quality_metric_of'] = qc_files
+            else:
+                print >> sys.stderr, "ERROR: Found no 'quality_metric_of' files for %s metric." % collection
+                sys.exit(1) # Until a legit case comes along, better exit and figure it out
             qc_metric['step_run'] =  step_run_id
             qc_metric['assay_term_name'] = self.exp['assay_term_name']
             qc_metric['assay_term_id']   = self.exp['assay_term_id'] # self.exp_type 

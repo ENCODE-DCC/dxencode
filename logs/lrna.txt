@@ -1,6 +1,35 @@
 
 ##### DONE: reversed: lrna_221> ./build_applets align-star-pe/ align-star-se/ align-tophat-pe/ align-tophat-se/ bam-to-bigwig-stranded/ bam-to-bigwig-unstranded/ quant-rsem/ mad-qc/
 
+# TODO: 4 for mm10 http://redmine.encodedcc.org/issues/3060#note-273
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000AHX       mm10 M4    -      1     no     2016-09-16  2016-09-16
+ENCSR000AHY       mm10 M4    -      1     no     2016-09-16  2016-09-16
+ENCSR000AHZ       mm10 M4    -      1     no     2016-09-16  2016-09-16
+ENCSR000AIA       mm10 M4    -      1     no     2016-09-16  2016-09-16
+
+# TODO: 19 for GRCh38 http://redmine.encodedcc.org/issues/3060#note-272
+# Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
+ENCSR000BZU       GRCh38 v24 -      1     no     2016-09-16  2016-09-16
+ENCSR000CTW       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000CTY       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000CWK       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000CWL       GRCh38 v24 -      1,2,3 no     2016-09-16  2016-09-16
+ENCSR000CWM       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000CWN       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000CWO       GRCh38 v24 -      1     no     2016-09-16  2016-09-16
+ENCSR000CWP       GRCh38 v24 -      1     no     2016-09-16  2016-09-16
+ENCSR000CWQ       GRCh38 v24 -      1,2,3 no     2016-09-16  2016-09-16
+ENCSR000CWR       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000EYN       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000EYO       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000EYP       GRCh38 v24 -    1,2,3,4 no     2016-09-16  2016-09-16 # Failed on awk??? 4 of 4
+ENCSR000EYQ       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000EYR       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR000EYS       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16 # Failed on awk??? 1 of 2 so far
+ENCSR000EYT       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+ENCSR329MHM       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16
+
 ####### GRCh38 Full list
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
 ENCSR000AAA       GRCh38 v24 -      1,2   no      -          2016-02-20  2016-02-24   19h06m  $52.31
