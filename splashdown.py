@@ -1148,20 +1148,20 @@ class Splashdown(object):
         obj['lab'] = encd.DCC_PIPELINE_LAB
         obj['award'] = encd.DEFAULT_DCC_AWARD
 
-        ### # Find replicate info
-        ### #if rep_tech.startswith("rep") and len(rep_tech) == 6:
-        ### (br,tr) = (None,None)
-        ### if rep_tech.startswith("reps"):
-        ###     br_tr = rep_tech[4:]
-        ###     (br,tr) = br_tr.split('_')
-        ###     tr = tr.split('.')[-1]       # TODO: Get buy in for bio_rep files being associated with the last tech_rep.
-        ### elif rep_tech.startswith("rep"):
-        ###     br_tr = rep_tech[3:]
-        ###     (br,tr) = br_tr.split('_')
-        ### if br != None and tr != None:
-        ###     full_mapping = encd.get_full_mapping(self.exp_id,self.exp)
-        ###     mapping = encd.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
-        ###     obj['replicate'] = mapping['replicate_id']
+        # TODO: Remove replicate from result files?  Decision still being made.
+        # Find replicate info
+        (br,tr) = (None,None)
+        if rep_tech.startswith("reps"):
+            br_tr = rep_tech[4:]
+            (br,tr) = br_tr.split('_')
+            tr = tr.split('.')[-1]       # TODO: Get buy in for bio_rep files being associated with the last tech_rep.
+        elif rep_tech.startswith("rep"):
+            br_tr = rep_tech[3:]
+            (br,tr) = br_tr.split('_')
+        if br != None and tr != None:
+            full_mapping = encd.get_full_mapping(self.exp_id,self.exp)
+            mapping = encd.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
+            obj['replicate'] = mapping['replicate_id']
 
         if verbose:
             print >> sys.stderr, "After adding encoded info:"
