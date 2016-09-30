@@ -1040,9 +1040,10 @@ class Launch(object):
         return priors
 
 
-    def find_inputs_and_priors(self,branch_id,globs):
+    def find_inputs_and_priors(self,branch_id,globs,verbose=False):
         '''Finds the inputs and priors for all reps for a given branch of the pipeline.'''
         # NOT EXPECTED TO OVERRIDE
+        #verbose=True
                     
         if not self.template:
             print "Checking for prior results..."
@@ -1076,6 +1077,11 @@ class Launch(object):
                 rep['inputs']['Reads2'] = dx.find_and_copy_read_files(rep['priors'], \
                                                     rep['fastqs']['2'], self.test, 'reads2', \
                                                     rep['resultsFolder'], False, self.proj_id)
+                if verbose:
+                    print "%s" % str(rep['fastqs']['1'])
+                    print json.dumps(rep['inputs']['Reads1'],indent=4,sort_keys=True)
+                    print "%s" % str(rep['fastqs']['2'])
+                    print json.dumps(rep['inputs']['Reads2'],indent=4,sort_keys=True)
 
         for rep in self.psv['reps'].values():
             # If rep has tributaries, then look for those priors!
@@ -1439,7 +1445,7 @@ class Launch(object):
 
         if not self.template:       
             if len(file_input) == 0:
-                print >> sys.stderr, "ERROR: step '"+step_id+"' can't find input '"+file_token+"'!"
+                print >> sys.stderr, "ERROR: step '%s'  can't find input '%s' paired:%s" % (step_id,file_token,str(rep['paired_end']))
                 #print >> sys.stderr, json.dumps(rep['priors'],indent=4,sort_keys=True)
                 sys.exit(1)
             if 'tributaries' in rep and len(file_input) != expect_count:

@@ -51,12 +51,12 @@ ENCSR420NOA  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted
 ENCSR423UEH  E3 hg19  1           2016-08-30  2016-09-12  
 ENCSR429RHR  E3 hg19  1,2         2016-08-30  2016-09-12  
 ENCSR435NHO  E3 hg19  1,2         2016-08-30  2016-09-12  
-ENCSR456SOX  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR456SOX  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-29: missed that it needed a restart. 
 ENCSR458LIB  E3 hg19  1,2         2016-08-30  2016-09-12  
 ENCSR475SYH  E3 hg19  1           2016-08-30  2016-09-12  
 ENCSR485CIR  E3 hg19  1           2016-08-30  2016-09-12  
 ENCSR493IAY  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error
-ENCSR499IFY  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR499IFY  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-29: missed that it needed a restart. 
 ENCSR501FWC  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error/rev step
 ENCSR503BEM  E3 hg19  1,2         2016-08-30  2016-09-12  
 ENCSR512CWR  E3 hg19  1           2016-08-30  2016-09-12  
@@ -79,7 +79,7 @@ ENCSR699ZLY  E3 hg19  1,2         2016-08-30  2016-09-12
 ENCSR705CNJ  E3 hg19  1,2         2016-08-30  2016-09-12  
 ENCSR724SCF  E3 hg19  1           2016-08-30  2016-09-12  
 ENCSR746ZPP  E3 hg19  1,2         2016-08-30  2016-09-12  
-ENCSR754LIN  E3 hg19  1           2016-08-30  2016-09-12  
+ENCSR754LIN  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-29: missed that it needed a restart. 
 ENCSR759UNY  E3 hg19  1,2         2016-08-30  2016-09-12    # 10 files rep1_1:14GB, rep2_1:4GB
 ENCSR790FIS  E3 hg19  1           2016-08-30  2016-09-12  
 ENCSR804RSI  E3 hg19  1           2016-08-30  2016-09-12  
@@ -96,9 +96,8 @@ ENCSR859CZM  E3 hg19  1           2016-08-30  2016-09-12
 ENCSR863XNX  E3 hg19  1           2016-08-30  2016-09-12  
 ENCSR865ICK  E3 hg19  1           2016-08-30  2016-09-12  
 ENCSR873PLF  E3 hg19  1           2016-08-30  2016-09-12  
-ENCSR901BRM  E3 hg19  1           2016-08-30  2016-09-12    # HOLD: filter_reads.py exception  Jemma tracks to bwa 0.7.3a
 ENCSR902XFY  E3 hg19  1,2         2016-08-30  2016-09-12  
-ENCSR907VOR  E3 hg19  1           2016-08-30  2016-09-12    # RUNNING: still aligning after 8d9h 
+ENCSR907VOR  E3 hg19  1           2016-08-30  2016-09-12    # Success, 10d01h26m $347.57 
 ENCSR910OQF  E3 hg19  1,2         2016-08-30  2016-09-12  
 ENCSR940NLN  E3 hg19  1,2         2016-08-30  2016-09-12    # 10 files rep1_1:8GB, rep2_1:23GB
 ENCSR945ENZ  E3 hg19  1           2016-08-30  2016-09-12  
@@ -111,18 +110,18 @@ ENCSR997TXZ  E3 hg19  1           2016-08-30  2016-09-12
 
 # Working on: (both paired and unpaired) DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
 #Experiment     On    Reps        Assembled   Launched    Posted
-ENCSR083STA  E3 hg19  1_1.2,2_1.2 2016-09-14  2016-09-16   # Success, First SE test
-ENCSR097BWW  E3 hg19  1_1.2,2     2016-09-14  2016-09-22   # Success
-ENCSR127PWK  E3 hg19  1_1.2       2016-09-14  2016-09-22   # Success
-ENCSR269SIA  E3 hg19  1_1.2,2     2016-09-14  2016-09-22   # Success
-ENCSR346IHH  E3 hg19  1_1.2,2_1.2 2016-09-14  2016-09-22   # Success
-ENCSR346JWH  E3 hg19  1,2         2016-09-14  2016-09-22   # Success
-ENCSR426IEA  E3 hg19  1,2_1.2     2016-08-30  2016-09-22   # Success, mixed PE and SE techreps: fixed
-ENCSR475VQD  E3 hg19  1,2_1.2     2016-09-14  2016-09-22   # Success
-ENCSR515EWI  E3 hg19  1_1.2,2_1.2 2016-09-14  2016-09-22   # Success
-ENCSR548MMD  E3 hg19  1,2_1.2     2016-08-30  2016-09-22   # Success, mixed PE and SE techreps
-ENCSR594NOE  E3 hg19  1,2_1.2     2016-09-14  2016-09-22   # Success
-ENCSR595CSH  E3 hg19  1,2_1.2     2016-09-14  2016-09-22   # Success
+ENCSR083STA  E3 hg19  1_1.2,2_1.2 2016-09-14  2016-09-16    # Success, First SE test
+ENCSR097BWW  E3 hg19  1_1.2,2     2016-09-14  2016-09-22    # Success
+ENCSR127PWK  E3 hg19  1_1.2       2016-09-14  2016-09-22    # Success
+ENCSR269SIA  E3 hg19  1_1.2,2     2016-09-14  2016-09-22    # Success
+ENCSR346IHH  E3 hg19  1_1.2,2_1.2 2016-09-14  2016-09-22    # Success
+ENCSR346JWH  E3 hg19  1,2         2016-09-14  2016-09-22    # Success
+ENCSR426IEA  E3 hg19  1,2_1.2     2016-08-30  2016-09-22    # Success, mixed PE and SE techreps: fixed
+ENCSR475VQD  E3 hg19  1,2_1.2     2016-09-14  2016-09-22    # Success
+ENCSR515EWI  E3 hg19  1_1.2,2_1.2 2016-09-14  2016-09-22    # Success
+ENCSR548MMD  E3 hg19  1,2_1.2     2016-08-30  2016-09-22    # Success, mixed PE and SE techreps
+ENCSR594NOE  E3 hg19  1,2_1.2     2016-09-14  2016-09-22    # Success
+ENCSR595CSH  E3 hg19  1,2_1.2     2016-09-14  2016-09-22    # Success
 ENCSR627NIF  E3 hg19  1,2_1.2     2016-09-14  2016-09-22    # RUNNING: still aligning after 6d7h
 ENCSR700ILE  E3 hg19  1_1.3       2016-09-14  2016-09-22
 ENCSR706IDL  E3 hg19  1_1.2,2     2016-09-14  2016-09-22
@@ -147,9 +146,8 @@ ENCSR620WAR  E3 hg19  1_1.2,2_1.2 2016-09-14               # PE/SE # requires la
 ENCSR621ENC  E3 hg19  1,2_1.2     2016-09-14               # no barcode
 ENCSR657DFR  E3 hg19  1,2         2016-08-30               # no barcode
 ENCSR662HMO  E3 hg19  1_1.2,2_1.2 2016-09-14               # no barcode
+ENCSR901BRM  E3 hg19  1           2016-08-30  2016-09-12   # FAILED: filter_reads.py exception  Jemma tracks to bwa 0.7.3a
 ENCSR979ZJS  E3 hg19  1           2016-08-30               # no barcode  6 files, rep1_1:17GB
-
-
 
 # TODO: (HOLD: requires lab review) DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
 ENCSR000FDI

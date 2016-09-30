@@ -23,6 +23,7 @@ import argparse,os, sys
 import json, urlparse, subprocess, itertools, logging, time
 #import requests, re, shlex, time
 from datetime import datetime
+from datetime import date
 from base64 import b64encode
 import commands
 
@@ -2033,6 +2034,9 @@ class Splashdown(object):
         accession = f_obj.get('accession')
         if accession == None:
             return None
+        status = f_obj['status']
+        if status == 'upload failed': # Hopefully this will try to repost it!
+            return None
             
         assert f_obj.get('accession') == payload.get('accession')
         assert f_obj.get('dataset') == "/experiments/" + payload.get('dataset') + "/"
@@ -2045,7 +2049,8 @@ class Splashdown(object):
         del update_payload['status']
         del update_payload['dataset'] 
         del update_payload['file_format']
-        del update_payload['file_format_type']
+        if 'file_format_type' in update_payload:
+            del update_payload['file_format_type']
         del update_payload['output_type']
 
         if not test:
@@ -2102,8 +2107,14 @@ class Splashdown(object):
         return None
 
 
-    def print_analysis_totals(self,exp_id):
+    def print_analysis_totals(self,exp_id, rep_str):
         '''Prints totals for all analyses for an experiment.'''
+        today = date.today()
+        anno = self.annotation
+        if anno == None:
+            anno = ""
+            
+
         total_cost = 0
         total_dur = 0
         count = 0
@@ -2140,10 +2151,10 @@ class Splashdown(object):
             # 27888946 / 7.75 = 3598573.54838709677419
             duration = dx.format_duration(0,total_dur/1000,include_seconds=False)
             #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:    hg19 v19      1      -           2016-08-25  2016-08-30 %s  $%.2f" % \
-            #    (duration.rjust(8), total_cost)
-            print "%s %d %s  cost: %s  $%.2f" % \
-                (exp_id, len(self.obj_cache["exp"]["ana_id"]), self.obj_cache["exp"]["ana_id"][0], duration, total_cost)
+            #print "cost:    %s %s      1      -           2016-08-25  %s %s  $%.2f" % \
+            #    (self.genome, anno, today.strftime('%Y-%m-%d'), duration.rjust(8), total_cost)
+            print "%s cost:    %s %s      %s      %s %s  $%.2f" % \
+                (exp_id, self.genome, anno, rep_str, today.strftime('%Y-%m-%d'), duration.rjust(8), total_cost)
 
     def run(self):
         '''Runs splasdown from start to finish using command line arguments.'''
@@ -2236,8 +2247,19 @@ class Splashdown(object):
             post_count = 0
             patch_count = 0
             qc_obj_count = 0
+            rep_str = ""
             for (out_type,rep_tech,fid,QC_only) in files_to_post:
                 sys.stdout.flush() # Slow running job should flush to piped log
+                
+                # just building a replicates string for a later message
+                if len(rep_tech) > 3:
+                    rep = rep_tech[3:]
+                    if rep_tech.startswith('reps'):
+                        rep = rep_tech[4:]
+                    if len(rep_str) == 0:
+                        rep_str = rep
+                    elif not rep_str.endswith(',' + rep):
+                        rep_str = rep_str + ',' + rep
 
                 if args.files != 0 and file_count >= args.files:  # Short circuit for test
                     print "- Just trying %d file(s) by request" % file_count
@@ -2299,7 +2321,7 @@ class Splashdown(object):
             else:
                 print "- For %s processed %d file(s), would post %d, patched %d, qc %d" % \
                                                         (self.exp_id, file_count, post_count, patch_count, qc_obj_count)
-            self.print_analysis_totals(self.exp_id)
+            self.print_analysis_totals(self.exp_id, rep_str)
             total_posted += post_count
             total_patched += patch_count
             

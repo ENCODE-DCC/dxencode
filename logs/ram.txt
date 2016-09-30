@@ -1,13 +1,10 @@
 ##### DONE: reversed: lrna_221/rampage> ./build_applets rampage-align-pe/ rampage-idr/ rampage-mad-qc/ rampage-peaks/ rampage-signals/
 
 
-# TODO: 1 rampage missed for GRCh38 http://redmine.encodedcc.org/issues/3156#note-56
-# Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
-ENCSR000CIP E2 GRCh38 V24 C  1      2016-09-28  2016-09-28
-
 # TODO: Holdouts of CAGE http://redmine.encodedcc.org/issues/4187#change-31361
 # Experiment   On            Reps   Assembled   Launched    Posted     Duration Cost
 ENCSR000CIN    GRCh38 v24    1      2016-09-16  2016-09-16  # Nathan: "is really, really shallow. So I would just drop this experiment.'
+ENCSR000CIP E2 GRCh38 V24 C  1      2016-09-28  2016-09-28  # Failed: low number of reads
 ENCSR000CJR E2 GRCh38 V24 C  3,4*   2016-07-05  2016-08-01    *3,4_1.2  NOT READY for pipeline yet
 ENCSR000CJY E2 GRCh38 V24 C  1,2*   2016-07-05  2016-08-01    *1_1.2,2_1.2 <===  NOT READY for pipeline yet
 ENCSR000CKH E2 GRCh38 V24 C  1,2    2016-07-05  2016-09-16 # Nathan: "only has ~20,000 reads, which is really, really shallow. So I would just drop this experiment.'
