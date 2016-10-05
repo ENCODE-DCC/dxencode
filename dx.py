@@ -585,7 +585,7 @@ def umbrella_folder(folder,default,proj_name=None,exp_type=None,sub_folder=None,
     if exp_type == None:
         return folder_normalize(folder)
 
-    if proj_name == PRODUCTION_PROJECT:
+    if proj_name == PRODUCTION_PROJECT or proj_name.find('roduction') != -1:
         if sub_folder == None:
             sub_folder = "runs/" 
         if exp_type == "long-rna-seq":

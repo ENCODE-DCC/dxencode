@@ -1,7 +1,10 @@
 
 ##### DONE: reversed: lrna_221> ./build_applets align-star-pe/ align-star-se/ align-tophat-pe/ align-tophat-se/ bam-to-bigwig-stranded/ bam-to-bigwig-unstranded/ quant-rsem/ mad-qc/
 
-# TODO: 16/19 for GRCh38 http://redmine.encodedcc.org/issues/3060#note-272
+# Working on: One for Aditi in hg19 to test (she is doing the other 31 on hg19 and all 32 on GRCh38).  http://redmine.encodedcc.org/issues/3060#note-280
+ENCSR174OYC
+
+# ON hold: FAILED: 16/19 for GRCh38 http://redmine.encodedcc.org/issues/3060#note-272
 # Experiment      On                Reps  TopHat  Assembled  Launched    Posted         Time  Cost
 ENCSR000BZU       GRCh38 v24 -      1     no     2016-09-16  2016-09-16 # Failed: STAR bam: samtools sequence and quality are inconsistent
 ENCSR000CWK       GRCh38 v24 -      1,2   no     2016-09-16  2016-09-16 # Failed: STAR bam: samtools sequence and quality are inconsistent
