@@ -8,19 +8,70 @@
 # bio2      N=62  Avg=$174.10 min=44.16 max=364.20
 # all       N=119 Avg=$135.53 min=11.49 max=364.20
 
-# Working on: 1st test: DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
-#Experiment     On    Reps        Assembled   Launched    Posted
-ENCSR749BWV  E3 hg19  1,2         2016-08-30  2016-09-01    # Success, 10 fastqs rep1_1:7GB, rep2_1:7GB <=== PE 1_1.2,2_1.2.3 *****
+# Done: 1st test: DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
+#Experiment     On    Reps        Assembled   Launched    Posted     Duration     Cost 
+ENCSR749BWV  E3 hg19  1,2         2016-08-30  2016-09-01  2016-10-05 5d08h19m  $181.43  # First launched, first posted 10 fastqs rep1_1:7GB, rep2_1:7GB <=== PE 1_1.2,2_1.2.3 *****
+
+# Done: DNase ENCODE3: 1 replicate PE hg19
+#Experiment     On    Reps        Assembled   Launched    Posted     Duration     Cost 
+ENCSR048BUO  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   21h47m   $30.80
+ENCSR064EFK  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   12h21m   $17.46
+ENCSR066WZJ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d20h39m   $63.15
+ENCSR087QUG  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d03h28m   $38.85
+ENCSR137EEM  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d04h36m   $40.44
+ENCSR171ETY  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d05h46m  $143.89
+ENCSR174TIP  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d15h35m  $157.78
+ENCSR191FOV  E3 hg19  1           2016-08-30  2016-09-07  2016-10-05 3d20h17m  $130.49
+ENCSR207TUX  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   18h06m   $25.58
+ENCSR215FCQ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d02h01m   $36.79
+ENCSR229PFU  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   13h59m   $19.77
+ENCSR237WJY  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 5d08h56m  $182.30
+ENCSR274JIR  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   12h40m   $17.91
+ENCSR382JUJ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d06h06m  $144.37
+ENCSR423UEH  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   17h17m   $24.44
+ENCSR456SOX  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 8d16h13m  $294.42
+ENCSR475SYH  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 6d20h41m  $232.87
+ENCSR485CIR  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   13h17m   $18.79
+ENCSR493IAY  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 3d07h57m  $113.05
+ENCSR499IFY  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 8d06h43m  $280.98
+ENCSR512CWR  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 3d00h58m  $103.17
+ENCSR514EOB  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   16h19m   $23.08
+ENCSR522WLH  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d06h03m  $144.30
+ENCSR527IGO  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   18h50m   $26.63
+ENCSR559WMK  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 3d06h60m  $111.70
+ENCSR577TXK  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d00h53m   $35.20
+ENCSR579BNV  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 8d13h37m  $290.73  # Success, Restarted 2016-09-27: 7 day align finished but merge predicably failed 
+ENCSR584LUZ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d10h39m  $150.80
+ENCSR592DQC  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d12h01m  $152.74  # Success, Restarted 2016-09-16: oom error/rev step
+ENCSR632CQZ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d08h56m   $46.56
+ENCSR724SCF  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   21h39m   $30.61
+ENCSR790FIS  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 5d01h14m  $171.42
+ENCSR804RSI  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 2d09h47m   $81.71
+ENCSR809LCE  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 2d06h29m   $77.05
+ENCSR813CKU  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   18h25m   $26.03
+ENCSR815JAA  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   16h17m   $23.04
+ENCSR818YUC  E3 hg19  1           2016-08-30  2016-09-07  2016-10-05   18h47m   $26.57
+ENCSR820ICX  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 2d14h29m   $88.36
+ENCSR826CTO  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d06h56m   $43.73
+ENCSR848XIY  E3 hg19  1           2016-08-30  2016-09-07  2016-10-05 4d00h05m  $135.87
+ENCSR855DJV  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d21h39m   $64.54
+ENCSR859CZM  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 1d11h32m   $50.24
+ENCSR863XNX  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d04h11m  $141.65
+ENCSR865ICK  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 4d08h38m  $147.96
+ENCSR873PLF  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   18h16m   $25.82
+ENCSR907VOR  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05 10d02h58m  $343.57  # Success, 10d01h26m $347.57  <==== 2nd place!  29.60038G fastqs
+ENCSR945ENZ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   19h10m   $27.10
+ENCSR967DXR  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   18h45m   $26.52
+ENCSR982JMP  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   23h19m   $32.97
+ENCSR986YWZ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05   18h45m   $26.52
+ENCSR997TXZ  E3 hg19  1           2016-08-30  2016-09-12  2016-10-05    8h08m   $11.49
 
 # Working on: 2nd batch: DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
 #Experiment     On    Reps        Assembled   Launched    Posted
 ENCSR017OZH  E3 hg19  1,2         2016-08-30  2016-09-07    # Success, 16 fastqs, rep1_1:9GB, rep2_1:8GB
 ENCSR149XIL  E3 hg19  1,2         2016-08-30  2016-09-07    # Success, 10 fastqs, rep1_1:5GB, rep2_1:28GB
-ENCSR191FOV  E3 hg19  1           2016-08-30  2016-09-07    # Success,  4 fastqs, rep1_1:5GB
 ENCSR785BDQ  E3 hg19  1,2         2016-08-30  2016-09-07    # Success, 12 fastqs, rep1_1:13GB, rep2_1:3GB
-ENCSR818YUC  E3 hg19  1           2016-08-30  2016-09-07    # Success,  4 fastqs, rep1_1:5GB
 ENCSR845CFB  E3 hg19  1,2         2016-08-30  2016-09-07    # Success, 10 fastqs, rep1_1:6GB, rep2_1:20GB
-ENCSR848XIY  E3 hg19  1           2016-08-30  2016-09-07    # Success,  4 fastqs, rep1_1:7GB
 ENCSR932KWJ  E3 hg19  1,2         2016-08-30  2016-09-07    # Success, 14 fastqs, rep1_1:7GB, rep2_1:13GB
 ENCSR943SYS  E3 hg19  1,2         2016-08-30  2016-09-07    # Success, 12 fastqs, rep1_1:9GB, rep2_1:12GB 
 ENCSR959ZXU  E3 hg19  1,2         2016-08-30  2016-09-07    # Success,  8 fastqs, rep1_1:16GB, rep2_1:4.5GB
@@ -29,92 +80,44 @@ ENCSR959ZXU  E3 hg19  1,2         2016-08-30  2016-09-07    # Success,  8 fastqs
 #Experiment     On    Reps        Assembled   Launched    Posted
 ENCSR019JDO  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, 10 fastqs rep1_1:29GB, rep2_1:14GB
 ENCSR037PGI  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR048BUO  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR052AWE  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR064EFK  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR066WZJ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR087QUG  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR121ZSL  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR137EEM  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR148VUP  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR158VAT  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR171ETY  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR174TIP  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error/rev step
-ENCSR207TUX  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR215FCQ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR217SET  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error/rev step
 ENCSR228IKB  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR229PFU  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR237WJY  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR240TPI  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, 10 fastqs rep1_1:27GB, rep2_1:3GB
 ENCSR265TEK  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR274JIR  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR314EZY  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR318PRQ  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR364MFN  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, 8 fastqs rep1_1:14GB, rep2_1:140MB
 ENCSR373BIX  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR382JUJ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR405TXU  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR420NOA  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error
-ENCSR423UEH  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR429RHR  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR435NHO  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR456SOX  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-29: missed that it needed a restart. 
 ENCSR458LIB  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR475SYH  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR485CIR  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR493IAY  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error
-ENCSR499IFY  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-29: missed that it needed a restart. 
 ENCSR501FWC  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error/rev step
 ENCSR503BEM  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR512CWR  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR514EOB  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR522WLH  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR527IGO  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR532CRI  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error/rev step
-ENCSR559WMK  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR560CCF  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-15: trim-adapters-illumina silent failure bad barcode  6 fastqs rep1_1:5.5GB rep2_1:9.5GB <=== PE 1_1.2,2_1 
 ENCSR564JUY  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR575VMI  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR577TXK  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR579BNV  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-27: 7 day align finished but merge predicably failed 
-ENCSR584LUZ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR592DQC  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error/rev step
 ENCSR593LTJ  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR620QNS  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR632CQZ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR699ZLY  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR705CNJ  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR724SCF  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR746ZPP  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR754LIN  E3 hg19  1           2016-08-30  2016-09-12    # Success, Restarted 2016-09-29: missed that it needed a restart. 
 ENCSR759UNY  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, 10 fastqs rep1_1:14GB, rep2_1:4GB
-ENCSR790FIS  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR804RSI  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR809LCE  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR813CKU  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR814KRX  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR815JAA  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR818JGZ  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR820ICX  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR820WLP  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR826CTO  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR855DJV  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR859CZM  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR863XNX  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR865ICK  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR873PLF  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR902XFY  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
-ENCSR907VOR  E3 hg19  1           2016-08-30  2016-09-12    # Success, 10d01h26m $347.57  <==== 2nd place!  29.60038G fastqs
 ENCSR910OQF  E3 hg19  1,2         2016-08-30  2016-09-12    # Success  
 ENCSR940NLN  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, 10 fastqs rep1_1:8GB, rep2_1:23GB
-ENCSR945ENZ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 ENCSR964MZQ  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error/rev step
 ENCSR964WHY  E3 hg19  1,2         2016-08-30  2016-09-12    # Success, Restarted 2016-09-16: oom error
-ENCSR967DXR  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR982JMP  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR986YWZ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
-ENCSR997TXZ  E3 hg19  1           2016-08-30  2016-09-12    # Success  
 
 # Working on: (both paired and unpaired) DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
 #Experiment     On    Reps        Assembled   Launched    Posted

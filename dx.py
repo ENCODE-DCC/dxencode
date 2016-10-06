@@ -593,7 +593,7 @@ def umbrella_folder(folder,default,proj_name=None,exp_type=None,sub_folder=None,
         elif exp_type == "small-rna-seq":
             folder = "/small-RNA-seq/"
         elif exp_type == "dnase-seq":
-            folder = "/DNAse-seq/"
+            folder = "/DNase-seq/"
         elif exp_type == "dna-me":
             folder = "/WG Bisulfite (Methylation)/"
         elif exp_type == "chip-seq":
