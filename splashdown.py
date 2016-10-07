@@ -58,7 +58,6 @@ class Splashdown(object):
     # Note: that some steps have multiple files with the same output_type (e.g. hotspot: bed & bb). 
     #       When this happens, key on "output_type|format|format_type": file_glob 
     #       (e.g. "hotspot|bed|narrowPeak": "*_hotspot.bed" and "hotspot|bb|narrowPeak": "*_hotspot.bb")
-    #       TODO: This could be done more gracefully.
     PIPELINE_SPECS = {
          "long-rna-seq": {
             "step-order": [ "align-tophat","signals-top-se","signals-top-pe",
@@ -221,7 +220,6 @@ class Splashdown(object):
                                     "files": {"results": "detail", "inputs": ["peaks_a", "peaks_b"] },        
                                     "blob": { "pattern": "/*_idr.png" }, 
                                 },
-        # TODO: characterized DNase qc_metrics better.  Especially files.
         "samtools_flagstats":   { 
                                     "files": {"results": "detail"}, 
                                     "blob": { "pattern": "/*_qc.txt" } 
@@ -388,8 +386,8 @@ class Splashdown(object):
         self.exp = {}  # Will hold the encoded exp json
         self.exp_id = None
         self.exp_type = {}  # Will hold the experiment's assay_type, normalized to known tokens.
-        self.genome = None  # TODO: need way to determine genome before any posts occur!
-        self.annotation = None  # TODO: if appropriate, need way to determine annotation
+        self.genome = None
+        self.annotation = None
         self.pipeline = None # pipeline definitions (filled in when experiment type is known)
         self.replicates = None # lost replicate folders currently found beneath experiment folder
         self.test = True # assume Test until told otherwise
@@ -399,7 +397,7 @@ class Splashdown(object):
         self.way_back_machine = False # Don't support methods/expectations used on very old runs.  Only modern methods!      
         self.exp_files = None # Currently only used by 'recovery' and the way_back_machine
         self.alt_accessions = False # Support looking up alternate accessions?
-        self.found = {} # stores file objects from encode to avoid repeated lookups # TODO: place in obj_cache?
+        self.found = {} # stores file objects from encode to avoid repeated lookups
         logging.basicConfig(format='%(asctime)s  %(levelname)s: %(message)s')
         encd.logger = logging.getLogger(__name__ + '.dxe') # I need this to avoid some errors
         encd.logger.addHandler(logging.StreamHandler()) #logging.NullHandler)
@@ -500,7 +498,7 @@ class Splashdown(object):
         #self.expected = copy.deepcopy(self.PIPELINE_SPECS[exp_type])
 
         pipeline_specs = self.PIPELINE_SPECS.get(exp_type)
-        self.annotation = None  # TODO: if appropriate, need way to determine annotation
+        self.annotation = None
 
         if verbose:
             print >> sys.stderr, "Pipeline specification:"
@@ -530,7 +528,7 @@ class Splashdown(object):
 
     def find_genome_annotation(self,posting_fid,derived_from_file_dict):
         '''Try to determine genome from input file properties.'''
-        # TODO: currently done in derived_from which is only run on needed files
+        # Note: currently done in derived_from which is only run on needed files
         #       much change to do this on expected files.
         properties = derived_from_file_dict["properties"]
         msg = ""
@@ -711,7 +709,7 @@ class Splashdown(object):
                 print >> sys.stderr, "* DEBUG Working on: " + dx.file_path_from_fid(fid,projectToo=True)
                 
             # Posted files should have accession in properties
-            # TODO: make use of new file_get_acession() insteead
+            # TODO: make use of new file_get_acession() instead
             #accession = self.file_get_accession(qc_fid,verify=True,fake_if_needed=False)
             #if fid in self.found:
             #    posted.append( (out_type,rep_tech,fid) )
@@ -958,7 +956,7 @@ class Splashdown(object):
         
     def input_exception(self,inp_fid):
         '''Returns True if this is one of a limit number of input files we do not track in encodeD.'''
-        # TODO: move specifics to json at top of file.
+        # Note: move specifics to json at top of file.
         # Unfortunate special case: the map_report is essentially a QC_only file but is an input to a step in order to 
         # combine multiple map_reports into a single qc_metric.
         try:
@@ -1149,20 +1147,20 @@ class Splashdown(object):
         obj['lab'] = encd.DCC_PIPELINE_LAB
         obj['award'] = encd.DEFAULT_DCC_AWARD
 
-        # TODO: Remove replicate from result files?  Decision still being made.
+        # Decided: Remove replicate from result files?  Decision still being made.
         # Find replicate info
-        (br,tr) = (None,None)
-        if rep_tech.startswith("reps"):
-            br_tr = rep_tech[4:]
-            (br,tr) = br_tr.split('_')
-            tr = tr.split('.')[-1]       # TODO: Get buy in for bio_rep files being associated with the last tech_rep.
-        elif rep_tech.startswith("rep"):
-            br_tr = rep_tech[3:]
-            (br,tr) = br_tr.split('_')
-        if br != None and tr != None:
-            full_mapping = encd.get_full_mapping(self.exp_id,self.exp)
-            mapping = encd.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
-            obj['replicate'] = mapping['replicate_id']
+        #(br,tr) = (None,None)
+        #if rep_tech.startswith("reps"):
+        #    br_tr = rep_tech[4:]
+        #    (br,tr) = br_tr.split('_')
+        #    tr = tr.split('.')[-1]       # Get buy in for bio_rep files being associated with the last tech_rep.
+        #elif rep_tech.startswith("rep"):
+        #    br_tr = rep_tech[3:]
+        #    (br,tr) = br_tr.split('_')
+        #if br != None and tr != None:
+        #    full_mapping = encd.get_full_mapping(self.exp_id,self.exp)
+        #    mapping = encd.get_replicate_mapping(self.exp_id,int(br),int(tr),full_mapping)
+        #    obj['replicate'] = mapping['replicate_id']
 
         if verbose:
             print >> sys.stderr, "After adding encoded info:"

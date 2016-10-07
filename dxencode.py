@@ -1232,13 +1232,13 @@ def umbrella_folder(folder,default,proj_name=None,exp_type=None,genome=None,anno
     if exp_type == None:
         return folder_normalize(folder)
 
-    if proj_name == PRODUCTION_PROJECT:
+    if proj_name == PRODUCTION_PROJECT or proj_name.find('roduction') != -1:
         if exp_type == "long-rna-seq":
             folder = "/long-RNA-seq/runs/"
         elif exp_type == "small-rna-seq":
             folder = "/small-RNA-seq/runs/"
         elif exp_type == "dnase-seq":
-            folder = "/DNAse-seq/runs/"
+            folder = "/DNase-seq/runs/"
         elif exp_type == "dna-me":
             folder = "/WG Bisulfite (Methylation)/runs/"
         elif exp_type == "chip-seq":
