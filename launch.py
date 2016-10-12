@@ -1858,7 +1858,7 @@ class Launch(object):
             print "Template workflow '" + wf.name + "' has been assembled in "+run['resultsFolder'] + "."
         elif ignition:
             print "Launch sequence initiating..."
-            wf_run = wf.run({}, project=self.proj_id) # ,priorty="high")
+            wf_run = wf.run({}, project=self.proj_id,priorty="normal")
             if wf_run == None:
                 print >> sys.stderr, "ERROR: failure to lift off!"
                 sys.exit(1)

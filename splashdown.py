@@ -603,13 +603,14 @@ class Splashdown(object):
                      expected.extend(step_files) # keep them in order!
 
         # Now add combined step files
-        for step in self.pipeline["step-order"]:
-            if step not in self.pipeline["combined"]:
-                continue
-            step_files = self.find_step_files(self.pipeline["combined"][step], \
-                                                                    exp_folder,"combined",verbose)
-            if len(step_files) > 0:
-                 expected.extend(step_files) # keep them in order!
+        if "combined" in self.pipeline:
+            for step in self.pipeline["step-order"]:
+                if step not in self.pipeline["combined"]:
+                    continue
+                step_files = self.find_step_files(self.pipeline["combined"][step], \
+                                                                        exp_folder,"combined",verbose)
+                if len(step_files) > 0:
+                     expected.extend(step_files) # keep them in order!
 
         if verbose:
             print >> sys.stderr, "Expected files:"
