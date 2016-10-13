@@ -776,7 +776,9 @@ class Launch(object):
                 else:
                     rep['umi'] = 'no'
                 if len(barcodes) > 0:
-                    rep['barcode'] = barcodes[0]    
+                    rep['barcode'] = barcodes[0]
+                else:    
+                    rep['barcode'] = "undetected"
                 
         # mult-rep rep_tech: 
         if self.combined_reps:
