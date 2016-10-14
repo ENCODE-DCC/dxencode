@@ -1233,19 +1233,26 @@ class Splashdown(object):
             enc_qc_props[qc_faq["singleton"]] = dx_qc_obj
         elif "props" in qc_faq: # Only selected properties and some oh them may be renamed
             for key in qc_faq['props'].keys():
-                enc_qc_props[qc_faq['props'][key]] = dx_qc_obj[key]
+                if not isinstance(dx_qc_obj[key],str) or dx_qc_obj[key] != "":
+                    enc_qc_props[qc_faq['props'][key]] = dx_qc_obj[key]
         elif "include" in qc_faq: # only selected properties, none of them are renamed
             for key in qc_faq['include']:
-                enc_qc_props[key] = dx_qc_obj[key]
+                if not isinstance(dx_qc_obj[key],str) or dx_qc_obj[key] != "":
+                    enc_qc_props[key] = dx_qc_obj[key]
         elif "exclude" in qc_faq: # all except excluded properties, and no renaming
             for key in dx_qc_obj.keys():
                 if key not in qc_faq['exclude']:
-                    enc_qc_props[key] = dx_qc_obj[key]
+                    if not isinstance(dx_qc_obj[key],str) or dx_qc_obj[key] != "":
+                        enc_qc_props[key] = dx_qc_obj[key]
         else:
-            enc_qc_props = dx_qc_obj # All props in DX object shall be placed in enc object
+            for key in dx_qc_obj.keys():
+                # ugly check for empty strings. Hope it does less harm than good.
+                if not isinstance(dx_qc_obj[key],str) or dx_qc_obj[key] != "":
+                    enc_qc_props[key] = dx_qc_obj[key]
             
         if "literal" in qc_faq: # Add some literals like comments
             enc_qc_props.update(qc_faq['literal'])
+            
 
         # As of r41, qc_metrics now require lab and award properties
         enc_qc_props['lab'] = encd.DCC_PIPELINE_LAB
@@ -2106,7 +2113,7 @@ class Splashdown(object):
         return None
 
 
-    def print_analysis_totals(self,exp_id, rep_str):
+    def print_analysis_totals(self,exp_id, rep_strs):
         '''Prints totals for all analyses for an experiment.'''
         today = date.today()
         anno = self.annotation
@@ -2120,7 +2127,6 @@ class Splashdown(object):
         if "jobs" not in self.obj_cache["exp"]:
             print "Could not find jobs for cost analysis."
             return
-        #print "Found %s jobs for cost analysis." % len(self.obj_cache["exp"]["jobs"].keys())
         for job_id in self.obj_cache["exp"]["jobs"].keys():
             job = self.obj_cache["exp"]["jobs"][job_id]
             job_name = job.get("executableName")
@@ -2129,30 +2135,14 @@ class Splashdown(object):
             if job_name.startswith("prep-") or "-index" in job_name:
                 print "Not including job %s - '%s' in cost analysis." % (job_id, job["executableName"]) 
                 continue
-            #print "job %s - '%s'" % (job_id, job["executableName"]) 
             count += 1
             total_cost += job["totalPrice"]
             total_dur  += (job["stoppedRunning"] - job["startedRunning"])
-            #total_dur  += (job["modified"] - job["created"])
 
-        #for ana_id in self.obj_cache["exp"]["ana_id"]:
-        #    count += 1
-        #    try:
-        #        ana = dxpy.api.analysis_describe(ana_id)
-        #        total_cost += ana["totalPrice"]
-        #        total_dur  += (ana["modified"] - ana["created"])
-        #    except:
-        #        #print "Failed to find analysis for " + str(ana_id)
-        #        #print json.dumps(self.obj_cache["exp"]["ana_id"],indent=4)
-        #        continue
-
+        rep_str = ','.join(rep_strs)
         if total_cost > 0 or total_dur > 0:
-            # 27888946 / 7.75 = 3598573.54838709677419
             duration = dx.format_duration(0,total_dur/1000,include_seconds=False)
-            #   Print lrna.txt line as....  Then use `grep cost {path}/*.log | sed s/^.*\\/// | sed s/\.log:cost://`
-            #print "cost:    %s %s      1      -           2016-08-25  %s %s  $%.2f" % \
-            #    (self.genome, anno, today.strftime('%Y-%m-%d'), duration.rjust(8), total_cost)
-            print "%s cost:    %s %s      %s      %s %s  $%.2f" % \
+            print "%s cost:    %s %s      %-28s %s %s  $%.2f" % \
                 (exp_id, self.genome, anno, rep_str, today.strftime('%Y-%m-%d'), duration.rjust(8), total_cost)
 
     def run(self):
@@ -2246,7 +2236,7 @@ class Splashdown(object):
             post_count = 0
             patch_count = 0
             qc_obj_count = 0
-            rep_str = ""
+            rep_strs = []
             for (out_type,rep_tech,fid,QC_only) in files_to_post:
                 sys.stdout.flush() # Slow running job should flush to piped log
                 
@@ -2255,10 +2245,8 @@ class Splashdown(object):
                     rep = rep_tech[3:]
                     if rep_tech.startswith('reps'):
                         rep = rep_tech[4:]
-                    if len(rep_str) == 0:
-                        rep_str = rep
-                    elif not rep_str.endswith(',' + rep):
-                        rep_str = rep_str + ',' + rep
+                    if rep not in rep_strs:
+                        rep_strs.append(rep)
 
                 if args.files != 0 and file_count >= args.files:  # Short circuit for test
                     print "- Just trying %d file(s) by request" % file_count
@@ -2320,7 +2308,7 @@ class Splashdown(object):
             else:
                 print "- For %s processed %d file(s), would post %d, patched %d, qc %d" % \
                                                         (self.exp_id, file_count, post_count, patch_count, qc_obj_count)
-            self.print_analysis_totals(self.exp_id, rep_str)
+            self.print_analysis_totals(self.exp_id, rep_strs)
             total_posted += post_count
             total_patched += patch_count
             
