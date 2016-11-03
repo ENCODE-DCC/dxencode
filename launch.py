@@ -754,7 +754,7 @@ class Launch(object):
         
         # Assume combined reps if supported AND exactly 2 reps AND for different biological reps
         if self.PIPELINE_BRANCH_ORDER != None and 'COMBINED_REPS' in self.PIPELINE_BRANCH_ORDER:
-            if len(reps) == 2:
+            if len(cv_reps) == 2:
                 if cv_reps['a']['br'] != cv_reps['b']['br']:
                     self.combined_reps = True
                 elif self.compare_techreps and cv_reps['a']['br'] == cv_reps['b']['br'] \
