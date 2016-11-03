@@ -572,7 +572,7 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                 rep['controls'] = []
                 if rep['paired_end']:
                     for (p1, p2) in mapping['paired']:
-                        if p1['status'] != 'released':
+                        if p1['status'] not in ['released','in progress']:
                             continue
                         rep['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
                         if "run_type" in p1:
@@ -588,7 +588,7 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                             rep['controls'].append( p2['controlled_by'] )
                 else: # not rep['paired_end']:
                     for f in mapping['unpaired']:
-                        if f['status'] != 'released':
+                        if f['status'] not in ['released','in progress']:
                             continue
                         rep['fastqs']['1'].append( f['accession']+".fastq.gz" )
                         if "run_type" in f:
