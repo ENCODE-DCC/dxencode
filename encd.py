@@ -276,12 +276,13 @@ def get_bucket(f_obj, SERVER=None, AUTHID=None, AUTHPW=None):
 
     #split up the url into components
     o = urlparse.urlparse(s3_url)
+    opath = o.path.replace("/http://encode-files.s3.amazonaws.com", "") # Hacked to make sure Aditi's assemble works
 
     #pull out the filename
     filename = os.path.basename(o.path)
 
     #hack together the s3 cp url (with the s3 method instead of https)
-    return filename, S3_SERVER.rstrip('/') + o.path
+    return filename, S3_SERVER.rstrip('/') + opath
 
 def file_in_list(looking_for_file,file_list):
     md5 = looking_for_file.get('md5sum')
@@ -475,6 +476,8 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
         elif min_size >= 150:
             return "long-rna-seq"
         elif (min_size + max_size)/2 >= 235: # This is some wicked voodoo (SRNA:108-347=227; LRNA:155-315=235)        
+            return "long-rna-seq"
+        elif min_size == 120 and max_size == 200: # Another ugly exception!        
             return "long-rna-seq"
         else:
             return "small-rna-seq"

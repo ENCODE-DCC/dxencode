@@ -289,12 +289,15 @@ class Assemble(object):
             print json.dumps(replicates,indent=4)
         return replicates
 
-    def find_encoded_files(self, exp, exp_files,verbose=False):
+    def find_encoded_files(self, exp, exp_files,replicates,verbose=False):
         '''Returns list of enc file_objects for all files available on encoded.'''
         enc_files = []
         enc_file_names = []
         enc_file_md5sums = []
         #verbose = True
+        rep_techs = []
+        for rep in replicates:
+            rep_techs.append(rep['rep_tech'])
         
         # Input file should match on format and have format
         input_files = encd.files_to_map(self.exp)
@@ -303,6 +306,9 @@ class Assemble(object):
             print self.statuses_accepted
         for f_obj in input_files:
             if f_obj.get('status') not in self.statuses_accepted:
+                continue
+            rep_tech = 'rep' + str(f_obj['replicate']['biological_replicate_number']) + '_' + str(f_obj['replicate']['technical_replicate_number'])
+            if rep_tech not in rep_techs:
                 continue
             file_md5 = f_obj['md5sum']
             if file_md5 in enc_file_md5sums:
@@ -317,6 +323,17 @@ class Assemble(object):
             result_files = encd.get_exp_files(exp)
             for obj_type in exp_files['results'].keys():
                 for f_obj in result_files:
+                    bio_rep = f_obj.get('biological_replicates',[])
+                    tech_rep = f_obj.get('technological_replicates',[])
+                    if len(bio_rep) == 1 and len(tech_rep) == 1:
+                        rep_tech = 'rep' + str(bio_rep[0]) + '_' + str(tech_rep[0])
+                        if rep_tech not in rep_techs:
+                            continue
+                    rep = f_obj.get('replicate')
+                    if rep != None:
+                        rep_tech = 'rep' + str(rep['biological_replicate_number']) + '_' + str(rep.get('technical_replicate_number',1))
+                        if rep_tech not in rep_techs:
+                            continue
                     if self.genome is not None and 'assembly' in f_obj:
                         if self.genome != f_obj['assembly']:
                             if verbose:
@@ -350,10 +367,12 @@ class Assemble(object):
             # Inputs are handled one way:
             if f_obj.get('file_format') == 'fastq':
                 dx_file_name = os.path.basename(f_obj['href'])
-                file_path = exp_folder + dx_file_name
+                #file_path = exp_folder + dx_file_name
+                file_path = dx_file_name
                 # Input files may be at exp folder level!
                 # Actually input files can be found anywhere in the project, so use recurse
-                fid = dx.find_file(exp_folder + dx_file_name,self.proj_id,recurse=True)
+                #fid = dx.find_file(exp_folder + dx_file_name,self.proj_id,recurse=True)
+                fid = dx.find_file(dx_file_name,self.proj_id,recurse=True)
                 if fid == None:
                     f_obj['dx_file_name'] = dx_file_name
                     br = f_obj['replicate']['biological_replicate_number']
@@ -573,7 +592,7 @@ class Assemble(object):
             
             # File list from encoded
             expected_files = self.PIPELINE_FILES[self.exp_type]
-            available_files = self.find_encoded_files(self.exp, expected_files)
+            available_files = self.find_encoded_files(self.exp, expected_files,self.replicates)
             if len(available_files) == 0:
                 print "Warning: No files are available in encoded for %s." % self.exp_id
                 skipped += 1
