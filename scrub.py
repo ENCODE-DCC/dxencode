@@ -36,7 +36,7 @@ class Scrub(object):
     FOLDER_DEFAULT = "/"
     '''Where to start the search for experiment folders.'''
 
-    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dna-me' ] #, 'dnase' ]
+    EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dna-me', 'dnase-seq' ]
     '''This module supports only these experiment (pipeline) types.'''
 
     SKIP_VALIDATE = {"transcription start sites":'bed'}
@@ -119,6 +119,19 @@ class Scrub(object):
             "combined":   {
                 "corr":            { "QC_only":                                   "*_CpG_corr.txt" }  }, # Not yet defined in encodeD
         },
+         "dnase-seq": {
+            "step-order": [ "dnase-align-bwa","dnase-filter","dnase-call-hotspots"],
+            "replicate":  {
+                "dnase-align-bwa":     { "unfiltered alignments":                 "*_bwa_techrep.bam"         },
+                "dnase-filter":        { "alignments":                            "*_bwa_biorep_filtered.bam" },
+                "dnase-call-hotspots": { "hotspots|bed|broadPeak":                "*_hotspots.bed.gz",
+                                         "hotspots|bigBed|broadPeak":             "*_hotspots.bb",
+                                         "peaks|bed|narrowPeak":                  "*_peaks.bed.gz",
+                                         "peaks|bigBed|narrowPeak":               "*_peaks.bb",
+                                         "signal of unique reads":                "*_density.bw"              } },
+            "combined":   {
+                },
+        },
     }
     
     # Step children are steps that should be combined with their parent step rather than be treated as a separate job 
@@ -186,6 +199,7 @@ class Scrub(object):
         self.annotation = None  # if appropriate (mice), points the way to the sub-dir
         self.pipeline = None # pipeline definitions (filled in when experiment type is known)
         self.replicates = None # lost replicate folders currently found beneath experiment folder
+        self.fastqs_too = False
         self.test = True # assume Test until told otherwise
         self.force = False # remove files whether posted or not
         self.remove_all = False # Removes experiment dir and all files beneath it recursively (Requires force!)
@@ -230,6 +244,11 @@ class Scrub(object):
                         help="The genome assembly that files were aligned to (default: discovered if possible)",
                         default=None,
                         required=True)
+
+        ap.add_argument('--fastqs_too',
+                        help='Remove fastqs too.',
+                        action='store_true',
+                        required=False)
 
         ap.add_argument('--test',
                         help='Test run only, do not launch anything.',
@@ -408,9 +427,13 @@ class Scrub(object):
         '''Returns tuple list of (type,rep_tech,fid) of files expected to be posted to ENCODE.'''
         expected = []
         # First find replicate step files
+        added_fastqs = False 
         for step in self.pipeline["step-order"]:
             if step not in self.pipeline["replicate"]:
                 continue
+            if self.fastqs_too and not added_fastqs and 'fastqs' not in self.pipeline["replicate"][step]:
+                self.pipeline["replicate"][step]['fastqs'] = "*.fastq.gz"
+                added_fastqs = True # Just adding this to the first step is all that is needed.
             for rep_tech in replicates:
                 step_files = self.find_step_files(self.pipeline["replicate"][step], \
                                                     exp_folder + rep_tech + '/',rep_tech,verbose)
@@ -487,6 +510,7 @@ class Scrub(object):
         self.genome = args.genome
         self.force = args.force
         self.remove_all = args.remove_all
+        self.fastqs_too = args.fastqs_too
             
         self.server_key = args.server
         encd.set_server_key(self.server_key) # TODO: change to self.encd = Encd(self.server_key)
@@ -595,7 +619,11 @@ class Scrub(object):
                     partial = True
                     break
 
-                file_name = dx.file_path_from_fid(fid)
+                try:
+                    # prove it exists before continuing.
+                    file_name = dx.file_path_from_fid(fid)
+                except:
+                    continue
                 if args.start_at != None:
                     if not file_name.endswith(args.start_at):
                         continue
