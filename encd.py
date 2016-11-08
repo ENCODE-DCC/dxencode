@@ -471,13 +471,13 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
             except:
                 min_size = 0
                 max_size = 0
-        if max_size <= 200 and max_size != min_size:
+        if min_size == 120 and max_size == 200: # Another ugly exception!        
+            return "long-rna-seq"
+        elif max_size <= 200 and max_size != min_size:
             return "small-rna-seq"
         elif min_size >= 150:
             return "long-rna-seq"
         elif (min_size + max_size)/2 >= 235: # This is some wicked voodoo (SRNA:108-347=227; LRNA:155-315=235)        
-            return "long-rna-seq"
-        elif min_size == 120 and max_size == 200: # Another ugly exception!        
             return "long-rna-seq"
         else:
             return "small-rna-seq"
