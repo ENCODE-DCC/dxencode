@@ -115,7 +115,7 @@ class Splashdown(object):
         "dna-me": {
             "step-order": [ "align","quantification","corr"], # How to: 1) combine 3 steps into 1; 2) tech lvl, bio lvl, exp lvl
             "replicate":  {
-                "align":           { "alignments":  [ "*_techrep_bismark_pe.bam", "*_bismark.bam"  ] },   # *may* have samtools_flagstat, samtools_stats, Don't wan't bismark_map
+                "align":           { "alignments":  [ "*_techrep_bismark_pe.bam", "*_.bam"  ] },   # *may* have samtools_flagstat, samtools_stats, Don't wan't bismark_map
                 "quantification":  { "methylation state at CpG|bigBed|bedMethyl": "*_bismark_biorep_CpG.bb",      # All have: samtools_flagstat, bismark_map
                                      "methylation state at CpG|bed|bedMethyl":    "*_bismark_biorep_CpG.bed.gz",  # All have: samtools_flagstat, bismark_map
                                      "methylation state at CHG|bigBed|bedMethyl": "*_bismark_biorep_CHG.bb",      # All have: samtools_flagstat, bismark_map

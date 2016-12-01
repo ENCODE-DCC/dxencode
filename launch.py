@@ -1542,7 +1542,7 @@ class Launch(object):
                         break
                 if inp_def["name"] != app_inp:
                     print >> sys.stderr, "ERROR: Pipeline definition for applet '"+app_name+"' file_token '"+file_token+"'"
-                    print >> sys.stderr, "value of '"+app_inp+"' not found in DX definition."
+                    print >> sys.stderr, "value of %s not found in DX definition." % app_inp
                     sys.exit(1)
                 expect_set = (inp_def["class"] == 'array:file')
                 inp_file = self.wf_find_file_input(rep,step,file_token,expect_set)
