@@ -168,9 +168,9 @@ def post_file(filename, file_meta, SERVER=None, AUTHID=None, AUTHPW=None):
         item = patch_obj('files/'+file_meta.get('accession'),file_meta, SERVER, AUTHID, AUTHPW)
         item = post_obj('files/'+file_meta.get('accession')+"/@@upload",{}, SERVER, AUTHID, AUTHPW)
     else:
-        logger.debug("Posting file object.")
+        logger.debug("Posting file object: %s %s %s" % (SERVER, AUTHID, file_meta))
         assert file_meta.get('status') == None
-        item = post_obj('file',file_meta, SERVER, AUTHID, AUTHPW)
+        item = post_obj('files/',file_meta, SERVER, AUTHID, AUTHPW)
 
     # Could look for returned["status"] == "success"
     #returned = r.json()
