@@ -311,11 +311,11 @@ class Splashdown(object):
                                                   "props": { "mapped": [ "Sequences analysed in total",
                                                                          "lambda Sequences analysed in total"] } },
                                 },
-        "bedmethyl_corr":       { 
-                                    "type":"cpg_correlation",
-                                    "files": {"inputs": ["CpG_A", "CpG_B"]}, 
-                                    "blob": { "pattern": "/*_CpG_corr.txt"},
-                                },
+        "bedmethyl_corr":       { "type":"correlation",
+                                  "files": {"inputs": ["CpG_A", "CpG_B"]}, 
+                                  "blob": { "pattern": "/*_CpG_corr.txt"},
+                                  "props": { "Pearson Correlation Coefficient": "Pearson correlation", "CpG pairs with atleast 10 reads each": "Items" },
+                                  "literal": {"Details": "Correlation of all CpG pairs covered by at least 10 reads each"} },
         "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspots_qc.txt"  } },
         "edwBamStats":          { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "dnase_techrep_bamstats":   { 
@@ -972,7 +972,7 @@ class Splashdown(object):
         '''Returns list of accessions a file is drived from based upon job inouts.'''
         input_accessions = []
         input_file_count = 0
-        verbose=True  # NOTE: verbose can help find the missing accessions  # excessive verbosity helped debugging recovery.py
+        #verbose=True  # NOTE: verbose can help find the missing accessions  # excessive verbosity helped debugging recovery.py
         # NOTE: What to do about concatenated files (that went through 'concat_fastqs')?
         #       Can punt for now since recovery can append to derived_from
         
