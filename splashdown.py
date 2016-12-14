@@ -1734,7 +1734,8 @@ class Splashdown(object):
                 self.obj_cache["exp"]["ana_id"].append( notes["dx_analysis_id"] )
             notes["dx_project_id"] = self.proj_id
             notes["dx_project_name"] = self.proj_name
-            notes["dx_cost"] = "$" + str(round(job['totalPrice'],2))
+            if 'totalPrice' in job:
+                notes["dx_cost"] = "$" + str(round(job['totalPrice'],2))
             duration = dx.format_duration(job.get('startedRunning')/1000,job.get('stoppedRunning')/1000)
             notes["duration"] = duration
             step_run["notes"] = json.dumps(notes)
@@ -1823,7 +1824,8 @@ class Splashdown(object):
             sys.exit(1)
         
         # Combine things like cost, time, executable versions???
-        parent_job['totalPrice'] = parent_job['totalPrice'] + child_job['totalPrice']
+        if 'totalPrice' in parent_job and 'totalPrice' in child_job:
+            parent_job['totalPrice'] = parent_job['totalPrice'] + child_job['totalPrice']
         parent_job['stoppedRunning'] += child_job.get('stoppedRunning') - child_job.get('startedRunning')
         parent_dxFile = dx.file_handler_from_fid(parent_fid)
         parent_job['step_parent_app_version'] = self.find_app_version(parent_dxFile)
@@ -2137,7 +2139,8 @@ class Splashdown(object):
                 print "Not including job %s - '%s' in cost analysis." % (job_id, job["executableName"]) 
                 continue
             count += 1
-            total_cost += job["totalPrice"]
+            if 'totalPrice' in job:
+                total_cost += job["totalPrice"]
             total_dur  += (job["stoppedRunning"] - job["startedRunning"])
 
         rep_str = ','.join(rep_strs)
