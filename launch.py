@@ -636,6 +636,10 @@ class Launch(object):
         else:  # for independent simple replicates, top level doesn't really matter.
             cv['paired_end'] = cv['reps']['a']['paired_end']
 
+        # Special case for lrna paired_end:
+        if cv['paired_end'] and self.PIPELINE_NAME == "long-rna-seq":
+            cv['ScriptSeq'] = encd.is_script_seq(self.exp)
+
         # Default locations
         cv['refLoc'] = args.refLoc
         if cv['refLoc'] == self.REF_FOLDER_DEFAULT:

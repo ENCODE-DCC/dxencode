@@ -20,21 +20,21 @@ ENCSR627NIF E3 GRCh38 1,2_1.2     2016-09-14  2016-10-07             # FAILED re
 # TODO: Investigate bwa failures 
 # TODO: (HOLD, issues) DNase ENCODE3: Assemble for GRCh38, but then run first on hg19
 #Experiment     On    Reps        Assembled   Launched    Posted
-ENCSR015BGH  E3 hg19  1_1.2       2016-09-14  2016-09-22   # PE/SE # FAILED: [bwa_sai2sam_pe_core] refine gapped alignments... /usr/bin/dnase_align_bwa_pe.sh: line 56: 29384 Segmentation fault      bwa sampe $ref_id tmp_1.sai tmp_2.sai $reads1_fq_gz $reads2_fq_gz > tmp_pe.sam
+ENCSR015BGH  E3 hg19  1_1.2       2016-09-14  2016-09-22   # PE/SE # FAILED: [Assertion `re - rb == rlen' failed.  bwa version: 0.7.12-r1039;  Bad data in fastq;   Jason's now
 ENCSR209TXI  E3 hg19  1           2016-08-30               # no barcode
-ENCSR257BGZ  E3 hg19  1,2_1.2     2016-09-14  2016-09-22   # PE/SE # FAILED: [bwa_sai2sam_pe_core] refine gapped alignments... /usr/bin/dnase_align_bwa_pe.sh: line 56: 23574 Segmentation fault      bwa sampe $ref_id tmp_1.sai tmp_2.sai $reads1_fq_gz $reads2_fq_gz > tmp_pe.sam 
+ENCSR257BGZ  E3 hg19  1,2_1.2     2016-09-14  2016-09-22   # PE/SE # FAILED: [Assertion `re - rb == rlen' failed.  bwa version: 0.7.12-r1039;  Bad data in fastq;   Jason's now
 ENCSR474GZQ  E3 hg19  1_1.2,2_1.2 2016-09-14               # no barcode
-ENCSR493VDS  E3 hg19  1_1.2       2016-09-14  2016-09-22   # PE/SE # FAILED: [bwa_sai2sam_pe_core] refine gapped alignments... /usr/bin/dnase_align_bwa_pe.sh: line 56: 10056 Segmentation fault      bwa sampe $ref_id tmp_1.sai tmp_2.sai $reads1_fq_gz $reads2_fq_gz > tmp_pe.sam
+ENCSR493VDS  E3 hg19  1_1.2       2016-09-14  2016-09-22   # PE/SE # FAILED:  [Assertion `re - rb == rlen' failed.  bwa version: 0.7.12-r1039;  Bad data in fastq;   Jason's now
 ENCSR503HIB  E3 hg19  1_1.2,2     2016-09-14               # PE/SE # requires lab review
 ENCSR504WYA  E3 hg19  1           2016-08-30               # no barcode
-ENCSR620WAR  E3 hg19  1_1.2,2_1.2 2016-09-14               # PE/SE # requires lab review
+ENCSR620WAR  E3 hg19  1_1.2,2_1.2 2016-09-14               # Completed by Jason
 ENCSR621ENC  E3 hg19  1,2_1.2     2016-09-14               # no barcode
 ENCSR627NIF  E3 hg19  1,2_1.2     2016-09-14  2016-09-22   # FAILED: align took 12d3h18m, failed in filter picard:MarkDuplicates.jar: Value was put into PairInfoMap more than once. Could also be bwa 0.7.3a
 ENCSR643OAB  E3 hg19  1           2016-10-05               # Requires lab review
 ENCSR657DFR  E3 hg19  1,2         2016-08-30               # no barcode
 ENCSR662HMO  E3 hg19  1_1.2,2_1.2 2016-09-14               # no barcode
-ENCSR901BRM  E3 hg19  1           2016-08-30  2016-09-12   # FAILED: filter_reads.py exception  Jemma tracks to bwa 0.7.3a
-ENCSR979ZJS  E3 hg19  1           2016-08-30               # no barcode  6 fastqs, rep1_1:17GB
+ENCSR901BRM  E3 hg19  1           2016-08-30  2016-09-12   # Completed by Jason
+ENCSR979ZJS  E3 hg19  1           2016-08-30               # 
 
 # TODO: still held
 ENCSR209TXI E3 GRCh38 1           2016-08-30               # no barcode

@@ -58,10 +58,10 @@ class Assemble(object):
             "results": { "alignments":                 [ "*_star_genome.bam",         "*_tophat.bam"          ],
                          "multi-read signal":          [ "*_star_genome_all.bw",      "*_tophat_all.bw"       ],
                          "unique signal":              [ "*_star_genome_uniq.bw",     "*_tophat_uniq.bw"      ],
-                         "multi-read minus signal":    [ "*_star_genome_minusAll.bw", "*_tophat_minusAll.bw"  ],
-                         "multi-read plus signal":     [ "*_star_genome_plusAll.bw",  "*_tophat_plusAll.bw"   ],
-                         "unique minus signal":        [ "*_star_genome_minusUniq.bw","*_tophat_minusUniq.bw" ],
-                         "unique plus signal":         [ "*_star_genome_plusUniq.bw", "*_tophat_plusUniq.bw"  ],
+                         "minus strand signal of all reads":    [ "*_star_genome_minusAll.bw", "*_tophat_minusAll.bw"  ],
+                         "plus strand signal of all reads":     [ "*_star_genome_plusAll.bw",  "*_tophat_plusAll.bw"   ],
+                         "minus strand signal of unique reads": [ "*_star_genome_minusUniq.bw","*_tophat_minusUniq.bw" ],
+                         "plus strand signal of unique reads":  [ "*_star_genome_plusUniq.bw", "*_tophat_plusUniq.bw"  ],
                          "transcriptome alignments":   [ "*_star_anno.bam"          ],
                          "gene quantifications":       [ "*_rsem.genes.results"     ],
                          "transcript quantifications": [ "*_rsem.isoforms.results"  ] }
@@ -302,7 +302,7 @@ class Assemble(object):
         # Input file should match on format and have format
         input_files = encd.files_to_map(self.exp)
         if verbose or len(self.statuses_accepted) > len(self.FILE_STATUSES_ACCEPTED):
-            print "Accepted file statuses:"
+            print ". Accepted file statuses:"
             print self.statuses_accepted
         for f_obj in input_files:
             if f_obj.get('status') not in self.statuses_accepted:
@@ -323,40 +323,54 @@ class Assemble(object):
             result_files = encd.get_exp_files(exp)
             for obj_type in exp_files['results'].keys():
                 for f_obj in result_files:
+                    if verbose:
+                        print ". Considering %s output_type '%s''" % (f_obj['submitted_file_name'],f_obj['output_type'])
                     bio_rep = f_obj.get('biological_replicates',[])
                     tech_rep = f_obj.get('technological_replicates',[])
                     if len(bio_rep) == 1 and len(tech_rep) == 1:
                         rep_tech = 'rep' + str(bio_rep[0]) + '_' + str(tech_rep[0])
                         if rep_tech not in rep_techs:
+                            if verbose:
+                                print "~ Excluding because rep_tech is " + rep_tech
                             continue
                     rep = f_obj.get('replicate')
                     if rep != None:
                         rep_tech = 'rep' + str(rep['biological_replicate_number']) + '_' + str(rep.get('technical_replicate_number',1))
                         if rep_tech not in rep_techs:
+                            if verbose:
+                                print "~ Excluding because 'replicate' rep_tech is " + rep_tech
                             continue
                     if self.genome is not None and 'assembly' in f_obj:
                         if self.genome != f_obj['assembly']:
                             if verbose:
-                                print "Skipping file %s as its %s != %s." % (f_obj.get('accession'),f_obj['assembly'],self.genome)
+                                print "~ Skipping file %s as its %s != %s." % (f_obj.get('accession'),f_obj['assembly'],self.genome)
                             continue
-                    if obj_type == f_obj['output_type']:
-                        if f_obj.get('award') != encd.DEFAULT_DCC_AWARD:
+                    if obj_type != f_obj['output_type']:
                             if verbose:
-                                print "Skipping file %s as it is not from DCC pipeline." % f_obj.get('accession')
+                                print "~ Skipping file %s as its opbject type '%s'' != '%s'." % (f_obj.get('accession'),f_obj['output_type'],obj_type)
                             continue
-                        file_path = f_obj['submitted_file_name'] # Can check submitted_file_name because these should
-                        if file_path in enc_file_names:          # have been submitted from dx pipeline
-                            continue
-                        for glob in exp_files['results'][obj_type]:
-                            if fnmatch.fnmatch(file_path, glob):
-                                enc_files.append( f_obj )
-                                enc_file_names.append(file_path) 
+                    if f_obj.get('award') != encd.DEFAULT_DCC_AWARD:
+                        if verbose:
+                            print "~ Skipping file %s as it is not from DCC pipeline." % f_obj.get('accession')
+                        continue
+                    file_path = f_obj['submitted_file_name'] # Can check submitted_file_name because these should
+                    if file_path in enc_file_names:          # have been submitted from dx pipeline
+                        #if verbose:
+                        #    print "~ Already found."
+                        continue
+                    for glob in exp_files['results'][obj_type]:
+                        if fnmatch.fnmatch(file_path, glob):
+                            enc_files.append( f_obj )
+                            enc_file_names.append(file_path)
+                            break
+                        elif verbose:
+                            print "~ Not glob: " + glob
 
         if verbose:
-            print "Encoded files:"
+            print ". Encoded files:"
             #print json.dumps(enc_files,indent=4)
             for f_obj in enc_files:
-                print "%s %s" % (f_obj['href'],f_obj['submitted_file_name'])
+                print ". %s %s" % (f_obj['href'],f_obj['submitted_file_name'])
         return enc_files
         
         

@@ -350,6 +350,39 @@ def is_paired_ended(experiment):
     print >> sys.stderr, "Never get here"
     sys.exit(1)
 
+def is_script_seq(experiment):
+    '''Small subset of LRNA experiments are ScriptSeq instead of TruSeq and require alternate RSEM parameter.'''
+
+    #exp_id = experiment['accession']
+    exp_files = files_to_map(experiment)
+    files = [f for f in exp_files if f.get('replicate') and 
+                                     f.get('replicate').get('biological_replicate_number') and
+                                     f.get('replicate').get('technical_replicate_number')]
+    replicates = replicates_to_map(experiment, files)
+
+    for rep in replicates:
+        biorep_n = rep.get('biological_replicate_number')
+        techrep_n = rep.get('technical_replicate_number')
+
+
+        docs = rep['library'].get('documents')
+        if not docs or len(docs) == 0:
+            continue
+        if isinstance(docs[0],str): # docs may not be embedded
+            if "/documents/17c31e10-1542-42c6-8b4c-3afff95564cf/" in docs:
+                return True
+        if isinstance(docs[0],dict):
+            for doc in docs:
+                if doc['@id'] == "/documents/17c31e10-1542-42c6-8b4c-3afff95564cf/":
+                    return True
+                if "ScriptSeq" in doc.get('description',''):
+                    return True
+                if "TruSeq" in doc.get('description',''):
+                    return False
+                    
+    return False
+                        
+
 def choose_mapping_for_experiment(experiment,warn=True):
     ''' for a given experiment object, fully embedded, return experimental info needed for mapping
         returns an dict keyed by [biological_rep][technical_rep]

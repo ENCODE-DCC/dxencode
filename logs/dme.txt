@@ -1,3 +1,10 @@
+ENCSR129SBE  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-08  9d02h38m  $555.48
+ENCSR217TMK  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-08 11d02h19m  $705.46
+ENCSR425NDU  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-08 10d00h33m  $628.00
+ENCSR535YCH  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-08  8d20h20m  $536.27
+ENCSR953WFU  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-09 12d17h32m  $825.00
+
+
 # Abandoned?
 #Experiment  What reps              assembled   aligned     extract
 ENCSR000AJI  ENC3 GRCh38 1          2015-10-30  
