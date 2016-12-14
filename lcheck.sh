@@ -87,9 +87,9 @@ elif [ "$type" == "splash" ] || [ "$type" == "s" ]; then
         replacing_per_frac=`expr $replacing_per_10x - $replacing_per \* 10`
         echo "Replacing: " $replacing "per exp:  ${replacing_per}.${replacing_per_frac}"
     fi
-    qcs=`grep "qc object" $logpath/*.log | awk '{print $13}' | paste -sd+ | bc` 2> /dev/null
+    qcs=`grep "qc object" $logpath/*.log | awk '{print $13}' | paste -sd+ - | bc` 2> /dev/null
     if [ "$qcs" == "" ] || [ $qcs -eq 0 ]; then
-        qcs=`grep "qc object" $logpath/*.log | awk '{print $12}' | paste -sd+ | bc`
+        qcs=`grep "qc object" $logpath/*.log | awk '{print $12}' | paste -sd+ - | bc`
     fi
     qcs_per_10x=`expr $qcs \* 10 / $exps`
     qcs_per=`expr $qcs / $exps`

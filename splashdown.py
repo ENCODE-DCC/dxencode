@@ -115,7 +115,7 @@ class Splashdown(object):
         "dna-me": {
             "step-order": [ "align","quantification","corr"], # How to: 1) combine 3 steps into 1; 2) tech lvl, bio lvl, exp lvl
             "replicate":  {
-                "align":           { "alignments":  [ "*_techrep_bismark_pe.bam", "*_bismark.bam"  ] },   # *may* have samtools_flagstat, samtools_stats, Don't wan't bismark_map
+                "align":           { "alignments":  [ "*_techrep_bismark_pe.bam", "*_techrep.bam"  ] },   # *may* have samtools_flagstat, samtools_stats, Don't wan't bismark_map
                 "quantification":  { "methylation state at CpG|bigBed|bedMethyl": "*_bismark_biorep_CpG.bb",      # All have: samtools_flagstat, bismark_map
                                      "methylation state at CpG|bed|bedMethyl":    "*_bismark_biorep_CpG.bed.gz",  # All have: samtools_flagstat, bismark_map
                                      "methylation state at CHG|bigBed|bedMethyl": "*_bismark_biorep_CHG.bb",      # All have: samtools_flagstat, bismark_map
@@ -256,18 +256,18 @@ class Splashdown(object):
                                 },
         "bismark_techrep_flagstats":   { 
                                     "type":"samtools_flagstats",
-                                    "only_for": [ "_techrep_bismark_pe.bam", "_bismark.bam" ],
+                                    "only_for": [ "_techrep_bismark_pe.bam", "_techrep.bam" ],
                                     "files": {"results": "detail"}, 
-                                    "blob": { "pattern": "/*_techrep_bismark*_qc.txt" } 
+                                    "blob": { "pattern": "/*_techrep_qc.txt" } 
                                 },
         "bismark_biorep_flagstats":   { 
                                     "type":"samtools_flagstats",
-                                    "only_for": [ "_bismark_biorep_CpG.bb", "_bismark_biorep_CpG.bed.gz",
-                                                  "_bismark_biorep_CHG.bb", "_bismark_biorep_CHG.bed.gz",
-                                                  "_bismark_biorep_CHH.bb", "_bismark_biorep_CHH.bed.gz",
-                                                  "_bismark_biorep.bw" ],
+                                    "only_for": [ "_biorep_CpG.bb", "_biorep_CpG.bed.gz",
+                                                  "_biorep_CHG.bb", "_biorep_CHG.bed.gz",
+                                                  "_biorep_CHH.bb", "_biorep_CHH.bed.gz",
+                                                  "_biorep.bw" ],
                                     "files": {"results": "detail"}, 
-                                    "blob": { "pattern": "/*_bismark_biorep_qc.txt" } 
+                                    "blob": { "pattern": "/*_biorep_qc.txt" } 
                                 },
         "dnase_techrep_flagstats":   { 
                                     "type":"samtools_flagstats",
@@ -284,9 +284,9 @@ class Splashdown(object):
         "samtools_stats":       { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "bismark_techrep_samstats":   { 
                                     "type":"samtools_stats",
-                                    "only_for": [ "_techrep_bismark_pe.bam", "_bismark.bam" ],
+                                    "only_for": [ "_techrep_bismark_pe.bam", "_techrep.bam" ],
                                     "files": {"results": "detail"}, 
-                                    "blob": { "pattern": "/*_techrep_bismark*_qc.txt" } 
+                                    "blob": { "pattern": "/*_techrep_qc.txt" } 
                                 },
         "dnase_biorep_samstats":   { 
                                     "type":"samtools_stats",
@@ -297,7 +297,7 @@ class Splashdown(object):
         "bismark_map":          { 
                                     "type":"bismark",
                                     "files": {"results": "detail"}, 
-                                    "blob": { "pattern": "/*_bismark_biorep_map_report.txt" },
+                                    "blob": { "pattern": "/*_map_report.txt" },
                                     "include": [
                                         "C methylated in CHG context","lambda C methylated in CHG context", 
                                         "C methylated in CHH context","lambda C methylated in CHH context",
@@ -311,11 +311,11 @@ class Splashdown(object):
                                                   "props": { "mapped": [ "Sequences analysed in total",
                                                                          "lambda Sequences analysed in total"] } },
                                 },
-        "bedmethyl_corr":       { 
-                                    "type":"cpg_correlation",
-                                    "files": {"inputs": ["CpG_A", "CpG_B"]}, 
-                                    "blob": { "pattern": "/*_CpG_corr.txt"},
-                                },
+        "bedmethyl_corr":       { "type":"correlation",
+                                  "files": {"inputs": ["CpG_A", "CpG_B"]}, 
+                                  "blob": { "pattern": "/*_CpG_corr.txt"},
+                                  "props": { "Pearson Correlation Coefficient": "Pearson correlation", "CpG pairs with atleast 10 reads each": "Items" },
+                                  "literal": {"Details": "Correlation of all CpG pairs covered by at least 10 reads each"} },
         "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspots_qc.txt"  } },
         "edwBamStats":          { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "dnase_techrep_bamstats":   { 
@@ -736,7 +736,7 @@ class Splashdown(object):
                             self.enc_file_add_alias(fid,accession,f_obj,remove=True,test=test)
                             ret = dx.file_set_property(fid,'revoked_accession',accession,test=test)
                             if not test and ret == accession:
-                                dx.file_set_property(fid,'accession',null,test=test)
+                                dx.file_set_property(fid, 'accession', None, test=test)
                                 print "  * Marked DX property with revoked_accession."
                         else:
                             self.found[fid] = f_obj
@@ -760,7 +760,7 @@ class Splashdown(object):
                             self.revoked.append(accession)
                             ret = dx.file_set_property(fid,'revoked_accession',accession,test=test)
                             if not test and ret == accession:
-                                dx.file_set_property(fid,'accession',null,test=test)
+                                dx.file_set_property(fid,'accession', None,test=test)
                                 print "  * Marked DX property with revoked_accession."
                         else:
                             self.found[fid] = f_obj
@@ -1386,7 +1386,7 @@ class Splashdown(object):
 
     def enc_qc_metric_find_or_create(self,qc_key,qc_obj,qc_faq,fid,job_id,step_run_id,test=True,verbose=False):
         '''Finds or creates the 'qc_metric' encoded object that will be attached to the step_run and/or file.'''
-        #verbose=True
+        # not all input files are accountedTrue
         qc_metric = None
         qc_patch = {}
         
@@ -1638,6 +1638,15 @@ class Splashdown(object):
                 print json.dumps(step_ver,indent=4,sort_keys=True)
         return step_ver
 
+    def find_price(self, job):
+        # totalPrice only shows up on top level job
+        price = job.get('totalPrice', -999.999)
+        if price < 0:
+            originJobId = job.get('originJob', job['id'])
+            if originJobId != job['id']:
+                ojob = dxpy.api.job_describe(originJobId)
+            price = ojob.get('totalPrice', price)
+        return price
 
     def enc_step_run_find_or_create(self,job,dxFile,rep_tech,test=False,verbose=False):
         '''Finds or creates the 'analysis_step_run' encoded object that actually created the file.'''
@@ -1671,6 +1680,9 @@ class Splashdown(object):
                 dx_app_ver = str( dx_app_ver.get('version') )
                 if dx_app_ver[0] == 'v':
                     dx_app_ver = dx_app_ver[1:]
+            # FIXMEFIRST: dme special case because ben screwed up the version
+            if dx_app_ver == 'unknown' and dx_app_name == 'dme-align-se-parallel':
+                dx_app_ver = "1.0.1"
             # FIXME: UGLY special case
             if dx_app_ver.startswith('0.'):  # If posting results generated while still developing, assume v1.0.0
                 dx_app_ver = "1.0.0"
@@ -1734,8 +1746,9 @@ class Splashdown(object):
                 self.obj_cache["exp"]["ana_id"].append( notes["dx_analysis_id"] )
             notes["dx_project_id"] = self.proj_id
             notes["dx_project_name"] = self.proj_name
-            if 'totalPrice' in job:
-                notes["dx_cost"] = "$" + str(round(job['totalPrice'],2))
+
+            price = self.find_price(job)
+            notes["dx_cost"] = "$" + str(round(price,2))
             duration = dx.format_duration(job.get('startedRunning')/1000,job.get('stoppedRunning')/1000)
             notes["duration"] = duration
             step_run["notes"] = json.dumps(notes)
@@ -1824,8 +1837,8 @@ class Splashdown(object):
             sys.exit(1)
         
         # Combine things like cost, time, executable versions???
-        if 'totalPrice' in parent_job and 'totalPrice' in child_job:
-            parent_job['totalPrice'] = parent_job['totalPrice'] + child_job['totalPrice']
+
+        parent_job['totalPrice'] = self.find_price(parent_job) + self.find_price(child_job)
         parent_job['stoppedRunning'] += child_job.get('stoppedRunning') - child_job.get('startedRunning')
         parent_dxFile = dx.file_handler_from_fid(parent_fid)
         parent_job['step_parent_app_version'] = self.find_app_version(parent_dxFile)
@@ -1891,6 +1904,10 @@ class Splashdown(object):
 
         # Some steps are child processes which are not known by encodeD so we must proceed with the "step-parent"
         job = self.dx_job_find(None,fid)
+        originJobId = job.get('originJob',job['id'])
+        if originJobId != job['id']:
+            job = dxpy.api.job_describe(originJobId)
+
         if job.get('executableName') in self.STEP_CHILDREN.keys():
             child_job = job
             job = self.find_step_parent(fid,child_job,child_job['executableName'],self.STEP_CHILDREN[child_job['executableName']])
@@ -1924,7 +1941,7 @@ class Splashdown(object):
         notes = dx.create_notes(dxFile, versions)
         notes["notes_version"] = "5" # Cricket requests starting at "5", since earlier files uploads were distingusihed by user
         if 'totalPrice' in job:
-            notes['dx_cost'] = "$" + str(round(job['totalPrice'],2))
+            notes['dx_cost'] = "$" + str(round(self.find_price(job),2))
         if 'step_parent_app_version' in job:
             notes['step_parent_app'] = job.get('step_parent_app_version') # One more little piece of the story.
 
@@ -2139,8 +2156,7 @@ class Splashdown(object):
                 print "Not including job %s - '%s' in cost analysis." % (job_id, job["executableName"]) 
                 continue
             count += 1
-            if 'totalPrice' in job:
-                total_cost += job["totalPrice"]
+            total_cost += self.find_price(job)
             total_dur  += (job["stoppedRunning"] - job["startedRunning"])
 
         rep_str = ','.join(rep_strs)

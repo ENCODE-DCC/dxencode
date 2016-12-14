@@ -636,6 +636,10 @@ class Launch(object):
         else:  # for independent simple replicates, top level doesn't really matter.
             cv['paired_end'] = cv['reps']['a']['paired_end']
 
+        # Special case for lrna paired_end:
+        if cv['paired_end'] and self.PIPELINE_NAME == "long-rna-seq":
+            cv['ScriptSeq'] = encd.is_script_seq(self.exp)
+
         # Default locations
         cv['refLoc'] = args.refLoc
         if cv['refLoc'] == self.REF_FOLDER_DEFAULT:
@@ -754,7 +758,7 @@ class Launch(object):
         
         # Assume combined reps if supported AND exactly 2 reps AND for different biological reps
         if self.PIPELINE_BRANCH_ORDER != None and 'COMBINED_REPS' in self.PIPELINE_BRANCH_ORDER:
-            if len(reps) == 2:
+            if len(cv_reps) == 2:
                 if cv_reps['a']['br'] != cv_reps['b']['br']:
                     self.combined_reps = True
                 elif self.compare_techreps and cv_reps['a']['br'] == cv_reps['b']['br'] \
@@ -1542,7 +1546,7 @@ class Launch(object):
                         break
                 if inp_def["name"] != app_inp:
                     print >> sys.stderr, "ERROR: Pipeline definition for applet '"+app_name+"' file_token '"+file_token+"'"
-                    print >> sys.stderr, "value of '"+app_inp+"' not found in DX definition."
+                    print >> sys.stderr, "value of %s not found in DX definition." % app_inp
                     sys.exit(1)
                 expect_set = (inp_def["class"] == 'array:file')
                 inp_file = self.wf_find_file_input(rep,step,file_token,expect_set)

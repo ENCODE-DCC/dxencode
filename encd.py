@@ -168,9 +168,9 @@ def post_file(filename, file_meta, SERVER=None, AUTHID=None, AUTHPW=None):
         item = patch_obj('files/'+file_meta.get('accession'),file_meta, SERVER, AUTHID, AUTHPW)
         item = post_obj('files/'+file_meta.get('accession')+"/@@upload",{}, SERVER, AUTHID, AUTHPW)
     else:
-        logger.debug("Posting file object.")
+        logger.debug("Posting file object: %s %s %s" % (SERVER, AUTHID, file_meta))
         assert file_meta.get('status') == None
-        item = post_obj('file',file_meta, SERVER, AUTHID, AUTHPW)
+        item = post_obj('files/',file_meta, SERVER, AUTHID, AUTHPW)
 
     # Could look for returned["status"] == "success"
     #returned = r.json()
@@ -276,12 +276,13 @@ def get_bucket(f_obj, SERVER=None, AUTHID=None, AUTHPW=None):
 
     #split up the url into components
     o = urlparse.urlparse(s3_url)
+    opath = o.path.replace("/http://encode-files.s3.amazonaws.com", "") # Hacked to make sure Aditi's assemble works
 
     #pull out the filename
     filename = os.path.basename(o.path)
 
     #hack together the s3 cp url (with the s3 method instead of https)
-    return filename, S3_SERVER.rstrip('/') + o.path
+    return filename, S3_SERVER.rstrip('/') + opath
 
 def file_in_list(looking_for_file,file_list):
     md5 = looking_for_file.get('md5sum')
@@ -348,6 +349,39 @@ def is_paired_ended(experiment):
 
     print >> sys.stderr, "Never get here"
     sys.exit(1)
+
+def is_script_seq(experiment):
+    '''Small subset of LRNA experiments are ScriptSeq instead of TruSeq and require alternate RSEM parameter.'''
+
+    #exp_id = experiment['accession']
+    exp_files = files_to_map(experiment)
+    files = [f for f in exp_files if f.get('replicate') and 
+                                     f.get('replicate').get('biological_replicate_number') and
+                                     f.get('replicate').get('technical_replicate_number')]
+    replicates = replicates_to_map(experiment, files)
+
+    for rep in replicates:
+        biorep_n = rep.get('biological_replicate_number')
+        techrep_n = rep.get('technical_replicate_number')
+
+
+        docs = rep['library'].get('documents')
+        if not docs or len(docs) == 0:
+            continue
+        if isinstance(docs[0],str): # docs may not be embedded
+            if "/documents/17c31e10-1542-42c6-8b4c-3afff95564cf/" in docs:
+                return True
+        if isinstance(docs[0],dict):
+            for doc in docs:
+                if doc['@id'] == "/documents/17c31e10-1542-42c6-8b4c-3afff95564cf/":
+                    return True
+                if "ScriptSeq" in doc.get('description',''):
+                    return True
+                if "TruSeq" in doc.get('description',''):
+                    return False
+                    
+    return False
+                        
 
 def choose_mapping_for_experiment(experiment,warn=True):
     ''' for a given experiment object, fully embedded, return experimental info needed for mapping
@@ -470,7 +504,9 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
             except:
                 min_size = 0
                 max_size = 0
-        if max_size <= 200 and max_size != min_size:
+        if min_size == 120 and max_size == 200: # Another ugly exception!        
+            return "long-rna-seq"
+        elif max_size <= 200 and max_size != min_size:
             return "small-rna-seq"
         elif min_size >= 150:
             return "long-rna-seq"
@@ -569,7 +605,7 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                 rep['controls'] = []
                 if rep['paired_end']:
                     for (p1, p2) in mapping['paired']:
-                        if p1['status'] != 'released':
+                        if p1['status'] not in ['released','in progress']:
                             continue
                         rep['fastqs'][p1['paired_end']].append(p1['accession']+".fastq.gz")
                         if "run_type" in p1:
@@ -585,7 +621,7 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                             rep['controls'].append( p2['controlled_by'] )
                 else: # not rep['paired_end']:
                     for f in mapping['unpaired']:
-                        if f['status'] != 'released':
+                        if f['status'] not in ['released','in progress']:
                             continue
                         rep['fastqs']['1'].append( f['accession']+".fastq.gz" )
                         if "run_type" in f:
