@@ -756,6 +756,13 @@ class Launch(object):
                 ltr = letters.popleft()
                 cv_reps[ltr] = rep
         
+        # Special case for srna ENCODE2:
+        if self.PIPELINE_NAME == "small-rna-seq":
+            for ltr in cv_reps.keys():
+                a_tailing = encd.has_a_tailing(self.exp,cv_reps[ltr]['rep_tech'])
+                if a_tailing is not None:
+                    cv_reps[ltr]['a_tailing'] = a_tailing
+
         # Assume combined reps if supported AND exactly 2 reps AND for different biological reps
         if self.PIPELINE_BRANCH_ORDER != None and 'COMBINED_REPS' in self.PIPELINE_BRANCH_ORDER:
             if len(cv_reps) == 2:

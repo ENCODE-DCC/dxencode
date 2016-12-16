@@ -371,7 +371,7 @@ def is_script_seq(experiment):
         if isinstance(docs[0],str): # docs may not be embedded
             if "/documents/17c31e10-1542-42c6-8b4c-3afff95564cf/" in docs:
                 return True
-        if isinstance(docs[0],dict):
+        elif isinstance(docs[0],dict):
             for doc in docs:
                 if doc['@id'] == "/documents/17c31e10-1542-42c6-8b4c-3afff95564cf/":
                     return True
@@ -382,6 +382,54 @@ def is_script_seq(experiment):
                     
     return False
                         
+
+def has_a_tailing(experiment,rep_tech=None):
+    '''Some ENCODE2 SRNA experiments have a alternate read clipping required.'''
+
+    #exp_id = experiment['accession']
+    exp_files = files_to_map(experiment)
+    files = [f for f in exp_files if f.get('replicate') and
+                                     f.get('replicate').get('biological_replicate_number') and
+                                     f.get('replicate').get('technical_replicate_number')]
+    replicates = replicates_to_map(experiment, files)
+
+    for rep in replicates:
+        if rep_tech is not None:
+            biorep_n = rep.get('biological_replicate_number',0)
+            techrep_n = rep.get('technical_replicate_number',0)
+            this_rep_tech = "rep%d_%d" % (biorep_n,techrep_n)
+            if this_rep_tech != rep_tech:
+                continue
+
+
+        docs = rep['library'].get('documents')
+        if not docs or len(docs) == 0:
+            continue
+        if isinstance(docs[0],str): # docs may not be embedded
+            if "/documents/76321494-21b0-4808-8df0-14e7db32a712/" in docs: # CSHL_Small_NoBarcode.png
+                return "No_Barcode"
+            if "/documents/834a07ef-0738-4d79-8d77-942ea2391ed8/" in docs: # CSHL_Small_N3_Barcode.png
+                return "N3"
+            if "/documents/4dd8ac21-437a-4024-a645-a7a8c3077fe0/" in docs: # CSHL_Small_N4_Barcode.png
+                return "N4"
+        elif isinstance(docs[0],dict):
+            for doc in docs:
+                if doc['@id'] == "/documents/76321494-21b0-4808-8df0-14e7db32a712/":
+                    return "No_Barcode"
+                if doc['@id'] == "/documents/834a07ef-0738-4d79-8d77-942ea2391ed8/":
+                    return "N3"
+                if doc['@id'] == "/documents/4dd8ac21-437a-4024-a645-a7a8c3077fe0/":
+                    return "N4"
+                if "attachment" in doc and "download" in doc["attachment"]:
+                    if doc["attachment"]["download"] == "CSHL_Small_NoBarcode.png":
+                        return "No_Barcode"
+                    if doc["attachment"]["download"] == "CSHL_Small_N3_Barcode.png":
+                        return "N3"
+                    if doc["attachment"]["download"] == "CSHL_Small_N4_Barcode.png":
+                        return "N4"
+
+    return None
+
 
 def choose_mapping_for_experiment(experiment,warn=True):
     ''' for a given experiment object, fully embedded, return experimental info needed for mapping
