@@ -577,7 +577,11 @@ class Launch(object):
                                                                         (cv['experiment'],self.exp['internal_status']) 
                 sys.exit(1)
             
-            # Load up the encoded and combining "reps" which will be processed by PIPELINE_BRANCHES
+            lab = self.exp.get('lab','')
+            if isinstance(lab,dict):
+                cv["lab"] = lab.get('name','unidentified')
+            else:
+                cv["lab"] = lab[6:-1] # e.g. "/labs/gregory-crawford/"
             self.load_reps(args, cv, cv['experiment'], self.exp)
         else:
             print "Templating experiment specifics..."
@@ -637,7 +641,7 @@ class Launch(object):
             cv['paired_end'] = cv['reps']['a']['paired_end']
 
         # Special case for lrna paired_end:
-        if cv['paired_end'] and self.PIPELINE_NAME == "long-rna-seq":
+        if cv['paired_end'] and cv['exp_type'] == "long-rna-seq":
             cv['ScriptSeq'] = encd.is_script_seq(self.exp)
 
         # Default locations
@@ -757,7 +761,7 @@ class Launch(object):
                 cv_reps[ltr] = rep
         
         # Special case for srna ENCODE2:
-        if self.PIPELINE_NAME == "small-rna-seq":
+        if cv['exp_type'] == "small-rna-seq":
             for ltr in cv_reps.keys():
                 a_tailing = encd.has_a_tailing(self.exp,cv_reps[ltr]['rep_tech'])
                 if a_tailing is not None:
