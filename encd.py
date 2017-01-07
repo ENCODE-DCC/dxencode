@@ -48,7 +48,7 @@ def find_keys(server=None,authid=None,authpw=None):
         return processkey( server ) # Assume server is server_key or None to get default
     return (authid,authpw,server)   # pass through
 
-    
+
 
 def processkey(key):
     ''' check encodedD access keys; assuming the format:
@@ -91,7 +91,7 @@ def processkey(key):
         prime_server_key = key
     return (AUTHID,AUTHPW,SERVER)
     ## TODO possibly this should return a dict
-    
+
 def post_obj(obj_type,obj_meta, SERVER=None, AUTHID=None, AUTHPW=None):
     ''' Posts a json object of a given type to the encoded database. '''
     (AUTHID,AUTHPW,SERVER) = find_keys(SERVER, AUTHID, AUTHPW)
@@ -150,7 +150,7 @@ def patch_obj(obj_id, obj_meta, SERVER=None, AUTHID=None, AUTHPW=None):
     #print >> sys.stderr, "* request to patch %s to %s..." % (obj_id,SERVER)
     #print >> sys.stderr, json.dumps(item, indent=4, sort_keys=True)
     return item
-           
+
 
 def post_file(filename, file_meta, SERVER=None, AUTHID=None, AUTHPW=None):
     ''' take a file object on local file system, post meta data and cp to AWS '''
@@ -218,7 +218,7 @@ def post_file(filename, file_meta, SERVER=None, AUTHID=None, AUTHPW=None):
         end = datetime.now()
         duration = end - start
         logger.debug("Uploaded in %.2f seconds" % duration.seconds)
-            
+
     return item
 
 
@@ -355,7 +355,7 @@ def is_script_seq(experiment):
 
     #exp_id = experiment['accession']
     exp_files = files_to_map(experiment)
-    files = [f for f in exp_files if f.get('replicate') and 
+    files = [f for f in exp_files if f.get('replicate') and
                                      f.get('replicate').get('biological_replicate_number') and
                                      f.get('replicate').get('technical_replicate_number')]
     replicates = replicates_to_map(experiment, files)
@@ -379,9 +379,42 @@ def is_script_seq(experiment):
                     return True
                 if "TruSeq" in doc.get('description',''):
                     return False
-                    
+
     return False
-                        
+
+
+def is_stranded(experiment,br=0,tr=0):
+    '''Determines whether one or all replicates are from a stranded library.'''
+
+    #exp_id = experiment['accession']
+    exp_files = files_to_map(experiment)
+    files = [f for f in exp_files if f.get('replicate') and
+                                     f.get('replicate').get('biological_replicate_number') and
+                                     f.get('replicate').get('technical_replicate_number')]
+    replicates = replicates_to_map(experiment, files)
+
+    reps_stranded = None
+    for rep in replicates:
+        biorep_n = rep.get('biological_replicate_number')
+        techrep_n = rep.get('technical_replicate_number')
+        if br > 0:
+            if biorep_n != br:
+                continue
+            elif tr > 0 and techrep_n != tr:
+                continue
+
+        stranded = rep['library'].get('strand_specificity',False)
+        if reps_stranded is None:
+            reps_stranded = stranded
+        elif stranded != reps_stranded:
+            print "WARNING: Replicates have unexpected mismatch in strandedness.  Treating as 'unstranded'"
+            reps_stranded = False
+
+    if reps_stranded is None:
+        return False
+    else:
+        return reps_stranded
+
 
 def has_a_tailing(experiment,rep_tech=None):
     '''Some ENCODE2 SRNA experiments have a alternate read clipping required.'''
@@ -439,7 +472,7 @@ def choose_mapping_for_experiment(experiment,warn=True):
 
     exp_id = experiment['accession']
     exp_files = files_to_map(experiment)
-    files = [f for f in exp_files if f.get('replicate') and 
+    files = [f for f in exp_files if f.get('replicate') and
                                      f.get('replicate').get('biological_replicate_number') and
                                      f.get('replicate').get('technical_replicate_number')]
     replicates = replicates_to_map(experiment, files)
@@ -536,7 +569,7 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
                                     "single cell isolation followed by RNA-seq", \
                                     "siRNA knockdown followed by RNA-seq" ]:
         #if exp["replicates"][0]["library"]["size_range"] in [">200", "300-350", "350-450"]:
-        # Now more: "150-400","149-512","151-499","153-499","157-497"        
+        # Now more: "150-400","149-512","151-499","153-499","157-497"
         size_range = exp["replicates"][0]["library"]["size_range"]
         if size_range.startswith('>'):
             try:
@@ -552,13 +585,13 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
             except:
                 min_size = 0
                 max_size = 0
-        if min_size == 120 and max_size == 200: # Another ugly exception!        
+        if min_size == 120 and max_size == 200: # Another ugly exception!
             return "long-rna-seq"
         elif max_size <= 200 and max_size != min_size:
             return "small-rna-seq"
         elif min_size >= 150:
             return "long-rna-seq"
-        elif (min_size + max_size)/2 >= 235: # This is some wicked voodoo (SRNA:108-347=227; LRNA:155-315=235)        
+        elif (min_size + max_size)/2 >= 235: # This is some wicked voodoo (SRNA:108-347=227; LRNA:155-315=235)
             return "long-rna-seq"
         else:
             return "small-rna-seq"
@@ -617,7 +650,7 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
 
 def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
     '''For a given exp_id (accession) returns a "rep" list as used by assemble, launch, etc.'''
-        
+
     reps = []
     # Must look through exp and find all replicates!
     if full_mapping == None:
@@ -642,10 +675,10 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                 print >> sys.stderr, "ERROR: Replicate %d_%d has both paired(%s) and unpaired(%s) reads." % \
                     (br,tr,len(mapping['paired']), len(mapping['unpaired']))
                 #print >> sys.stderr, json.dumps(mapping,indent=4)
-                sys.exit(1)                
+                sys.exit(1)
                 rep['paired_end'] = False
                 rep['has_reads'] = True
-                
+
             # Load read and control files, only if requested.
             run_type = None  # The files should be consistent as all single-end or paired-end, but some mapping got it wrong
             if load_reads and rep['has_reads']:
@@ -681,11 +714,11 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                         rep['controls'].append( mapping['unpaired'][0]['controlled_by'] )
                 if len(rep['controls']) == 0:
                     rep['controls'] = None
-            
+
             # One more test because of non-standard data: single-end data reporting 'paired' == 1 !
             if rep['paired_end'] and run_type == "single-ended" and len(rep['fastqs']['2']) == 0:
                 rep['paired_end'] = False
-                
+
             reps.append( rep )
 
     return reps
@@ -716,7 +749,7 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
         return []
     files = []
     accessions = []
-    #print >> sys.stderr, "DEBUG: Found %d original_files" % len(exp_obj['original_files']) 
+    #print >> sys.stderr, "DEBUG: Found %d original_files" % len(exp_obj['original_files'])
     for file_acc in exp_obj['original_files']:
         file_obj = None
         acc = file_acc[7:18]
@@ -734,7 +767,7 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
         #print >> sys.stderr, " * Found: %s [%s] status:%s %s" % \
         #                  (file_obj['accession'],file_obj['output_type'],file_obj['status'],file_obj['submitted_file_name'])
         out_type = file_obj.get('output_type')
-        #print >> sys.stderr, "DEBUG: File %s is of out_type '%s'" % (acc,out_type) 
+        #print >> sys.stderr, "DEBUG: File %s is of out_type '%s'" % (acc,out_type)
         if len(output_types) > 0 and (out_type == None or out_type not in output_types):
             continue
         if lab != None:
@@ -743,7 +776,7 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
                 if (isinstance(file_lab,unicode) or isinstance(file_lab,str)) and file_lab != "/labs/"+lab+"/":
                     continue
                 elif "name" in file_lab and file_lab["name"] != lab:
-                    #print >> sys.stderr, "DEBUG: File %s is of out_type '%s' and lab '%s' not '%s'" % (acc,out_type,file_lab["name"],lab) 
+                    #print >> sys.stderr, "DEBUG: File %s is of out_type '%s' and lab '%s' not '%s'" % (acc,out_type,file_lab["name"],lab)
                     continue
         if file_obj.get('status') not in ["released","uploaded","uploading","in progress"]: # further restricted by caller.
             continue
@@ -753,29 +786,29 @@ def get_exp_files(exp_obj,output_types=[],lab=None,key=None):
 
 def exp_is_pe(exp,exp_files=None,rep_tech=None,server_key=None):
     '''Determine if this experiment is expected to be 'paired-end' as opposed to 'single-end'.'''
-    
+
     if rep_tech != None:
         reps = get_reps(exp_id=exp.get('accession'), load_reads=False, exp=exp, full_mapping=None, key=server_key)
         for rep in reps:
             if rep.get('rep_tech') == rep_tech:
                 if rep.get('paired_end') == False:
                     return False  # no more is needed!
-        
+
     # But if rep_tech not requested or not found, OR found to be paired, then must check all fastqs
     found_fastq = False
     all_fastqs_pe = True
-    
+
     if exp_files == None:
         exp_files = get_exp_files(exp,key=server_key)
-        
+
     for f_obj in exp_files:
         if f_obj.get("file_format") != "fastq":
             continue
         found_fastq = True
         if f_obj.get("paired_with") == None and f_obj.get("run_type") != "paired-ended":
             all_fastqs_pe = False
-            
-    return (found_fastq and all_fastqs_pe) 
+
+    return (found_fastq and all_fastqs_pe)
 
 def select_alias(aliases, prefix='dnanexus:',must_find=True):
     '''returns the alias of a given prefix'''
@@ -786,13 +819,13 @@ def select_alias(aliases, prefix='dnanexus:',must_find=True):
         print >> sys.stderr, "ERROR: Failed to find alias of prefix: '"+prefix+"' in:"
         print >> sys.stderr, aliases
         sys.exit(1)
-    
+
     return None
 
 
 def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
     '''Determine if this technical replicate is has fastqs all marked as UMI or all non-UMI.'''
-    
+
     if rep == None:
         reps = get_reps(exp_id=exp.get('accession'), load_reads=False, exp=exp, full_mapping=None, key=server_key)
         for one_rep in reps:
@@ -803,11 +836,11 @@ def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
     if exp_files == None:
         exp_files = get_exp_files(exp,key=server_key)
     #print >> sys.stderr, ">  Looking through %d files for rep%d_%d %s" % (len(exp_files),rep.get('br',0),rep.get('tr',0),rep.get('replicate_id'))
-        
+
     umi_found_true  = False
     umi_found_false = False
     umi = None
-    
+
     barcodes = []
     for f_obj in exp_files:
         if f_obj.get("file_format") != "fastq":
@@ -827,32 +860,32 @@ def rep_is_umi(exp,rep=None,exp_files=None,rep_tech=None,server_key=None):
                 umi_found_true  = True
         if not umi_found :
             umi_found_false = True
-        
+
     if umi_found_true and umi_found_false:
         print >> sys.stderr, "ERROR: mixed UMI setting on the fastqs for replicate %s." % rep.get('replicate_id')
         sys.exit(1)
     if not umi_found_true and not umi_found_false:
         print >> sys.stderr, "WARNING: could not detect UMI for replicate %s." % rep.get('replicate_id')
     #print >> sys.stderr, "Found: UMI for replicate %s to be %s." % (rep.get('replicate_id'),str(umi_found_true))
-    return (umi_found_true, barcodes) 
+    return (umi_found_true, barcodes)
 
 
 def exp_patch_internal_status(exp_id, internal_status, key=None, test=False):
     '''Updates encodeD Experiment with an internal status.'''
-    
+
     allowed = [ 'pipeline ready', 'processing', 'pipeline completed', 'requires lab review' ]
-    
+
     if internal_status not in allowed:
         print >> sys.stderr, "  * ERROR: Attempting to set internal status of %s to '%s'." % (exp_id,internal_status)
         return False
     if not exp_id.startswith('ENCSR'):
         print >> sys.stderr, "  * ERROR: Attempting to set internal status on experiment without valid accession %s." % exp_id
         return False
-        
+
     payload = { "internal_status": internal_status }
     if not test:
         (authid,authpw,server) = find_keys(key)
-        
+
         ret = patch_obj('experiments/'+exp_id, payload, server, authid, authpw)
         print >> sys.stderr, "  * Updated encodeD %s with internal_status '%s'." % (exp_id,internal_status)
     else:
