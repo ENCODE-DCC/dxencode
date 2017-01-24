@@ -1680,16 +1680,12 @@ class Splashdown(object):
                 dx_app_ver = str( dx_app_ver.get('version') )
                 if dx_app_ver[0] == 'v':
                     dx_app_ver = dx_app_ver[1:]
-            # FIXMEFIRST: dme special case because ben screwed up the version
+            # FIXME: dme special case because ben screwed up the version
             if dx_app_ver == 'unknown' and dx_app_name == 'dme-align-se-parallel':
                 dx_app_ver = "1.0.2"
-            # FIXME: UGLY special case
+            # Failsafe
             if dx_app_ver.startswith('0.'):  # If posting results generated while still developing, assume v1.0.0
                 dx_app_ver = "1.0.0"
-            # FIXME: UGLY temporary special case!!!
-            if dx_app_name  == "rampage-peaks" and dx_app_ver == "1.0.1":
-                dx_app_ver = "1.1.0"  # Because the version was supposed to bump the second digit if a tool changes.
-            # FIXME: UGLY temporary special case!!!
             if not dx_app_ver or not type(dx_app_ver) == str or len(dx_app_ver) == 0:
                 print "ERROR: cannot find applet version %s in the log" % ( type(dx_app_ver) )
                 sys.exit(0)
@@ -1718,8 +1714,8 @@ class Splashdown(object):
                 print "DX JOB: originalInputs:"
                 print json.dumps(inputs,indent=4,sort_keys=True)
             for name in inputs.keys():
-                #if type(inputs[name]) == in [ str, int, unicode\:
-                if type(inputs[name]) != dict:  # not class file? and not class:array:file
+                #if type(inputs[name]) in [str, int, unicode]:
+                if type(inputs[name]) not in [dict, list]:  # not class file? and not class:array:file
                     params[name] = inputs[name]
             if len(params) > 0:
                 applet_details["parameters"] = params
