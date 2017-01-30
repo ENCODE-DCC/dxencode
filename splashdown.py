@@ -156,7 +156,7 @@ class Splashdown(object):
     ANNOTATIONS_SUPPORTED = [ 'V24', 'V19', 'M2', 'M3', 'M4' ]
     '''This module supports only these annotations.'''
 
-    ANNOTATION_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4'}
+    ANNOTATION_DEFAULTS = {'hg19': 'V19', 'GRCh38': 'V24', 'mm10': 'M4'}
     '''These seeemblies default to these annotation.'''
 
     REQUIRE_ANNOTATION = [ 'long-rna-seq','small-rna-seq','rampage' ]
