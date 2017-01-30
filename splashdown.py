@@ -156,6 +156,9 @@ class Splashdown(object):
     ANNOTATIONS_SUPPORTED = [ 'V24', 'V19', 'M2', 'M3', 'M4' ]
     '''This module supports only these annotations.'''
 
+    ANNOTATION_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4'}
+    '''These seeemblies default to these annotation.'''
+
     REQUIRE_ANNOTATION = [ 'long-rna-seq','small-rna-seq','rampage' ]
     '''These assays require an annotation.'''
 
@@ -1927,8 +1930,13 @@ class Splashdown(object):
         if self.annotation != None:
             payload['genome_annotation'] = self.annotation
         elif self.exp_type in self.REQUIRE_ANNOTATION:
-            print "ERROR: could not determine annotation on '%s' experiment! Check reference file properties." % (self.exp_type)
-            sys.exit(1)
+            self.annotation = self.ANNOTATION_DEFAULTS.get(self.genome)
+            if self.annotation is not None:
+                payload['genome_annotation'] = self.annotation
+                print "WARNING: could not determine annotation so using '%s'! Check reference file properties." % (self.annotation)
+            else:
+                print "ERROR: could not determine annotation on '%s'! Check reference file properties." % (self.exp_type)
+                sys.exit(1)
 
 
         dxFile = dx.file_handler_from_fid(fid)
