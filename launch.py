@@ -353,25 +353,17 @@ class Launch(object):
             return None
         if 'controls' not in rep:
             return None
-        for file_key in rep['controls']:
-            if isinstance(file_key,list):
-                file_key = file_key[0]
-            file_obj = encd.lookup_json(file_key,frame='embedded')
-            rep_id = file_obj["replicate"]['@id']
-            rep_obj = encd.lookup_json(rep_id,frame='embedded')
-            exp_id = rep_obj['experiment']['@id'].split('/')[2]
-            rep_tech = "rep%s_%s" % \
-                    (rep_obj['biological_replicate_number'], rep_obj['technical_replicate_number'])
+        for (control_exp_id,control_rep_tech) in rep['controls']:
             control_root = self.psv['control_path']
             # FIXME: Cheating:
             if self.proj_name == "scratchPad" and self.psv['control_path'] == self.CONTROL_ROOT_FOLDER:
                 control_root = "/lrna"
-            path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
-            target_folder = dx.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
-            #print >> sys.stderr, "=== Target found [%s]" % target_folder
+            path_n_glob = control_root + control_exp_id + '/' + control_rep_tech + '/' + self.CONTROL_FILE_GLOB
+            target_folder = dx.find_folder(control_exp_id + '/' + control_rep_tech,self.project,control_root)
+            #print >> sys.stderr, "=== Target folder [%s]" % target_folder
             if target_folder != None:
                 path_n_glob = target_folder + self.CONTROL_FILE_GLOB
-            #print >> sys.stderr, "=== path_n_glob [%s] Project:[%s]" % (path_n_glob,self.proj_id)
+                #print >> sys.stderr, "=== path_n_glob [%s] Project:[%s]" % (path_n_glob,self.proj_id)
             fid = self.find_file(path_n_glob,self.proj_id,multiple=False,recurse=False)
             if fid != None:
                 return dx.file_path_from_fid(fid)

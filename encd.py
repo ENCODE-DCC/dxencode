@@ -648,13 +648,61 @@ def get_replicate_mapping(experiment,biorep=None,techrep=None,full_mapping=None,
             sys.exit(1)
     return None
 
+
+def get_control_mappings(exp, key=None):
+    '''For a given exp, find any associated control experiment and its mappings.'''
+    control_ids = exp.get("possible_controls")
+    if control_ids is None:  # Perhaps none are expected!
+        return (None, None)
+    for control_exp_obj in control_ids:
+        control_exp_id = control_exp_obj["accession"]
+        #print >> sys.stderr, "=== Looking for control %s" % (control_exp_id)
+        control_exp = get_exp(control_exp_id,must_find=False,warn=True,key=key)
+        if control_exp is not None:
+            control_mappings = get_full_mapping(control_exp_id,control_exp,key=key)
+            if control_mappings is not None:
+                return (control_exp_id, control_mappings)
+    print >> sys.stderr, "WARNING: Could not determine a single associated control experiment."
+    return (None, None)
+
+
+def get_control_locations(control_exp_id, control_mappings, br, tr):
+    '''For a given experiment br and tr, returns the ordered list of locations to be
+       searched for an expected control file.'''
+    # e.g. br,tr 2,2 could return [(2,2),(2,1),(1,1),(1,2)]
+    if control_mappings is None:
+        return None
+    control_locations = []
+    secondary_locations = []
+    other_locations = []
+    for (control_br,control_tr) in sorted( control_mappings.keys() ):
+        control_rep_tech = "rep%d_%d" % (control_br,control_tr)
+        if control_br == br and control_tr == tr:
+            control_locations.append((control_exp_id,control_rep_tech))
+        elif control_br == br or control_tr == tr:
+            secondary_locations.append((control_exp_id,control_rep_tech))
+        else:
+            other_locations.append((control_exp_id,control_rep_tech))
+    if len(secondary_locations) > 0:
+        control_locations.extend(secondary_locations)
+    if len(other_locations) > 0:
+        control_locations.extend(other_locations)
+    if len(control_locations) > 0:
+        return control_locations
+    return None
+
+
 def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
     '''For a given exp_id (accession) returns a "rep" list as used by assemble, launch, etc.'''
 
     reps = []
     # Must look through exp and find all replicates!
+    if exp == None:
+        exp = get_exp(exp_id,must_find=True,warn=False,key=key)
     if full_mapping == None:
         full_mapping = get_full_mapping(exp_id,exp,key=key)
+    (control_exp_id, control_mappings) = get_control_mappings(exp,key=key)
+
     if full_mapping != None:
         for (br,tr) in sorted( full_mapping.keys() ):
             rep = { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) }
@@ -678,12 +726,14 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                 sys.exit(1)
                 rep['paired_end'] = False
                 rep['has_reads'] = True
+            control_locations = get_control_locations(control_exp_id, control_mappings, br, tr)
 
             # Load read and control files, only if requested.
             run_type = None  # The files should be consistent as all single-end or paired-end, but some mapping got it wrong
             if load_reads and rep['has_reads']:
                 rep['fastqs'] = { "1": [], "2": [] }
-                rep['controls'] = []
+                if control_locations is not None:
+                    rep['controls'] = control_locations
                 if rep['paired_end']:
                     for (p1, p2) in mapping['paired']:
                         if p1['status'] not in ['released','in progress']:
@@ -696,10 +746,6 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                             #    # Warn?
                         if p2 != None and 'paired_end' in p2:
                             rep['fastqs'][p2['paired_end']].append(p2['accession']+".fastq.gz")
-                        if 'controlled_by' in p1:
-                            rep['controls'].append( p1['controlled_by'] )
-                        if p2 != None and 'controlled_by' in p2:
-                            rep['controls'].append( p2['controlled_by'] )
                 else: # not rep['paired_end']:
                     for f in mapping['unpaired']:
                         if f['status'] not in ['released','in progress']:
@@ -708,12 +754,6 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
                         if "run_type" in f:
                             if run_type == None or run_type == "single-ended":
                                 run_type = f["run_type"]
-                    if 'controlled_by' in mapping['unpaired']:
-                        rep['controls'].append( mapping['unpaired']['controlled_by'] )
-                    elif 'controlled_by' in mapping['unpaired'][0]:
-                        rep['controls'].append( mapping['unpaired'][0]['controlled_by'] )
-                if len(rep['controls']) == 0:
-                    rep['controls'] = None
 
             # One more test because of non-standard data: single-end data reporting 'paired' == 1 !
             if rep['paired_end'] and run_type == "single-ended" and len(rep['fastqs']['2']) == 0:
