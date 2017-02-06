@@ -669,22 +669,27 @@ def get_control_mappings(exp, key=None):
 def get_control_locations(control_exp_id, control_mappings, br, tr):
     '''For a given experiment br and tr, returns the ordered list of locations to be
        searched for an expected control file.'''
-    # e.g. br,tr 2,2 could return [(2,2),(2,1),(1,1),(1,2)]
+    # e.g. br,tr 2,2 could return [(exp_id,rep2_2),(,rep2_1),(,rep1_2),(,rep1_1)]
     if control_mappings is None:
         return None
     control_locations = []
     secondary_locations = []
+    tertiary_locations = []
     other_locations = []
     for (control_br,control_tr) in sorted( control_mappings.keys() ):
         control_rep_tech = "rep%d_%d" % (control_br,control_tr)
         if control_br == br and control_tr == tr:
             control_locations.append((control_exp_id,control_rep_tech))
-        elif control_br == br or control_tr == tr:
+        elif control_br == br:
             secondary_locations.append((control_exp_id,control_rep_tech))
+        elif control_tr == tr:
+            tertiary_locations.append((control_exp_id,control_rep_tech))
         else:
             other_locations.append((control_exp_id,control_rep_tech))
     if len(secondary_locations) > 0:
         control_locations.extend(secondary_locations)
+    if len(tertiary_locations) > 0:
+        control_locations.extend(tertiary_locations)
     if len(other_locations) > 0:
         control_locations.extend(other_locations)
     if len(control_locations) > 0:
