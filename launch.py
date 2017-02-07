@@ -24,8 +24,8 @@ import encd
 #        will not be rerun.
 #      - If any jobs for the experiment and replicate are already running, nothing new will be
 #        launched.
-#      - Almost all the code is generic and derived classes will only need to extend or override a 
-#        a few things.  It relies upon JSON pipeline descriptions which in simple cases can be 
+#      - Almost all the code is generic and derived classes will only need to extend or override a
+#        a few things.  It relies upon JSON pipeline descriptions which in simple cases can be
 #        directly read from dx (e.g. srnaLaunch.py).  More complex examples (e.g. lrnaLaunch.py)
 #        must hard-code the pipeline json to handle repeated apps and dx name conflicts.
 #        Tokens are used to abstract dx.app input/outout file names to avoid collisions.
@@ -56,11 +56,11 @@ import encd
 #      - Combined replicates have a "rep_tech" like "reps1_1-1_2" (for combining simple reps rep1_1 and rep1_2).
 #      - Combined replicates should be keyed (in sort order) after their "tributary" reps (e.g. "a","b","b-combines-a-b").
 #      - The final combined replicate (aka "SEA" into which all rivers flow) is keyed with self.SEA_ID ("zzz")
-#      - In the 'standard combination model' (which can be overridden in descendent classes): 
+#      - In the 'standard combination model' (which can be overridden in descendent classes):
 #        - Simple reps are processed by the "REP" pipeline branch.
 #        - The one combined rep (aka "SEA") is processed by the "COMBINED_REPS" pipeline branch
 #
-# Example derived classes: 
+# Example derived classes:
 #    https://github.com/ENCODE-DCC/long-rna-seq-pipeline/blob/master/dnanexus/lrnaLaunch.py
 #    https://github.com/ENCODE-DCC/long-rna-seq-pipeline/blob/master/dnanexus/small-rna/srnaLaunch.py
 #    https://github.com/ENCODE-DCC/long-rna-seq-pipeline/blob/master/dnanexus/rampage/rampageLaunch.py
@@ -69,7 +69,7 @@ import encd
 
 class Launch(object):
     '''
-    Launch module is the common code for pipeline specific launcher classes.  
+    Launch module is the common code for pipeline specific launcher classes.
     Launchers dynamically create and launch a workflow covering any needed steps of a pipeline.
     Steps needed are thos that have available inputs but not already generatedresults.
     '''
@@ -80,27 +80,27 @@ class Launch(object):
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline " + \
                     "analysis for one replicate or combined replicates. "
     ''' This help title should name pipline and whether combined replicates are supported.'''
-                    
+
     SERVER_DEFAULT = 'www'
     '''At this time there is no need to use the any but the one true server for launching.'''
-    
+
     FOLDER_DEFAULT = '/runs/'
     ''' This the default location to place results folders for each experiment.'''
-    
+
     PIPELINE_BRANCH_ORDER = None # MUST replace in derived class. Example: [ "REP", "COMBINED_REPS" ]
     '''A pipeline is frequently made of branches that flow into each other, such as replicate level to combined replicate.'''
-    
+
     PIPELINE_BRANCHES = None # MUST replace in derived class. 'ORDER' and "STEPS" are required for each branch,
     # Example:               # though simple "STEPS" may be discovered.
     #{    "REP": {
     #            "ORDER": [ "rep_app_one", ... ],
     #     # NOTE: In simple cases "STEPS" can be discovered from dnanexus apps (example: srnaLaunch.py)
-    #     # HINT: Try to discover the "STEPS" usubg build_simple_steps(verbose) to print the json, then modify from there  
+    #     # HINT: Try to discover the "STEPS" usubg build_simple_steps(verbose) to print the json, then modify from there
     #            "STEPS": {
     #                        "rep_app_one": {
     #                            "inputs":  { "reads":    "reads" },
-    #                            "app":       "rep_app_1", 
-    #                            "params":  { "nthreads": "nthreads"}, 
+    #                            "app":       "rep_app_1",
+    #                            "params":  { "nthreads": "nthreads"},
     #                            "results": { "rep_bam":  "bam_out" }
     #                        }, ...
     #    },
@@ -115,18 +115,18 @@ class Launch(object):
     #        "inputs":  { "input_token": "dx_input_name", ...},  # Files: Token *may* match name
     #        "results": { "result_token": "dx_output_name", ...}, # Files: Token *may* match name
     #        "output_values": { "output_token": "dx_output_name" }, # RARE: non-file output used as input to another step
-    #        "param_links": { "param_token": {"name":"output_token", "rep":"sister"} }} # RARE: link input to non-file output 
-    # Note, tokens *may* be the same as dx names, but MUST MATCH other tokens to define dependencies as: 
+    #        "param_links": { "param_token": {"name":"output_token", "rep":"sister"} }} # RARE: link input to non-file output
+    # Note, tokens *may* be the same as dx names, but MUST MATCH other tokens to define dependencies as:
     #     stepA:result_token == stepB:input_token
     # Also result_tokens must be in FILE_GLOB.keys()
     #
-    # NOTE: Simple pipelines have no reused steps or dx name to param complications and the 
+    # NOTE: Simple pipelines have no reused steps or dx name to param complications and the
     #       "STEPS" objects can be generated directly from dx apps.  If unsure, print the json from
     #       self.build_simple_steps(verbose=True) to determine if it will work for your pipeline.
-    
+
     PRUNE_STEPS = None
     '''Rare setting that allows dynamically pruning steps from a pipeline befpre running it.  Used by lrnaLaunch.py.'''
-    
+
     FILE_GLOBS = {"MAY": {}, "NEED": {}, "TO": {}, "REPLACE": {} }
     '''Globs for discovering existing results. Can be discoverd in simple piplines.'''
 
@@ -140,19 +140,19 @@ class Launch(object):
     GENOMES_SUPPORTED = ['hg19', 'mm10']
     GENOME_DEFAULT = 'hg19'
     ''' This is the default Genome that experiments are mapped to.'''
-    
+
     STANDARD_LABELS = {
-        'long-rna-seq':  { 'long': 'Long-RNA-seq',  'short': 'lrna',  'se_and_pe': True  }, 
-        'small-rna-seq': { 'long': 'Small-RNA-seq', 'short': 'srna',  'se_and_pe': False }, 
-        'rampage':       { 'long': 'Rampage',       'short': 'ramp',  'se_and_pe': True }, 
+        'long-rna-seq':  { 'long': 'Long-RNA-seq',  'short': 'lrna',  'se_and_pe': True  },
+        'small-rna-seq': { 'long': 'Small-RNA-seq', 'short': 'srna',  'se_and_pe': False },
+        'rampage':       { 'long': 'Rampage',       'short': 'ramp',  'se_and_pe': True },
         'dnase-seq':     { 'long': 'DNase-seq',     'short': 'dnase', 'se_and_pe': True  },
         'dna-me':        { 'long': 'DNA-methlyation','short': 'dme',  'se_and_pe': True  },
     }
     '''Standard labelling requires exp_type specific labels.  This can be overridden in descendent classes.'''
-    
+
     SEA_ID = 'zzz'
     '''SEA is the final branch into which all tributaries flow.'''
-        
+
 
     def __init__(self):
         '''
@@ -177,12 +177,12 @@ class Launch(object):
         self.link_later = None       # Rare: when 2 sister branches link to each other, it requires a final wf pass.
         self.deprecate = []          # Master list of files to deprecate.  Needed to cross rep boundaries in steps_to_run
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
-    
+
     def get_args(self,parse=True):
         '''Parse the input arguments.'''
         # MAY NEED TO EXTEND OR REPLACE in derived class
         # see long-rna-seq: lrnaLaunch.py for and example of extending
-        
+
         # Change this description to PIPELINE SPECIFIC version
         ap = argparse.ArgumentParser(description=self.PIPELINE_HELP +
                     "Can be run repeatedly and will launch only the steps that are needed to " +
@@ -221,7 +221,7 @@ class Launch(object):
                             help="Path to look in for control files (default: '" + self.CONTROL_ROOT_FOLDER + "')",
                             default=self.CONTROL_ROOT_FOLDER,
                             required=False)
-                        
+
         ap.add_argument('--project',
                         help="Project to run analysis in (default: '" + \
                                                         dx.env_get_current_project() + "')",
@@ -302,13 +302,13 @@ class Launch(object):
         # psv can contain any variables, but it must contain these at a minimum:
         # - Any non-file input param needed to launch the workflow
         # - 'resultFolder' - full dx path (without project) to the results folder of the specific run
-        # - 'name' - A short name used for specific workflow run. 
+        # - 'name' - A short name used for specific workflow run.
         # - 'description' - generic description of the pipeline.
-        # - 'title'/['subtitle'] for command line output announcing what will be done 
-        
+        # - 'title'/['subtitle'] for command line output announcing what will be done
+
         # Start with dict containing common variables
         psv = self.common_variables(args)
-        
+
         # Now add pipline specific variables here...
 
         if verbose:
@@ -321,9 +321,9 @@ class Launch(object):
         '''Locates all reference files based upon organism and gender.'''
         # PLEASE REPLACE in derived class
         assert "must replace!" and False
-        
+
         # Add your pipeline specific referernce file detection here
-        
+
         # Examples:
         # If all the ref files are in json keyed by ['genome']['gender'] then try:
         for ref in self.REFERENCES_FILES.keys():
@@ -333,7 +333,7 @@ class Launch(object):
                 sys.exit("ERROR: Unable to locate ref file: '" + filePath + "'")
             else:
                 priors[ref] = fid
-        
+
         # Or explicitly by key
         chrom_sizes = self.psv['refLoc']+self.REFERENCE_FILES['chrom_sizes'][self.psv['genome']][self.psv['gender']]
         chrom_sizes_fid = self.find_file(chrom_sizes,self.REF_PROJECT_DEFAULT)
@@ -343,45 +343,37 @@ class Launch(object):
             priors['chrom_sizes'] = chrom_sizes_fid
         self.psv['ref_files'] = self.REFERENCE_FILES.keys()
         return priors
-        
+
 
     def find_control_file(self,rep,default=None):
         '''Attempts to find an appropriate control file.'''
         # MAY NEED TO REPLACE for pipelines with controls
-        
+
         if self.CONTROL_FILE_GLOB == None or self.template:
             return None
         if 'controls' not in rep:
             return None
-        for file_key in rep['controls']:
-            if isinstance(file_key,list):
-                file_key = file_key[0]
-            file_obj = encd.lookup_json(file_key,frame='embedded')
-            rep_id = file_obj["replicate"]['@id']
-            rep_obj = encd.lookup_json(rep_id,frame='embedded')
-            exp_id = rep_obj['experiment']['@id'].split('/')[2]
-            rep_tech = "rep%s_%s" % \
-                    (rep_obj['biological_replicate_number'], rep_obj['technical_replicate_number'])
+        for (control_exp_id,control_rep_tech) in rep['controls']:
             control_root = self.psv['control_path']
             # FIXME: Cheating:
             if self.proj_name == "scratchPad" and self.psv['control_path'] == self.CONTROL_ROOT_FOLDER:
                 control_root = "/lrna"
-            path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
-            target_folder = dx.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
-            #print >> sys.stderr, "=== Target found [%s]" % target_folder
+            path_n_glob = control_root + control_exp_id + '/' + control_rep_tech + '/' + self.CONTROL_FILE_GLOB
+            target_folder = dx.find_folder(control_exp_id + '/' + control_rep_tech,self.project,control_root)
+            #print >> sys.stderr, "=== Target folder [%s]" % target_folder
             if target_folder != None:
                 path_n_glob = target_folder + self.CONTROL_FILE_GLOB
-            #print >> sys.stderr, "=== path_n_glob [%s] Project:[%s]" % (path_n_glob,self.proj_id)
+                #print >> sys.stderr, "=== path_n_glob [%s] Project:[%s]" % (path_n_glob,self.proj_id)
             fid = self.find_file(path_n_glob,self.proj_id,multiple=False,recurse=False)
             if fid != None:
                 return dx.file_path_from_fid(fid)
-                
+
         if default != None:
             return default
         #print json.dumps(rep,indent=4)
         print >> sys.stderr, "ERROR: Unable to find control in search of %s" % rep['controls']
         sys.exit(1)
-            
+
 
     def find_all_control_files(self):
         '''Attempts to find all control files needed for a run
@@ -410,12 +402,12 @@ class Launch(object):
     def add_combining_reps(self, psv):
         '''Defines how replicated are combined.'''
         # MAY NEED TO REPLACE for pipelines with combined steps
-        
+
         reps = psv['reps']
         # In the 'standard combining model' PIPELINE_BRANCH_ORDER = [ "REP", "COMBINED_REPS" ]
         # and all ENCODEd replicates are in psv['reps'] keyed as 'a','b',... and having rep['rep_tech'] = 'rep1_1'
         # All these simple reps will have rep['branch_id'] = "REP"
-        
+
         # If there are non-standard combinations, such as tech_reps combining, then bio_reps combining, define it here...
         # HINT: dnaseLaunch.py has a working example
 
@@ -426,7 +418,7 @@ class Launch(object):
             assert len(reps.keys()) == 2
             assert 'a' in reps.keys()
             assert 'b' in reps.keys()
-            
+
             sea = {} # SEA is the final branch into which all tributaries flow
             sea['branch_id'] = 'COMBINED_REPS'
             sea['tributaries'] = ['a','b']
@@ -437,13 +429,13 @@ class Launch(object):
             psv['reps'][sea['tributaries'][1]]['sister'] = sea['tributaries'][0]
             psv['reps'][self.SEA_ID] = sea
             psv['rep_tech'] = sea['rep_tech']  # psv gets labelled the same as the sea
-            
-        
+
+
     def find_combined_inputs(self,rep,steps,file_globs,verbose=False):
         '''Finds the inputs for a combined run in the directories of the replicate runs.'''
         # MAY NEED TO REPLACE for pipelines with combined steps
         #verbose=True
-        
+
         if not self.combined_reps or 'tributaries' not in rep:
             return
 
@@ -451,7 +443,7 @@ class Launch(object):
         inputs = {}
         for step in rep['path']:
             if verbose:
-                print >> sys.stderr, "DEBUG: step: "+ step 
+                print >> sys.stderr, "DEBUG: step: "+ step
             for file_token in steps[step]['inputs'].keys():
                 if verbose:
                     print >> sys.stderr, "DEBUG:   file_token: "+ file_token
@@ -494,7 +486,7 @@ class Launch(object):
                                                                        % (file_token, rep['resultsFolder'])
                             print >> sys.stderr, "       Please run for single replicate first."
                             sys.exit(1)
-        
+
         if inputs:
             if verbose:
                 print >> sys.stderr, "DEBUG: inputs:"
@@ -503,8 +495,8 @@ class Launch(object):
         if 'inputs' not in rep:
             rep['inputs'] = inputs
         else:
-            rep['inputs'].update( inputs )            
-    
+            rep['inputs'].update( inputs )
+
 
     ############## WRAPPED DXENCODE METHODS (makes templating without encd/dx easier) ############
     # Wrap a few global defines to make inheritance easier
@@ -516,18 +508,18 @@ class Launch(object):
         '''Using a DX style file path, find the file.'''
         # wrap the dx version to make templating easier
         return dx.find_file(filePath,project=project,verbose=verbose,multiple=multiple,recurse=recurse)
-        
+
     def umbrella_folder(self,folder,default,proj_name=None,exp_type=None,genome=None,annotation=None):
         '''Returns a normalized umbrella folder (that holds the experiments of a given type).'''
         if self.no_refs: # (no_refs is only True when templating)
             genome = None # If templating with no refs then this will hide genome and annotation
         return dx.umbrella_folder(folder,default,proj_name,exp_type=exp_type,sub_folder="runs/",genome=genome,annotation=annotation)
-                
+
     ############## NOT EXPECTED TO OVERIDE THE FOLLOWING METHODS ############
     def common_variables(self,args,fastqs=True):
         '''Initializes dict with common variables from args and encoded.'''
         # NOT EXPECTED TO OVERRIDE
-        
+
         self.server_key = args.server
         encd.set_server_key(self.server_key) # TODO: change to self.encd = Encd(self.server_key)
         self.test = args.test
@@ -542,7 +534,7 @@ class Launch(object):
             self.build_apps = True
         if args.compare_techreps:
             self.compare_techreps = True
-            
+
         cv = {}
         self.proj_name = dx.env_get_current_project()
         if self.proj_name == None or args.project != None:
@@ -551,19 +543,19 @@ class Launch(object):
             print >> sys.stderr, "ERROR: Please enter a '--project' to run in."
             sys.exit(1)
         self.project = dx.get_project(self.proj_name)
-        self.proj_id = self.project.get_id()        
+        self.proj_id = self.project.get_id()
 
         cv['project']    = self.proj_name
         cv['experiment'] = args.experiment
         if args.experiment == None and self.template:
             cv['experiment'] = 'template'
-        
+
         # A few experiment types have controls
         if self.CONTROL_FILE_GLOB != None:
             if args.control != None: # Very few cases do you want to explicitly set this
                 cv['control'] = args.control
             cv['control_path'] = args.control_path  # My defining this, you can shorten the search time through dx paths
-        
+
         if not self.template:
             print "Retrieving experiment specifics..."
             self.exp = encd.get_exp(cv['experiment'])
@@ -574,16 +566,20 @@ class Launch(object):
                 sys.exit(1)
             if 'internal_status' in self.exp and self.exp['internal_status'] in encd.INTERNAL_STATUS_BLOCKS:
                 print "ERROR: Experiment %s with internal_status of '%s' cannot be launched." % \
-                                                                        (cv['experiment'],self.exp['internal_status']) 
+                                                                        (cv['experiment'],self.exp['internal_status'])
                 sys.exit(1)
-            
-            # Load up the encoded and combining "reps" which will be processed by PIPELINE_BRANCHES
+
+            lab = self.exp.get('lab','')
+            if isinstance(lab,dict):
+                cv["lab"] = lab.get('name','unidentified')
+            else:
+                cv["lab"] = lab[6:-1] # e.g. "/labs/gregory-crawford/"
             self.load_reps(args, cv, cv['experiment'], self.exp)
         else:
             print "Templating experiment specifics..."
             cv['exp_type'] = self.PIPELINE_NAME  # By definition, this should be correct
             self.load_template_reps(args, cv)
-        
+
         assert 'a' in cv['reps']
 
         # Only supported genomes
@@ -599,7 +595,7 @@ class Launch(object):
                 elif cv['genome'] != args.genome:
                     print >> sys.stderr, "ERROR: Genome %s does not match discovered genome %s" % (args.genome, cv['genome'])
                     sys.exit(1)
-                cv['genome'] = args.genome            
+                cv['genome'] = args.genome
         else:
             print >> sys.stderr, "ERROR: Organism %s not currently supported" % organism
             sys.exit(1)
@@ -636,8 +632,11 @@ class Launch(object):
         else:  # for independent simple replicates, top level doesn't really matter.
             cv['paired_end'] = cv['reps']['a']['paired_end']
 
+        # Special case for RNA pipelines:
+        if cv['exp_type'] in ["long-rna-seq", "small-rna-seq", "rampage"]:
+            cv['stranded'] = encd.is_stranded(self.exp)
         # Special case for lrna paired_end:
-        if cv['paired_end'] and self.PIPELINE_NAME == "long-rna-seq":
+        if cv['paired_end'] and cv['exp_type'] == "long-rna-seq":
             cv['ScriptSeq'] = encd.is_script_seq(self.exp)
 
         # Default locations
@@ -654,7 +653,7 @@ class Launch(object):
         if not self.template:
             cv['resultsFolder'] += cv['experiment'] + '/'
         self.update_rep_result_folders(cv)
-        
+
         # Standard labels:
         if cv['exp_type'] in self.STANDARD_LABELS:
             labels = self.STANDARD_LABELS[cv['exp_type']]
@@ -682,13 +681,13 @@ class Launch(object):
                 rep['title'] = cv['title'] + " - "+rep['rep_tech']
                 if 'library_id' in rep:
                     rep['title'] += " (library '"+rep['library_id']+"')"
-                if not self.no_refs: 
+                if not self.no_refs:
                     rep['title'] += " on "+cv['genome']
                     if not self.template:
                         rep['title'] += ", "+cv['gender']
                 rep['name']  = cv['name']+"_"+rep['rep_tech']
             cv['title']   += " - "+cv['rep_tech']
-            if not self.no_refs: 
+            if not self.no_refs:
                 cv['title']   += " on "+cv['genome']
                 if not self.template:
                     cv['title']   += ", "+cv['gender']
@@ -701,7 +700,7 @@ class Launch(object):
         Gathers replicates from encoded, then builds the cv['reps'] list from requested or all.
         '''
         # NOT EXPECTED TO OVERRIDE
-        
+
         # A design note about replicates in the launchers:
         # - "rep" objects should contain (almost) all information necesary to launch processing against them.
         #   A few minor things common to the entire experiment are stored directly in the psv (pipeline specific variables)
@@ -711,7 +710,7 @@ class Launch(object):
         # - Combined replicates have a "rep_tech" like "reps1_1-2_1" (for combining simple reps rep1_1 and rep2_1).
         # - Combined replicates should be keyed (in sort order) after their "tributary" reps (e.g. "a","b","b-combines-a-b").
         # - The final combined replicate (aka "SEA" into which all rivers flow) is keyed with self.SEA_ID ("zzz")
-        # - In the 'standard combination model' (which can be overridden in descendent classes): 
+        # - In the 'standard combination model' (which can be overridden in descendent classes):
         #   - Simple reps are processed by the "REP" pipeline branch.
         #   - The one combined rep (aka "SEA") is processed by the "COMBINED_REPS" pipeline branch
         cv_reps = {}
@@ -729,7 +728,7 @@ class Launch(object):
         elif args.br != None and args.br != 0:
             rep_tech = 'rep' + str(args.br) + '_' + str(args.tr)
             rep_techs.append(rep_tech)
-            
+
         # Find each requested rep_tech in reps
         letters = deque('abcdefghijklmnopqrstuvwxyz')
         if len(rep_techs) > 0:
@@ -755,7 +754,14 @@ class Launch(object):
             for rep in reps:
                 ltr = letters.popleft()
                 cv_reps[ltr] = rep
-        
+
+        # Special case for srna ENCODE2:
+        if cv['exp_type'] == "small-rna-seq":
+            for ltr in cv_reps.keys():
+                a_tailing = encd.has_a_tailing(self.exp,cv_reps[ltr]['rep_tech'])
+                if a_tailing is not None:
+                    cv_reps[ltr]['a_tailing'] = a_tailing
+
         # Assume combined reps if supported AND exactly 2 reps AND for different biological reps
         if self.PIPELINE_BRANCH_ORDER != None and 'COMBINED_REPS' in self.PIPELINE_BRANCH_ORDER:
             if len(cv_reps) == 2:
@@ -765,13 +771,13 @@ class Launch(object):
                                            and cv_reps['a']['tr'] != cv_reps['b']['tr']:
                     self.combined_reps = True
         self.multi_rep = (len(reps) > 1)
-            
+
         # A little more rep tidying
         for ltr in cv_reps.keys():
             rep = cv_reps[ltr]
             rep['branch_id'] = 'REP'  # MUST override for non-standard pipelines which have ['REP','COMBINED_REPS']
             rep['concat_id'] = 'reads'
-            if 'paired_end' in rep and rep['paired_end']: 
+            if 'paired_end' in rep and rep['paired_end']:
                 rep['concat_id2'] = 'reads2'
             if self.detect_umi:
                 (umi_found_true, barcodes) = encd.rep_is_umi(exp,rep)
@@ -781,10 +787,10 @@ class Launch(object):
                     rep['umi'] = 'no'
                 if len(barcodes) > 0:
                     rep['barcode'] = barcodes[0]
-                else:    
+                else:
                     rep['barcode'] = "undetected"
-                
-        # mult-rep rep_tech: 
+
+        # mult-rep rep_tech:
         if self.combined_reps:
             cv['rep_tech'] = 'reps' + cv_reps['a']['rep_tech'][3:] + \
                                 '-' + cv_reps['b']['rep_tech'][3:]  # combined delimited by '-'
@@ -795,9 +801,9 @@ class Launch(object):
                     cv['rep_tech'] += ','+cv_reps[ltr]['rep_tech'][3:] # not combined are delimited by ','
         else:
             cv['rep_tech'] = cv_reps['a']['rep_tech']
-            
+
         cv['reps'] = cv_reps
-        
+
         # Call override-able function to define replicate combinations.
         self.add_combining_reps(cv)
 
@@ -807,7 +813,7 @@ class Launch(object):
         Creates template replicates building the cv['reps'] list from requested or all.
         '''
         # NOT EXPECTED TO OVERRIDE
-        
+
         # A design note about replicates in the launchers:
         # - "rep" objects should contain (almost) all information necesary to launch processing against them.
         #   A few minor things common to the entire experiment are stored directly in the psv (pipeline specific variables)
@@ -817,7 +823,7 @@ class Launch(object):
         # - Combined replicates have a "rep_tech" like "reps1_1-2_1" (for combining simple reps rep1_1 and rep2_1).
         # - Combined replicates should be keyed (in sort order) after their "tributary" reps (e.g. "a","b","b-combines-a-b").
         # - The final combined replicate (aka "SEA" into which all rivers flow) is keyed with self.SEA_ID ("zzz")
-        # - In the 'standard combination model' (which can be overridden in descendent classes): 
+        # - In the 'standard combination model' (which can be overridden in descendent classes):
         #   - Simple reps are processed by the "REP" pipeline branch.
         #   - The one combined rep (aka "SEA") is processed by the "COMBINED_REPS" pipeline branch
 
@@ -836,7 +842,7 @@ class Launch(object):
             rep_techs.append( (rep_tech,int(args.br),args(args.tr)) )
         else:
             rep_techs = [ ('rep1_1',1,1), ('rep2_1',2,1) ]  # Default is 2 biological replicate pipeline run
-            
+
         # Create rep dicts that will be used to build pipeline ins and outs
         cv_reps = {}
         letters = deque('abcdefghijklmnopqrstuvwxyz')
@@ -851,38 +857,38 @@ class Launch(object):
             if args.genome == 'mm10':
                 rep['organism'] = 'mouse'
             rep['sex'] = 'male' # Sorry, but the patriarchy has ruled that we must include chrY.
-            rep['paired_end'] = args.pe  # Defaults to se        
+            rep['paired_end'] = args.pe  # Defaults to se
             rep['has_reads'] = False
-                    
+
             # Load read and control files, only if requested.
             run_type = None  # The files should be consistent as all single-end or paired-end, but some mapping got it wrong
             rep['fastqs'] = { "1": [], "2": [] }
             rep['controls'] = []
-            rep['priors'] = {} 
+            rep['priors'] = {}
             rep['inputs'] = {}
             rep['inputs']['Reads1'] = []
             rep['inputs']['Reads2'] = []
-                
+
             ltr = letters.popleft()
             cv_reps[ltr] = rep
             #print "* Added: cv_reps[%s] as %s" % (ltr, rep_tech)
-            
+
         # Add combining replicates as appropriate
         # Assume combined reps if supported AND exactly 2 reps AND for different biological reps
         if self.PIPELINE_BRANCH_ORDER != None and 'COMBINED_REPS' in self.PIPELINE_BRANCH_ORDER:
             if len(cv_reps.keys()) == 2 and cv_reps['a']['br'] != cv_reps['b']['br']:
                 self.combined_reps = True
         self.multi_rep = (len(cv_reps.keys()) > 1)
-            
+
         # A little more rep tidying
         for ltr in cv_reps.keys():
             rep = cv_reps[ltr]
             rep['branch_id'] = 'REP'  # MUST override for non-standard pipelines which have ['REP','COMBINED_REPS']
             rep['concat_id'] = 'reads'
-            if 'paired_end' in rep and rep['paired_end']: 
+            if 'paired_end' in rep and rep['paired_end']:
                 rep['concat_id2'] = 'reads2'
-                
-        # mult-rep rep_tech: 
+
+        # mult-rep rep_tech:
         if self.combined_reps:
             cv['rep_tech'] = 'reps' + cv_reps['a']['rep_tech'][3:] + \
                                 '-' + cv_reps['b']['rep_tech'][3:]  # combined delimited by '-'
@@ -893,15 +899,15 @@ class Launch(object):
                     cv['rep_tech'] += ','+cv_reps[ltr]['rep_tech'][3:] # not combined are delimited by ','
         else:
             cv['rep_tech'] = cv_reps['a']['rep_tech']
-            
-        cv['reps'] = cv_reps 
+
+        cv['reps'] = cv_reps
 
         # Call override-able function to define replicate combinations.
         self.add_combining_reps(cv)
         for rep_id in sorted( cv['reps'].keys() ):  # Everything will be initiated
             rep = cv['reps'][rep_id]
             if "priors" not in rep:
-                rep['priors'] = {} 
+                rep['priors'] = {}
                 rep['inputs'] = {}
 
 
@@ -999,7 +1005,7 @@ class Launch(object):
         '''Assemble the requested steps and file globs.'''
         # NOT EXPECTED TO OVERRIDE
         assert 'ORDER' in branch
-        pipe_path = branch['ORDER']    
+        pipe_path = branch['ORDER']
 
         if self.FILE_GLOBS != None and 'STEPS' in branch:
             # Use for complex pipelines:
@@ -1023,7 +1029,7 @@ class Launch(object):
                     rep['path'] = pipe_path['se']
             else:
                 rep['path'] = pipe_path
-            # In a rare case, pruning of steps is done.            
+            # In a rare case, pruning of steps is done.
             if self.PRUNE_STEPS != None and len(self.PRUNE_STEPS) != 0:
                 for step in self.PRUNE_STEPS:
                     if step in pipe_steps:
@@ -1031,7 +1037,7 @@ class Launch(object):
                     if step in rep['path']:
                         rep['path'].remove(step)
             rep['steps'] = pipe_steps
-            
+
         return [ pipe_steps, file_globs ]
 
     def find_prior_results(self,pipe_path,steps,results_folder,file_globs):
@@ -1050,7 +1056,7 @@ class Launch(object):
         '''Finds the inputs and priors for all reps for a given branch of the pipeline.'''
         # NOT EXPECTED TO OVERRIDE
         #verbose=True
-                    
+
         if not self.template:
             print "Checking for prior results..."
             # NOTE: priors is a dictionary of fileIds that will be used to determine stepsToDo
@@ -1062,7 +1068,7 @@ class Launch(object):
                     if not dx.project_has_folder(self.project, rep['resultsFolder']):
                         self.project.new_folder(rep['resultsFolder'],parents=True)
                 rep['priors'] = self.find_prior_results(rep['path'],rep['steps'],rep['resultsFolder'],globs)
-                
+
         if not self.template:
             print "Checking for input files..."
             # Find all reads files and move into place
@@ -1100,12 +1106,12 @@ class Launch(object):
     def find_all_ref_files(self):
         '''Locates all reference files based upon organism and gender.'''
         # NOT EXPECTED TO OVERRIDE
-        
+
         if not self.no_refs:
             print "Looking for reference files..."
             ref_priors = {}
             ref_priors = self.find_ref_files(ref_priors)
-            
+
             # Add into all rep priors
             for rep in self.psv['reps'].values():
                 rep['priors'].update(ref_priors)
@@ -1118,8 +1124,8 @@ class Launch(object):
         #verbose=True
 
         print "Checking for prior app non-file outputs..."
-        
-        # After inputs and priors have been discovered... 
+
+        # After inputs and priors have been discovered...
         # 1) walk through all reps
         for rep_id in sorted(self.psv["reps"].keys()):
             rep = self.psv["reps"][rep_id]
@@ -1170,7 +1176,7 @@ class Launch(object):
     def determine_steps_to_run(self,pipe_path, steps, priors, deprecate, force=False, verbose=False):
         '''Determine what steps need to be done, base upon prior results.'''
         # NOT EXPECTED TO OVERRIDE
-        #verbose=True  # Very useful when verifying new/updated launcher 
+        #verbose=True  # Very useful when verifying new/updated launcher
         will_create = []
         steps_to_run = []
         for step in pipe_path:
@@ -1246,7 +1252,7 @@ class Launch(object):
     def determine_steps_needed(self, force=False):
         '''Determine steps needed for replicate(s) and combined, base upon prior results.'''
         # NOT EXPECTED TO OVERRIDE
-        
+
         print "Determining steps to run..."
         # NOTE: stepsToDo is an ordered list of steps that need to be run
         for rep_id in sorted( self.psv['reps'].keys() ):
@@ -1259,8 +1265,8 @@ class Launch(object):
     def find_results_from_prev_branch(self, river, inp_token, expect_set):
         '''If combined_reps step, look for input from results of replicate level step.'''
         # NOT EXPECTED TO OVERRIDE
-        
-        if not self.combined_reps:    # Not even doing a wf with combining branches 
+
+        if not self.combined_reps:    # Not even doing a wf with combining branches
             return None
         if 'tributaries' not in river:  # Not a combining branch
             return None
@@ -1268,7 +1274,7 @@ class Launch(object):
             return None
         # The combined_step input tokens should either end in '_a', '_b' or the like,
         # Or the step expects to combine N files so expect_set=True and all matching results should be combined.
-        
+
         # Using letters since 2 tech_rep branches could be combined into 2 bio_rep branches and then 1 experiment level branch
         # Thus tr branch_ids would be: 'a','b','c','d'
         #  and br branch_ids might be 'b-bio_rep1','d-bio_rep2', and those branches flow into the sea (self.SEA_ID='zzz').
@@ -1281,10 +1287,10 @@ class Launch(object):
             results_array = []
         elif inp_token[-2] == '_' and inp_token.lower()[-1] in letters:
             looking_for = inp_token.lower()[-1]
-        elif looking_for == None: 
+        elif looking_for == None:
             # NOT a warning: no current means to distinguish between expecting a prior from not expecting one
             return None
-            
+
         for tributary_id in river['tributaries']:
             ltr = letters.popleft()
             if looking_for != None and looking_for != ltr:
@@ -1302,16 +1308,16 @@ class Launch(object):
                     if self.FILE_GLOBS[result_token] == self.FILE_GLOBS[inp_token]:
                         if expect_set:
                             #print "- Expected set in branch priors and found inp:'"+inp_token + \
-                            #                                                "' from prior branch result:'"+result_token+"'" 
+                            #                                                "' from prior branch result:'"+result_token+"'"
                             results_array.append(prev_results[result_token])
                             break  # Done with this branch, but look for more results in next branches
                         if looking_for == ltr:
                             #print "- Expected '"+ltr+"' in branch priors and found inp:'"+inp_token + \
-                            #                                                "' from prior branch result:'"+result_token+"'" 
+                            #                                                "' from prior branch result:'"+result_token+"'"
                             return prev_results[result_token] # found result on branch matched by letter
                         #elif looking_for == None:
                         #    return prev_results[result_token] # return first match from first branch
-        
+
         # Went through all branches so return any results found
         if not expect_set or len(results_array) == 0:
             return None
@@ -1325,11 +1331,11 @@ class Launch(object):
         # Mystery params come from the non-file outputs of other steps (even from other reps!).
         # If a step definition contains an "output_values" parameter then:
         # - find_all_app_non_file_outputs will look for already run step values and place them in rep['params']
-        # - create_or_extend_workflow will create links in rep['prevStepResults'] for steps not yet run 
+        # - create_or_extend_workflow will create links in rep['prevStepResults'] for steps not yet run
         # If this step contains "param_links", then each param_spec should say what rep to look for: 'self', 'sister'
         #verbose=True
-        
-        # Not easy, that is for sure! "param_links": { "target_size": {"name":"reads_filtered", "rep":"sister"} } 
+
+        # Not easy, that is for sure! "param_links": { "target_size": {"name":"reads_filtered", "rep":"sister"} }
         if "param_links" not in rep["steps"][step_id]:
             return None
         param_links = rep["steps"][step_id]["param_links"]
@@ -1348,7 +1354,7 @@ class Launch(object):
         else: # or "parent" or "aunt" ??
             print "ERROR: Looking for mystery parameter but don't (yet) support rep '"+param_spec["rep"]+"'."
             sys.exit(0)
-            
+
         mystery_rep = self.psv["reps"][mystery_rep_id]
         if verbose:
             print >> sys.stderr, "DEBUG: Found rep "+rep['rep_tech']+"'s "+param_spec["rep"]+" as mystery rep '"+mystery_rep['rep_tech']+"'"
@@ -1365,10 +1371,10 @@ class Launch(object):
                 print >> sys.stderr, "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
                       "' from mystery rep '"+mystery_rep['rep_tech']+"' with value: " + str(mystery_value)
             return mystery_value
-            
+
         if not link_later or param_spec["rep"] == "self":  # Linking to self must be to prior step in rep
             return None
-            
+
         # Avoid failure to link BOTH mystery 'sister' params because one is always prior to the other
         # Solution is to put in a known token '@link_later@', then have a final pass after building whole workflow
         # This link_later strategy should only be used if the mystery_step that produces the value can be found.
@@ -1387,16 +1393,16 @@ class Launch(object):
                 print >> sys.stderr, "DEBUG: Found mystery param '"+param_name+"' as '"+param_spec["name"]+\
                       "' from rep '"+param_spec["rep"]+"' with value: " + str(mystery_value)
             return mystery_value
-        
+
         return None
-        
+
 
     def wf_find_file_input(self,rep,step_id,file_token,expect_set,verbose=False):
-        '''When buidling a workflow, finds a dx defined step file input (which may be for a set) 
+        '''When buidling a workflow, finds a dx defined step file input (which may be for a set)
            from prior step results, tributary results, or prior files found.'''
         # NOT EXPECTED TO OVERRIDE
         #verbose=True
-        
+
         # Now try to find prior results or existing files to fill in this input
         file_input = []
         expect_count = 1
@@ -1411,10 +1417,10 @@ class Launch(object):
                     file_input.extend( prev_input )
                 else:
                     file_input.append( prev_input )
-            
+
             if verbose:
                 print >> sys.stderr, "DEBUG: Found %d file_inputs from prev_branch" % len(file_input)
-            
+
         if len(file_input) != expect_count and file_token in rep['prevStepResults']:
             if isinstance(rep['prevStepResults'][file_token], list):
                 file_input.extend( rep['prevStepResults'][file_token] )
@@ -1425,7 +1431,7 @@ class Launch(object):
 
         if len(file_input) != expect_count:
             alt_token = file_token
-            if not self.template:       
+            if not self.template:
                 if alt_token not in rep['priors'] and expect_set:
                     alt_token = file_token + "_set"  # Sometimes sets expect  the token to end in '_set'!
                 if alt_token not in rep['priors'] and file_token.startswith('reads'):
@@ -1434,7 +1440,7 @@ class Launch(object):
                     alt_token = "reads_set"  # Sometimes reads are reads_sets. # FIXME: should really drop "_set" logic
             if alt_token == "reads" and file_token == "reads2" and not rep['paired_end']:
                 return None # This special case can come when applet is built for PE and SE reads with optional reads2 param
-            #print >> sys.stderr, "DEBUG: alt_token '%s' file_token '%s'" % (alt_token,file_token) 
+            #print >> sys.stderr, "DEBUG: alt_token '%s' file_token '%s'" % (alt_token,file_token)
             if alt_token in rep['priors']:
                 if isinstance(rep['priors'][alt_token], list):
                      if expect_set:
@@ -1449,7 +1455,7 @@ class Launch(object):
                 if verbose:
                     print >> sys.stderr, "DEBUG: Now %d file_inputs after priors, with '%s'" % (len(file_input),file_token)
 
-        if not self.template:       
+        if not self.template:
             if len(file_input) == 0:
                 print >> sys.stderr, "ERROR: step '%s'  can't find input '%s' paired:%s" % (step_id,file_token,str(rep['paired_end']))
                 #print >> sys.stderr, json.dumps(rep['priors'],indent=4,sort_keys=True)
@@ -1459,19 +1465,19 @@ class Launch(object):
                                                                                     (expect_count,len(file_input))
                 #print >> sys.stderr, json.dumps(rep['priors'],indent=4,sort_keys=True)
                 sys.exit(1)
-            
+
         if len(file_input) == 0:
             return None
         if not expect_set:
             return file_input[0]
         return file_input
-            
+
 
     def wf_find_param_input(self,rep,rep_id,step_id,param,app_param,verbose=False):
         '''When buidling a workflow, finds a dx defined step param input (sets not yet supported)
-           from rep, psv or in rare cases another step''' 
+           from rep, psv or in rare cases another step'''
         # NOT EXPECTED TO OVERRIDE
-        
+
         # Now try to find prior results or existing files to fill in this input
         param_input = None
         if param in rep:
@@ -1488,13 +1494,13 @@ class Launch(object):
                                               "' in pipeline specific variables (psv)."
             #print >> sys.stderr, json.dumps(rep,indent=4)
             sys.exit(1)
-            
+
         return param_input
 
 
     def create_or_extend_workflow(self,rep, rep_id, wf=None,app_proj_id=None):
         '''
-        This function will populate or extend a workflow with the steps in rep['stepsToDo'] and return 
+        This function will populate or extend a workflow with the steps in rep['stepsToDo'] and return
         the workflow unlaunched.   It relies on the rep object containing *almost* all information to run
         the PIPELINE_BRANCH associated with the rep.  The rep should contain rep['priors'] defining existing files;
         rep['steps'] objects defining applet, input and output requirements; etc.  A few common parameters will
@@ -1507,7 +1513,7 @@ class Launch(object):
             if not dx.project_has_folder(self.project, rep['resultsFolder']):
                 self.project.new_folder(rep['resultsFolder'],parents=True)
         self.build_applets_if_necessary()
-                
+
         if len(rep['stepsToDo']) < 1:
             return None
         if app_proj_id == None:
@@ -1552,7 +1558,7 @@ class Launch(object):
                 inp_file = self.wf_find_file_input(rep,step,file_token,expect_set)
                 if inp_file != None:
                     app_inputs[ app_inp ] = inp_file
-                
+
             # Non-file app param inputs
             if 'params' in steps[step]:
                 for param in steps[step]['params'].keys():
@@ -1577,7 +1583,7 @@ class Launch(object):
                     stage_id = wf.add_stage(app, stage_input=app_inputs, folder=rep['resultsFolder'])
                 if step_link_later:  # At least one parameter will requre linking later so save stage_id
                     steps[step]['stage_id'] = stage_id
-                    
+
             # outputs, which we will need to link to
             for file_token in steps[step]['results'].keys():
                 app_out = steps[step]['results'][file_token]
@@ -1606,7 +1612,7 @@ class Launch(object):
         # NOT EXPECTED TO OVERRIDE
         if self.link_later == None:
             return
-        
+
         # Since non-file outputs from one step might be input params to another step and since
         # those outputs might be in 'sister' branches of the workflow, this final pass may be
         # needed to fill in the links that were not available when the wf was built branch by branch.
@@ -1614,7 +1620,7 @@ class Launch(object):
         #verbose=True
 
         print "Final pass through workflow..."
-        
+
         for later_link in self.link_later:
             rep       = later_link['rep']
             rep_id    = later_link['rep_id']
@@ -1639,7 +1645,7 @@ class Launch(object):
                 print >> sys.stderr, "DEBUG: found '"+app_inputs[app_param]+"' which is being replaced with '"+mystery_param+"'"
             app_inputs[app_param] = mystery_param
             wf.update_stage(stage_id, stage_input=app_inputs)
-                
+
         return
 
 
@@ -1661,7 +1667,7 @@ class Launch(object):
                 rep_tech_msg = rep['rep_tech']
                 for input_type in sorted( rep['inputs'].keys() ):
                     input_type_msg = input_type
-                    if len(rep['inputs'][input_type]) > 0: 
+                    if len(rep['inputs'][input_type]) > 0:
                         for fid in rep['inputs'][input_type]:
                             print "  - "+rep_tech_msg+' '+input_type_msg+' '+dx.file_path_from_fid(fid)
                             rep_tech_msg = '      '  # Trick to make output less cluttered
@@ -1670,7 +1676,7 @@ class Launch(object):
             rep_tech_msg = run['rep_tech']
             for input_type in sorted( run['inputs'].keys() ):
                 input_type_msg = input_type
-                if len(run['inputs'][input_type]) > 0: 
+                if len(run['inputs'][input_type]) > 0:
                     for fid in run['inputs'][input_type]:
                         print "  - "+rep_tech_msg+' '+input_type_msg+' '+dx.file_path_from_fid(fid)
                         rep_tech_msg = '      '
@@ -1681,7 +1687,7 @@ class Launch(object):
             # Should be enough to show the ref priors from 'a' rep for single-rep, multi or combined
             for token in self.psv['ref_files']:
                 print "  " + dx.file_path_from_fid(self.psv['reps']['a']['priors'][token],True)
-        
+
         print "- Results written to: " + self.psv['project'] + ":" +run['resultsFolder']
         if not self.template:
             if self.multi_rep:
@@ -1768,7 +1774,7 @@ class Launch(object):
                     print "Moving "+str(len(run['deprecate']))+" "+run['rep_tech']+" prior result file(s) to '"+ \
                                                                                         deprecated+"'..."
                     dx.move_files(run['deprecate'],deprecated,proj_id)
-        
+
         # Build the workflow...
         wf = None
         if self.multi_rep:
@@ -1790,11 +1796,11 @@ class Launch(object):
                 else:
                     print "Assembling workflow for "+run['rep_tech']+"..."
                 wf = self.create_or_extend_workflow(run, None, wf=wf)
-        
+
         # Need a final pass over the whole workflow to patch in params set to '@link_later@'
         if wf != None:  # Only non-test case
             self.workflow_final_pass(wf)
-            
+
         return wf
 
 
@@ -1850,7 +1856,7 @@ class Launch(object):
                         new_fh.write(old_run_id+'\n')
             proj = dxpy.DXProject(self.proj_id)
             proj.remove_objects(old_fids)
-            
+
         new_fh.close()
 
     def launch_pad(self,wf,run,ignition=False):
@@ -1888,7 +1894,7 @@ class Launch(object):
         print "Retrieving pipeline specifics..."
         self.psv = self.pipeline_specific_vars(args)
         print "Running in project ["+self.proj_name+"]..."
-        
+
         print "Building apps dictionaries..."
         # The point of using 'branches' instead of 'self.PIPELINE_BRANCHES' is that the app dicts *may* be discovered from dx
         branches = {}
@@ -1906,7 +1912,7 @@ class Launch(object):
 
         # finding experiment specific control files in a stadardized way
         self.find_all_control_files()
-        
+
         # finding pipeline specific reference files in a stadardized way
         self.find_all_ref_files()
 
@@ -1919,7 +1925,7 @@ class Launch(object):
         # Preperation is done. Now build up multi-rep workflow
         if self.multi_rep or self.combined_reps:
             run = self.psv
-        else:            
+        else:
             run = self.psv['reps']['a']
         wf = self.workflow_report_and_build(run,self.proj_id)
 
@@ -1930,7 +1936,7 @@ class Launch(object):
 
         # Roll out to pad and possibly launch
         self.launch_pad(wf,run,ignition=args.run)
-                
+
         print "(success)"
 
 if __name__ == '__main__':
