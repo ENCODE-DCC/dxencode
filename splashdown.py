@@ -1459,7 +1459,6 @@ class Splashdown(object):
                 sys.exit(1) # Until a legit case comes along, better exit and figure it out
             qc_metric['step_run'] =  step_run_id
             qc_metric['assay_term_name'] = self.exp['assay_term_name']
-            qc_metric['assay_term_id']   = self.exp['assay_term_id'] # self.exp_type
             qc_metric['aliases'] = [ qc_alias ]
             if verbose:
                 print >> sys.stderr, "ENCODEd 'qc_metric' before attachment:"
