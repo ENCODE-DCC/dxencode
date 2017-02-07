@@ -1747,6 +1747,7 @@ class Splashdown(object):
             notes["dx_project_name"] = self.proj_name
 
             price = self.find_price(job)
+
             notes["dx_cost"] = "$" + str(round(price,2))
             duration = dx.format_duration(job.get('startedRunning')/1000,job.get('stoppedRunning')/1000)
             notes["duration"] = duration
@@ -1836,7 +1837,6 @@ class Splashdown(object):
             sys.exit(1)
 
         # Combine things like cost, time, executable versions???
-
         parent_job['totalPrice'] = self.find_price(parent_job) + self.find_price(child_job)
         parent_job['stoppedRunning'] += child_job.get('stoppedRunning') - child_job.get('startedRunning')
         parent_dxFile = dx.file_handler_from_fid(parent_fid)
