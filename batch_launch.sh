@@ -2603,3 +2603,308 @@
 #~/Documents/dnase_pipeline/dnanexus/dnaseLaunch.py -e ENCSR649KBB -g GRCh38 --run > logs/launch/dnase/16_11_21/remc_GRCh38/ENCSR649KBB.log 2>&1 &
 #~/Documents/dnase_pipeline/dnanexus/dnaseLaunch.py -e ENCSR477RTP -g GRCh38 --run > logs/launch/dnase/16_11_21/remc_GRCh38/ENCSR477RTP.log 2>&1 &
 
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR020GGM -g mm10 --test > logs/launch/dname/16_12_14/ENCSR020GGM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR033PGF -g mm10 --test > logs/launch/dname/16_12_14/ENCSR033PGF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR037RNN -g mm10 --test > logs/launch/dname/16_12_14/ENCSR037RNN.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR050EXR -g mm10 --test > logs/launch/dname/16_12_14/ENCSR050EXR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR089FFK -g mm10 --test > logs/launch/dname/16_12_14/ENCSR089FFK.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR091VFX -g mm10 --test > logs/launch/dname/16_12_14/ENCSR091VFX.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR099RYD -g mm10 --test > logs/launch/dname/16_12_14/ENCSR099RYD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR128HOP -g mm10 --test > logs/launch/dname/16_12_14/ENCSR128HOP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR168RTO -g mm10 --test > logs/launch/dname/16_12_14/ENCSR168RTO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR191UKH -g mm10 --test > logs/launch/dname/16_12_14/ENCSR191UKH.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR020GGM -g mm10 --run > logs/launch/dname/16_12_14ENCSR020GGM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR033PGF -g mm10 --run > logs/launch/dname/16_12_14ENCSR033PGF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR037RNN -g mm10 --run > logs/launch/dname/16_12_14ENCSR037RNN.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR050EXR -g mm10 --run > logs/launch/dname/16_12_14ENCSR050EXR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR089FFK -g mm10 --run > logs/launch/dname/16_12_14ENCSR089FFK.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR091VFX -g mm10 --run > logs/launch/dname/16_12_14ENCSR091VFX.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR099RYD -g mm10 --run > logs/launch/dname/16_12_14ENCSR099RYD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR128HOP -g mm10 --run > logs/launch/dname/16_12_14ENCSR128HOP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR168RTO -g mm10 --run > logs/launch/dname/16_12_14ENCSR168RTO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR191UKH -g mm10 --run > logs/launch/dname/16_12_14ENCSR191UKH.log 2>&1 &
+
+
+#mkdir -p logs/launch/dname/16_12_15/
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR271HQP -g mm10 --test > logs/launch/dname/16_12_15/ENCSR271HQP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR286OOJ -g mm10 --test > logs/launch/dname/16_12_15/ENCSR286OOJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR344GSM -g mm10 --test > logs/launch/dname/16_12_15/ENCSR344GSM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR353IFP -g mm10 --test > logs/launch/dname/16_12_15/ENCSR353IFP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR397YEG -g mm10 --test > logs/launch/dname/16_12_15/ENCSR397YEG.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR398UCM -g mm10 --test > logs/launch/dname/16_12_15/ENCSR398UCM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR409HKJ -g mm10 --test > logs/launch/dname/16_12_15/ENCSR409HKJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR415FAF -g mm10 --test > logs/launch/dname/16_12_15/ENCSR415FAF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR430SAY -g mm10 --test > logs/launch/dname/16_12_15/ENCSR430SAY.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR450UMG -g mm10 --test > logs/launch/dname/16_12_15/ENCSR450UMG.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR271HQP -g mm10 --run > logs/launch/dname/16_12_15/ENCSR271HQP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR286OOJ -g mm10 --run > logs/launch/dname/16_12_15/ENCSR286OOJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR344GSM -g mm10 --run > logs/launch/dname/16_12_15/ENCSR344GSM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR353IFP -g mm10 --run > logs/launch/dname/16_12_15/ENCSR353IFP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR397YEG -g mm10 --run > logs/launch/dname/16_12_15/ENCSR397YEG.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR398UCM -g mm10 --run > logs/launch/dname/16_12_15/ENCSR398UCM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR409HKJ -g mm10 --run > logs/launch/dname/16_12_15/ENCSR409HKJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR415FAF -g mm10 --run > logs/launch/dname/16_12_15/ENCSR415FAF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR430SAY -g mm10 --run > logs/launch/dname/16_12_15/ENCSR430SAY.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR450UMG -g mm10 --run > logs/launch/dname/16_12_15/ENCSR450UMG.log 2>&1 &
+
+#mkdir -p logs/launch/dname/16_12_16/
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR033PGF -g mm10 --test > logs/launch/dname/16_12_16/ENCSR033PGF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR099RYD -g mm10 --test > logs/launch/dname/16_12_16/ENCSR099RYD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR128HOP -g mm10 --test > logs/launch/dname/16_12_16/ENCSR128HOP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR168RTO -g mm10 --test > logs/launch/dname/16_12_16/ENCSR168RTO.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR033PGF -g mm10 --run > logs/launch/dname/16_12_16/ENCSR033PGF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR099RYD -g mm10 --run > logs/launch/dname/16_12_16/ENCSR099RYD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR128HOP -g mm10 --run > logs/launch/dname/16_12_16/ENCSR128HOP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR168RTO -g mm10 --run > logs/launch/dname/16_12_16/ENCSR168RTO.log 2>&1 &
+
+#mkdir -p logs/launch/dname/16_12_19/
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR473ZCM -g mm10 --test > logs/launch/dname/16_12_19/ENCSR473ZCM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR545WRA -g mm10 --test > logs/launch/dname/16_12_19/ENCSR545WRA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR550CYA -g mm10 --test > logs/launch/dname/16_12_19/ENCSR550CYA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR613BMI -g mm10 --test > logs/launch/dname/16_12_19/ENCSR613BMI.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR633CON -g mm10 --test > logs/launch/dname/16_12_19/ENCSR633CON.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR641SDF -g mm10 --test > logs/launch/dname/16_12_19/ENCSR641SDF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR788XSZ -g mm10 --test > logs/launch/dname/16_12_19/ENCSR788XSZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR804EWT -g mm10 --test > logs/launch/dname/16_12_19/ENCSR804EWT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR841TRV -g mm10 --test > logs/launch/dname/16_12_19/ENCSR841TRV.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR871FJZ -g mm10 --test > logs/launch/dname/16_12_19/ENCSR871FJZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR874LLF -g mm10 --test > logs/launch/dname/16_12_19/ENCSR874LLF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR916GKL -g mm10 --test > logs/launch/dname/16_12_19/ENCSR916GKL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR950OMB -g mm10 --test > logs/launch/dname/16_12_19/ENCSR950OMB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR695BII -g mm10 --test > logs/launch/dname/16_12_19/ENCSR695BII.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR700FCF -g mm10 --test > logs/launch/dname/16_12_19/ENCSR700FCF.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR473ZCM -g mm10 --run > logs/launch/dname/16_12_19/ENCSR473ZCM.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR545WRA -g mm10 --run > logs/launch/dname/16_12_19/ENCSR545WRA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR550CYA -g mm10 --run > logs/launch/dname/16_12_19/ENCSR550CYA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR613BMI -g mm10 --run > logs/launch/dname/16_12_19/ENCSR613BMI.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR633CON -g mm10 --run > logs/launch/dname/16_12_19/ENCSR633CON.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR641SDF -g mm10 --run > logs/launch/dname/16_12_19/ENCSR641SDF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR788XSZ -g mm10 --run > logs/launch/dname/16_12_19/ENCSR788XSZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR804EWT -g mm10 --run > logs/launch/dname/16_12_19/ENCSR804EWT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR841TRV -g mm10 --run > logs/launch/dname/16_12_19/ENCSR841TRV.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR871FJZ -g mm10 --run > logs/launch/dname/16_12_19/ENCSR871FJZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR874LLF -g mm10 --run > logs/launch/dname/16_12_19/ENCSR874LLF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR916GKL -g mm10 --run > logs/launch/dname/16_12_19/ENCSR916GKL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR950OMB -g mm10 --run > logs/launch/dname/16_12_19/ENCSR950OMB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR695BII -g mm10 --run > logs/launch/dname/16_12_19/ENCSR695BII.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR700FCF -g mm10 --run > logs/launch/dname/16_12_19/ENCSR700FCF.log 2>&1 &
+
+
+#mkdir -p logs/launch/dname/16_12_26/
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR019HJV -g mm10 --test > logs/launch/dname/16_12_26/ENCSR019HJV.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR007JSP -g mm10 --test > logs/launch/dname/16_12_26/ENCSR007JSP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR476OEL -g mm10 --test > logs/launch/dname/16_12_26/ENCSR476OEL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR660CKG -g mm10 --test > logs/launch/dname/16_12_26/ENCSR660CKG.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR013VIR -g mm10 --test > logs/launch/dname/16_12_26/ENCSR013VIR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324XQF -g mm10 --test > logs/launch/dname/16_12_26/ENCSR324XQF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR377CZO -g mm10 --test > logs/launch/dname/16_12_26/ENCSR377CZO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR734GST -g mm10 --test > logs/launch/dname/16_12_26/ENCSR734GST.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR842QTB -g mm10 --test > logs/launch/dname/16_12_26/ENCSR842QTB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324NAF -g mm10 --test > logs/launch/dname/16_12_26/ENCSR324NAF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR634OPL -g mm10 --test > logs/launch/dname/16_12_26/ENCSR634OPL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR027ICI -g mm10 --test > logs/launch/dname/16_12_26/ENCSR027ICI.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR888JFA -g mm10 --test > logs/launch/dname/16_12_26/ENCSR888JFA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR587ASA -g mm10 --test > logs/launch/dname/16_12_26/ENCSR587ASA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR254OTS -g mm10 --test > logs/launch/dname/16_12_26/ENCSR254OTS.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR258MDR -g mm10 --test > logs/launch/dname/16_12_26/ENCSR258MDR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR628KWF -g mm10 --test > logs/launch/dname/16_12_26/ENCSR628KWF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR215QTA -g mm10 --test > logs/launch/dname/16_12_26/ENCSR215QTA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR993XPD -g mm10 --test > logs/launch/dname/16_12_26/ENCSR993XPD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR803ICQ -g mm10 --test > logs/launch/dname/16_12_26/ENCSR803ICQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR835OJU -g mm10 --test > logs/launch/dname/16_12_26/ENCSR835OJU.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR952CMN -g mm10 --test > logs/launch/dname/16_12_26/ENCSR952CMN.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR735PMJ -g mm10 --test > logs/launch/dname/16_12_26/ENCSR735PMJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR651PAZ -g mm10 --test > logs/launch/dname/16_12_26/ENCSR651PAZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR906HLA -g mm10 --test > logs/launch/dname/16_12_26/ENCSR906HLA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR149GUT -g mm10 --test > logs/launch/dname/16_12_26/ENCSR149GUT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR265OMO -g mm10 --test > logs/launch/dname/16_12_26/ENCSR265OMO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR609ZCD -g mm10 --test > logs/launch/dname/16_12_26/ENCSR609ZCD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR141ZVB -g mm10 --test > logs/launch/dname/16_12_26/ENCSR141ZVB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR334GBD -g mm10 --test > logs/launch/dname/16_12_26/ENCSR334GBD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR227RPE -g mm10 --test > logs/launch/dname/16_12_26/ENCSR227RPE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR144UTF -g mm10 --test > logs/launch/dname/16_12_26/ENCSR144UTF.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR019HJV -g mm10 --run > logs/launch/dname/16_12_26/ENCSR019HJV.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR007JSP -g mm10 --run > logs/launch/dname/16_12_26/ENCSR007JSP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR476OEL -g mm10 --run > logs/launch/dname/16_12_26/ENCSR476OEL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR660CKG -g mm10 --run > logs/launch/dname/16_12_26/ENCSR660CKG.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR013VIR -g mm10 --run > logs/launch/dname/16_12_26/ENCSR013VIR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324XQF -g mm10 --run > logs/launch/dname/16_12_26/ENCSR324XQF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR377CZO -g mm10 --run > logs/launch/dname/16_12_26/ENCSR377CZO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR734GST -g mm10 --run > logs/launch/dname/16_12_26/ENCSR734GST.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR842QTB -g mm10 --run > logs/launch/dname/16_12_26/ENCSR842QTB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324NAF -g mm10 --run > logs/launch/dname/16_12_26/ENCSR324NAF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR634OPL -g mm10 --run > logs/launch/dname/16_12_26/ENCSR634OPL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR027ICI -g mm10 --run > logs/launch/dname/16_12_26/ENCSR027ICI.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR888JFA -g mm10 --run > logs/launch/dname/16_12_26/ENCSR888JFA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR587ASA -g mm10 --run > logs/launch/dname/16_12_26/ENCSR587ASA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR254OTS -g mm10 --run > logs/launch/dname/16_12_26/ENCSR254OTS.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR258MDR -g mm10 --run > logs/launch/dname/16_12_26/ENCSR258MDR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR628KWF -g mm10 --run > logs/launch/dname/16_12_26/ENCSR628KWF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR215QTA -g mm10 --run > logs/launch/dname/16_12_26/ENCSR215QTA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR993XPD -g mm10 --run > logs/launch/dname/16_12_26/ENCSR993XPD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR803ICQ -g mm10 --run > logs/launch/dname/16_12_26/ENCSR803ICQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR835OJU -g mm10 --run > logs/launch/dname/16_12_26/ENCSR835OJU.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR952CMN -g mm10 --run > logs/launch/dname/16_12_26/ENCSR952CMN.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR735PMJ -g mm10 --run > logs/launch/dname/16_12_26/ENCSR735PMJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR651PAZ -g mm10 --run > logs/launch/dname/16_12_26/ENCSR651PAZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR906HLA -g mm10 --run > logs/launch/dname/16_12_26/ENCSR906HLA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR149GUT -g mm10 --run > logs/launch/dname/16_12_26/ENCSR149GUT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR265OMO -g mm10 --run > logs/launch/dname/16_12_26/ENCSR265OMO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR609ZCD -g mm10 --run > logs/launch/dname/16_12_26/ENCSR609ZCD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR141ZVB -g mm10 --run > logs/launch/dname/16_12_26/ENCSR141ZVB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR334GBD -g mm10 --run > logs/launch/dname/16_12_26/ENCSR334GBD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR227RPE -g mm10 --run > logs/launch/dname/16_12_26/ENCSR227RPE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR144UTF -g mm10 --run > logs/launch/dname/16_12_26/ENCSR144UTF.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_4/
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR700FCF -g mm10 --run > logs/launch/dname/17_1_4/ENCSR700FCF.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_5/
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR695BII -g mm10 --run > logs/launch/dname/17_1_5/ENCSR695BII.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR700FCF -g mm10 --run > logs/launch/dname/17_1_5/ENCSR700FCF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR019HJV -g mm10 --run > logs/launch/dname/17_1_5/ENCSR019HJV.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR007JSP -g mm10 --run > logs/launch/dname/17_1_5/ENCSR007JSP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR476OEL -g mm10 --run > logs/launch/dname/17_1_5/ENCSR476OEL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR660CKG -g mm10 --run > logs/launch/dname/17_1_5/ENCSR660CKG.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR013VIR -g mm10 --run > logs/launch/dname/17_1_5/ENCSR013VIR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324XQF -g mm10 --run > logs/launch/dname/17_1_5/ENCSR324XQF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR377CZO -g mm10 --run > logs/launch/dname/17_1_5/ENCSR377CZO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR734GST -g mm10 --run > logs/launch/dname/17_1_5/ENCSR734GST.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR700FCF -g mm10 --test > logs/launch/dname/17_1_5/ENCSR700FCF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR476OEL -g mm10 --test > logs/launch/dname/17_1_5/ENCSR476OEL.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR700FCF -g mm10 --run > logs/launch/dname/17_1_5/ENCSR700FCF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR476OEL -g mm10 --run > logs/launch/dname/17_1_5/ENCSR476OEL.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR842QTB -g mm10 --run > logs/launch/dname/17_1_5/ENCSR842QTB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324NAF -g mm10 --run > logs/launch/dname/17_1_5/ENCSR324NAF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR634OPL -g mm10 --run > logs/launch/dname/17_1_5/ENCSR634OPL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR027ICI -g mm10 --run > logs/launch/dname/17_1_5/ENCSR027ICI.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR888JFA -g mm10 --run > logs/launch/dname/17_1_5/ENCSR888JFA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR587ASA -g mm10 --run > logs/launch/dname/17_1_5/ENCSR587ASA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR254OTS -g mm10 --run > logs/launch/dname/17_1_5/ENCSR254OTS.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR258MDR -g mm10 --run > logs/launch/dname/17_1_5/ENCSR258MDR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR628KWF -g mm10 --run > logs/launch/dname/17_1_5/ENCSR628KWF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR215QTA -g mm10 --run > logs/launch/dname/17_1_5/ENCSR215QTA.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_6
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR993XPD -g mm10 --run > logs/launch/dname/17_1_6/ENCSR993XPD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR803ICQ -g mm10 --run > logs/launch/dname/17_1_6/ENCSR803ICQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR835OJU -g mm10 --run > logs/launch/dname/17_1_6/ENCSR835OJU.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR952CMN -g mm10 --run > logs/launch/dname/17_1_6/ENCSR952CMN.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR735PMJ -g mm10 --run > logs/launch/dname/17_1_6/ENCSR735PMJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR651PAZ -g mm10 --run > logs/launch/dname/17_1_6/ENCSR651PAZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR906HLA -g mm10 --run > logs/launch/dname/17_1_6/ENCSR906HLA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR149GUT -g mm10 --run > logs/launch/dname/17_1_6/ENCSR149GUT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR265OMO -g mm10 --run > logs/launch/dname/17_1_6/ENCSR265OMO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR609ZCD -g mm10 --run > logs/launch/dname/17_1_6/ENCSR609ZCD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR141ZVB -g mm10 --run > logs/launch/dname/17_1_6/ENCSR141ZVB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR334GBD -g mm10 --run > logs/launch/dname/17_1_6/ENCSR334GBD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR227RPE -g mm10 --run > logs/launch/dname/17_1_6/ENCSR227RPE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR144UTF -g mm10 --run > logs/launch/dname/17_1_6/ENCSR144UTF.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_10
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR695BII -g mm10 --run > logs/launch/dname/17_1_10/ENCSR695BII.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR700FCF -g mm10 --run > logs/launch/dname/17_1_10/ENCSR700FCF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR007JSP -g mm10 --run > logs/launch/dname/17_1_10/ENCSR007JSP.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR476OEL -g mm10 --run > logs/launch/dname/17_1_10/ENCSR476OEL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR660CKG -g mm10 --run > logs/launch/dname/17_1_10/ENCSR660CKG.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR634OPL -g mm10 --run > logs/launch/dname/17_1_10/ENCSR634OPL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR587ASA -g mm10 --run > logs/launch/dname/17_1_10/ENCSR587ASA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR258MDR -g mm10 --run > logs/launch/dname/17_1_10/ENCSR258MDR.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR628KWF -g mm10 --run > logs/launch/dname/17_1_10/ENCSR628KWF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR215QTA -g mm10 --run > logs/launch/dname/17_1_10/ENCSR215QTA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR993XPD -g mm10 --run > logs/launch/dname/17_1_10/ENCSR993XPD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR952CMN -g mm10 --run > logs/launch/dname/17_1_10/ENCSR952CMN.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR735PMJ -g mm10 --run > logs/launch/dname/17_1_10/ENCSR735PMJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR651PAZ -g mm10 --run > logs/launch/dname/17_1_10/ENCSR651PAZ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR149GUT -g mm10 --run > logs/launch/dname/17_1_10/ENCSR149GUT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR609ZCD -g mm10 --run > logs/launch/dname/17_1_10/ENCSR609ZCD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR141ZVB -g mm10 --run > logs/launch/dname/17_1_10/ENCSR141ZVB.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR334GBD -g mm10 --run > logs/launch/dname/17_1_10/ENCSR334GBD.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR227RPE -g mm10 --run > logs/launch/dname/17_1_10/ENCSR227RPE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR144UTF -g mm10 --run > logs/launch/dname/17_1_10/ENCSR144UTF.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR888JFA -g mm10 --test > logs/launch/dname/17_1_10/ENCSR888JFA.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_11
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR803ICQ -g mm10 --test > logs/launch/dname/17_1_11/ENCSR803ICQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR835OJU -g mm10 --test > logs/launch/dname/17_1_11/ENCSR835OJU.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR803ICQ -g mm10 --run > logs/launch/dname/17_1_11/ENCSR803ICQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR835OJU -g mm10 --run > logs/launch/dname/17_1_11/ENCSR835OJU.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_13
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324XQF -g mm10 --test > logs/launch/dname/17_1_13/ENCSR324XQF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR377CZO -g mm10 --test > logs/launch/dname/17_1_13/ENCSR377CZO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR888JFA -g mm10 --test > logs/launch/dname/17_1_13/ENCSR888JFA.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR254OTS -g mm10 --test > logs/launch/dname/17_1_13/ENCSR254OTS.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR013VIR -g mm10 --test > logs/launch/dname/17_1_13/ENCSR013VIR.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324XQF -g mm10 --test > logs/launch/dname/17_1_13/ENCSR324XQF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR377CZO -g mm10 --test > logs/launch/dname/17_1_13/ENCSR377CZO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR803ICQ -g mm10 --test > logs/launch/dname/17_1_13/ENCSR803ICQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR835OJU -g mm10 --test > logs/launch/dname/17_1_13/ENCSR835OJU.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR888JFA -g mm10 --test > logs/launch/dname/17_1_13/ENCSR888JFA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR993XPD -g mm10 --test > logs/launch/dname/17_1_13/ENCSR993XPD.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR324XQF -g mm10 --run > logs/launch/dname/17_1_13/ENCSR324XQF.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR377CZO -g mm10 --run > logs/launch/dname/17_1_13/ENCSR377CZO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR803ICQ -g mm10 --run > logs/launch/dname/17_1_13/ENCSR803ICQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR835OJU -g mm10 --run > logs/launch/dname/17_1_13/ENCSR835OJU.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR888JFA -g mm10 --run > logs/launch/dname/17_1_13/ENCSR888JFA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR993XPD -g mm10 --run > logs/launch/dname/17_1_13/ENCSR993XPD.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_21
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR735PMJ -g mm10 --test > logs/launch/dname/17_1_21ENCSR735PMJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR735PMJ -g mm10 --run > logs/launch/dname/17_1_21/ENCSR735PMJ.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_1_22
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR735PMJ -g mm10 --test > logs/launch/dname/17_1_22/ENCSR735PMJ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR906HLA -g mm10 --test > logs/launch/dname/17_1_22/ENCSR906HLA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR265OMO -g mm10 --test > logs/launch/dname/17_1_22/ENCSR265OMO.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR027ICI -g mm10 --test > logs/launch/dname/17_1_22/ENCSR027ICI.log 2>&1 &
+
+#mkdir -p logs/launch/dnase/17_01_26
+#~/Documents/dnase_pipeline/dnanexus/dnaseLaunch.py -e ENCSR963ALV -g hg19 --test > logs/launch/dnase/17_01_26/ENCSR963ALV_hg19.log 2>&1 &
+#~/Documents/dnase_pipeline/dnanexus/dnaseLaunch.py -e ENCSR963ALV -g hg19 --run > logs/launch/dnase/17_01_26/ENCSR963ALV_hg19.log 2>&1 &
+
+#~/Documents/dnase_pipeline/dnanexus/dnaseLaunch.py -e ENCSR963ALV -g GRCh38 --test > logs/launch/dnase/17_01_26/ENCSR963ALV_GRCh38.log 2>&1 &
+#~/Documents/dnase_pipeline/dnanexus/dnaseLaunch.py -e ENCSR963ALV -g GRCh38 --run > logs/launch/dnase/17_01_26/ENCSR963ALV_GRCh38.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_02_01
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR922UEQ -g GRCh38 --test > logs/launch/dname/17_02_01/ENCSR922UEQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR922UEQ -g GRCh38 --run > logs/launch/dname/17_02_01/ENCSR922UEQ.log 2>&1 &
+
+#mkdir -p logs/launch/dname/17_02_02
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR893BUA -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR893BUA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR405XVT -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR405XVT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR012TGL -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR012TGL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR623SXW -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR623SXW.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR542QVE -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR542QVE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR987GWQ -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR987GWQ.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR424IEX -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR424IEX.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR583ONK -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR583ONK.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR331PWE -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR331PWE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR079YPP -g GRCh38 --test > logs/launch/dname/17_02_02/ENCSR079YPP.log 2>&1 &
+
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR012TGL -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR012TGL.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR331PWE -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR331PWE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR405XVT -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR405XVT.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR424IEX -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR424IEX.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR542QVE -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR542QVE.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR583ONK -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR583ONK.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR623SXW -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR623SXW.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR893BUA -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR893BUA.log 2>&1 &
+#~/Documents/dna-me-pipeline/dnanexus/dmeLaunch.py -e ENCSR987GWQ -g GRCh38 --run > logs/launch/dname/17_02_02/ENCSR987GWQ.log 2>&1 &
+
+
+
+

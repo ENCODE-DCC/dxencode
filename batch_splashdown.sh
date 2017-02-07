@@ -1495,3 +1495,171 @@
 #./splashdown.py -e ENCSR649KBB --server www -g hg19 > logs/splashdown/dnase/16_11_22/remc_hg19/ENCSR649KBB.log 2>&1 &
 #./splashdown.py -e ENCSR477RTP --server www -g hg19 > logs/splashdown/dnase/16_11_22/remc_hg19/ENCSR477RTP.log 2>&1 &
 #./splashdown.py -e ENCSR911LTI --server www -g hg19 > logs/splashdown/dnase/16_11_22/remc_hg19/ENCSR911LTI.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname
+#mkdir -p logs/splashdown/dname/17_1_5
+#./splashdown.py -e ENCSR020GGM --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR020GGM.log 2>&1 &
+#./splashdown.py -e ENCSR037RNN --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR037RNN.log 2>&1 &
+#./splashdown.py -e ENCSR089FFK --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR089FFK.log 2>&1 &
+#./splashdown.py -e ENCSR091VFX --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR091VFX.log 2>&1 &
+#./splashdown.py -e ENCSR191UKH --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR191UKH.log 2>&1 &
+#./splashdown.py -e ENCSR271HQP --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR271HQP.log 2>&1 &
+#./splashdown.py -e ENCSR286OOJ --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR286OOJ.log 2>&1 &
+#./splashdown.py -e ENCSR344GSM --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR344GSM.log 2>&1 &
+#./splashdown.py -e ENCSR353IFP --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR353IFP.log 2>&1 &
+#./splashdown.py -e ENCSR397YEG --server www -g mm10 > logs/splashdown/dname/17_1_5/ENCSR397YEG.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_6
+#./splashdown.py -e ENCSR398UCM --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR398UCM.log 2>&1 &
+#./splashdown.py -e ENCSR409HKJ --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR409HKJ.log 2>&1 &
+#./splashdown.py -e ENCSR415FAF --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR415FAF.log 2>&1 &
+#./splashdown.py -e ENCSR430SAY --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR430SAY.log 2>&1 &
+#./splashdown.py -e ENCSR450UMG --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR450UMG.log 2>&1 &
+#./splashdown.py -e ENCSR033PGF --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR033PGF.log 2>&1 &
+#./splashdown.py -e ENCSR099RYD --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR099RYD.log 2>&1 &
+#./splashdown.py -e ENCSR128HOP --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR128HOP.log 2>&1 &
+#./splashdown.py -e ENCSR168RTO --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR168RTO.log 2>&1 &
+#./splashdown.py -e ENCSR473ZCM --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR473ZCM.log 2>&1 &
+#./splashdown.py -e ENCSR545WRA --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR545WRA.log 2>&1 &
+#./splashdown.py -e ENCSR550CYA --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR550CYA.log 2>&1 &
+#./splashdown.py -e ENCSR613BMI --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR613BMI.log 2>&1 &
+#./splashdown.py -e ENCSR633CON --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR633CON.log 2>&1 &
+
+#./splashdown.py -e ENCSR641SDF --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR641SDF.log 2>&1 &
+#./splashdown.py -e ENCSR788XSZ --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR788XSZ.log 2>&1 &
+#./splashdown.py -e ENCSR804EWT --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR804EWT.log 2>&1 &
+#./splashdown.py -e ENCSR841TRV --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR841TRV.log 2>&1 &
+#./splashdown.py -e ENCSR871FJZ --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR871FJZ.log 2>&1 &
+#./splashdown.py -e ENCSR874LLF --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR874LLF.log 2>&1 &
+#./splashdown.py -e ENCSR916GKL --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR916GKL.log 2>&1 &
+#./splashdown.py -e ENCSR950OMB --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR950OMB.log 2>&1 &
+#./splashdown.py -e ENCSR888JFA --server www -g mm10 > logs/splashdown/dname/17_1_6/ENCSR888JFA.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_10
+#./splashdown.py -e ENCSR020GGM --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR020GGM.log 2>&1 &
+#./splashdown.py -e ENCSR037RNN --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR037RNN.log 2>&1 &
+#./splashdown.py -e ENCSR089FFK --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR089FFK.log 2>&1 &
+#./splashdown.py -e ENCSR091VFX --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR091VFX.log 2>&1 &
+#./splashdown.py -e ENCSR191UKH --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR191UKH.log 2>&1 &
+#./splashdown.py -e ENCSR271HQP --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR271HQP.log 2>&1 &
+#./splashdown.py -e ENCSR286OOJ --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR286OOJ.log 2>&1 &
+#./splashdown.py -e ENCSR344GSM --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR344GSM.log 2>&1 &
+#./splashdown.py -e ENCSR353IFP --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR353IFP.log 2>&1 &
+#./splashdown.py -e ENCSR397YEG --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR397YEG.log 2>&1 &
+#./splashdown.py -e ENCSR398UCM --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR398UCM.log 2>&1 &
+#./splashdown.py -e ENCSR409HKJ --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR409HKJ.log 2>&1 &
+#./splashdown.py -e ENCSR415FAF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR415FAF.log 2>&1 &
+#./splashdown.py -e ENCSR430SAY --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR430SAY.log 2>&1 &
+#./splashdown.py -e ENCSR450UMG --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR450UMG.log 2>&1 &
+#./splashdown.py -e ENCSR033PGF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR033PGF.log 2>&1 &
+#./splashdown.py -e ENCSR099RYD --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR099RYD.log 2>&1 &
+#./splashdown.py -e ENCSR128HOP --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR128HOP.log 2>&1 &
+#./splashdown.py -e ENCSR168RTO --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR168RTO.log 2>&1 &
+#./splashdown.py -e ENCSR473ZCM --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR473ZCM.log 2>&1 &
+#./splashdown.py -e ENCSR545WRA --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR545WRA.log 2>&1 &
+#./splashdown.py -e ENCSR550CYA --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR550CYA.log 2>&1 &
+#./splashdown.py -e ENCSR613BMI --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR613BMI.log 2>&1 &
+#./splashdown.py -e ENCSR633CON --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR633CON.log 2>&1 &
+#./splashdown.py -e ENCSR641SDF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR641SDF.log 2>&1 &
+#./splashdown.py -e ENCSR788XSZ --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR788XSZ.log 2>&1 &
+#./splashdown.py -e ENCSR804EWT --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR804EWT.log 2>&1 &
+#./splashdown.py -e ENCSR841TRV --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR841TRV.log 2>&1 &
+#./splashdown.py -e ENCSR871FJZ --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR871FJZ.log 2>&1 &
+#./splashdown.py -e ENCSR874LLF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR874LLF.log 2>&1 &
+#./splashdown.py -e ENCSR916GKL --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR916GKL.log 2>&1 &
+#./splashdown.py -e ENCSR950OMB --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR950OMB.log 2>&1 &
+#./splashdown.py -e ENCSR888JFA --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR888JFA.log 2>&1 &
+#./splashdown.py -e ENCSR019HJV --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR019HJV.log 2>&1 &
+#./splashdown.py -e ENCSR013VIR --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR013VIR.log 2>&1 &
+#./splashdown.py -e ENCSR324XQF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR324XQF.log 2>&1 &
+#./splashdown.py -e ENCSR377CZO --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR377CZO.log 2>&1 &
+#./splashdown.py -e ENCSR734GST --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR734GST.log 2>&1 &
+#./splashdown.py -e ENCSR842QTB --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR842QTB.log 2>&1 &
+#./splashdown.py -e ENCSR324NAF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR324NAF.log 2>&1 &
+#./splashdown.py -e ENCSR254OTS --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR254OTS.log 2>&1 &
+#./splashdown.py -e ENCSR695BII --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR695BII.log 2>&1 &
+#./splashdown.py -e ENCSR700FCF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR700FCF.log 2>&1 &
+#./splashdown.py -e ENCSR007JSP --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR007JSP.log 2>&1 &
+#./splashdown.py -e ENCSR660CKG --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR660CKG.log 2>&1 &
+#./splashdown.py -e ENCSR634OPL --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR634OPL.log 2>&1 &
+#./splashdown.py -e ENCSR628KWF --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR628KWF.log 2>&1 &
+#./splashdown.py -e ENCSR215QTA --server www -g mm10 --test > logs/splashdown/dname/17_1_10/ENCSR215QTA.log 2>&1 &
+
+#./splashdown.py -e ENCSR641SDF --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR641SDF.log 2>&1 &
+#./splashdown.py -e ENCSR788XSZ --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR788XSZ.log 2>&1 &
+#./splashdown.py -e ENCSR804EWT --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR804EWT.log 2>&1 &
+#./splashdown.py -e ENCSR841TRV --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR841TRV.log 2>&1 &
+#./splashdown.py -e ENCSR871FJZ --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR871FJZ.log 2>&1 &
+#./splashdown.py -e ENCSR874LLF --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR874LLF.log 2>&1 &
+#./splashdown.py -e ENCSR916GKL --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR916GKL.log 2>&1 &
+#./splashdown.py -e ENCSR950OMB --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR950OMB.log 2>&1 &
+#./splashdown.py -e ENCSR019HJV --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR019HJV.log 2>&1 &
+#./splashdown.py -e ENCSR013VIR --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR013VIR.log 2>&1 &
+#./splashdown.py -e ENCSR734GST --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR734GST.log 2>&1 &
+#./splashdown.py -e ENCSR842QTB --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR842QTB.log 2>&1 &
+#./splashdown.py -e ENCSR324NAF --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR324NAF.log 2>&1 &
+#./splashdown.py -e ENCSR254OTS --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR254OTS.log 2>&1 &
+#./splashdown.py -e ENCSR695BII --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR695BII.log 2>&1 &
+#./splashdown.py -e ENCSR700FCF --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR700FCF.log 2>&1 &
+#./splashdown.py -e ENCSR007JSP --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR007JSP.log 2>&1 &
+#./splashdown.py -e ENCSR660CKG --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR660CKG.log 2>&1 &
+#./splashdown.py -e ENCSR634OPL --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR634OPL.log 2>&1 &
+#./splashdown.py -e ENCSR628KWF --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR628KWF.log 2>&1 &
+#./splashdown.py -e ENCSR215QTA --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR215QTA.log 2>&1 &
+#./splashdown.py -e ENCSR476OEL --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR476OEL.log 2>&1 &
+#./splashdown.py -e ENCSR258MDR --server www -g mm10 > logs/splashdown/dname/17_1_10/ENCSR258MDR.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_13
+#./splashdown.py -e ENCSR324XQF --server www -g mm10 --test > logs/splashdown/dname/17_1_13/ENCSR324XQF.log 2>&1 &
+#./splashdown.py -e ENCSR377CZO --server www -g mm10 --test > logs/splashdown/dname/17_1_13/ENCSR377CZO.log 2>&1 &
+#./splashdown.py -e ENCSR888JFA --server www -g mm10 --test > logs/splashdown/dname/17_1_13/ENCSR888JFA.log 2>&1 &
+
+#./splashdown.py -e ENCSR013VIR --server www -g mm10 > logs/splashdown/dname/17_1_13/ENCSR013VIR.log 2>&1 &
+#./splashdown.py -e ENCSR254OTS --server www -g mm10 > logs/splashdown/dname/17_1_13/ENCSR254OTS.log 2>&1 &
+#./splashdown.py -e ENCSR651PAZ --server www -g mm10 > logs/splashdown/dname/17_1_13/ENCSR651PAZ.log 2>&1 &
+
+#./splashdown.py -e ENCSR609ZCD --server www -g mm10 > logs/splashdown/dname/17_1_13/ENCSR609ZCD.log 2>&1 &
+
+
+#mkdir -p logs/splashdown/dname/17_1_14
+#./splashdown.py -e ENCSR952CMN --server www -g mm10 > logs/splashdown/dname/17_1_14/ENCSR952CMN.log 2>&1 &
+#./splashdown.py -e ENCSR149GUT --server www -g mm10 > logs/splashdown/dname/17_1_14/ENCSR149GUT.log 2>&1 &
+#./splashdown.py -e ENCSR141ZVB --server www -g mm10 > logs/splashdown/dname/17_1_14/ENCSR141ZVB.log 2>&1 &
+
+#./splashdown.py -e ENCSR144UTF --server www -g mm10 > logs/splashdown/dname/17_1_14/ENCSR144UTF.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_15
+#./splashdown.py -e ENCSR587ASA --server www -g mm10 > logs/splashdown/dname/17_1_15/ENCSR587ASA.log 2>&1 &
+#./splashdown.py -e ENCSR334GBD --server www -g mm10 > logs/splashdown/dname/17_1_15/ENCSR334GBD.log 2>&1 &
+#./splashdown.py -e ENCSR227RPE --server www -g mm10 > logs/splashdown/dname/17_1_15/ENCSR227RPE.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_17
+#./splashdown.py -e ENCSR377CZO --server www -g mm10 > logs/splashdown/dname/17_1_17/ENCSR377CZO.log 2>&1 &
+#./splashdown.py -e ENCSR803ICQ --server www -g mm10 > logs/splashdown/dname/17_1_17/ENCSR803ICQ.log 2>&1 &
+#./splashdown.py -e ENCSR835OJU --server www -g mm10 > logs/splashdown/dname/17_1_17/ENCSR835OJU.log 2>&1 &
+#./splashdown.py -e ENCSR888JFA --server www -g mm10 > logs/splashdown/dname/17_1_17/ENCSR888JFA.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_18
+#./splashdown.py -e ENCSR324XQF --server www -g mm10 > logs/splashdown/dname/17_1_18/ENCSR324XQF.log 2>&1 &
+#./splashdown.py -e ENCSR050EXR --server www -g mm10 > logs/splashdown/dname/17_1_18/ENCSR050EXR.log 2>&1 &
+#./splashdown.py -e ENCSR993XPD --server www -g mm10 > logs/splashdown/dname/17_1_18/ENCSR993XPD.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_19
+#./splashdown.py -e ENCSR993XPD --server www -g mm10 > logs/splashdown/dname/17_1_19/ENCSR993XPD.log 2>&1 &
+#./splashdown.py -e ENCSR050EXR --server www -g mm10 --test > logs/splashdown/dname/17_1_19/ENCSR050EXR.log 2>&1 &
+#./splashdown.py -e ENCSR050EXR --server www -g mm10 > logs/splashdown/dname/17_1_19/ENCSR050EXR.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_1_22
+#./splashdown.py -e ENCSR735PMJ --server www -g mm10 > logs/splashdown/dname/17_1_22/ENCSR735PMJ.log 2>&1 &
+#./splashdown.py -e ENCSR906HLA --server www -g mm10 > logs/splashdown/dname/17_1_22/ENCSR906HLA.log 2>&1 &
+#./splashdown.py -e ENCSR265OMO --server www -g mm10 > logs/splashdown/dname/17_1_22/ENCSR265OMO.log 2>&1 &
+#./splashdown.py -e ENCSR027ICI --server www -g mm10 > logs/splashdown/dname/17_1_22/ENCSR027ICI.log 2>&1 &
+
+#mkdir -p logs/splashdown/dnase/17_02_01
+#./splashdown.py -e ENCSR963ALV --server www -g GRCh38 > logs/splashdown/dnase/17_02_01/ENCSR963ALV_GRCh38.log 2>&1 &
+
+#mkdir -p logs/splashdown/dname/17_02_02
+#./splashdown.py -e ENCSR922UEQ --server www -g GRCh38 > logs/splashdown/dname/17_02_02/ENCSR922UEQ.log 2>&1 &
+
+
+

@@ -1313,5 +1313,115 @@
 #./assemble.py -e ENCSR649KBB -g GRCh38 > logs/assemble/dnase/16_11_21/remc_GRCh38/ENCSR649KBB.log 2>&1 &
 #./assemble.py -e ENCSR477RTP -g GRCh38 > logs/assemble/dnase/16_11_21/remc_GRCh38/ENCSR477RTP.log 2>&1 &
 
+#mkdir logs/assemble/dname
+#mkdir logs/assemble/dname/16_12_15
+#./assemble.py -e ENCSR695BII -g mm10 > logs/assemble/dname/16_12_15/ENCSR695BII.log 2>&1 &
+#./assemble.py -e ENCSR700FCF -g mm10 > logs/assemble/dname/16_12_15/ENCSR700FCF.log 2>&1 &
+#./assemble.py -e ENCSR019HJV -g mm10 > logs/assemble/dname/16_12_15/ENCSR019HJV.log 2>&1 &
+#./assemble.py -e ENCSR953WFU -g mm10 > logs/assemble/dname/16_12_15/ENCSR953WFU.log 2>&1 &
+#./assemble.py -e ENCSR007JSP -g mm10 > logs/assemble/dname/16_12_15/ENCSR007JSP.log 2>&1 &
+#./assemble.py -e ENCSR217TMK -g mm10 > logs/assemble/dname/16_12_15/ENCSR217TMK.log 2>&1 &
+#./assemble.py -e ENCSR476OEL -g mm10 > logs/assemble/dname/16_12_15/ENCSR476OEL.log 2>&1 &
+#./assemble.py -e ENCSR660CKG -g mm10 > logs/assemble/dname/16_12_15/ENCSR660CKG.log 2>&1 &
+#./assemble.py -e ENCSR013VIR -g mm10 > logs/assemble/dname/16_12_15/ENCSR013VIR.log 2>&1 &
+#./assemble.py -e ENCSR324XQF -g mm10 > logs/assemble/dname/16_12_15/ENCSR324XQF.log 2>&1 &
+
+#./assemble.py -e ENCSR377CZO -g mm10 > logs/assemble/dname/16_12_15/ENCSR377CZO.log 2>&1 &
+#./assemble.py -e ENCSR734GST -g mm10 > logs/assemble/dname/16_12_15/ENCSR734GST.log 2>&1 &
+#./assemble.py -e ENCSR842QTB -g mm10 > logs/assemble/dname/16_12_15/ENCSR842QTB.log 2>&1 &
+#./assemble.py -e ENCSR324NAF -g mm10 > logs/assemble/dname/16_12_15/ENCSR324NAF.log 2>&1 &
+#./assemble.py -e ENCSR634OPL -g mm10 > logs/assemble/dname/16_12_15/ENCSR634OPL.log 2>&1 &
+#./assemble.py -e ENCSR027ICI -g mm10 > logs/assemble/dname/16_12_15/ENCSR027ICI.log 2>&1 &
+#./assemble.py -e ENCSR888JFA -g mm10 > logs/assemble/dname/16_12_15/ENCSR888JFA.log 2>&1 &
+#./assemble.py -e ENCSR587ASA -g mm10 > logs/assemble/dname/16_12_15/ENCSR587ASA.log 2>&1 &
+#./assemble.py -e ENCSR254OTS -g mm10 > logs/assemble/dname/16_12_15/ENCSR254OTS.log 2>&1 &
+#./assemble.py -e ENCSR258MDR -g mm10 > logs/assemble/dname/16_12_15/ENCSR258MDR.log 2>&1 &
+#./assemble.py -e ENCSR535YCH -g mm10 > logs/assemble/dname/16_12_15/ENCSR535YCH.log 2>&1 &
+#./assemble.py -e ENCSR628KWF -g mm10 > logs/assemble/dname/16_12_15/ENCSR628KWF.log 2>&1 &
+#./assemble.py -e ENCSR215QTA -g mm10 > logs/assemble/dname/16_12_15/ENCSR215QTA.log 2>&1 &
+#./assemble.py -e ENCSR993XPD -g mm10 > logs/assemble/dname/16_12_15/ENCSR993XPD.log 2>&1 &
+#./assemble.py -e ENCSR803ICQ -g mm10 > logs/assemble/dname/16_12_15/ENCSR803ICQ.log 2>&1 &
+
+#./assemble.py -e ENCSR835OJU -g mm10 > logs/assemble/dname/16_12_15/ENCSR835OJU.log 2>&1 &
+#./assemble.py -e ENCSR952CMN -g mm10 > logs/assemble/dname/16_12_15/ENCSR952CMN.log 2>&1 &
+#./assemble.py -e ENCSR735PMJ -g mm10 > logs/assemble/dname/16_12_15/ENCSR735PMJ.log 2>&1 &
+#./assemble.py -e ENCSR651PAZ -g mm10 > logs/assemble/dname/16_12_15/ENCSR651PAZ.log 2>&1 &
+#./assemble.py -e ENCSR906HLA -g mm10 > logs/assemble/dname/16_12_15/ENCSR906HLA.log 2>&1 &
+#./assemble.py -e ENCSR149GUT -g mm10 > logs/assemble/dname/16_12_15/ENCSR149GUT.log 2>&1 &
+#./assemble.py -e ENCSR265OMO -g mm10 > logs/assemble/dname/16_12_15/ENCSR265OMO.log 2>&1 &
+#./assemble.py -e ENCSR609ZCD -g mm10 > logs/assemble/dname/16_12_15/ENCSR609ZCD.log 2>&1 &
+#./assemble.py -e ENCSR141ZVB -g mm10 > logs/assemble/dname/16_12_15/ENCSR141ZVB.log 2>&1 &
+#./assemble.py -e ENCSR334GBD -g mm10 > logs/assemble/dname/16_12_15/ENCSR334GBD.log 2>&1 &
+#./assemble.py -e ENCSR227RPE -g mm10 > logs/assemble/dname/16_12_15/ENCSR227RPE.log 2>&1 &
+#./assemble.py -e ENCSR144UTF -g mm10 > logs/assemble/dname/16_12_15/ENCSR144UTF.log 2>&1 &
+
+#mkdir logs/assemble/dname/17_1_13
+#./assemble.py -e ENCSR324XQF -g mm10 > logs/assemble/dname/17_1_13/ENCSR324XQF.log 2>&1 &
+#./assemble.py -e ENCSR377CZO -g mm10 > logs/assemble/dname/17_1_13/ENCSR377CZO.log 2>&1 &
+#./assemble.py -e ENCSR803ICQ -g mm10 > logs/assemble/dname/17_1_13/ENCSR803ICQ.log 2>&1 &
+#./assemble.py -e ENCSR835OJU -g mm10 > logs/assemble/dname/17_1_13/ENCSR835OJU.log 2>&1 &
+#./assemble.py -e ENCSR888JFA -g mm10 > logs/assemble/dname/17_1_13/ENCSR888JFA.log 2>&1 &
+#./assemble.py -e ENCSR993XPD -g mm10 > logs/assemble/dname/17_1_13/ENCSR993XPD.log 2>&1 &
+
+#mkdir logs/assemble/dnase/17_01_26
+#./assemble.py -e ENCSR963ALV -g hg19 > logs/assemble/dnase/17_01_26/ENCSR963ALV.log 2>&1 &
+
+#mkdir logs/assemble/dname/17_02_01
+#./assemble.py -e ENCSR922UEQ -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR922UEQ.log 2>&1 &
+#./assemble.py -e ENCSR893BUA -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR893BUA.log 2>&1 &
+#./assemble.py -e ENCSR517TCG -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR517TCG.log 2>&1 &
+#./assemble.py -e ENCSR405XVT -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR405XVT.log 2>&1 &
+#./assemble.py -e ENCSR561YHA -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR561YHA.log 2>&1 &
+#./assemble.py -e ENCSR012TGL -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR012TGL.log 2>&1 &
+#./assemble.py -e ENCSR623SXW -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR623SXW.log 2>&1 &
+#./assemble.py -e ENCSR542QVE -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR542QVE.log 2>&1 &
+#./assemble.py -e ENCSR987GWQ -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR987GWQ.log 2>&1 &
+#./assemble.py -e ENCSR424IEX -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR424IEX.log 2>&1 &
+#./assemble.py -e ENCSR583ONK -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR583ONK.log 2>&1 &
+#./assemble.py -e ENCSR331PWE -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR331PWE.log 2>&1 &
+#./assemble.py -e ENCSR079YPP -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR079YPP.log 2>&1 &
+#./assemble.py -e ENCSR417YFD -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR417YFD.log 2>&1 &
+#./assemble.py -e ENCSR914REH -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR914REH.log 2>&1 &
+#./assemble.py -e ENCSR482VHG -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR482VHG.log 2>&1 &
+#./assemble.py -e ENCSR797TEV -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR797TEV.log 2>&1 &
+#./assemble.py -e ENCSR540ONK -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR540ONK.log 2>&1 &
+#./assemble.py -e ENCSR675POY -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR675POY.log 2>&1 &
+#./assemble.py -e ENCSR255DLP -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR255DLP.log 2>&1 &
+#./assemble.py -e ENCSR022QUM -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR022QUM.log 2>&1 &
+#./assemble.py -e ENCSR264YPT -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR264YPT.log 2>&1 &
+#./assemble.py -e ENCSR141JKC -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR141JKC.log 2>&1 &
+#./assemble.py -e ENCSR113KSF -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR113KSF.log 2>&1 &
+#./assemble.py -e ENCSR311RCE -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR311RCE.log 2>&1 &
+#./assemble.py -e ENCSR781LIC -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR781LIC.log 2>&1 &
+#./assemble.py -e ENCSR713WYJ -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR713WYJ.log 2>&1 &
+#./assemble.py -e ENCSR357BWB -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR357BWB.log 2>&1 &
+#./assemble.py -e ENCSR925GVY -g GRCh38 > logs/assemble/dname/17_02_01/ENCSR925GVY.log 2>&1 &
+
+#mkdir logs/assemble/dname/17_02_02
+#./assemble.py -e ENCSR608JPV -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR608JPV.log 2>&1 &
+#./assemble.py -e ENCSR551AYL -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR551AYL.log 2>&1 &
+#./assemble.py -e ENCSR467KKO -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR467KKO.log 2>&1 &
+#./assemble.py -e ENCSR999RWT -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR999RWT.log 2>&1 &
+#./assemble.py -e ENCSR848CUY -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR848CUY.log 2>&1 &
+#./assemble.py -e ENCSR265ZHH -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR265ZHH.log 2>&1 &
+#./assemble.py -e ENCSR317JGM -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR317JGM.log 2>&1 &
+#./assemble.py -e ENCSR652ELW -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR652ELW.log 2>&1 &
+#./assemble.py -e ENCSR634GFF -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR634GFF.log 2>&1 &
+#./assemble.py -e ENCSR364ANL -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR364ANL.log 2>&1 &
+#./assemble.py -e ENCSR744UGB -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR744UGB.log 2>&1 &
+#./assemble.py -e ENCSR579AXB -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR579AXB.log 2>&1 &
+#./assemble.py -e ENCSR266CNE -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR266CNE.log 2>&1 &
+#./assemble.py -e ENCSR862LLM -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR862LLM.log 2>&1 &
+#./assemble.py -e ENCSR467QPI -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR467QPI.log 2>&1 &
+#./assemble.py -e ENCSR559QOU -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR559QOU.log 2>&1 &
+#./assemble.py -e ENCSR414XEF -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR414XEF.log 2>&1 &
+#./assemble.py -e ENCSR556KEJ -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR556KEJ.log 2>&1 &
+#./assemble.py -e ENCSR442IUA -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR442IUA.log 2>&1 &
+#./assemble.py -e ENCSR524APF -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR524APF.log 2>&1 &
+#./assemble.py -e ENCSR577RUU -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR577RUU.log 2>&1 &
+#./assemble.py -e ENCSR517TCG -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR517TCG.log 2>&1 &
+#./assemble.py -e ENCSR561YHA -g GRCh38 > logs/assemble/dname/17_02_02/ENCSR561YHA.log 2>&1 &
+
+
 
 
