@@ -18,15 +18,15 @@ import encd
 #   2) Ideally, a workflow_run object could be created on encoded as a request for assemble/launch.
 
 # Assemble is meant to be run directly for most experiment types.  That is, no derived class should be needed.
-#   Its purpose is to recognize all files (for a given experiment) that are available in ENCODEd and are needed to 
-#   complete a pipeline run (including fastqs and intermediate results); then if they are not already on DX copy them there.  
-#   Ideally assemble.py is run for a single experiment, but can act on a list of experiments.  The files are "fetched" to 
+#   Its purpose is to recognize all files (for a given experiment) that are available in ENCODEd and are needed to
+#   complete a pipeline run (including fastqs and intermediate results); then if they are not already on DX copy them there.
+#   Ideally assemble.py is run for a single experiment, but can act on a list of experiments.  The files are "fetched" to
 #   DX by a DX applet and assemble.py waits for the fetch to complete for one experiment, before moving on to the next.
 #   After a successful fetch, assemble.py can kick-off (ignite) the appropriate Launcher, so that the pipeline will be run.
 
 class Assemble(object):
     '''
-    Assembles all input files in dx for a given accessioned experiment and replicate (or combined replicates).  
+    Assembles all input files in dx for a given accessioned experiment and replicate (or combined replicates).
     '''
 
     SERVER_DEFAULT = 'www'
@@ -34,30 +34,30 @@ class Assemble(object):
 
     FOLDER_DEFAULT = '/runs/'
     '''This the default location for creating experiment folders on dnanexus.'''
-    
+
     FILE_STATUSES_ACCEPTED = [ "released", "in progress" ]
     '''By default only 'released' files may be assembled.  Use --status-accepted to allow others.'''
-    
+
     EXPERIMENT_TYPES_SUPPORTED = [ 'long-rna-seq', 'small-rna-seq', 'rampage', 'dnase-seq', "dna-me" ] #,"chip-seq" ]
     '''This module supports only these experiment (pipeline) types.'''
-    
-    LAUNCHERS = {   'long-rna-seq':     '../long-rna-seq-pipeline/dnanexus/lrnaLaunch.py', 
-                    'small-rna-seq':    '../long-rna-seq-pipeline/dnanexus/small-rna/srnaLaunch.py', 
-                    'rampage':          '../long-rna-seq-pipeline/dnanexus/rampage/rampageLaunch.py', 
+
+    LAUNCHERS = {   'long-rna-seq':     '../long-rna-seq-pipeline/dnanexus/lrnaLaunch.py',
+                    'small-rna-seq':    '../long-rna-seq-pipeline/dnanexus/small-rna/srnaLaunch.py',
+                    'rampage':          '../long-rna-seq-pipeline/dnanexus/rampage/rampageLaunch.py',
                     'dnase-seq':        '../dnase_pipeline/dnanexus/dnaseLaunch.py',
                     'dna-me':           '../dna-me-pipeline/dnanexus/dmeLaunch.py',
                 }
 
     # Pipeline files includes inputs and results.  To assemble the files, there is no need to understand step order
     # dependencies.  Even replicate vs. combined is not important information as folder destinations can be discovered
-    # from submitted_file_name paths. 
+    # from submitted_file_name paths.
     # For each "output_type" there will be one or more globs to recognize files.  Input files really don't need globs.
     PIPELINE_FILES = {
          "long-rna-seq": {
             "inputs":  { "reads": [ "*.fastqs.gz" ] },
-            "results": { "alignments":                 [ "*_star_genome.bam",         "*_tophat.bam"          ],
-                         "multi-read signal":          [ "*_star_genome_all.bw",      "*_tophat_all.bw"       ],
-                         "unique signal":              [ "*_star_genome_uniq.bw",     "*_tophat_uniq.bw"      ],
+            "results": { "alignments":                          [ "*_star_genome.bam",         "*_tophat.bam"          ],
+                         "signal of all reads":                 [ "*_star_genome_all.bw",      "*_tophat_all.bw"       ],
+                         "signal of unique reads":              [ "*_star_genome_uniq.bw",     "*_tophat_uniq.bw"      ],
                          "minus strand signal of all reads":    [ "*_star_genome_minusAll.bw", "*_tophat_minusAll.bw"  ],
                          "plus strand signal of all reads":     [ "*_star_genome_plusAll.bw",  "*_tophat_plusAll.bw"   ],
                          "minus strand signal of unique reads": [ "*_star_genome_minusUniq.bw","*_tophat_minusUniq.bw" ],
@@ -76,13 +76,15 @@ class Assemble(object):
         },
         "rampage": {
             "inputs":  { "reads": [ "*.fastqs.gz" ] },
-            "results": { "alignments":                 [ "*_rampage_star_marked.bam" ],
-                         "multi-read minus signal":    [ "*_rampage_5p_minusAll.bw"  ],
-                         "multi-read plus signal":     [ "*_rampage_5p_plusAll.bw"   ],
-                         "unique minus signal":        [ "*_rampage_5p_minusUniq.bw" ],
-                         "unique plus signal":         [ "*_rampage_5p_plusUniq.bw"  ],
-                         "sites":                      [ "*_rampage_idr.gff"         ],  # TODO: not really "sites"
-                         "peaks":                      [ "*_rampage_idr.bb"          ] } # TODO: not really "peaks" ?
+            "results": { "alignments":                 [ "*_star_marked.bam" ],
+                         "minus strand signal of all reads":    [ "*_5p_minusAll.bw"  ],
+                         "plus strand signal of all reads":     [ "*_5p_plusAll.bw"   ],
+                         "minus strand signal of unique reads": [ "*_5p_minusUniq.bw" ],
+                         "plus strand signal of unique reads":  [ "*_5p_plusUniq.bw"  ],
+                         "signal of all reads":                 [ "*_5p_all.bw" ],
+                         "signal of unique reads":              [ "*_5p_uniq.bw"  ],
+                         "transcription start sites":           [ "*_peaks.bed.gz", "*_peaks.gff.gz", "*_peaks.bb"  ],
+                         "gene quantifications":                [ "*_quant.tsv"          ] }
             # TODO: "controls"?  Punt at this time
             # TODO: "references" Probably not.  Assume that they are in place.
         },
@@ -95,7 +97,7 @@ class Assemble(object):
             "results": { "alignments":                 [ "*_bismark_techrep.bam" ] }
         },
     }
-    
+
     def __init__(self):
         '''
         Assemble expects to be the only class for assembling experiments on for pipeline types.
@@ -112,7 +114,7 @@ class Assemble(object):
         self.psv = {} # will hold pipeline specific variables.
         self.statuses_accepted = self.FILE_STATUSES_ACCEPTED
         print # TEMPORARY: adds a newline to "while retrieving session configuration" unknown error
-    
+
     def get_args(self,parse=True):
         '''Parse the input arguments.'''
         # Change this description if there is a derived version of Assemble
@@ -230,29 +232,29 @@ class Assemble(object):
                 self.statuses_accepted.extend(args.sa)
             else:
                 self.statuses_accepted.append(args.sa)
-            
+
         self.project = dx.get_project(self.proj_name)
         self.proj_id = self.project.get_id()
 
         # Resolve exp/replicate parameters
         if args.br != None and args.br != 0:
             if len(args.experiments) != 1:
-                print "May only specify a replicate for a single experiment." 
+                print "May only specify a replicate for a single experiment."
                 sys.exit(1)
             self.rep = { 'br': args.br, 'tr': args.tr, 'rep_tech': 'rep' + str(args.br) + '_' + str(args.tr) }
         else:
             self.rep = None
-            
+
         if args.genome:
             self.genome = args.genome
-        
-        
+
+
     def find_replicates(self, exp_id, exp, verbose=False):
         '''Returns a list of replicates with input files for this experiment.'''
         if self.rep != None:
             return [ self.rep ]
         #verbose=True
-            
+
         # Must look through exp and find all replicates!
         if exp != self.exp or self.full_mapping == None:
             self.full_mapping = encd.get_full_mapping(exp_id,exp)
@@ -270,7 +272,7 @@ class Assemble(object):
         #replicates = []
         #for (br,tr) in self.full_mapping.keys():
         #    replicates.append( { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) } )
-        #    
+        #
         #    mapping = encd.get_replicate_mapping(exp_id,br,tr,self.full_mapping)
         #    if self.genome == None:
         #        if mapping['organism'] in encd.GENOME_DEFAULTS:
@@ -282,8 +284,8 @@ class Assemble(object):
         #        print "Mixing genomes in one assembly run not supported %s and %s" % \
         #                                            (self.genome, dx.GENOME_DEFAULTS[mapping['organism']])
         #        sys.exit(1)
-        
-            
+
+
         if verbose:
             print "Replicates:"
             print json.dumps(replicates,indent=4)
@@ -298,7 +300,7 @@ class Assemble(object):
         rep_techs = []
         for rep in replicates:
             rep_techs.append(rep['rep_tech'])
-        
+
         # Input file should match on format and have format
         input_files = encd.files_to_map(self.exp)
         if verbose or len(self.statuses_accepted) > len(self.FILE_STATUSES_ACCEPTED):
@@ -315,8 +317,8 @@ class Assemble(object):
                 continue
             if f_obj.get('file_format') == 'fastq':
                 #f_obj['dx_file_name'] = f_obj['accession'] + ".fastq.gz'
-                enc_files.append( f_obj ) 
-                enc_file_md5sums.append(file_md5) 
+                enc_files.append( f_obj )
+                enc_file_md5sums.append(file_md5)
 
         # Result file must match their glob!
         if not self.inputs_only:
@@ -372,8 +374,8 @@ class Assemble(object):
             for f_obj in enc_files:
                 print ". %s %s" % (f_obj['href'],f_obj['submitted_file_name'])
         return enc_files
-        
-        
+
+
     def subtract_files_already_in_dx(self, enc_files, exp_id, exp_folder,verbose=False):
         '''Subtracts from an enc file_objs list any files that are already in the dx exp_folder.'''
         needed_files = []
@@ -445,7 +447,7 @@ class Assemble(object):
 
     def fetch_to_dx(self,exp_id,dx_folder,needed_files,test=True):
         '''Runs fetch-to-dx app to fetch of all files for a given experiment from encoded to dnanexus.'''
-        needed_count = len(needed_files)        
+        needed_count = len(needed_files)
         files_to_fetch = self.prepare_files_to_fetch_json(needed_files,verbose=False)
         assert (files_to_fetch != None)
 
@@ -482,11 +484,11 @@ class Assemble(object):
 
     def launch(self,exp_id,exp_type,replicates,genome,annotation,test=True,verbose=False):
         '''
-        Spawns the appropriate launcher, not waiting around for the results.  
+        Spawns the appropriate launcher, not waiting around for the results.
         Returns pid, 0 for noop and -1 for error.
         '''
         # NOT EXPECTED TO OVERRIDE
-        
+
         # look up the launcher launcher
         if exp_type not in self.LAUNCHERS:
             print "ERROR: No launcher defined for experiment of type " + exp_type
@@ -494,27 +496,27 @@ class Assemble(object):
         cmd = [ self.LAUNCHERS[exp_type] ]
         cmd.append('-e')
         cmd.append(exp_id)
-            
+
         # determine arguments to launcher
         # do anything about genome?  Defaults to hg19 or mm10 so not needed yet
         if genome not in ['hg19','mm10']:
             cmd.append('--genome')
             cmd.append(genome)
-         
+
         # do anything about annotation (lrna, rampage)?  Defaults to v19 or M4 which is okay for now
         if annotation and annotation not in ['v19','M4']:
             cmd.append('--annotation')
             cmd.append(annotation)
-            
+
         # TODO: Any additional arguments that a launcher might need.
-        
+
         # Always run, because assemble --test will not actually spawn the command.
         cmd.append('--run')
-            
+
         if verbose:
             print "Launch command:"
             print json.dumps(cmd,indent=4)
-               
+
         echo_cmd = ['echo','"']
         echo_cmd.extend(cmd)
         echo_cmd.append('"')
@@ -533,26 +535,26 @@ class Assemble(object):
             log_file = 'logs/launch/' + exp_id + '.log'
             with open(log_file,"a") as out:  # append log
                 return subprocess.Popen(cmd,stdout=out,stderr=subprocess.STDOUT).pid
-        
+
     def run(self):
         '''Runs assemble from start to finish using command line arguments.'''
         # NOT EXPECTED TO OVERRIDE
-        
+
         #try:
         args = self.get_args()
         self.load_variables(args)
         #except Exception as e:
         #    print 'Caught: %s %s' % (e.status_code, e.reason)
         #    #raise
-        
+
         print "== Running in project [%s] and will copy from the [%s] server ==" % \
                                                         (self.proj_name,self.server_key)
-                                                        
+
         exp_count = 0
         skipped = 0
         total_copied = 0
-        total_failed = 0 
-        total_launched = 0 
+        total_failed = 0
+        total_launched = 0
         for exp_id in args.experiments:
             sys.stdout.flush() # Slow running job should flush to piped log
             exp_count += 1
@@ -565,7 +567,7 @@ class Assemble(object):
                 continue
             if 'internal_status' in self.exp and self.exp['internal_status'] in encd.INTERNAL_STATUS_BLOCKS:
                 print "ERROR: Experiment %s with internal_status of '%s' cannot be assembled." % \
-                                                                        (self.exp_id,self.exp['internal_status']) 
+                                                                        (self.exp_id,self.exp['internal_status'])
                 skipped += 1
                 continue
             #print json.dumps(self.exp['files'],indent=4)
@@ -603,7 +605,7 @@ class Assemble(object):
                     descr += ','
                 descr += str(rep['br'])
             print "Handling %s  %s  %s experiment..." % (exp_id, descr, self.exp_type)
-            
+
             # File list from encoded
             expected_files = self.PIPELINE_FILES[self.exp_type]
             available_files = self.find_encoded_files(self.exp, expected_files,self.replicates)
@@ -612,7 +614,7 @@ class Assemble(object):
                 skipped += 1
                 continue
             print "There are %s files available in encoded for %s." % (len(available_files),self.exp_id)
-            
+
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation may have been entered as args to help organize folders
             if self.genome == "mm10" and args.annotation is None:
@@ -640,7 +642,7 @@ class Assemble(object):
                         print "  - Test created rep folder:      " + rep_folder
                 else:
                     print "  - Will examine rep folder:      " + rep_folder
-                    
+
             # minus file list already in dx
             needed_files = self.subtract_files_already_in_dx(available_files, self.exp_id,self.exp_folder)
             if len(needed_files) == 0:
@@ -650,12 +652,12 @@ class Assemble(object):
             ## short circuit for test
             #needed_files = needed_files[0:1]
             print "- Need to copy %d files to dx for %s" % (len(needed_files),self.exp_id)
-            
+
             # Now for each needed report it
             already_processed_files = False
             for f_obj in needed_files:
                 sys.stdout.flush() # Slow running job should flush to piped log
-                if not self.test: 
+                if not self.test:
                     print "  - Will try to copy %s to dx %s:%s%s" % \
                             (f_obj['accession'],self.proj_name,f_obj['dx_folder'],f_obj['dx_file_name'])
                 else:
@@ -668,40 +670,40 @@ class Assemble(object):
             failed = self.fetch_to_dx(self.exp_id,self.exp_folder,needed_files,test=self.test)
             copied = len(needed_files) - failed
             launched = 0
-            
+
             if failed == 0 and not already_processed_files:
                 encd.exp_patch_internal_status(self.exp_id, 'pipeline ready', test=self.test)
             #else:
             #    encd.exp_patch_internal_status(self.exp_id, 'unrunnable', test=self.test)
-                
+
             # Ignite a launcher here...
             if args.launch:
                 pid = self.launch(self.exp_id,self.exp_type,self.replicates,self.genome,args.annotation,test=self.test)
                 if pid > 0:
                     #print "- Launcher ignited for %s, pid %d" % (self.exp_id, pid)
                     launched = 1
-            
+
             if self.test:
                 print "- For %s Processed %d file(s), would try to copy %d file(s)" % \
                                                             (self.exp_id, len(needed_files), copied)
             else:
                 print "- For %s Processed %d file(s), copied %d, failed %d, launched %d" % \
                                                             (self.exp_id, len(needed_files), copied, failed, launched)
-                                                            
+
             total_copied += copied
             total_failed += failed
             total_launched += launched
-        
+
         if exp_count > 1:
             if self.test:
                 print "Processed %d experiment(s), skipped %d, would try to copy %d file(s)" % \
                                                                 (exp_count, skipped, total_copied)
-            else:    
+            else:
                 print "Processed %d experiment(s), skipped %d, copied %d file(s), failures %d, launched %d" % \
                                                             (exp_count, skipped, total_copied, total_failed, total_launched)
         if total_failed != 0:
             print "(finished with failures)"
-            sys.exit(1)    
+            sys.exit(1)
 
         print "(finished)"
 
