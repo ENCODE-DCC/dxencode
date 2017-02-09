@@ -697,7 +697,7 @@ def get_control_locations(control_exp_id, control_mappings, br, tr):
     return None
 
 
-def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
+def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, control_locs=False, key=None):
     '''For a given exp_id (accession) returns a "rep" list as used by assemble, launch, etc.'''
 
     reps = []
@@ -706,8 +706,10 @@ def get_reps(exp_id, load_reads=False, exp=None, full_mapping=None, key=None):
         exp = get_exp(exp_id,must_find=True,warn=False,key=key)
     if full_mapping == None:
         full_mapping = get_full_mapping(exp_id,exp,key=key)
-    (control_exp_id, control_mappings) = get_control_mappings(exp,key=key)
-
+    if control_locs:
+        (control_exp_id, control_mappings) = get_control_mappings(exp,key=key)
+    else:
+        (control_exp_id, control_mappings) = (None, None)
     if full_mapping != None:
         for (br,tr) in sorted( full_mapping.keys() ):
             rep = { 'br': br, 'tr': tr,'rep_tech': 'rep' + str(br) + '_' + str(tr) }

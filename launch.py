@@ -170,8 +170,9 @@ class Launch(object):
         self.proj_id = None
         self.exp = {}  # Will hold the encoded exp json
         self.psv = {} # will hold pipeline specific variables.
-        self.multi_rep = False       # This run includes more than one replicate
-        self.combined_reps = False   # This run includes combined replicate workflows
+        self.multi_rep = False       # This run includes more than one replicate (e.g. rep1_1 and (rep2_1 or rep1_2)
+        self.combined_reps = False   # This run includes 2 or more reps that flow into one
+        self.combine_one_or_more = False  # Special case where one or more flow into one
         self.compare_techreps = False# Only for special cases where there is only 1 bio_rep but 2 techreps.
         self.detect_umi = False      # Only in DNase is there a umi setting buried in the fastq metadata.
         self.link_later = None       # Rare: when 2 sister branches link to each other, it requires a final wf pass.
@@ -481,7 +482,7 @@ class Launch(object):
                             else:
                                 rep['priors'][file_token].append( fid )
                             inputs[file_token].append( fid )
-                        elif not self.multi_rep:
+                        elif not self.multi_rep and not self.combine_one_or_more:
                             print >> sys.stderr, "ERROR: Necessary '%s' for combined run, not found in '%s'." \
                                                                        % (file_token, rep['resultsFolder'])
                             print >> sys.stderr, "       Please run for single replicate first."
@@ -715,7 +716,9 @@ class Launch(object):
         #   - The one combined rep (aka "SEA") is processed by the "COMBINED_REPS" pipeline branch
         cv_reps = {}
         full_mapping = encd.get_full_mapping(exp_id,exp=exp)
-        reps = encd.get_reps(exp_id, load_reads=True, exp=exp, full_mapping=full_mapping)
+        controls_expected = (self.CONTROL_FILE_GLOB != None)
+        reps = encd.get_reps(exp_id, load_reads=True, exp=exp, full_mapping=full_mapping, \
+                             control_locs=controls_expected)
         rep_techs = []
         if 'reps' in args and args.reps != None:
             for rep_tech in args.reps:
@@ -1661,7 +1664,7 @@ class Launch(object):
 
         # Inputs:
         print "- Inputs:"
-        if self.multi_rep:
+        if self.multi_rep or self.combine_one_or_more:
             for ltr in sorted( self.psv['reps'].keys() ):
                 rep = self.psv['reps'][ltr]
                 rep_tech_msg = rep['rep_tech']
@@ -1701,7 +1704,7 @@ class Launch(object):
 
         print "- Steps to run:"
         to_run_count = 0
-        if self.multi_rep:
+        if self.multi_rep or self.combine_one_or_more:
             for ltr in sorted( self.psv['reps'].keys() ):
                 rep = self.psv['reps'][ltr]
                 for step in rep['path']:
@@ -1726,7 +1729,7 @@ class Launch(object):
             sys.exit(0)
 
         if not self.template:
-            if self.multi_rep:
+            if self.multi_rep or self.combine_one_or_more:
                 for ltr in sorted( self.psv['reps'].keys() ):
                     rep = self.psv['reps'][ltr]
                     if len(rep['deprecate']) > 0:
@@ -1760,7 +1763,7 @@ class Launch(object):
             self.check_run_log(run['resultsFolder'], proj_id, verbose=True)
 
             # Move old files out of the way...
-            if self.multi_rep:
+            if self.multi_rep or self.combine_one_or_more:
                 for rep_id in sorted( self.psv['reps'].keys() ):
                     rep = self.psv['reps'][rep_id]
                     if len(rep['deprecate']) > 0 and not self.test:
@@ -1768,7 +1771,7 @@ class Launch(object):
                         print "Moving "+str(len(rep['deprecate']))+" "+rep['rep_tech']+" prior result file(s) to '"+ \
                                                                                             deprecated+"'..."
                         dx.move_files(rep['deprecate'],deprecated,proj_id)
-            if not self.multi_rep:
+            if not self.multi_rep and not self.combine_one_or_more:
                 if len(run['deprecate']) > 0 and not self.test:
                     deprecated = run['resultsFolder']+"deprecated/"
                     print "Moving "+str(len(run['deprecate']))+" "+run['rep_tech']+" prior result file(s) to '"+ \
@@ -1777,7 +1780,7 @@ class Launch(object):
 
         # Build the workflow...
         wf = None
-        if self.multi_rep:
+        if self.multi_rep or self.combine_one_or_more:
             for rep_id in sorted( self.psv['reps'].keys() ):
                 rep = self.psv['reps'][rep_id]
                 dotdotdot = "..."
@@ -1789,7 +1792,7 @@ class Launch(object):
                     else:
                         print "Assembling workflow for "+rep['rep_tech']+dotdotdot
                     wf = self.create_or_extend_workflow(rep, rep_id, wf=wf)
-        if not self.multi_rep:
+        if not self.multi_rep and not self.combine_one_or_more:
             if len(run['stepsToDo']) > 0:
                 if self.test:
                     print "Testing workflow assembly for "+run['rep_tech']+"..."
