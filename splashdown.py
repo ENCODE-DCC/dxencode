@@ -69,17 +69,13 @@ class Splashdown(object):
                 "signals-top-pe":  { "minus strand signal of all reads":          "*_tophat_minusAll.bw",
                                      "plus strand signal of all reads":           "*_tophat_plusAll.bw",
                                      "minus strand signal of unique reads":       "*_tophat_minusUniq.bw",
-                                     "plus strand signal of unique reads":        "*_tophat_plusUniq.bw",
-                                     "signal of all reads":                       "*_tophat_all.bw",
-                                     "signal of unique reads":                    "*_tophat_uniq.bw" },
+                                     "plus strand signal of unique reads":        "*_tophat_plusUniq.bw"         },
                 "signals-star-se": { "signal of all reads":                       "*_star_genome_all.bw",
                                      "signal of unique reads":                    "*_star_genome_uniq.bw"        },
                 "signals-star-pe": { "minus strand signal of all reads":          "*_star_genome_minusAll.bw",
                                      "plus strand signal of all reads":           "*_star_genome_plusAll.bw",
                                      "minus strand signal of unique reads":       "*_star_genome_minusUniq.bw",
-                                     "plus strand signal of unique reads":        "*_star_genome_plusUniq.bw",
-                                     "signal of all reads":                       "*_star_genome_all.bw",
-                                     "signal of unique reads":                    "*_tstar_genome_uniq.bw" },
+                                     "plus strand signal of unique reads":        "*_star_genome_plusUniq.bw"    },
                 "align-star":      { "alignments":                                "*_star_genome.bam",
                                      "transcriptome alignments":                  "*_star_anno.bam"              },
                 "quant-rsem":      { "gene quantifications":                      "*_rsem.genes.results",
@@ -100,15 +96,15 @@ class Splashdown(object):
                 "mad_qc":          { "QC_only":                                   "*_mad_plot.png"               }  },
         },
         "rampage": {
-            "step-order": [ "align","signals","peaks","idr","mad_qc"],
+            "step-order": [ "align","signals-stranded","signals-unstranded","peaks","idr","mad_qc"],
             "replicate":  {
-                "align":           { "alignments":                                "*_star_marked.bam" },
-                "signals":         { "plus strand signal of all reads":           "*_5p_plusAll.bw",
-                                     "minus strand signal of all reads":          "*_5p_minusAll.bw",
-                                     "plus strand signal of unique reads":        "*_5p_plusUniq.bw",
-                                     "minus strand signal of unique reads":       "*_5p_minusUniq.bw",
-                                     "signal of all reads":                       "*_5p_all.bw",
-                                     "signal of unique reads":                    "*_5p_uniq.bw" },
+                "align":            { "alignments":                               "*_star_marked.bam" },
+                "signals-stranded": { "plus strand signal of all reads":          "*_5p_plusAll.bw",
+                                      "minus strand signal of all reads":         "*_5p_minusAll.bw",
+                                      "plus strand signal of unique reads":       "*_5p_plusUniq.bw",
+                                      "minus strand signal of unique reads":      "*_5p_minusUniq.bw" },
+                "signals-unstranded": { "signal of all reads":                    "*_5p_all.bw",
+                                        "signal of unique reads":                 "*_5p_uniq.bw" },
                 "peaks":           { "transcription start sites|gff|gff3":        "*_peaks.gff.gz",
                                      "transcription start sites|bed|tss_peak":    "*_peaks.bed.gz",
                                      "transcription start sites|bigBed|tss_peak": "*_peaks.bb",
@@ -567,6 +563,7 @@ class Splashdown(object):
 
     def find_step_files(self,file_globs,result_folder,rep_tech,verbose=False):
         '''Returns tuple list of (type,rep_tech,fid) of ALL files expected for a single step.'''
+        # verbose=True  # Useful for debuging new or changed pipelines
         step_files = []
 
         for token in file_globs.keys():
