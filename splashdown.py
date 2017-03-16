@@ -192,6 +192,26 @@ class Splashdown(object):
         }
     '''List of supported formats, and means of recognizing with file extensions.'''
 
+    # If any files need specific format specifications docs attached, they can be recognized by
+    # either output_type or file_format_type, but can be further distinguished by file ending.
+    FORMAT_SPECS = {
+        "gene quantifications": {
+            "_srna_star_quant.tsv": "/documents/58797852-35cc-4fc4-8a27-b877389cab25/",
+            "default": "/documents/0c78ea4b-9392-421b-a6f3-6c858b6002aa/",
+        },
+        "transcript quantifications": "/documents/0c78ea4b-9392-421b-a6f3-6c858b6002aa/",
+        "narrowPeak": "/documents/948203bb-8eb2-42a2-8b12-1c10f356c998/",
+        "broadPeak": "/documents/f4e14cde-9ce2-49cf-a7aa-341d7811a463/",
+        "tss_peak": "/documents/938041d3-2327-4abb-bb48-31ae106685ad/",
+        "idr_peak": "/documents/da98b997-4d2b-4291-90e8-b05cc22912ee/",
+        "bedMethyl":  "/documents/bd8553e4-f49a-4f42-b93c-56b3235c1e9a/",
+        "bedRrbs":  "/documents/e22d2d22-2c0b-4e39-a51c-e7d61426ce80/",        # Identical to bedMethyl
+        "gappedPeak": "/documents/3b108849-abee-47f0-8dbf-55a8855ccc70/",      # used?
+        "bedLogR": "/documents/ebd06d34-18c3-473b-b4de-7609d02242cb/",         # used?
+        "bedRnaElements": "/documents/b936b944-0652-42ab-bf13-8eaf533956ea/",  # used?
+        "enhancerAssay": "/documents/3df639bb-61e2-4afe-ac76-d7eb7960bfc4/",   # used?
+    }
+
     # Each QC object has its own particulars:
     # The key should match a key found in a file details json
     # type: (optional) the collection of quality_metric objects in encodeD. Collection will be type+'_quality_metric'.
@@ -1149,10 +1169,36 @@ class Splashdown(object):
         return derived_from
 
 
+    def lookup_format_spec(self,obj):
+        '''Tries to find an appropriate file format sepc for the given file.'''
+        format_spec = None
+        for obj_property in ['output_type','file_format_type']:
+            format_spec = None
+            if obj.get(obj_property,'NONONO') in self.FORMAT_SPECS:
+                format_spec = self.FORMAT_SPECS[obj[obj_property]]
+                if isinstance(format_spec, dict):
+                    new_format_spec = None
+                    for file_ending in format_spec.keys():
+                        if obj["submitted_file_name"].endswith(file_ending):
+                            new_format_spec = format_spec[file_ending]
+                            break
+                    if new_format_spec is None and 'default' in format_spec:
+                        new_format_spec = format_spec['default']
+                    format_spec = new_format_spec
+                if format_spec is not None and isinstance(format_spec, str):
+                    break
+        return format_spec
+
+
     def add_encoded_info(self,obj,rep_tech,fid,verbose=False):
         '''Updates an object with information from encoded database.'''
         obj['lab'] = encd.DCC_PIPELINE_LAB
         obj['award'] = encd.DEFAULT_DCC_AWARD
+
+        # file format spec:
+        format_spec = self.lookup_format_spec(obj)
+        if format_spec is not None and isinstance(format_spec, str):
+            obj['file_format_specifications'] = [ format_spec ]
 
         # Decided: Remove replicate from result files?  Decision still being made.
         # Find replicate info
@@ -2251,7 +2297,7 @@ class Splashdown(object):
             files_to_post = self.find_needed_files(files_expected, test=self.test, verbose=args.verbose)
             print "- Found %d files that need to be handled" % len(files_to_post)
             if len(files_to_post) == 0:
-                self.print_analysis_totals(self.exp_id)
+                #self.print_analysis_totals(self.exp_id)
                 continue
 
             # 6) For each file that needs to be posted:
