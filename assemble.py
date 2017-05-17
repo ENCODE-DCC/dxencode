@@ -90,7 +90,7 @@ class Assemble(object):
         },
         "dnase-seq": { # TODO: Flesh out the DNase results
             "inputs":  { "reads": [ "*.fastqs.gz" ] },
-            "results": { "alignments":                 [ "*_bwa.bam"    ] }
+            "results": { "unfiltered alignments":  [ "*_bwa_techrep.bam"    ] }
         },
         "dna-me": { # TODO: Flesh out the DNase results
             "inputs":  { "reads": [ "*.fastqs.gz" ] },

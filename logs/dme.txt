@@ -1,3 +1,29 @@
+Some extrapolations of Jan 2017:
+21d14h31m	$1535.19  15367
+1535.19 / 31111m = -.04934557 
+31111 / 1535.19 = 20.265 = 311416
+5190h
+216d6h16m
+# Experiment    replicate   CPU Time    Job Time    Total Cost  CPU Time    Job Time    Total Cost
+ENCSR328TBS     rep1_1:                 12d12h36m   $891.03
+                rep2_1:                 9d02h13m    $644.57
+                combined:                                                   21d14h31m   $1535.19
+# Totals	min:		9d02h13m	$644.57		21d14h31m	$1535.19
+# 	max:		12d12h36m	$891.03		21d14h31m	$1535.19
+# 	mean:		10d19h24m	$767.80		21d14h31m	$1535.19
+
+ENCSR888JFA
+3d14h30m = 5190 clock  machine = 4251+6698+595+101+12 = 11657
+align: 19h15m + 14h42m + 19h48m + 17h6m = 4251m = 2d22h51m  4251/11657=0.365  x4  311416*0.365 = 113666 = 78d22h26m   113666*4 = 454664 = 315d17h44m
+extract: 2d12h21m + 2d13h17m = 6698m = 4d15h38m             6698/11657=0.575 x32  311416*0.575 = 179064 = 124d8h24m   179064*32 = 5730048 = 3979d04h48m 10y329d04h48m
+c2bb: 4h56m + 4h59m = 595m = 9h55m                           595/11657=0.05   x8  311416*0.6   =  18686 = 12d23hh26m  18686*8 = 149488 = 103d19h28m
+c2bw: 51m + 50m = 101m = 1h41m                               101/11657=0.009  x8                                                6334200 = 4398d18h 12y18d18h
+corr: 12m                                                     12/11657=0.001  x8
+
+
+
+
+
 ENCSR129SBE  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-08  9d02h38m  $555.48
 ENCSR217TMK  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-08 11d02h19m  $705.46
 ENCSR425NDU  mm10       1_1,1_2,2_1,2_2,1_1.2,2_1.2,combined 2016-12-08 10d00h33m  $628.00
@@ -35,9 +61,6 @@ ENCSR765JPC  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  18d22h27m  $1236.4
 ENCSR881XOU  GRCh38 1,2   2016-02-16  2016-02-16  2016-03-10  23d12h20m  $1006.06  Paired replicate R (pearson):0.9341, on CpG pairs >= 10 reads each:30,156,878
 ENCSR890UQO  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-10  23d12h06m  $1004.76  Paired replicate R (pearson):0.7953, on CpG pairs >= 10 reads each:32,745,730   
 ENCSR959RNH  GRCh38 1,2   2016-02-24  2016-02-24  2016-03-22  25d07h45m  $1691.61  Paired replicate R (pearson):0.8944, on CpG pairs >= 10 reads each:41,370,673
-
-
-
 
 ENCSR020GGM  aligned  extracted
 ENCSR033PGF  aligned  extracted
