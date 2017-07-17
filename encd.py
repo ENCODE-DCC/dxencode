@@ -600,6 +600,8 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
         return "dna-me"
     elif exp["assay_term_name"] == "CAGE":
         return "rampage"
+    elif exp["assay_term_name"] in ["DNase-seq","genetic modification followed by DNase-seq"]:
+        return "dnase-seq"
     #elif exp["assay_term_name"] == "RAMPAGE":
     #    return "rampage"
     #elif exp["assay_term_name"] == "ChIP-seq":

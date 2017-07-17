@@ -138,7 +138,7 @@ class Splashdown(object):
                                          "hotspots|bigBed|broadPeak":             "*_hotspots.bb",
                                          "peaks|bed|narrowPeak":                  "*_peaks.bed.gz",
                                          "peaks|bigBed|narrowPeak":               "*_peaks.bb",
-                                         "signal of unique reads":                "*_density.bw"              } },
+                                         "read-depth normalized signal":          "*_normalized_density.bw"   } },
             "combined":   {
                 "dnase-rep-corr":      { "QC_only":                               "*_density_corr.txt"        }  },
         },
