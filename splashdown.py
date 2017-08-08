@@ -129,16 +129,17 @@ class Splashdown(object):
                 "corr":            { "QC_only":                                   "*_CpG_corr.txt" }  }, # Not yet defined in encodeD
         },
          "dnase-seq": {
-            "step-order": [ "dnase-align-bwa","dnase-filter","dnase-eval-bam","dnase-call-hotspots","dnase-rep-corr"],
+            "step-order": [ "dnase-align-bwa","dnase-filter","dnase-eval-bam","dnase-density","dnase-call-hotspots","dnase-rep-corr"],
             "replicate":  {
                 "dnase-align-bwa":     { "unfiltered alignments":                 "*_bwa_techrep.bam"         },
                 "dnase-filter":        { "alignments":                            "*_bwa_biorep_filtered.bam" },
                 "dnase-eval-bam":      { "QC_only":                               "*_sample_qc.txt"           },
+                "dnase-density":       { "read-depth normalized signal":          "*_normalized_density.bw"   },
                 "dnase-call-hotspots": { "hotspots|bed|broadPeak":                "*_hotspots.bed.gz",
                                          "hotspots|bigBed|broadPeak":             "*_hotspots.bb",
                                          "peaks|bed|narrowPeak":                  "*_peaks.bed.gz",
                                          "peaks|bigBed|narrowPeak":               "*_peaks.bb",
-                                         "read-depth normalized signal":          "*_normalized_density.bw"   } },
+                                         "enrichment|bed|bed3+":                  "*_all_calls.bed.gz"        } },
             "combined":   {
                 "dnase-rep-corr":      { "QC_only":                               "*_density_corr.txt"        }  },
         },
@@ -341,7 +342,15 @@ class Splashdown(object):
                                   "blob": { "pattern": "/*_CpG_corr.txt"},
                                   "props": { "Pearson Correlation Coefficient": "Pearson correlation", "CpG pairs with atleast 10 reads each": "Items" },
                                   "literal": {"Details": "Correlation of all CpG pairs covered by at least 10 reads each"} },
-        "hotspot":              { "files": {"results": "detail"}, "blob": { "pattern": "/*_hotspots_qc.txt"  } },
+        "hotspot":              { "files": {"results": "detail"}, 
+                                  "props": { "SPOT score": "SPOT2 score", "hotspot count": "hotspot count", "peaks count": "peaks count" },
+                                  "blob": { "pattern": "/*_hotspots_qc.txt" }
+                                },
+        "hotspot1":             { "type": "hotspot",
+                                  "files": {"inputs": [ "bam_filtered" ] }, 
+                                  "props": { "SPOT": "SPOT1 score", "hotspot tags": "hotspot tags", "total tags": "total tags" },
+                                  "blob": { "pattern": "/*_sample_qc.txt"  } 
+                                },
         "edwBamStats":          { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "dnase_techrep_bamstats":   {
                                     "type":"edwBamStats",
@@ -351,7 +360,11 @@ class Splashdown(object):
                                 },
         # How to NOT post edwBamStats that are a metric of the sample?  Won't most because sample isn't file to be posted!
         "trim_illumina":        { "type":"trimming","files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_techrep_qc.txt" } },
-        "dup_stats":            { "type":"duplicates", "files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } },
+        "dup_stats":            { "type":"duplicates", 
+                                  "files": {"results": "detail"}, 
+                                  "exclude": [ "Secondary Or Supplementary Rds" ],
+                                  "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" }
+                                },
         "filtering":            { "files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" } },
         "pbc_spp":              { "type":"complexity_xcorr", "files": { "inputs": [ "bam_filtered" ] }, "blob": { "pattern": "/*_sample_qc.txt" } },
         #"correlation":          { "files": { "inputs": ["density_a", "density_b"] },
@@ -1719,7 +1732,7 @@ class Splashdown(object):
         if step_run == None:
             step_run = {}
             step_run['aliases'] = [ step_alias ]
-            step_run['status'] = "finished"
+            step_run['status'] = "released"
             dx_app_name = job.get('executableName')
 
             # get applet and version
