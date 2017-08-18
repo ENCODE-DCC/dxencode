@@ -617,10 +617,11 @@ class Assemble(object):
 
             # 2) Locate the experiment accession named folder
             # NOTE: genome and annotation may have been entered as args to help organize folders
+            # NOTE2: annotation may be relevant to launching it is no longer desired for folders
             if self.genome == "mm10" and args.annotation is None:
-                args.annotation = "M4"
+                args.annotation = "M4" 
             self.umbrella_folder = dx.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name, \
-                                                                            self.exp_type,"runs/",self.genome,args.annotation)
+                                                                            self.exp_type,"runs/",self.genome)
             self.exp_folder = dx.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
             if self.exp_folder == None:
                 self.exp_folder = self.umbrella_folder + exp_id + '/'

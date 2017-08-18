@@ -514,7 +514,8 @@ class Launch(object):
         '''Returns a normalized umbrella folder (that holds the experiments of a given type).'''
         if self.no_refs: # (no_refs is only True when templating)
             genome = None # If templating with no refs then this will hide genome and annotation
-        return dx.umbrella_folder(folder,default,proj_name,exp_type=exp_type,sub_folder="runs/",genome=genome,annotation=annotation)
+        # NOTE: annotation is no longer used in organizing folders.
+        return dx.umbrella_folder(folder,default,proj_name,exp_type=exp_type,sub_folder="runs/",genome=genome)
 
     ############## NOT EXPECTED TO OVERIDE THE FOLLOWING METHODS ############
     def common_variables(self,args,fastqs=True):
