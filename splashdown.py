@@ -1709,7 +1709,7 @@ class Splashdown(object):
             originJobId = job.get('originJob', job['id'])
             if originJobId != job['id']:
                 ojob = dxpy.api.job_describe(originJobId)
-            price = ojob.get('totalPrice', price)
+                price = ojob.get('totalPrice', price)
         return price
 
     def enc_step_run_find_or_create(self,job,dxFile,rep_tech,test=False,verbose=False):
