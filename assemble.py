@@ -416,21 +416,19 @@ class Assemble(object):
                 trs = f_obj.get('technical_replicates',[])
                 if len(trs) == 1:
                     enc_rep_tech = 'rep' + trs[0]
-                #
+
                 # Now look if the file is in dx
-                dx_folder = exp_folder
                 if rep_tech != None:
-                    dx_folder += rep_tech + '/'
+                    dx_folder = exp_folder + rep_tech + '/'
                 fid = dx.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
+                if fid == None and enc_rep_tech != rep_tech:
+                    dx_folder = exp_folder + enc_rep_tech + '/'
+                    fid = dx.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
                 if fid == None:
-                    if enc_rep_tech != enc_rep_tech:
-                        dx_folder = exp_folder + enc_rep_tech + '/'
-                        fid = dx.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
-                    if fid == None:
-                        f_obj['dx_file_name'] = dx_file_name
-                        f_obj['dx_folder']    = dx_folder
-                        needed_files.append(f_obj)
-                elif enc_rep_tech != enc_rep_tech:
+                    f_obj['dx_file_name'] = dx_file_name
+                    f_obj['dx_folder']    = dx_folder
+                    needed_files.append(f_obj)
+                elif enc_rep_tech != rep_tech:
                     print "WARNING: found %s in old DX folder: %s" % (dx_file_name,dx_folder)
         if verbose:
             print "Encoded files:"
