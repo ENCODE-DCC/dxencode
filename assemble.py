@@ -411,15 +411,27 @@ class Assemble(object):
                                 if int(br) > 0 and int(tr) > 0:
                                     rep_tech = folder
                         break
+                # Now check that encoded.rep_tech hasn't changed.
+                enc_rep_tech = rep_tech
+                trs = f_obj.get('technical_replicates',[])
+                if len(trs) == 1:
+                    enc_rep_tech = 'rep' + trs[0]
+                #
                 # Now look if the file is in dx
                 dx_folder = exp_folder
                 if rep_tech != None:
                     dx_folder += rep_tech + '/'
                 fid = dx.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
                 if fid == None:
-                    f_obj['dx_file_name'] = dx_file_name
-                    f_obj['dx_folder']    = dx_folder
-                    needed_files.append(f_obj)
+                    if enc_rep_tech != enc_rep_tech:
+                        dx_folder = exp_folder + enc_rep_tech + '/'
+                        fid = dx.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
+                    if fid == None:
+                        f_obj['dx_file_name'] = dx_file_name
+                        f_obj['dx_folder']    = dx_folder
+                        needed_files.append(f_obj)
+                elif enc_rep_tech != enc_rep_tech:
+                    print "WARNING: found %s in old DX folder: %s" % (dx_file_name,dx_folder)
         if verbose:
             print "Encoded files:"
             print json.dumps(needed_files,indent=4)
@@ -619,7 +631,7 @@ class Assemble(object):
             # NOTE: genome and annotation may have been entered as args to help organize folders
             # NOTE2: annotation may be relevant to launching it is no longer desired for folders
             if self.genome == "mm10" and args.annotation is None:
-                args.annotation = "M4" 
+                args.annotation = "M4"
             self.umbrella_folder = dx.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name, \
                                                                             self.exp_type,"runs/",self.genome)
             self.exp_folder = dx.find_exp_folder(self.project,self.exp_id,self.umbrella_folder)
