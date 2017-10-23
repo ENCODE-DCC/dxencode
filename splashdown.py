@@ -320,18 +320,31 @@ class Splashdown(object):
                                     "files": {"results": "detail"},
                                     "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" }
                                 },
-        "bismark_map":          {
-                                    "type":"bismark",
+        "biorep_bismark_map":          {
+                                    "type":"bismark_map",
                                     "files": {"results": "detail"},
-                                    "blob": { "pattern": "/*_map_report.txt" },
+                                    "blob": { "pattern": "/*_biorep_map_report.txt" },
                                     "include": [
                                         "C methylated in CHG context","lambda C methylated in CHG context",
                                         "C methylated in CHH context","lambda C methylated in CHH context",
                                         "C methylated in CpG context","lambda C methylated in CpG context",
                                         "Mapping efficiency",         "lambda Mapping efficiency",
                                         "Sequences analysed in total","lambda Sequences analysed in total",
-    ## From:bismark_extract: "Bismark result lines processed" => "Sequences analysed in total" and "lambda Sequences analysed in total"
-    # I think a good plan is to patch the dx metric json with he second blob (bismark_extract) then proceed
+                                        ],
+                                    "extend_by": {"qc_json": "samtools_flagstats",
+                                                  "props": { "mapped": [ "Sequences analysed in total",
+                                                                         "lambda Sequences analysed in total"] } },
+                                },
+        "techrep_bismark_map":          {
+                                    "type":"bismark_map",
+                                    "files": {"results": "detail"},
+                                    "blob": { "pattern": "/*_techrep_map_report.txt" },
+                                    "include": [
+                                        "C methylated in CHG context","lambda C methylated in CHG context",
+                                        "C methylated in CHH context","lambda C methylated in CHH context",
+                                        "C methylated in CpG context","lambda C methylated in CpG context",
+                                        "Mapping efficiency",         "lambda Mapping efficiency",
+                                        "Sequences analysed in total","lambda Sequences analysed in total",
                                         ],
                                     "extend_by": {"qc_json": "samtools_flagstats",
                                                   "props": { "mapped": [ "Sequences analysed in total",
@@ -342,14 +355,14 @@ class Splashdown(object):
                                   "blob": { "pattern": "/*_CpG_corr.txt"},
                                   "props": { "Pearson Correlation Coefficient": "Pearson correlation", "CpG pairs with atleast 10 reads each": "Items" },
                                   "literal": {"Details": "Correlation of all CpG pairs covered by at least 10 reads each"} },
-        "hotspot":              { "files": {"results": "detail"}, 
+        "hotspot":              { "files": {"results": "detail"},
                                   "props": { "SPOT score": "SPOT2 score", "hotspot count": "hotspot count", "peaks count": "peaks count" },
                                   "blob": { "pattern": "/*_hotspots_qc.txt" }
                                 },
         "hotspot1":             { "type": "hotspot",
-                                  "files": {"inputs": [ "bam_filtered" ] }, 
+                                  "files": {"inputs": [ "bam_filtered" ] },
                                   "props": { "SPOT": "SPOT1 score", "hotspot tags": "hotspot tags", "total tags": "total tags" },
-                                  "blob": { "pattern": "/*_sample_qc.txt"  } 
+                                  "blob": { "pattern": "/*_sample_qc.txt"  }
                                 },
         "edwBamStats":          { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
         "dnase_techrep_bamstats":   {
@@ -360,8 +373,8 @@ class Splashdown(object):
                                 },
         # How to NOT post edwBamStats that are a metric of the sample?  Won't most because sample isn't file to be posted!
         "trim_illumina":        { "type":"trimming","files": {"results": "detail"}, "blob": { "pattern": "/*_bwa_techrep_qc.txt" } },
-        "dup_stats":            { "type":"duplicates", 
-                                  "files": {"results": "detail"}, 
+        "dup_stats":            { "type":"duplicates",
+                                  "files": {"results": "detail"},
                                   "exclude": [ "Secondary Or Supplementary Rds" ],
                                   "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" }
                                 },
