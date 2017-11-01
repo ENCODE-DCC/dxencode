@@ -280,11 +280,17 @@ class Splashdown(object):
                                     "files": {"results": "detail"},
                                     "blob": { "pattern": "/*_star_marked_flagstat.txt" },
                                 },
-        "bismark_techrep_flagstats":   {
+        "bismark_techrep_se_flagstats":   {
                                     "type":"samtools_flagstats",
-                                    "only_for": [ "_techrep_bismark_pe.bam", "_techrep.bam" ],
+                                    "only_for": [ "_techrep.bam" ],
                                     "files": {"results": "detail"},
                                     "blob": { "pattern": "/*_techrep_qc.txt" }
+                                },
+        "bismark_techrep_pe_flagstats":   {
+                                    "type":"samtools_flagstats",
+                                    "only_for": [ "_techrep_bismark_pe.bam" ],
+                                    "files": {"results": "detail"},
+                                    "blob": { "pattern": "/*_techrep_bismark_pe_qc.txt" }
                                 },
         "bismark_biorep_flagstats":   {
                                     "type":"samtools_flagstats",
@@ -308,11 +314,17 @@ class Splashdown(object):
                                     "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" }
                                 },
         "samtools_stats":       { "files": {"results": "detail"}, "blob": { "pattern": "/*_qc.txt"          } },
-        "bismark_techrep_samstats":   {
+        "bismark_techrep_se_samstats":   {
                                     "type":"samtools_stats",
-                                    "only_for": [ "_techrep_bismark_pe.bam", "_techrep.bam" ],
+                                    "only_for": [ "_techrep.bam" ],
                                     "files": {"results": "detail"},
                                     "blob": { "pattern": "/*_techrep_qc.txt" }
+                                },
+        "bismark_techrep_pe_samstats":   {
+                                    "type":"samtools_stats",
+                                    "only_for": [ "_techrep_bismark_pe.bam" ],
+                                    "files": {"results": "detail"},
+                                    "blob": { "pattern": "/*_techrep_bismark_pe_qc.txt" }
                                 },
         "dnase_biorep_samstats":   {
                                     "type":"samtools_stats",
