@@ -931,7 +931,7 @@ def exp_patch_internal_status(exp_id, internal_status, key=None, test=False):
         print >> sys.stderr, "  * ERROR: Attempting to set internal status on experiment without valid accession %s." % exp_id
         return False
 
-    payload = { "internal_status": internal_status, 'pipeline_error_detail': '' }
+    payload = { "internal_status": internal_status }
     if not test:
         (authid,authpw,server) = find_keys(key)
 
