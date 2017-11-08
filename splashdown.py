@@ -1758,7 +1758,7 @@ class Splashdown(object):
             step_run = {}
             step_run['aliases'] = [ step_alias ]
             step_run['status'] = "released"
-            dx_app_name = job.get('executableName')
+            dx_app_name = job.get('executableName').split()[0]  # archived applets need date stripped off.
 
             # get applet and version
             dx_app_id = job.get('applet')
