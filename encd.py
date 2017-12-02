@@ -563,7 +563,7 @@ def get_assay_type(experiment,exp=None,key=None,must_find=True,warn=False):
             print >> sys.stderr, "No 'assay_term_name' found for experiment %s." % experiment
             sys.exit(1)
         return None
-    if exp["assay_term_name"] in [  "RNA-seq", \
+    if exp["assay_term_name"] in [  "RNA-seq", "PAS-seq", \
                                     "shRNA knockdown followed by RNA-seq", \
                                     "CRISPR genome editing followed by RNA-seq", \
                                     "CRISPRi followed by RNA-seq", \
