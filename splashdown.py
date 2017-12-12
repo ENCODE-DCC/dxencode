@@ -333,7 +333,11 @@ class Splashdown(object):
                                     "blob": { "pattern": "/*_bwa_biorep_filtered_qc.txt" }
                                 },
         "biorep_bismark_map":          {
-                                    "type":"bismark_map",
+                                    "type":"bismark",
+                                    "only_for": [ "_biorep_CpG.bb", "_biorep_CpG.bed.gz",
+                                                  "_biorep_CHG.bb", "_biorep_CHG.bed.gz",
+                                                  "_biorep_CHH.bb", "_biorep_CHH.bed.gz",
+                                                  "_biorep.bw" ],
                                     "files": {"results": "detail"},
                                     "blob": { "pattern": "/*_biorep_map_report.txt" },
                                     "include": [
@@ -348,7 +352,11 @@ class Splashdown(object):
                                                                          "lambda Sequences analysed in total"] } },
                                 },
         "techrep_bismark_map":          {
-                                    "type":"bismark_map",
+                                    "type":"bismark",
+                                    "only_for": [ "_techrep_CpG.bb", "_techrep_CpG.bed.gz",
+                                                  "_techrep_CHG.bb", "_techrep_CHG.bed.gz",
+                                                  "_techrep_CHH.bb", "_techrep_CHH.bed.gz",
+                                                  "_techrep.bw" ],
                                     "files": {"results": "detail"},
                                     "blob": { "pattern": "/*_techrep_map_report.txt" },
                                     "include": [
@@ -1487,6 +1495,7 @@ class Splashdown(object):
         collection = self.qc_metric_schema_type(qc_key)
         qc_files = self.qc_metric_files(qc_faq,fid,verbose=verbose)
         qc_alias = self.qc_metric_make_alias(fid,qc_key,job_id)
+        #print "  - Working on qc_metric: '%s'" % qc_alias
 
         qc_metric = self.enc_qc_metric_find(fid,qc_key,job_id,collection)
         if qc_metric != None:
@@ -1576,6 +1585,9 @@ class Splashdown(object):
 
     def find_qc_key(self,key,payload):
         '''QC instructions may differ based upon file type.'''
+        # ugly special case due to changed encoded naming:
+        if key == "bismark_map":
+            key = 'bismark'
         for qc_key in self.QC_SUPPORTED.keys():
             qc_faq = self.QC_SUPPORTED[qc_key]
             if "only_for" in qc_faq:
