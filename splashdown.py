@@ -1331,12 +1331,14 @@ class Splashdown(object):
             enc_qc_props[qc_faq["singleton"]] = dx_qc_obj
         elif "props" in qc_faq: # Only selected properties and some oh them may be renamed
             for key in qc_faq['props'].keys():
-                if not isinstance(dx_qc_obj[key],basestring) or len(dx_qc_obj[key]) > 0:
-                    enc_qc_props[qc_faq['props'][key]] = dx_qc_obj[key]
+                if key in dx_qc_obj:
+                    if not isinstance(dx_qc_obj[key],basestring) or len(dx_qc_obj[key]) > 0:
+                        enc_qc_props[qc_faq['props'][key]] = dx_qc_obj[key]
         elif "include" in qc_faq: # only selected properties, none of them are renamed
             for key in qc_faq['include']:
-                if not isinstance(dx_qc_obj[key],basestring) or len(dx_qc_obj[key]) > 0:
-                    enc_qc_props[key] = dx_qc_obj[key]
+                if key in dx_qc_obj:
+                    if not isinstance(dx_qc_obj[key],basestring) or len(dx_qc_obj[key]) > 0:
+                        enc_qc_props[key] = dx_qc_obj[key]
         elif "exclude" in qc_faq: # all except excluded properties, and no renaming
             for key in dx_qc_obj.keys():
                 if key not in qc_faq['exclude']:
