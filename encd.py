@@ -394,6 +394,7 @@ def is_stranded(experiment,br=0,tr=0):
     replicates = replicates_to_map(experiment, files)
 
     reps_stranded = None
+    reps_direction = None
     for rep in replicates:
         biorep_n = rep.get('biological_replicate_number')
         techrep_n = rep.get('technical_replicate_number')
@@ -406,14 +407,31 @@ def is_stranded(experiment,br=0,tr=0):
         stranded = rep['library'].get('strand_specificity',False)
         if reps_stranded is None:
             reps_stranded = stranded
+            if "Reads are forward stranded" in rep['library'].get('notes',""):
+                reps_stranded = 'forward'
+            elif "Reads are reverse stranded" in rep['library'].get('notes',""):
+                reps_stranded = 'forward'
         elif stranded != reps_stranded:
             print "WARNING: Replicates have unexpected mismatch in strandedness.  Treating as 'unstranded'"
             reps_stranded = False
 
-    if reps_stranded is None:
-        return False
+        # Possibly strand direction is in notes
+        if reps_stranded:
+            direction = reps_direction
+            if "Reads are forward stranded" in rep['library'].get('notes',""):
+                direction = 'forward'
+            elif "Reads are reverse stranded" in rep['library'].get('notes',""):
+                direction = 'reverse'
+            if reps_direction is None:
+                reps_direction = direction
+            elif direction is not None and direction != reps_direction:
+                print "WARNING: Replicates have unexpected mismatch in strand direction.  Treating direction as 'unknown'"
+                reps_direction = None
+
+    if not reps_stranded:
+        return (False, None)
     else:
-        return reps_stranded
+        return (True, reps_direction)
 
 
 def has_a_tailing(experiment,rep_tech=None):

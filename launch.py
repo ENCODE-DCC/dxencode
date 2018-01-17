@@ -636,7 +636,7 @@ class Launch(object):
 
         # Special case for RNA pipelines:
         if cv['exp_type'] in ["long-rna-seq", "small-rna-seq", "rampage", "cage"]:
-            cv['stranded'] = encd.is_stranded(self.exp)
+            (cv['stranded'], cv['strand_direction']) = encd.is_stranded(self.exp)
         # Special case for lrna paired_end:
         if cv['paired_end'] and cv['exp_type'] == "long-rna-seq":
             cv['ScriptSeq'] = encd.is_script_seq(self.exp)
