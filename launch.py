@@ -118,6 +118,7 @@ class Launch(object):
     #        "param_links": { "param_token": {"name":"output_token", "rep":"sister"} }} # RARE: link input to non-file output
     # Note, tokens *may* be the same as dx names, but MUST MATCH other tokens to define dependencies as:
     #     stepA:result_token == stepB:input_token
+    #     result_token beginning with OPT_ are optional results.  If any result is found the step is considered run.
     # Also result_tokens must be in FILE_GLOB.keys()
     #
     # NOTE: Simple pipelines have no reused steps or dx name to param complications and the
@@ -1204,12 +1205,22 @@ class Launch(object):
                     continue
             if step not in steps_to_run:
                 results = steps[step]['results'].keys()
+                result_found = False
                 for result in results:
-                    if result not in priors:
+                    if result in priors:
+                        result_found = True
+                    elif not result.startswith("OPT_"):  # Would have been nicer to look in dx applet
                         steps_to_run += [ step ]
                         if verbose:
                             print "- Adding step '"+step+"' because prior '"+result+"' was not found."
+                            #print json.dumps(priors,indent=4)
                         break
+                if not result_found:  # Needed for OPT_ results.  At least one result must be found.
+                    steps_to_run += [ step ]
+                    if verbose:
+                        print "- Adding step '"+step+"' because no results at all were found."
+                        #print json.dumps(priors,indent=4)
+
             # If results are there but inputs are being recreated, then step must be rerun
             if step not in steps_to_run:
                 inputs = steps[step]['inputs'].keys()
