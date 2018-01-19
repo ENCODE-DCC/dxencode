@@ -1215,7 +1215,8 @@ class Launch(object):
                             print "- Adding step '"+step+"' because prior '"+result+"' was not found."
                             #print json.dumps(priors,indent=4)
                         break
-                if not result_found:  # Needed for OPT_ results.  At least one result must be found.
+                if step not in steps_to_run and not result_found:
+                    # Needed for OPT_ results.  At least one result must be found.
                     steps_to_run += [ step ]
                     if verbose:
                         print "- Adding step '"+step+"' because no results at all were found."
