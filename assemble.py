@@ -418,6 +418,7 @@ class Assemble(object):
                     enc_rep_tech = 'rep' + trs[0]
 
                 # Now look if the file is in dx
+                dx_folder = exp_folder
                 if rep_tech != None:
                     dx_folder = exp_folder + rep_tech + '/'
                 fid = dx.find_file(dx_folder + dx_file_name,self.proj_id,recurse=False)
