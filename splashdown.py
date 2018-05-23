@@ -1087,7 +1087,7 @@ class Splashdown(object):
                     inp_obj = dx.description_from_fid(inp_fid,properties=True)
                 except:
                     del dx.FILES[inp_fid]
-                    print "WARNING: can't find "+ fid # may try to append derived_from below.
+                    print "WARNING: can't find "+ inp_fid # may try to append derived_from below.
                     continue
             if verbose:
                 print >> sys.stderr, "* derived from: " + inp_fid + " " + inp_obj["project"] + ":" + \
@@ -1180,6 +1180,16 @@ class Splashdown(object):
                 if f_obj != None and "accession" in f_obj:
                     accession = f_obj["accession"]
                     input_accessions.append(accession)
+
+        if len(input_accessions) < input_file_count:
+            file_obj = dx.description_from_fid(fid, properties=True)
+            derived_from = file_obj.get('properties',{}).get('derived_from')
+            if derived_from is not None:
+                missing_accessions = derived_from.split(',')
+                for acc in derived_from.split(','):
+                    if acc not in input_accessions:
+                        input_accessions.append(acc)
+
 
         # All file_inputs were tested and we hope that the number of accessions match the number of input files.
         if len(input_accessions) < input_file_count:
